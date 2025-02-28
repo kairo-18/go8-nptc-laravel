@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
 
+        Role::create(['name' => 'NPTC Super Admin']);
         Role::create(['name' => 'NPTC Admin']);
         Role::create(['name' => 'VR Admin']);
         Role::create(['name' => 'Operator']);
@@ -37,13 +38,13 @@ class DatabaseSeeder extends Seeder
             'ContactNumber' => '09123456789',
         ]);
 
-        $user->assignRole('NPTC Admin');
+        $user->assignRole('NPTC Super Admin');
 
 
 
         $user2 = User::factory()->create([
             'username' => 'Alex',
-            'email' => 'alez@example.com',
+            'email' => 'alex@example.com',
             'FirstName' => 'Alexander',
             'LastName' => 'Parayno',
             'Address' => 'Test Address',
@@ -51,18 +52,7 @@ class DatabaseSeeder extends Seeder
             'ContactNumber' => '09123456789',
         ]);
 
-        $user2->assignRole("Driver");
-
-        if($user2->hasRole("Driver")){
-            $user2->driver()->create([
-                'License' => 'path/to/license',
-                'LicenseNumber' => '1234567890',
-                'Photo' => 'path/to/photo',
-                'NBI_clearance' => 'path/to/nbi',
-                'Police_clearance' => 'path/to/police',
-                'BIR_clearance' => 'path/to/bir',
-            ]);
-        }
+        $user2->assignRole("NPTC Admin");
 
 
 

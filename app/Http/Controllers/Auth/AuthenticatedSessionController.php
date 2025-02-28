@@ -34,7 +34,7 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user();
 
         //check if user has a role or has the role NPTC Admin
-        if (!$user->hasRole('NPTC Admin') || !$user->roles->isNotEmpty()) {
+        if (!$user->hasRole(['NPTC Admin', 'NPTC Super Admin']) || !$user->roles->isNotEmpty()) {
             Auth::logout(); // Log out the user
             return redirect()->route('login')->withErrors(['email' => 'Access denied. You do not have the required role.']);
         }

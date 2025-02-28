@@ -46,15 +46,6 @@ Route::middleware('auth')->group(function () {
         ->middleware(['signed', 'throttle:6,1'])
         ->name('verification.verify');
 
-    Route::post('create-nptc-admin', [NptcAdminController::class, 'createNPTCAdmin'])
-        ->name('create-nptc-admin');
-
-    Route::patch('update-nptc-admin', [NptcAdminController::class, 'updateNPTCAdmin'])
-        ->name('update-nptc-admin');
-
-    Route::delete('delete-nptc-admin', [NptcAdminController::class, 'destroy'])
-        ->name('delete-nptc-admin');
-
     Route::post('email/verification-notification', [EmailVerificationNotificationController::class, 'store'])
         ->middleware('throttle:6,1')
         ->name('verification.send');
