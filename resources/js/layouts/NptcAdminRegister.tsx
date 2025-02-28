@@ -36,7 +36,7 @@ export default function NptcAdminRegister() {
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('register'), {
+        post(route('create-nptc-admin'), {
             onFinish: () => reset('password', 'password_confirmation'),
         });
     };
@@ -53,6 +53,7 @@ export default function NptcAdminRegister() {
                     <DialogDescription>Enter the details below to create a new NPTC Admin.</DialogDescription>
                 </DialogHeader>
                 <form className="flex flex-col gap-6 h-[70vh] overflow-y-scroll" onSubmit={submit}>
+
                     <div className="grid gap-6">
                         <div className="grid gap-2">
                             <Label htmlFor="FirstName">First Name</Label>

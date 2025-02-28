@@ -16,7 +16,9 @@ Route::middleware(['auth', 'verified', NPTCAdminMiddleware::class])->group(funct
 
 Route::middleware(['auth', 'verified', NPTCAdminMiddleware::class])->group(function () {
     Route::get('nptc-admins', function () {
-        return Inertia::render('nptc-admins');
+        return Inertia::render('nptc-admins', [
+            'users' => \App\Models\User::role('NPTC Admin')->get()
+        ]);
     })->name('dashboard');
 });
 require __DIR__.'/settings.php';
