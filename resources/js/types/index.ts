@@ -30,11 +30,25 @@ export interface SharedData {
 
 export interface User {
     id: number;
-    name: string;
+    username: string;
+    FirstName: string;
+    LastName: string;
+    Address: string;
+    Birthdate?: string;
+    ContactNumber: string;
     email: string;
-    avatar?: string;
-    email_verified_at: string | null;
-    created_at: string;
-    updated_at: string;
+    [key: string]: unknown; // This allows for additional properties...
+}
+
+export interface Driver {
+    id: number;
+    user_id: number;
+    Status: 'Active' | 'Inactive' | 'Pending';
+    License?: string;
+    LicenseNumber: string;
+    Photo?: string;
+    NBI_clearance?: string;
+    Police_clearance?: string;
+    BIR_clearance?: string;
     [key: string]: unknown; // This allows for additional properties...
 }
