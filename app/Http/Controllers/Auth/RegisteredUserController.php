@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
@@ -28,18 +27,16 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-
-    //function for registering user of role NPTC ADMIN
-    public function store(Request $request): RedirectResponse
+    public function createNPTCAdmin(Request $request)
     {
         $request->validate([
             'FirstName' => 'required|string|max:255',
             'LastName' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:'.User::class,
+            'username' => 'required|string|max:255|unique:users',
             'Address' => 'nullable|string|max:255',
             'Birthdate' => 'nullable|date',
             'ContactNumber' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'email' => 'required|string|lowercase|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -57,7 +54,34 @@ class RegisteredUserController extends Controller
         $user->assignRole('NPTC Admin');
         event(new Registered($user));
 
+    }
 
-        return to_route('/');
+    public function store(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'FirstName' => 'required|string|max:255',
+            'LastName' => 'required|string|max:255',
+            'username' => 'required|string|max:255|unique:users',
+            'Address' => 'nullable|string|max:255',
+            'Birthdate' => 'nullable|date',
+            'ContactNumber' => 'required|string|max:255',
+            'email' => 'required|string|lowercase|email|max:255|unique:users',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $user = User::create([
+            'FirstName' => $request->FirstName,
+            'LastName' => $request->LastName,
+            'username' => $request->username,
+            'Address' => $request->Address,
+            'Birthdate' => $request->Birthdate,
+            'ContactNumber' => $request->ContactNumber,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+
+        event(new Registered($user));
+
+        return to_route('home');
     }
 }
