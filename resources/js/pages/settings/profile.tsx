@@ -45,7 +45,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
             <Head title="Profile settings" />
 
             <SettingsLayout>
-                <h1>{auth.user.role}</h1>
                 <div className="space-y-6">
                     <HeadingSmall title="Profile information" description="Update your name, email address, phone number, and address" />
 
@@ -117,7 +116,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 required
                                 autoComplete="bday"
                             />
-                            <InputError className="mt-2" message={errors.Birthdate} />
+                            <InputError className="mt-2" message={errors.BirthDate} />
                         </div>
 
                         <div className="grid gap-2">
@@ -154,7 +153,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                             <Input
                                 id="role"
                                 className="mt-1 block w-full"
-                                value={auth.role}
+                                value={auth.roles[0].name}
                                 disabled
                             />
                             <InputError className="mt-2" message={errors.role} />
