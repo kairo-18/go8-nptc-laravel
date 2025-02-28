@@ -27,34 +27,6 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function createNPTCAdmin(Request $request)
-    {
-        $request->validate([
-            'FirstName' => 'required|string|max:255',
-            'LastName' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users',
-            'Address' => 'nullable|string|max:255',
-            'Birthdate' => 'nullable|date',
-            'ContactNumber' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:users',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
-
-        $user = User::create([
-            'FirstName' => $request->FirstName,
-            'LastName' => $request->LastName,
-            'username' => $request->username,
-            'Address' => $request->Address,
-            'Birthdate' => $request->Birthdate,
-            'ContactNumber' => $request->ContactNumber,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
-
-        $user->assignRole('NPTC Admin');
-        event(new Registered($user));
-
-    }
 
     public function store(Request $request): RedirectResponse
     {

@@ -1,13 +1,12 @@
-import { Head, useForm } from '@inertiajs/react';
+import { useForm } from '@inertiajs/react';
 import { LoaderCircle } from 'lucide-react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useEffect } from 'react';
 
 import InputError from '@/components/input-error';
-import TextLink from '@/components/text-link';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
 
 interface RegisterForm {
     FirstName: string;
@@ -21,39 +20,87 @@ interface RegisterForm {
     password_confirmation: string;
 }
 
-export default function NptcAdminRegister() {
-    const { data, setData, post, processing, errors, reset } = useForm<RegisterForm>({
+interface UpdateForm {
+    id: number | string;
+    FirstName: string;
+    LastName: string;
+    username: string;
+    Address: string;
+    ContactNumber: string;
+    email: string;
+}
+
+interface NptcAdminRegisterProps {
+    isOpen: boolean;
+    onClose: () => void;
+    isEditing?: boolean;
+    user?: RegisterForm;
+}
+
+export default function NptcAdminRegister({ isOpen, onClose, isEditing, user }: NptcAdminRegisterProps) {
+    const { data, setData, post, patch, processing, errors, reset } = useForm({
+        id: '',
         FirstName: '',
         LastName: '',
         username: '',
         Address: '',
-        Birthdate: '',
+        BirthDate: '',
         ContactNumber: '',
         email: '',
         password: '',
         password_confirmation: '',
     });
 
+    useEffect(() => {
+        if (isEditing && user) {
+            setData({
+                id: user.id || '',
+                FirstName: user.FirstName || '',
+                LastName: user.LastName || '',
+                username: user.username || '',
+                Address: user.Address || '',
+                BirthDate: user.BirthDate || '',
+                ContactNumber: user.ContactNumber || '',
+                email: user.email || '',
+                password: undefined,
+                password_confirmation: undefined,
+            });
+        } else {
+            reset();
+        }
+    }, [user, isEditing]);
+
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-        post(route('create-nptc-admin'), {
-            onFinish: () => reset('password', 'password_confirmation'),
-        });
+
+        const updatedData = { ...data };
+
+        // Remove password fields if they are empty
+        if (!updatedData.password) delete updatedData.password;
+        if (!updatedData.password_confirmation) delete updatedData.password_confirmation;
+
+        if (isEditing) {
+            patch(route('update-nptc-admin'), {
+                data: updatedData, // Send filtered data
+                preserveScroll: true,
+            });
+        } else {
+            post(route('create-nptc-admin'), {
+                onFinish: () => reset('password', 'password_confirmation'),
+            });
+        }
     };
 
     return (
-        <Dialog>
-            <DialogTrigger asChild className='w-[200px] ml-5 mt-5'>
-                <Button className=''><Label>Create NPTC Admin</Label></Button>
-            </DialogTrigger>
-
+        <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent>
                 <DialogHeader>
-                    <DialogTitle>Create NPTC Admin</DialogTitle>
-                    <DialogDescription>Enter the details below to create a new NPTC Admin.</DialogDescription>
+                    <DialogTitle>{isEditing ? 'Update NPTC Admin' : 'Create NPTC Admin'}</DialogTitle>
+                    <DialogDescription>
+                        {isEditing ? 'Update the details below to edit the NPTC Admin.' : 'Enter the details below to create a new NPTC Admin.'}
+                    </DialogDescription>
                 </DialogHeader>
-                <form className="flex flex-col gap-6 h-[70vh] overflow-y-scroll" onSubmit={submit}>
-
+                <form className="flex h-[70vh] flex-col gap-6 overflow-y-scroll" onSubmit={submit}>
                     <div className="grid gap-6">
                         <div className="grid gap-2">
                             <Label htmlFor="FirstName">First Name</Label>
@@ -121,27 +168,12 @@ export default function NptcAdminRegister() {
                         </div>
 
                         <div className="grid gap-2">
-                            <Label htmlFor="Birthdate">Birthdate</Label>
-                            <Input
-                                id="Birthdate"
-                                type="date"
-                                required
-                                tabIndex={5}
-                                autoComplete="bday"
-                                value={data.Birthdate}
-                                onChange={(e) => setData('Birthdate', e.target.value)}
-                                disabled={processing}
-                            />
-                            <InputError message={errors.Birthdate} />
-                        </div>
-
-                        <div className="grid gap-2">
                             <Label htmlFor="ContactNumber">Contact Number</Label>
                             <Input
                                 id="ContactNumber"
                                 type="tel"
                                 required
-                                tabIndex={6}
+                                tabIndex={5}
                                 autoComplete="tel"
                                 value={data.ContactNumber}
                                 onChange={(e) => setData('ContactNumber', e.target.value)}
@@ -157,7 +189,7 @@ export default function NptcAdminRegister() {
                                 id="email"
                                 type="email"
                                 required
-                                tabIndex={7}
+                                tabIndex={6}
                                 autoComplete="email"
                                 value={data.email}
                                 onChange={(e) => setData('email', e.target.value)}
@@ -168,17 +200,31 @@ export default function NptcAdminRegister() {
                         </div>
 
                         <div className="grid gap-2">
+                            <Label htmlFor="Birthdate">Birthdate</Label>
+                            <Input
+                                id="Birthdate"
+                                type="date"
+                                required={!isEditing}
+                                tabIndex={7}
+                                autoComplete="bday"
+                                value={data.Birthdate}
+                                onChange={(e) => setData('BirthDate', e.target.value)}
+                                disabled={processing}
+                            />
+                            <InputError message={errors.Birthdate} />
+                        </div>
+
+                        <div className="grid gap-2">
                             <Label htmlFor="password">Password</Label>
                             <Input
                                 id="password"
                                 type="password"
-                                required
                                 tabIndex={8}
-                                autoComplete="new-password"
+                                autoComplete={isEditing ? 'new-password' : 'current-password'}
                                 value={data.password}
                                 onChange={(e) => setData('password', e.target.value)}
                                 disabled={processing}
-                                placeholder="Password"
+                                placeholder={isEditing ? 'Leave blank to keep current password' : 'Password'}
                             />
                             <InputError message={errors.password} />
                         </div>
@@ -188,7 +234,6 @@ export default function NptcAdminRegister() {
                             <Input
                                 id="password_confirmation"
                                 type="password"
-                                required
                                 tabIndex={9}
                                 autoComplete="new-password"
                                 value={data.password_confirmation}
@@ -202,7 +247,7 @@ export default function NptcAdminRegister() {
                         <DialogFooter>
                             <Button type="submit" className="mt-2 w-full" tabIndex={10} disabled={processing}>
                                 {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                Create account
+                                {isEditing ? 'Update account' : 'Create account'}
                             </Button>
                         </DialogFooter>
                     </div>
