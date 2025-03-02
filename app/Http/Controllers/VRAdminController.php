@@ -14,6 +14,7 @@ class VRAdminController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'vr_company_id' => 'required|integer|exists:vr_companies,id',
             'username' => 'required|string|unique:users,username',
             'email' => 'required|email|unique:users,email',
             'FirstName' => 'required|string',
@@ -29,6 +30,7 @@ class VRAdminController extends Controller
 
         // Create the VR Admin user
         $user = User::create([
+            'vr_company_id' => $request->vr_company_id,
             'username' => $request->username,
             'email' => $request->email,
             'password' => Hash::make($generatedPassword),
@@ -41,12 +43,14 @@ class VRAdminController extends Controller
 
         $user->assignRole('VR Admin');
 
+
+        $vehicleRentalOwner = VehicleRentalOwner::create([
+        'user_id' => $user->id,
+        'vr_company_id' => $request->vr_company_id,
+        ]);
+
         event(new Registered($user));
 
-        return response()->json([
-            'message' => 'VR Admin user created successfully!',
-            'user' => $user,
-            'generated_password' => $generatedPassword, 
-        ], 201);
+        return redirect('dashboard');
     }
 }

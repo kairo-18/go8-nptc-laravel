@@ -51,11 +51,11 @@ class DatabaseSeeder extends Seeder
             'ContactNumber' => '09123456789',
         ]);
 
-        
+
 
         $user2->assignRole("NPTC Admin");
 
-        if($user2->hasRole("Driver")){
+        if ($user2->hasRole("Driver")) {
             $user2->driver()->create([
                 'License' => 'path/to/license',
                 'LicenseNumber' => '1234567890',
@@ -66,24 +66,6 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-       
-
-        $vrAdmin = User::factory()->create([
-            'username' => 'Alexx',
-            'email' => 'alezz@example.com',
-            'FirstName' => 'Alexxander',
-            'LastName' => 'Parayno',
-            'Address' => 'Test Address',
-            'BirthDate' => '2000-01-01',
-            'ContactNumber' => '09123456789',
-        ]);
-
-        $vrAdmin->assignRole("VR Admin");
-
-        if($vrAdmin->hasRole("VR Admin")){
-            $vrAdmin->vrOwner()->create([]);
-        }
-        
 
 
 
