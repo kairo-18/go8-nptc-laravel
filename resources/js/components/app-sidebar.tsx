@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookOpen, BookUser, Folder, LayoutGrid, UserPlus } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -17,6 +17,16 @@ const mainNavItems: NavItem[] = [
         title: 'NPTC Admins',
         url: '/nptc-admins',
         icon: Folder,
+    },
+    {
+        title: 'Registration',
+        url: '/create-vr-company-page',
+        icon: UserPlus,
+    },
+    {
+        title: 'Records',
+        url: '/vr-owner', // Route where VR Owners list will be displayed
+        icon: BookUser, // Icon representing "Records"
     },
 ];
 
