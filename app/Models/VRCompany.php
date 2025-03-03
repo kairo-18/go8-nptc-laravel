@@ -23,5 +23,9 @@ class VRCompany extends Model implements HasMedia
         return $this->hasOne(VehicleRentalOwner::class, 'vr_company_id');
     }
 
+    public function contacts()
+    {
+        return $this->hasOne(VrContacts::class);
+    }
 
 }

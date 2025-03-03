@@ -20,7 +20,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Registration',
-        url: '/create-vr-company-page',
+        url: '/registration',
         icon: UserPlus,
     },
     {
