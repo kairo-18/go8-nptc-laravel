@@ -84,6 +84,7 @@ class NptcAdminController extends Controller
         $user->assignRole('NPTC Admin');
         event(new Registered($user));
 
+        return json_encode($user);
     }
 
     /**
