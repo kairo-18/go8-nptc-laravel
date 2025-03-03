@@ -78,6 +78,11 @@ Route::get('create-vr-admin', function () {
 Route::post('vr-admins.store', [VRAdminController::class, 'store'])
     ->name('vr-admins.store');
 
+Route::get('registration', function(){
+    return Inertia::render('registration', [
+        'companies' => \App\Models\VRCompany::all()
+    ]);
+})->name('registration');
 
 
 require __DIR__.'/settings.php';

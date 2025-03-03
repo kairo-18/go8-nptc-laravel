@@ -72,7 +72,6 @@ export default function CreateVrContacts({ companies }) {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
             <div className="mx-auto mt-6 w-full max-w-6xl">
                 <h1 className="text-2xl font-semibold">Create Vehicle Rental Contacts</h1>
                 <p className="text-gray-500">Manage the contact information of the vehicle rental company.</p>
@@ -88,7 +87,7 @@ export default function CreateVrContacts({ companies }) {
                                     <div>
                                         <Label htmlFor={`vr_company_id_${index}`}>Select VR Company</Label>
                                         <Select
-                                            value={String(contact.vr_company_id)} // Ensure it reflects the selected value
+                                            value={String(contact.vr_company_id)}
                                             onValueChange={(value) => updateContact(index, 'vr_company_id', value)}
                                         >
                                             <SelectTrigger>
@@ -106,72 +105,81 @@ export default function CreateVrContacts({ companies }) {
                                             <p className="text-sm text-red-500">{errors[`contacts.${index}.vr_company_id`]}</p>
                                         )}
                                     </div>
-                                    <div>
-                                        <Label htmlFor={`email_${index}`}>Email</Label>
-                                        <Input
-                                            id={`email_${index}`}
-                                            type="email"
-                                            value={contact.email}
-                                            onChange={(e) => updateContact(index, 'email', e.target.value)}
-                                        />
-                                        {errors[`contacts.${index}.email`] && (
-                                            <p className="text-sm text-red-500">{errors[`contacts.${index}.email`]}</p>
-                                        )}
+    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <Label htmlFor={`email_${index}`}>Email</Label>
+                                            <Input
+                                                id={`email_${index}`}
+                                                type="email"
+                                                value={contact.email}
+                                                onChange={(e) => updateContact(index, 'email', e.target.value)}
+                                            />
+                                            {errors[`contacts.${index}.email`] && (
+                                                <p className="text-sm text-red-500">{errors[`contacts.${index}.email`]}</p>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <Label htmlFor={`ContactNumber_${index}`}>Contact Number</Label>
+                                            <Input
+                                                id={`ContactNumber_${index}`}
+                                                value={contact.ContactNumber}
+                                                onChange={(e) => updateContact(index, 'ContactNumber', e.target.value)}
+                                            />
+                                            {errors[`contacts.${index}.ContactNumber`] && (
+                                                <p className="text-sm text-red-500">{errors[`contacts.${index}.ContactNumber`]}</p>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <Label htmlFor={`ContactNumber_${index}`}>Contact Number</Label>
-                                        <Input
-                                            id={`ContactNumber_${index}`}
-                                            value={contact.ContactNumber}
-                                            onChange={(e) => updateContact(index, 'ContactNumber', e.target.value)}
-                                        />
-                                        {errors[`contacts.${index}.ContactNumber`] && (
-                                            <p className="text-sm text-red-500">{errors[`contacts.${index}.ContactNumber`]}</p>
-                                        )}
+    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <Label htmlFor={`LastName_${index}`}>Last Name</Label>
+                                            <Input
+                                                id={`LastName_${index}`}
+                                                value={contact.LastName}
+                                                onChange={(e) => updateContact(index, 'LastName', e.target.value)}
+                                            />
+                                            {errors[`contacts.${index}.LastName`] && (
+                                                <p className="text-sm text-red-500">{errors[`contacts.${index}.LastName`]}</p>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <Label htmlFor={`FirstName_${index}`}>First Name</Label>
+                                            <Input
+                                                id={`FirstName_${index}`}
+                                                value={contact.FirstName}
+                                                onChange={(e) => updateContact(index, 'FirstName', e.target.value)}
+                                            />
+                                            {errors[`contacts.${index}.FirstName`] && (
+                                                <p className="text-sm text-red-500">{errors[`contacts.${index}.FirstName`]}</p>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div>
-                                        <Label htmlFor={`LastName_${index}`}>Last Name</Label>
-                                        <Input
-                                            id={`LastName_${index}`}
-                                            value={contact.LastName}
-                                            onChange={(e) => updateContact(index, 'LastName', e.target.value)}
-                                        />
-                                        {errors[`contacts.${index}.LastName`] && (
-                                            <p className="text-sm text-red-500">{errors[`contacts.${index}.LastName`]}</p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <Label htmlFor={`FirstName_${index}`}>First Name</Label>
-                                        <Input
-                                            id={`FirstName_${index}`}
-                                            value={contact.FirstName}
-                                            onChange={(e) => updateContact(index, 'FirstName', e.target.value)}
-                                        />
-                                        {errors[`contacts.${index}.FirstName`] && (
-                                            <p className="text-sm text-red-500">{errors[`contacts.${index}.FirstName`]}</p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <Label htmlFor={`MiddleName_${index}`}>Middle Name</Label>
-                                        <Input
-                                            id={`MiddleName_${index}`}
-                                            value={contact.MiddleName}
-                                            onChange={(e) => updateContact(index, 'MiddleName', e.target.value)}
-                                        />
-                                        {errors[`contacts.${index}.MiddleName`] && (
-                                            <p className="text-sm text-red-500">{errors[`contacts.${index}.MiddleName`]}</p>
-                                        )}
-                                    </div>
-                                    <div>
-                                        <Label htmlFor={`Position_${index}`}>Position</Label>
-                                        <Input
-                                            id={`Position_${index}`}
-                                            value={contact.Position}
-                                            onChange={(e) => updateContact(index, 'Position', e.target.value)}
-                                        />
-                                        {errors[`contacts.${index}.Position`] && (
-                                            <p className="text-sm text-red-500">{errors[`contacts.${index}.Position`]}</p>
-                                        )}
+    
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <Label htmlFor={`MiddleName_${index}`}>Middle Name</Label>
+                                            <Input
+                                                id={`MiddleName_${index}`}
+                                                value={contact.MiddleName}
+                                                onChange={(e) => updateContact(index, 'MiddleName', e.target.value)}
+                                            />
+                                            {errors[`contacts.${index}.MiddleName`] && (
+                                                <p className="text-sm text-red-500">{errors[`contacts.${index}.MiddleName`]}</p>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <Label htmlFor={`Position_${index}`}>Position</Label>
+                                            <Input
+                                                id={`Position_${index}`}
+                                                value={contact.Position}
+                                                onChange={(e) => updateContact(index, 'Position', e.target.value)}
+                                            />
+                                            {errors[`contacts.${index}.Position`] && (
+                                                <p className="text-sm text-red-500">{errors[`contacts.${index}.Position`]}</p>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
                             ))}
@@ -187,6 +195,6 @@ export default function CreateVrContacts({ companies }) {
                     </CardContent>
                 </Card>
             </div>
-        </AppLayout>
     );
+    
 }
