@@ -80,7 +80,7 @@ Route::post('vr-admins.store', [VRAdminController::class, 'store'])
 
 Route::get('registration', function(){
     return Inertia::render('registration', [
-        'companies' => \App\Models\VRCompany::all()
+        'companies' => \App\Models\VRCompany::all(),
     ]);
 })->name('registration');
 
