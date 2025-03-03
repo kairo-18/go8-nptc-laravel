@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\VRCompany;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class VRCompanyController extends Controller
 {
@@ -49,9 +51,6 @@ class VRCompanyController extends Controller
         }
 
         \Log::info('VR Company created successfully', ['id' => $vrCompany->id]);
-
-        return redirect()->route('create-vr-admin')->with('success', 'VR Company created successfully.');
-
     }
 
     public function downloadMedia($mediaId)
@@ -71,5 +70,14 @@ class VRCompanyController extends Controller
         }
 
         return response()->file($filePath, ['Content-Type' => $mimeType]);
+    }
+
+    public function registrationPage(): Response
+    {
+        $companies = VRCompany::select('id', 'BusinessPermitNumber')->get();
+
+        return Inertia::render('registration', [
+            'companies' => $companies
+        ]);
     }
 }

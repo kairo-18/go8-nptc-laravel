@@ -6,6 +6,7 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
+use App\Models\VrContacts;
 
 /**
  * Class DatabaseSeeder
@@ -65,7 +66,6 @@ class DatabaseSeeder extends Seeder
                 'BIR_clearance' => 'path/to/bir',
             ]);
         }
-
 
 
 

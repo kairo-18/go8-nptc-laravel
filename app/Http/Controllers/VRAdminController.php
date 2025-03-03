@@ -50,7 +50,5 @@ class VRAdminController extends Controller
         ]);
 
         event(new Registered($user));
-
-        return redirect('dashboard');
     }
 }
