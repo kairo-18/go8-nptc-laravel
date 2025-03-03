@@ -9,8 +9,8 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import AppLayout from '@/layouts/app-layout';
 import SettingsLayout from '@/layouts/settings/layout';
+import MainLayout from '../mainLayout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -41,7 +41,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
+        <MainLayout breadcrumbs={breadcrumbs}>
             <Head title="Profile settings" />
 
             <SettingsLayout>
@@ -150,12 +150,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
                         <div className="grid gap-2">
                             <Label htmlFor="role">Role</Label>
-                            <Input
-                                id="role"
-                                className="mt-1 block w-full"
-                                value={auth.roles[0].name}
-                                disabled
-                            />
+                            <Input id="role" className="mt-1 block w-full" value={auth.roles[0].name} disabled />
                             <InputError className="mt-2" message={errors.role} />
                         </div>
 
@@ -199,6 +194,6 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
                 <DeleteUser />
             </SettingsLayout>
-        </AppLayout>
+        </MainLayout>
     );
 }
