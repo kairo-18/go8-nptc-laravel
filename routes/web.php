@@ -47,6 +47,17 @@ Route::get('vr-owner', function () {
     ]);
 })->name('vr-owner');
 
+//Registration page on the sidebar
+Route::get('registration', function(){
+    return Inertia::render('registration', [
+        'companies' => \App\Models\VRCompany::all(),
+    ]);
+})->name('registration');
+
+Route::get('pending', function(){
+    return Inertia::render('pending');
+})->name('registration');
+
 
 //move to vr company controller
 Route::get('create-vr-company-page', function () {
@@ -55,6 +66,7 @@ Route::get('create-vr-company-page', function () {
     ]);
 })->name('create-vr-company-page');
 
+//VR Company
 Route::get('download-media/{mediaId}', [VRCompanyController::class, 'downloadMedia'])
     ->name('download-media');
 
@@ -68,7 +80,7 @@ Route::get('create-vr-contacts', [VrContactsController::class, 'index'])->name('
 Route::post('vr-contacts.store', [VrContactsController::class, 'store'])->name('vr-contacts.store');
 Route::post('vr-contacts.store-multiple', [VrContactsController::class, 'storeMultiple'])->name('vr-contacts.store-multiple');
 
-
+//VR Admin
 Route::get('create-vr-admin', function () {
     return Inertia::render('create-vr-admin', [
         'companies' => \App\Models\VRCompany::all()
@@ -78,11 +90,6 @@ Route::get('create-vr-admin', function () {
 Route::post('vr-admins.store', [VRAdminController::class, 'store'])
     ->name('vr-admins.store');
 
-Route::get('registration', function(){
-    return Inertia::render('registration', [
-        'companies' => \App\Models\VRCompany::all(),
-    ]);
-})->name('registration');
 
 
 require __DIR__.'/settings.php';
