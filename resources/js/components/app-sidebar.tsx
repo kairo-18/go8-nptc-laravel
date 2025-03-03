@@ -1,10 +1,9 @@
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, BookUser, Folder, LayoutGrid, Mail, Receipt, UserPlus, Wallet } from 'lucide-react';
+import { BookUser, Folder, LayoutGrid, Mail, Receipt, UserPlus, Wallet } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -24,35 +23,38 @@ const mainNavItems: NavItem[] = [
         icon: UserPlus,
     },
     {
+        title: 'Pending',
+        url: '/pending',
+        icon: UserPlus,
+    },
+    {
         title: 'Records',
         url: '/vr-owner', // Route where VR Owners list will be displayed
         icon: BookUser, // Icon representing "Records"
     },
     {
         title: 'Billings',
-        url: '', // Route 
-        icon: Receipt, 
+        url: '', // Route
+        icon: Receipt,
     },
     {
         title: 'Bookings',
-        url: '', // Route 
-        icon: Wallet, 
+        url: '', // Route
+        icon: Wallet,
     },
     {
         title: 'Notifications',
-        url: '', // Route 
-        icon: Mail, 
+        url: '', // Route
+        icon: Mail,
     },
 ];
-
-
 
 export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
                 <SidebarMenu>
-                    <SidebarMenuItem className='text-white'>
+                    <SidebarMenuItem className="text-white">
                         <SidebarMenuButton size="lg" asChild>
                             <Link href="/dashboard" prefetch>
                                 <AppLogo />
@@ -66,7 +68,7 @@ export function AppSidebar() {
                 <NavMain items={mainNavItems} />
             </SidebarContent>
 
-            <SidebarFooter className='text-white'>
+            <SidebarFooter className="text-white">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

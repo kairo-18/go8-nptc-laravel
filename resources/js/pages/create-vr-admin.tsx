@@ -24,7 +24,7 @@ export default function CreateVrAdmin({ companies, onNextTab }: CreateVrAdminPro
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        post(route('vr-admins.store'), {
+        post(route('vr-admin.store'), {
             forceFormData: true,
             onSuccess: () => {
                 onNextTab(); // Move to the next tab on success
