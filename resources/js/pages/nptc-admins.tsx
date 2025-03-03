@@ -8,6 +8,7 @@ import { useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import { type SharedData } from '@/types';
 import { Head, Link, usePage } from '@inertiajs/react';
+import MainLayout from '@/pages/mainLayout';
 
 interface User {
     id: number;
@@ -67,8 +68,7 @@ export default function NptcAdmins({ users }: NptcAdminsProps) {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Label className="mt-5 ml-5 text-2xl font-bold">NPTC Admin View</Label>
+        <MainLayout breadcrumbs={breadcrumbs}>
             {auth.roles[0].name === "NPTC Super Admin" &&
                 <Button className="mt-5 ml-5 w-[200px]" onClick={() => setIsModalOpen(true)}>
                     Create NPTC Admin
@@ -147,6 +147,6 @@ export default function NptcAdmins({ users }: NptcAdminsProps) {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-        </AppLayout>
+        </MainLayout>
     );
 }

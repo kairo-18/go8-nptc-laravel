@@ -4,7 +4,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, BookUser, Folder, LayoutGrid, UserPlus } from 'lucide-react';
+import { BookOpen, BookUser, Folder, LayoutGrid, Mail, Receipt, UserPlus, Wallet } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -28,27 +28,31 @@ const mainNavItems: NavItem[] = [
         url: '/vr-owner', // Route where VR Owners list will be displayed
         icon: BookUser, // Icon representing "Records"
     },
+    {
+        title: 'Billings',
+        url: '', // Route 
+        icon: Receipt, 
+    },
+    {
+        title: 'Bookings',
+        url: '', // Route 
+        icon: Wallet, 
+    },
+    {
+        title: 'Notifications',
+        url: '', // Route 
+        icon: Mail, 
+    },
 ];
 
-const footerNavItems: NavItem[] = [
-    {
-        title: 'Repository',
-        url: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
-    },
-    {
-        title: 'Documentation',
-        url: 'https://laravel.com/docs/starter-kits',
-        icon: BookOpen,
-    },
-];
+
 
 export function AppSidebar() {
     return (
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
                 <SidebarMenu>
-                    <SidebarMenuItem>
+                    <SidebarMenuItem className='text-white'>
                         <SidebarMenuButton size="lg" asChild>
                             <Link href="/dashboard" prefetch>
                                 <AppLogo />
@@ -58,12 +62,11 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
+            <SidebarContent className="text-white">
                 <NavMain items={mainNavItems} />
             </SidebarContent>
 
-            <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+            <SidebarFooter className='text-white'>
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
