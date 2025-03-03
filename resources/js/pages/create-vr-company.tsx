@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import MainLayout from '@/pages/mainLayout';
 
 export default function CreateVrCompany({ onNextTab }: { onNextTab: () => void }) {
     const { data, setData, post, progress, transform } = useForm({
