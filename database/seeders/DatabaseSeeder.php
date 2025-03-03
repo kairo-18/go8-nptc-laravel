@@ -6,7 +6,9 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
+use App\Models\VRCompany;
 use App\Models\VrContacts;
+use Database\Factories\VrCompanyFactory;
 
 /**
  * Class DatabaseSeeder
@@ -67,6 +69,27 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        VRCompany::factory()->create([
+            'CompanyName' => 'Example VR Company',
+            'BusinessPermitNumber' => 123456,
+        ]);
+
+        $user3 = User::factory()->create([
+            'username' => 'Alexis',
+            'email' => 'alex@example.com',
+            'FirstName' => 'Alexander',
+            'LastName' => 'Parayno',
+            'Address' => 'Test Address',
+            'BirthDate' => '2000-01-01',
+            'ContactNumber' => '09123456789',
+        ]);
+
+        $user3->assignRole("Operator");
+
+        $user3->operator()->create([
+            'user_id' => $user3->id,
+            'vr_company_id' => 1,
+        ]);
 
 
     }

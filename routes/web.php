@@ -17,19 +17,25 @@ Route::middleware(['auth', 'verified', NPTCAdminMiddleware::class])->group(funct
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
-});
 
-Route::middleware(['auth', 'verified', NPTCAdminMiddleware::class])->group(function () {
     Route::get('nptc-admins', function () {
         return Inertia::render('nptc-admins', [
             'users' => \App\Models\User::role('NPTC Admin')->get()
         ]);
     })->name('dashboard');
+    Route::get('vr-owner', function () {
+        return Inertia::render('vr-admin', [
+            'users' => \App\Models\User::role('VR Admin')->get(),
+            'companies' => \App\Models\VRCompany::with(['owner.user'])->get()->each(function ($company) {
+                $company->media_files = $company->getMedia(); // Fetch all media files
+            }),
+        ]);
+    })->name('vr-owner');
 });
 
-Route::middleware('auth', 'verified', NPTCAdminMiddleware::class)->group(function () {
     Route::post('create-nptc-admin', [NptcAdminController::class, 'createNPTCAdmin'])
         ->name('create-nptc-admin');
+Route::middleware('auth', 'verified', NPTCAdminMiddleware::class)->group(function () {
 
     Route::patch('update-nptc-admin', [NptcAdminController::class, 'updateNPTCAdmin'])
         ->name('update-nptc-admin');
@@ -38,14 +44,6 @@ Route::middleware('auth', 'verified', NPTCAdminMiddleware::class)->group(functio
         ->name('delete-nptc-admin');
 });
 
-Route::get('vr-owner', function () {
-    return Inertia::render('vr-admin', [
-        'users' => \App\Models\User::role('VR Admin')->get(),
-        'companies' => \App\Models\VRCompany::with(['owner.user'])->get()->each(function ($company) {
-            $company->media_files = $company->getMedia(); // Fetch all media files
-        }),
-    ]);
-})->name('vr-owner');
 
 //Registration page on the sidebar
 Route::get('registration', function(){
