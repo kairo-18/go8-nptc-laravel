@@ -1,11 +1,13 @@
 <?php
 
 use App\Http\Controllers\VRCompanyController;
+use App\Models\VrContacts;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Middleware\NPTCAdminMiddleware;
 use App\Http\Controllers\NptcAdminController;
 use App\Http\Controllers\VRAdminController;
+use App\Http\Controllers\VrContactsController;
 
 Route::get('/', function () {
     return Inertia::render('welcome');
@@ -60,6 +62,11 @@ Route::get('preview-media/{mediaId}', [VRCompanyController::class, 'previewMedia
     ->name('preview-media');
 
 Route::post('vr-company.store', [VRCompanyController::class, 'store'])->name('vr-company.store');
+
+//Contacts
+Route::get('create-vr-contacts', [VrContactsController::class, 'index'])->name('vr-contacts.index');
+Route::post('vr-contacts.store', [VrContactsController::class, 'store'])->name('vr-contacts.store');
+Route::post('vr-contacts.store-multiple', [VrContactsController::class, 'storeMultiple'])->name('vr-contacts.store-multiple');
 
 
 Route::get('create-vr-admin', function () {
