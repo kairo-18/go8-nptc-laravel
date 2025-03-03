@@ -3,11 +3,11 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import AppLayout from '@/layouts/app-layout';
 import { type SharedData } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { MoreHorizontal, Square } from 'lucide-react';
 import { useState } from 'react';
+import MainLayout from './mainLayout';
 
 export default function VrAdmin({ companies }) {
     const { auth } = usePage<SharedData>().props;
@@ -30,8 +30,15 @@ export default function VrAdmin({ companies }) {
         setSelectedPreview(file);
     };
 
+    const breadcrumbs = [
+        {
+            title: 'Records',
+            href: '/vr-owner',
+        },
+    ];
+
     return (
-        <AppLayout>
+        <MainLayout breadcrumbs={breadcrumbs}>
             <Head title="VR Companies" />
             <div className="space-y-4 p-6">
                 <div>
@@ -76,9 +83,9 @@ export default function VrAdmin({ companies }) {
 
             {/* Dialog for Company Files */}
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="!w-full !max-w-4xl sm:max-w-6xl">
+                <DialogContent className="!w-full !max-w-4xl bg-white sm:max-w-6xl">
                     <DialogHeader>
-                        <DialogTitle>Company Files</DialogTitle>
+                        <DialogTitle className="">Company Files</DialogTitle>
                     </DialogHeader>
 
                     <div className="max-h-[80vh] overflow-y-auto p-6">
@@ -94,11 +101,21 @@ export default function VrAdmin({ companies }) {
                                                 <div key={file.id} className="flex items-center justify-between rounded border p-3">
                                                     <span className="max-w-[60%] truncate">{file.name}</span>
                                                     <div className="flex space-x-3">
-                                                        <Button variant="outline" size="sm" onClick={() => handlePreview(file)}>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="text-white"
+                                                            onClick={() => handlePreview(file)}
+                                                        >
                                                             Preview
                                                         </Button>
 
-                                                        <Button variant="outline" size="sm" onClick={() => handleDownload(file.id)}>
+                                                        <Button
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className="text-white"
+                                                            onClick={() => handleDownload(file.id)}
+                                                        >
                                                             Download
                                                         </Button>
                                                     </div>
@@ -137,6 +154,6 @@ export default function VrAdmin({ companies }) {
                     </div>
                 </DialogContent>
             </Dialog>
-        </AppLayout>
+        </MainLayout>
     );
 }

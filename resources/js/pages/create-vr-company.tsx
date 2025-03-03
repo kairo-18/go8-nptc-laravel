@@ -5,8 +5,9 @@ import { Label } from '@/components/ui/label';
 import AppLayout from '@/layouts/app-layout';
 import { useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import MainLayout from '@/pages/mainLayout';
 
-export default function CreateVrCompany() {
+export default function CreateVrCompany({ onNextTab }: { onNextTab: () => void }) {
     const { data, setData, post, progress, transform } = useForm({
         CompanyName: '',
         BusinessPermit: null,
@@ -48,6 +49,7 @@ export default function CreateVrCompany() {
             forceFormData: true, // Important for Inertia to recognize FormData
             onSuccess: () => {
                 setProcessing(false);
+                onNextTab();
             },
             onError: (errors) => {
                 setErrors(errors);
@@ -57,7 +59,6 @@ export default function CreateVrCompany() {
     };
 
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
             <div className="mx-auto mt-6 w-full max-w-6xl">
                 <h1 className="text-2xl font-semibold">Create Vehicle Rental Company</h1>
                 <p className="text-gray-500">Manage the account settings of the owner and company information.</p>
@@ -68,45 +69,53 @@ export default function CreateVrCompany() {
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
-                            <div>
-                                <Label htmlFor="BusinessPermit">Business Permit</Label>
-                                <Input id="BusinessPermit" type="file" onChange={(e) => setData('BusinessPermit', e.target.files[0])} />
-                                {errors.BusinessPermit && <p className="text-sm text-red-500">{errors.BusinessPermit}</p>}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label htmlFor="BusinessPermit">Business Permit</Label>
+                                    <Input id="BusinessPermit" type="file" onChange={(e) => setData('BusinessPermit', e.target.files[0])} />
+                                    {errors.BusinessPermit && <p className="text-sm text-red-500">{errors.BusinessPermit}</p>}
+                                </div>
+                                <div>
+                                    <Label htmlFor="CompanyName">Company Name</Label>
+                                    <Input id="CompanyName" value={data.CompanyName} onChange={(e) => setData('CompanyName', e.target.value)} />
+                                    {errors.CompanyName && <p className="text-sm text-red-500">{errors.CompanyName}</p>}
+                                </div>
                             </div>
-                            <div>
-                                <Label htmlFor="CompanyName">Company Name</Label>
-                                <Input id="CompanyName" value={data.CompanyName} onChange={(e) => setData('CompanyName', e.target.value)} />
-                                {errors.CompanyName && <p className="text-sm text-red-500">{errors.CompanyName}</p>}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label htmlFor="BusinessPermitNumber">Business Permit Number</Label>
+                                    <Input
+                                        id="BusinessPermitNumber"
+                                        type="number"
+                                        value={data.BusinessPermitNumber}
+                                        onChange={(e) => setData('BusinessPermitNumber', e.target.value)}
+                                    />
+                                    {errors.BusinessPermitNumber && <p className="text-sm text-red-500">{errors.BusinessPermitNumber}</p>}
+                                </div>
+                                <div>
+                                    <Label htmlFor="BIR_2303">BIR 2303</Label>
+                                    <Input id="BIR_2303" type="file" onChange={(e) => setData('BIR_2303', e.target.files[0])} />
+                                    {errors.BIR_2303 && <p className="text-sm text-red-500">{errors.BIR_2303}</p>}
+                                </div>
                             </div>
-                            <div>
-                                <Label htmlFor="BusinessPermitNumber">Business Permit Number</Label>
-                                <Input
-                                    id="BusinessPermitNumber"
-                                    type="number"
-                                    value={data.BusinessPermitNumber}
-                                    onChange={(e) => setData('BusinessPermitNumber', e.target.value)}
-                                />
-                                {errors.BusinessPermitNumber && <p className="text-sm text-red-500">{errors.BusinessPermitNumber}</p>}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label htmlFor="DTI_Permit">DTI Permit</Label>
+                                    <Input id="DTI_Permit" type="file" onChange={(e) => setData('DTI_Permit', e.target.files[0])} />
+                                    {errors.DTI_Permit && <p className="text-sm text-red-500">{errors.DTI_Permit}</p>}
+                                </div>
+                                <div>
+                                    <Label htmlFor="BrandLogo">Brand Logo</Label>
+                                    <Input id="BrandLogo" type="file" onChange={(e) => setData('BrandLogo', e.target.files[0])} />
+                                    {errors.BrandLogo && <p className="text-sm text-red-500">{errors.BrandLogo}</p>}
+                                </div>
                             </div>
-                            <div>
-                                <Label htmlFor="BIR_2303">BIR 2303</Label>
-                                <Input id="BIR_2303" type="file" onChange={(e) => setData('BIR_2303', e.target.files[0])} />
-                                {errors.BIR_2303 && <p className="text-sm text-red-500">{errors.BIR_2303}</p>}
-                            </div>
-                            <div>
-                                <Label htmlFor="DTI_Permit">DTI Permit</Label>
-                                <Input id="DTI_Permit" type="file" onChange={(e) => setData('DTI_Permit', e.target.files[0])} />
-                                {errors.DTI_Permit && <p className="text-sm text-red-500">{errors.DTI_Permit}</p>}
-                            </div>
-                            <div>
-                                <Label htmlFor="BrandLogo">Brand Logo</Label>
-                                <Input id="BrandLogo" type="file" onChange={(e) => setData('BrandLogo', e.target.files[0])} />
-                                {errors.BrandLogo && <p className="text-sm text-red-500">{errors.BrandLogo}</p>}
-                            </div>
-                            <div>
-                                <Label htmlFor="SalesInvoice">Sales Invoice</Label>
-                                <Input id="SalesInvoice" type="file" onChange={(e) => setData('SalesInvoice', e.target.files[0])} />
-                                {errors.SalesInvoice && <p className="text-sm text-red-500">{errors.SalesInvoice}</p>}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <Label htmlFor="SalesInvoice">Sales Invoice</Label>
+                                    <Input id="SalesInvoice" type="file" onChange={(e) => setData('SalesInvoice', e.target.files[0])} />
+                                    {errors.SalesInvoice && <p className="text-sm text-red-500">{errors.SalesInvoice}</p>}
+                                </div>
                             </div>
                             <div className="flex justify-end">
                                 <Button type="submit" disabled={processing} className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700">
@@ -118,6 +127,6 @@ export default function CreateVrCompany() {
                     </CardContent>
                 </Card>
             </div>
-        </AppLayout>
     );
+    
 }
