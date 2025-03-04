@@ -9,6 +9,7 @@ class Operator extends Model
     protected $fillable = [
         'vr_company_id',
         'user_id',
+        'Status'
     ];
     //
     public function user(){
