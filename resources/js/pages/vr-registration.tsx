@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button';
-
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
+import { Clipboard, ClipboardCheck } from 'lucide-react';
 import { useState } from 'react';
 import MainLayout from './mainLayout';
 
@@ -16,6 +17,13 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 export default function VrRegistration() {
     const [activeTab, setActiveTab] = useState('tempoAccountTab');
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isCopied, setIsCopied] = useState(false);
+    const [isAppIdCopied, setIsAppIdCopied] = useState(false);
+
+    const generatedUsername = 'user123';
+    const generatedPassword = 'pass@123';
+    const generatedApplicationId = 'app-456';
 
     const TabContent = ({ value, title, description }: { value: string; title: string; description?: string }) => (
         <TabsContent value={value} className="w-full rounded-sm border border-gray-300 p-2">
@@ -83,13 +91,75 @@ export default function VrRegistration() {
                 </div>
             </form>
 
-            <Button
-                variant="outline"
-                onClick={() => console.log('Congrats! You have generated a temporary account')}
-                className="float-right mt-20 mb-5 bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white"
-            >
-                Generate Temporary Account
-            </Button>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <DialogTrigger asChild>
+                    <Button
+                        variant="outline"
+                        onClick={() => setIsDialogOpen(true)}
+                        className="float-right mt-20 mb-5 bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white"
+                    >
+                        Generate Temporary Account
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px]">
+                    <DialogHeader>
+                        <DialogTitle>Creation Successful</DialogTitle>
+                        <DialogDescription>Share this link to proceed to registration.</DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-2 py-4">
+                        {/* Username and Password Section */}
+                        <div className="flex items-center justify-between rounded border border-gray-300 p-2">
+                            <div className="flex-1">
+                                <p className="ml-2 text-gray-500">Username:</p> {/* Gray text for the label */}
+                                <p className="ml-2 text-black">{generatedUsername}</p> {/* Black text for the generated username */}
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-gray-500">Password:</p> {/* Gray text for the label */}
+                                <p className="text-black">{generatedPassword}</p> {/* Black text for the generated password */}
+                            </div>
+                            <Button
+                                className="bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white"
+                                onClick={() => {
+                                    // Copy functionality
+                                    navigator.clipboard.writeText(`${generatedUsername}\n${generatedPassword}`);
+                                    setIsCopied(true); // Set copied state to true
+                                    setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
+                                }}
+                            >
+                                {isCopied ? <ClipboardCheck /> : <Clipboard />} {/* Toggle icon */}
+                            </Button>
+                        </div>
+
+                        {/* Application ID Section */}
+                        <div className="flex items-center justify-between rounded border border-gray-300 p-2">
+                            <p>
+                                <span className="ml-2 text-gray-500">Application ID:</span>
+                                <span className="text-black"> {generatedApplicationId}</span>
+                            </p>
+                            <Button
+                                className="bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white"
+                                onClick={() => {
+                                    // Copy functionality
+                                    navigator.clipboard.writeText(generatedApplicationId);
+                                    setIsAppIdCopied(true); // Set copied state to true
+                                    setTimeout(() => setIsAppIdCopied(false), 2000); // Reset after 2 seconds
+                                }}
+                            >
+                                {isAppIdCopied ? <ClipboardCheck /> : <Clipboard />} {/* Toggle icon */}
+                            </Button>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            onClick={() => setIsDialogOpen(false)}
+                            className="bg-gray-300 text-gray-800 hover:bg-gray-400 hover:text-gray-900"
+                        >
+                            Close
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 
