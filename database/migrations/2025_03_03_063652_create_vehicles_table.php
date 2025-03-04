@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('Model');
             $table->string('Brand');
             $table->integer("SeatNumber");
-            $table->enum('Status', ['Active', 'Inactive', 'Suspended', 'Banned']);
+            $table->enum('Status', ['Active', 'Inactive', 'Suspended', 'Banned', 'Pending', 'Approved', 'Rejected']);
             $table->timestamps();
         });
     }
