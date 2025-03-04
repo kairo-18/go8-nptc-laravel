@@ -15,28 +15,28 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function VrRegistration() {
-    const [activeTab, setActiveTab] = useState('tempoAccountTab');
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
+const generatedUsername = 'user123';
+const generatedPassword = 'pass@123';
+const generatedApplicationId = 'app-456';
+
+const CopyButton = ({ text, isCopied, setIsCopied }: { text: string; isCopied: boolean; setIsCopied: (value: boolean) => void }) => (
+    <Button
+        className="bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white"
+        onClick={() => {
+            navigator.clipboard.writeText(text);
+            setIsCopied(true);
+            setTimeout(() => setIsCopied(false), 2000);
+        }}
+    >
+        {isCopied ? <ClipboardCheck /> : <Clipboard />}
+    </Button>
+);
+
+const TemporaryAccountTabContent = ({ setIsDialogOpen }: { setIsDialogOpen: (value: boolean) => void }) => {
     const [isCopied, setIsCopied] = useState(false);
     const [isAppIdCopied, setIsAppIdCopied] = useState(false);
 
-    const generatedUsername = 'user123';
-    const generatedPassword = 'pass@123';
-    const generatedApplicationId = 'app-456';
-
-    const TabContent = ({ value, title, description }: { value: string; title: string; description?: string }) => (
-        <TabsContent value={value} className="w-full rounded-sm border border-gray-300 p-2">
-            <div className="ml-2 flex flex-col items-start py-2">
-                <h3 className="scroll-m-20 text-lg font-semibold tracking-tight">{title}</h3>
-                {description && <p className="text-sm text-gray-600">{description}</p>}
-            </div>
-            <Separator className="my-2" />
-            {value === 'tempoAccountTab' ? <TemporaryAccountTabContent /> : <ApplicationStatusTabContent />}
-        </TabsContent>
-    );
-
-    const TemporaryAccountTabContent = () => (
+    return (
         <div className="p-4">
             <form className="space-y-4">
                 <div className="grid grid-cols-3 gap-4">
@@ -91,7 +91,7 @@ export default function VrRegistration() {
                 </div>
             </form>
 
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <Dialog>
                 <DialogTrigger asChild>
                     <Button
                         variant="outline"
@@ -107,46 +107,24 @@ export default function VrRegistration() {
                         <DialogDescription>Share this link to proceed to registration.</DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-2 py-4">
-                        {/* Username and Password Section */}
                         <div className="flex items-center justify-between rounded border border-gray-300 p-2">
                             <div className="flex-1">
-                                <p className="ml-2 text-gray-500">Username:</p> {/* Gray text for the label */}
-                                <p className="ml-2 text-black">{generatedUsername}</p> {/* Black text for the generated username */}
+                                <p className="ml-2 text-gray-500">Username:</p>
+                                <p className="ml-2 text-black">{generatedUsername}</p>
                             </div>
                             <div className="flex-1">
-                                <p className="text-gray-500">Password:</p> {/* Gray text for the label */}
-                                <p className="text-black">{generatedPassword}</p> {/* Black text for the generated password */}
+                                <p className="text-gray-500">Password:</p>
+                                <p className="text-black">{generatedPassword}</p>
                             </div>
-                            <Button
-                                className="bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white"
-                                onClick={() => {
-                                    // Copy functionality
-                                    navigator.clipboard.writeText(`${generatedUsername}\n${generatedPassword}`);
-                                    setIsCopied(true); // Set copied state to true
-                                    setTimeout(() => setIsCopied(false), 2000); // Reset after 2 seconds
-                                }}
-                            >
-                                {isCopied ? <ClipboardCheck /> : <Clipboard />} {/* Toggle icon */}
-                            </Button>
+                            <CopyButton text={`${generatedUsername}\n${generatedPassword}`} isCopied={isCopied} setIsCopied={setIsCopied} />
                         </div>
 
-                        {/* Application ID Section */}
                         <div className="flex items-center justify-between rounded border border-gray-300 p-2">
                             <p>
                                 <span className="ml-2 text-gray-500">Application ID:</span>
                                 <span className="text-black"> {generatedApplicationId}</span>
                             </p>
-                            <Button
-                                className="bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white"
-                                onClick={() => {
-                                    // Copy functionality
-                                    navigator.clipboard.writeText(generatedApplicationId);
-                                    setIsAppIdCopied(true); // Set copied state to true
-                                    setTimeout(() => setIsAppIdCopied(false), 2000); // Reset after 2 seconds
-                                }}
-                            >
-                                {isAppIdCopied ? <ClipboardCheck /> : <Clipboard />} {/* Toggle icon */}
-                            </Button>
+                            <CopyButton text={generatedApplicationId} isCopied={isAppIdCopied} setIsCopied={setIsAppIdCopied} />
                         </div>
                     </div>
                     <DialogFooter>
@@ -162,8 +140,24 @@ export default function VrRegistration() {
             </Dialog>
         </div>
     );
+};
 
-    const ApplicationStatusTabContent = () => <h1 className="p-2 text-2xl font-bold">Not yet</h1>;
+const ApplicationStatusTabContent = () => <h1 className="p-2 text-2xl font-bold">Not yet</h1>;
+
+export default function VrRegistration() {
+    const [activeTab, setActiveTab] = useState('tempoAccountTab');
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+    const TabContent = ({ value, title, description }: { value: string; title: string; description?: string }) => (
+        <TabsContent value={value} className="w-full rounded-sm border border-gray-300 p-2">
+            <div className="ml-2 flex flex-col items-start py-2">
+                <h3 className="scroll-m-20 text-lg font-semibold tracking-tight">{title}</h3>
+                {description && <p className="text-sm text-gray-600">{description}</p>}
+            </div>
+            <Separator className="my-2" />
+            {value === 'tempoAccountTab' ? <TemporaryAccountTabContent setIsDialogOpen={setIsDialogOpen} /> : <ApplicationStatusTabContent />}
+        </TabsContent>
+    );
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
