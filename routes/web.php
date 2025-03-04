@@ -44,6 +44,9 @@ Route::middleware('auth', 'verified', NPTCAdminMiddleware::class)->group(functio
         ->name('delete-nptc-admin');
 });
 
+Route::get('vr-registration', function(){
+    return Inertia::render('vr-registration');
+})->name('vr-registration');
 
 //Registration page on the sidebar
 Route::get('registration', function(){
@@ -54,7 +57,7 @@ Route::get('registration', function(){
 
 Route::get('pending', function(){
     return Inertia::render('pending');
-})->name('registration');
+})->name('pending');
 
 
 //move to vr company controller
