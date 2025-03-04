@@ -1,42 +1,78 @@
 <?php
 
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\OperatorAdminController;
 use App\Http\Controllers\VRCompanyController;
-use App\Models\VrContacts;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use App\Http\Middleware\NPTCAdminMiddleware;
 use App\Http\Controllers\NptcAdminController;
 use App\Http\Controllers\VRAdminController;
 use App\Http\Controllers\VrContactsController;
+use Illuminate\Support\Facades\Route;
+use Inertia\Inertia;
+use App\Http\Middleware\NPTCAdminMiddleware;
 
+// Home route
 Route::get('/', function () {
     return Inertia::render('welcome');
 })->name('home');
 
-Route::middleware(['auth', 'verified', NPTCAdminMiddleware::class])->group(function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+// Routes restricted to authenticated and verified users
+Route::group(['middleware' => ['auth', 'verified']], function () {
 
-    Route::get('nptc-admins', function () {
-        return Inertia::render('nptc-admins', [
-            'users' => \App\Models\User::role('NPTC Admin')->get()
-        ]);
-    })->name('dashboard');
-    Route::get('vr-owner', function () {
-        return Inertia::render('vr-admin', [
-            'users' => \App\Models\User::role('VR Admin')->get(),
-            'companies' => \App\Models\VRCompany::with(['owner.user'])->get()->each(function ($company) {
-                $company->media_files = $company->getMedia(); // Fetch all media files
-            }),
-        ]);
-    })->name('vr-owner');
+    // Routes restricted to NPTC Admins only
+    Route::group(['middleware' => ['role:NPTC Admin']], function () {
+        Route::get('dashboard', function () {
+            return Inertia::render('dashboard');
+        })->name('dashboard');
+
+        Route::get('nptc-admins', function () {
+            return Inertia::render('nptc-admins', [
+                'users' => \App\Models\User::role('NPTC Admin')->get()
+            ]);
+        })->name('nptc-admins');
+
+        Route::get('vr-owner', function () {
+            return Inertia::render('vr-admin', [
+                'users' => \App\Models\User::role('VR Admin')->get(),
+                'companies' => \App\Models\VRCompany::with(['owner.user'])->get()->each(function ($company) {
+                    $company->media_files = $company->getMedia();
+                }),
+            ]);
+        })->name('vr-owner');
+
+        Route::get('pending', function () {
+            return Inertia::render('pending');
+        })->name('pending');
+
+        Route::get('create-vr-company-page', function () {
+            return Inertia::render('create-vr-company', [
+                'users' => \App\Models\User::role('VR Admin')->get()
+            ]);
+        })->name('create-vr-company-page');
+
+        Route::get('create-vr-contacts', [VrContactsController::class, 'index'])->name('vr-contacts.index');
+
+        Route::get('create-vr-admin', function () {
+            return Inertia::render('create-vr-admin', [
+                'companies' => \App\Models\VRCompany::all()
+            ]);
+        })->name('create-vr-admin');
+    });
+
+    // Registration page exposed to Temp Users
+    Route::group(['middleware' => ['role:Temp User']], function () {
+        Route::get('registration', function () {
+            return Inertia::render('registration', [
+                'companies' => \App\Models\VRCompany::all(),
+            ]);
+        })->name('registration');
+    });
 });
 
-    Route::post('create-nptc-admin', [NptcAdminController::class, 'createNPTCAdmin'])
-        ->name('create-nptc-admin');
-Route::middleware('auth', 'verified', NPTCAdminMiddleware::class)->group(function () {
+// NPTC Admin routes
+Route::post('create-nptc-admin', [NptcAdminController::class, 'createNPTCAdmin'])
+    ->name('create-nptc-admin');
 
+Route::middleware(['auth', 'verified', NPTCAdminMiddleware::class])->group(function () {
     Route::patch('update-nptc-admin', [NptcAdminController::class, 'updateNPTCAdmin'])
         ->name('update-nptc-admin');
 
@@ -44,27 +80,7 @@ Route::middleware('auth', 'verified', NPTCAdminMiddleware::class)->group(functio
         ->name('delete-nptc-admin');
 });
 
-
-//Registration page on the sidebar
-Route::get('registration', function(){
-    return Inertia::render('registration', [
-        'companies' => \App\Models\VRCompany::all(),
-    ]);
-})->name('registration');
-
-Route::get('pending', function(){
-    return Inertia::render('pending');
-})->name('registration');
-
-
-//move to vr company controller
-Route::get('create-vr-company-page', function () {
-    return Inertia::render('create-vr-company', [
-        'users' => \App\Models\User::role('VR Admin')->get()
-    ]);
-})->name('create-vr-company-page');
-
-//VR Company
+// VR Company routes
 Route::get('download-media/{mediaId}', [VRCompanyController::class, 'downloadMedia'])
     ->name('download-media');
 
@@ -73,22 +89,33 @@ Route::get('preview-media/{mediaId}', [VRCompanyController::class, 'previewMedia
 
 Route::post('vr-company.store', [VRCompanyController::class, 'store'])->name('vr-company.store');
 
-//Contacts
-Route::get('create-vr-contacts', [VrContactsController::class, 'index'])->name('vr-contacts.index');
+// Contacts routes
 Route::post('vr-contacts.store', [VrContactsController::class, 'store'])->name('vr-contacts.store');
 Route::post('vr-contacts.store-multiple', [VrContactsController::class, 'storeMultiple'])->name('vr-contacts.store-multiple');
 
-//VR Admin
-Route::get('create-vr-admin', function () {
-    return Inertia::render('create-vr-admin', [
-        'companies' => \App\Models\VRCompany::all()
-    ]);
-})->name('create-vr-admin');
-
+// VR Admin routes
 Route::post('vr-admins.store', [VRAdminController::class, 'store'])
     ->name('vr-admins.store');
 
+// Route for temporary registration page
+Route::post('temp-registration', [RegisteredUserController::class, 'storeTempAcc'])
+    ->name('temp-registration');
 
+//Operator
+Route::get('/create-operator-admin', function () {
+    return Inertia::render('create-operator-admin');
+})->name('create-operator.admin');
 
+Route::get('/operator-admin', function () {
+    return Inertia::render('operator-admin');
+})->name('operator.admin');
+Route::get('/operators', [OperatorAdminController::class, 'index'])->name('operators.index');
+Route::get('/operators/create', [OperatorAdminController::class, 'create'])->name('operators.create');
+Route::post('/operators', [OperatorAdminController::class, 'store'])->name('operators.store');
+Route::get('/operators/{operator}/edit', [OperatorAdminController::class, 'edit'])->name('operators.edit');
+Route::patch('/operators/{operator}', [OperatorAdminController::class, 'update'])->name('operators.update');
+Route::delete('/operators/{operator}', [OperatorAdminController::class, 'destroy'])->name('operators.destroy');
+
+// Include additional route files
 require __DIR__.'/settings.php';
 require __DIR__.'/auth.php';
