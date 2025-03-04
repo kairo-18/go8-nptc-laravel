@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('NBI_clearance')->nullable(); // Path to NBI clearance file
             $table->string('Police_clearance')->nullable(); // Path to Police clearance file
             $table->string('BIR_clearance')->nullable(); // Path to BIR clearance file
+            $table->enum('Status', ['Active', 'Inactive', 'Suspended', 'Banned']);
             $table->timestamps();
         });
     }
