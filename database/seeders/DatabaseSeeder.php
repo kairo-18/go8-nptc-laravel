@@ -72,6 +72,7 @@ class DatabaseSeeder extends Seeder
         VRCompany::factory()->create([
             'CompanyName' => 'Example VR Company',
             'BusinessPermitNumber' => 123456,
+            'Status' => 'Approved'
         ]);
 
         $user3 = User::factory()->create([
@@ -89,6 +90,7 @@ class DatabaseSeeder extends Seeder
         $user3->operator()->create([
             'user_id' => $user3->id,
             'vr_company_id' => 1,
+            'Status' => 'Approved'
         ]);
 
 
