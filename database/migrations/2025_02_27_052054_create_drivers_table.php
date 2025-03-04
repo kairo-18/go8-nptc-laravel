@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('drivers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->enum('Status', ['Active', 'Inactive', 'Pending'])->default('Pending');
             $table->string('License')->nullable(); // Path to uploaded license file
             $table->string('LicenseNumber')->unique();
             $table->string('Photo')->nullable(); // Path to 1x1 photo file
