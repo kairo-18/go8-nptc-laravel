@@ -1,10 +1,9 @@
-import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link } from '@inertiajs/react';
-import { BookOpen, Folder, LayoutGrid } from 'lucide-react';
+import { BookUser, Folder, LayoutGrid, Mail, Receipt, UserPlus, Wallet } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -18,18 +17,35 @@ const mainNavItems: NavItem[] = [
         url: '/nptc-admins',
         icon: Folder,
     },
-];
-
-const footerNavItems: NavItem[] = [
     {
-        title: 'Repository',
-        url: 'https://github.com/laravel/react-starter-kit',
-        icon: Folder,
+        title: 'Registration',
+        url: '/registration',
+        icon: UserPlus,
     },
     {
-        title: 'Documentation',
-        url: 'https://laravel.com/docs/starter-kits',
-        icon: BookOpen,
+        title: 'Pending',
+        url: '/pending',
+        icon: UserPlus,
+    },
+    {
+        title: 'Records',
+        url: '/vr-owner', // Route where VR Owners list will be displayed
+        icon: BookUser, // Icon representing "Records"
+    },
+    {
+        title: 'Billings',
+        url: '', // Route
+        icon: Receipt,
+    },
+    {
+        title: 'Bookings',
+        url: '', // Route
+        icon: Wallet,
+    },
+    {
+        title: 'Notifications',
+        url: '', // Route
+        icon: Mail,
     },
 ];
 
@@ -38,7 +54,7 @@ export function AppSidebar() {
         <Sidebar collapsible="icon" variant="inset">
             <SidebarHeader>
                 <SidebarMenu>
-                    <SidebarMenuItem>
+                    <SidebarMenuItem className="text-white">
                         <SidebarMenuButton size="lg" asChild>
                             <Link href="/dashboard" prefetch>
                                 <AppLogo />
@@ -48,12 +64,11 @@ export function AppSidebar() {
                 </SidebarMenu>
             </SidebarHeader>
 
-            <SidebarContent>
+            <SidebarContent className="text-white">
                 <NavMain items={mainNavItems} />
             </SidebarContent>
 
-            <SidebarFooter>
-                <NavFooter items={footerNavItems} className="mt-auto" />
+            <SidebarFooter className="text-white">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

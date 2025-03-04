@@ -6,6 +6,9 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
+use App\Models\VRCompany;
+use App\Models\VrContacts;
+use Database\Factories\VrCompanyFactory;
 
 /**
  * Class DatabaseSeeder
@@ -21,7 +24,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-
+        Role::create(['name' => 'NPTC Super Admin']);
         Role::create(['name' => 'NPTC Admin']);
         Role::create(['name' => 'VR Admin']);
         Role::create(['name' => 'Operator']);
@@ -37,7 +40,7 @@ class DatabaseSeeder extends Seeder
             'ContactNumber' => '09123456789',
         ]);
 
-        $user->assignRole('NPTC Admin');
+        $user->assignRole('NPTC Super Admin');
 
 
 
@@ -51,9 +54,11 @@ class DatabaseSeeder extends Seeder
             'ContactNumber' => '09123456789',
         ]);
 
-        $user2->assignRole("Driver");
 
-        if($user2->hasRole("Driver")){
+
+        $user2->assignRole("NPTC Admin");
+
+        if ($user2->hasRole("Driver")) {
             $user2->driver()->create([
                 'License' => 'path/to/license',
                 'LicenseNumber' => '1234567890',
@@ -64,6 +69,27 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
+        VRCompany::factory()->create([
+            'CompanyName' => 'Example VR Company',
+            'BusinessPermitNumber' => 123456,
+        ]);
+
+        $user3 = User::factory()->create([
+            'username' => 'Alexis',
+            'email' => 'alex@example.com',
+            'FirstName' => 'Alexander',
+            'LastName' => 'Parayno',
+            'Address' => 'Test Address',
+            'BirthDate' => '2000-01-01',
+            'ContactNumber' => '09123456789',
+        ]);
+
+        $user3->assignRole("Operator");
+
+        $user3->operator()->create([
+            'user_id' => $user3->id,
+            'vr_company_id' => 1,
+        ]);
 
 
     }

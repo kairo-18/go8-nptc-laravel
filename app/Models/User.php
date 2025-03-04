@@ -57,5 +57,13 @@ class User extends Authenticatable
         return $this->hasOne(Driver::class);
     }
 
+    public function  operator(){
+        return $this->hasMany(Operator::class);
+    }
+
+    public function vrOwner(){
+        return $this->hasOne(VehicleRentalOwner::class);
+    }
+
 
 }
