@@ -19,7 +19,7 @@ Route::get('/', function () {
 Route::group(['middleware' => ['auth', 'verified']], function () {
 
     // Routes restricted to NPTC Admins only
-    Route::group(['middleware' => ['role:NPTC Admin']], function () {
+    Route::group(['middleware' => ['role:NPTC Admin|NPTC Super Admin']], function () {
         Route::get('dashboard', function () {
             return Inertia::render('dashboard');
         })->name('dashboard');
@@ -59,7 +59,7 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
     });
 
     // Registration page exposed to Temp Users
-    Route::group(['middleware' => ['role:Temp User']], function () {
+    Route::group(['middleware' => ['role:Temp User|NPTC Admin|NPTC Super Admin']], function () {
         Route::get('registration', function () {
             return Inertia::render('registration', [
                 'companies' => \App\Models\VRCompany::all(),

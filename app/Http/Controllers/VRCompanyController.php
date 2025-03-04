@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\VRCompany;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use function Laravel\Prompts\warning;
 
 class VRCompanyController extends Controller
 {
@@ -23,10 +25,10 @@ class VRCompanyController extends Controller
             'SalesInvoice' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
         ]);
 
-
         $vrCompany = VRCompany::create([
             'BusinessPermitNumber' => $request->BusinessPermitNumber,
             "CompanyName" => $request->CompanyName,
+            "Status" => Auth::user()->hasRole(['NPTC Admin', 'NPTC Super Admin']) ? 'Approved' : 'Pending',
         ]);
 
         // Upload media files (only if provided)
@@ -51,6 +53,7 @@ class VRCompanyController extends Controller
         }
 
         \Log::info('VR Company created successfully', ['id' => $vrCompany->id]);
+
     }
 
     public function downloadMedia($mediaId)
