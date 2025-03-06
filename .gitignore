@@ -21,6 +21,4 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
-echo ".history/" >> .gitignore
-git rm -r --cached .history
-git commit -m "Removed .history from Git tracking"
+.history
