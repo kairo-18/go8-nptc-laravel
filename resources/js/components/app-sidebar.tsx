@@ -18,12 +18,12 @@ const mainNavItems: NavItem[] = [
         icon: Folder,
     },
     {
-        title: 'VR Registration',
+        title: 'VR Temp Acc Registration',
         url: '/vr-registration',
         icon: BadgePlus,
     },
     {
-        title: 'Registration',
+        title: 'VR Registration',
         url: '/registration',
         icon: UserPlus,
     },

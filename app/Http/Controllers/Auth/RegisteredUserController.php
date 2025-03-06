@@ -27,29 +27,30 @@ class RegisteredUserController extends Controller
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-
     public function storeTempAcc(Request $request)
     {
-        $request->validate([
+        $request->validate(
+            [
             'FirstName' => 'required|string|max:255',
             'LastName' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
             'Address' => 'nullable|string|max:255',
-            'Birthdate' => 'nullable|date',
+            'BirthDate' => 'nullable|date',
             'ContactNumber' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:users',
-        ]);
+            ]
+        );
 
-        // For example January 1 2005 = 01012005
-            $formattedBirthDate = "12345";
-        if($request->Birthdate){
-            $formattedrirthDate = date('mdY', strtotime($request->Birthdate));
+        $birthYear = "1234";
+        if ($request->BirthDate) {
+            $birthYear = date('Y', strtotime($request->BirthDate));
         }
-        //Add Last Name
-        $generatedPassword = $request->LastName . $formattedBirthDate;
+        // Add Last Name
+        $generatedPassword = $request->LastName . $birthYear;
         \Log::info($generatedPassword);
 
-        $user = User::create([
+        $user = User::create(
+            [
             'FirstName' => $request->FirstName,
             'LastName' => $request->LastName,
             'username' => $request->username,
@@ -58,20 +59,20 @@ class RegisteredUserController extends Controller
             'ContactNumber' => $request->ContactNumber,
             'email' => $request->email,
             'password' => Hash::make($generatedPassword),
-        ]);
+            ]
+        );
 
         $user->assignRole('Temp User');
 
         event(new Registered($user));
 
-        //return username and password
-        return response()->json(['email' => $request->email, 'password' => $generatedPassword]);
 
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
+        $request->validate(
+            [
             'FirstName' => 'required|string|max:255',
             'LastName' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users',
@@ -80,9 +81,11 @@ class RegisteredUserController extends Controller
             'ContactNumber' => 'required|string|max:255',
             'email' => 'required|string|lowercase|email|max:255|unique:users',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+            ]
+        );
 
-        $user = User::create([
+        $user = User::create(
+            [
             'FirstName' => $request->FirstName,
             'LastName' => $request->LastName,
             'username' => $request->username,
@@ -91,7 +94,8 @@ class RegisteredUserController extends Controller
             'ContactNumber' => $request->ContactNumber,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-        ]);
+            ]
+        );
 
         event(new Registered($user));
 

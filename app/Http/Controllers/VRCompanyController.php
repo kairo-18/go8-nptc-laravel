@@ -15,7 +15,8 @@ class VRCompanyController extends Controller
     public function store(Request $request)
     {
         // Validate input fields and file uploads
-        $request->validate([
+        $request->validate(
+            [
             'CompanyName' => 'required|string',
             'BusinessPermitNumber' => 'required|integer',
             'BusinessPermit' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
@@ -23,13 +24,19 @@ class VRCompanyController extends Controller
             'DTI_Permit' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
             'BrandLogo' => 'nullable|file|mimes:jpg,png|max:1024',
             'SalesInvoice' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-        ]);
+            ]
+        );
 
-        $vrCompany = VRCompany::create([
+
+        $userRoles = Auth::user()->getRoleNames();
+
+        $vrCompany = VRCompany::create(
+            [
             'BusinessPermitNumber' => $request->BusinessPermitNumber,
             "CompanyName" => $request->CompanyName,
-            "Status" => Auth::user()->hasRole(['NPTC Admin', 'NPTC Super Admin']) ? 'Approved' : 'Pending',
-        ]);
+            "Status" => $userRoles->contains('NPTC Super Admin') || $userRoles->contains('NPTC Admin') ? 'Approved' : 'Pending',
+            ]
+        );
 
         // Upload media files (only if provided)
         if ($request->hasFile('BusinessPermit')) {
@@ -79,8 +86,10 @@ class VRCompanyController extends Controller
     {
         $companies = VRCompany::select('id', 'BusinessPermitNumber')->get();
 
-        return Inertia::render('registration', [
+        return Inertia::render(
+            'registration', [
             'companies' => $companies
-        ]);
+            ]
+        );
     }
 }
