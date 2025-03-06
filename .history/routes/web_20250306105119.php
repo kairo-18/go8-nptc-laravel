@@ -58,10 +58,6 @@ Route::group(['middleware' => ['auth', 'verified']], function () {
         })->name('create-vr-admin');
     });
 
-    Route::get('vr-registration', function () {
-        return Inertia::render('vr-registration');
-    })->name('vr-registration');
-
     // Registration page exposed to Temp Users
     Route::group(['middleware' => ['role:Temp User|NPTC Admin|NPTC Super Admin']], function () {
         Route::get('registration', function () {
