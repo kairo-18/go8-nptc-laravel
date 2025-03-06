@@ -1,18 +1,22 @@
 import { useState } from 'react';
-import MainLayout from './mainLayout';
 import Company from '../components/RecordsComponent/vr-company';
-import Operator from '../components/RecordsComponent/vr-operator';
 import Driver from '../components/RecordsComponent/vr-driver-vehicle';
+import Operator from '../components/RecordsComponent/vr-operator';
+import MainLayout from './mainLayout';
 
-
-
-export default function Registration({ companies }: { companies: { id: number; BusinessPermitNumber: string }[] }) {
+export default function Registration({
+    companies,
+    operators,
+}: {
+    companies: { id: number; BusinessPermitNumber: string }[];
+    operators: { id: number; name: string; status: string }[];
+}) {
     const [activeTab, setActiveTab] = useState('vr-company');
 
     // Breadcrumbs with onClick navigation
     const breadcrumbs = [
         { label: 'Records', title: 'Records', href: '#', onClick: () => setActiveTab('vr-company') },
-        { label: activeTab.replace('-', ' ').toUpperCase(), title: activeTab.replace('-', ' ').toUpperCase(), href: '#', onClick: () => {} }
+        { label: activeTab.replace('-', ' ').toUpperCase(), title: activeTab.replace('-', ' ').toUpperCase(), href: '#', onClick: () => {} },
     ];
 
     return (
@@ -24,7 +28,6 @@ export default function Registration({ companies }: { companies: { id: number; B
                         { key: 'vr-company', label: 'VR Company' },
                         { key: 'operator', label: 'Operator' },
                         { key: 'driver', label: 'Driver and Vehicle' },
-                        
                     ].map((tab, index) => (
                         <span key={tab.key} className="flex items-center">
                             <button
@@ -40,9 +43,8 @@ export default function Registration({ companies }: { companies: { id: number; B
 
                 {/* Tab Content */}
                 {activeTab === 'vr-company' && <Company companies={companies} onNextTab={() => setActiveTab('operator')} />}
-                {activeTab === 'operator' && <Operator companies={companies} onNextTab={() => setActiveTab('driver')} />}
+                {activeTab === 'operator' && <Operator operators={operators} onNextTab={() => setActiveTab('driver')} />}
                 {activeTab === 'driver' && <Driver companies={companies} onNextTab={() => setActiveTab('vehicle')} />}
-                
             </div>
         </MainLayout>
     );

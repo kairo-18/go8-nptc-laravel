@@ -1,14 +1,26 @@
-import { DataTable } from "./data-table"
-import { paymentData, paymentHeaders } from "./array-data" // Import headers
-import { generateColumns } from "./columns" // Import dynamic column generator
+import { useEffect, useState } from 'react';
+import { generateColumns } from './columns'; // Import dynamic column generator
+import { DataTable } from './data-table';
 
-interface CompanyProps {
-    companies: { id: number; BusinessPermitNumber: string }[];
-    onNextTab: () => void;
-}
+export default function Operator({ operators, onNextTab }) {
+    const [operatorData, setOperatorData] = useState([]);
+    const [operatorHeaders, setOperatorHeaders] = useState<{ key: string; label: string }[]>([]);
 
-export default function Company({ companies, onNextTab }: CompanyProps) { 
-    const columns = generateColumns(paymentHeaders) // Generate columns dynamically
+    useEffect(() => {
+        // Simulate fetching operator data (replace with actual API call if needed)
+        setOperatorData(operators);
 
-    return <DataTable data={paymentData} columns={columns} />
+        // Generate headers dynamically based on the first operator object
+        if (operators.length > 0) {
+            const headers = Object.keys(operators[0]).map((key) => ({
+                key,
+                label: key.charAt(0).toUpperCase() + key.slice(1), // Capitalize the label
+            }));
+            setOperatorHeaders(headers);
+        }
+    }, [operators]);
+
+    const columns = generateColumns(operatorHeaders, { entityType: 'operators' });
+
+    return <DataTable data={operatorData} columns={columns} />;
 }
