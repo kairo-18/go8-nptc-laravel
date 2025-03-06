@@ -245,14 +245,37 @@ export default function Pending() {
         </div>
     );
 
-    const PreviewButton = () => (
-        <Button
-            variant="outline"
-            className="absolute top-1/2 right-2 h-7 -translate-y-1/2 border border-blue-500 bg-transparent px-10 text-sm text-blue-500 hover:bg-blue-50"
-        >
-            Preview
-        </Button>
-    );
+    const PreviewButton = ({ imageUrl }: { imageUrl: string }) => {
+        return (
+            <Dialog>
+                <DialogTrigger asChild>
+                    <Button
+                        variant="outline"
+                        className="absolute top-1/2 right-2 h-7 -translate-y-1/2 border border-blue-500 bg-transparent px-10 text-sm text-blue-500 hover:bg-blue-50"
+                    >
+                        Preview
+                    </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl">
+                    <DialogTitle className="text-lg font-semibold">Image Preview</DialogTitle>
+                    <DialogDescription>Here is the preview of the image.</DialogDescription>
+                    <div className="mt-2 flex items-center justify-center">
+                        <img src={imageUrl} alt="Preview" className="h-auto max-h-[400px] w-auto max-w-[400px] rounded-lg" />
+                    </div>
+                    <DialogFooter className="mt-4">
+                        <DialogClose asChild>
+                            <Button
+                                variant="secondary"
+                                className="border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-600"
+                            >
+                                Close
+                            </Button>
+                        </DialogClose>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        );
+    };
 
     const CompanyInfoSection = ({ operator }: { operator: Operator }) => (
         <div className="mt-5 rounded-sm border border-gray-300 p-2">
@@ -266,14 +289,14 @@ export default function Pending() {
                         <Label>DTI or SEC Permit</Label>
                         <div className="relative w-full">
                             <Input disabled className="w-full pr-16" placeholder={operator.vrCompany} />
-                            <PreviewButton />
+                            <PreviewButton imageUrl="https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png" />
                         </div>
                     </div>
                     <div className="w-full">
                         <Label>BIR 2303</Label>
                         <div className="relative w-full">
                             <Input disabled className="w-full pr-16" placeholder={operator.Email} />
-                            <PreviewButton />
+                            <PreviewButton imageUrl="https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png" />
                         </div>
                     </div>
                 </div>
@@ -283,14 +306,14 @@ export default function Pending() {
                         <Label>Business Permit</Label>
                         <div className="relative w-full">
                             <Input disabled className="w-full pr-16" placeholder={operator.ContactNumber} />
-                            <PreviewButton />
+                            <PreviewButton imageUrl="https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png" />
                         </div>
                     </div>
                     <div className="w-full">
                         <Label>Brand Logo</Label>
                         <div className="relative w-full">
                             <Input disabled className="w-full pr-16" placeholder={operator.Address} />
-                            <PreviewButton />
+                            <PreviewButton imageUrl="https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png" />
                         </div>
                     </div>
                 </div>
@@ -306,7 +329,7 @@ export default function Pending() {
                         <Label>Samples Sales Invoice</Label>
                         <div className="relative w-full">
                             <Input disabled className="w-full pr-16" placeholder={operator.Address} />
-                            <PreviewButton />
+                            <PreviewButton imageUrl="https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png" />
                         </div>
                     </div>
                 </div>
