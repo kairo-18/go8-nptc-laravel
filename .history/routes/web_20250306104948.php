@@ -80,7 +80,34 @@ Route::middleware(['auth', 'verified', NPTCAdminMiddleware::class])->group(funct
         ->name('delete-nptc-admin');
 });
 
+<<<<<<< HEAD
+Route::get('vr-registration', function(){
+    return Inertia::render('vr-registration');
+})->name('vr-registration');
+
+//Registration page on the sidebar
+Route::get('registration', function(){
+    return Inertia::render('registration', [
+        'companies' => \App\Models\VRCompany::all(),
+    ]);
+})->name('registration');
+
+Route::get('pending', function(){
+    return Inertia::render('pending');
+})->name('pending');
+
+
+//move to vr company controller
+Route::get('create-vr-company-page', function () {
+    return Inertia::render('create-vr-company', [
+        'users' => \App\Models\User::role('VR Admin')->get()
+    ]);
+})->name('create-vr-company-page');
+
+//VR Company
+=======
 // VR Company routes
+>>>>>>> ce7bb57395014abc0abe1240f0acf4f415c0e184
 Route::get('download-media/{mediaId}', [VRCompanyController::class, 'downloadMedia'])
     ->name('download-media');
 

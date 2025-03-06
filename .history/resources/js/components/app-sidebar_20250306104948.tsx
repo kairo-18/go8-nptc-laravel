@@ -2,8 +2,13 @@ import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
+<<<<<<< HEAD
+import { Link } from '@inertiajs/react';
+import { BadgePlus, BookUser, Folder, LayoutGrid, Mail, Receipt, UserPlus, Wallet } from 'lucide-react';
+=======
 import { Link, usePage } from '@inertiajs/react';
 import { BookUser, Folder, LayoutGrid, Mail, Receipt, UserPlus, Wallet } from 'lucide-react';
+>>>>>>> ce7bb57395014abc0abe1240f0acf4f415c0e184
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
