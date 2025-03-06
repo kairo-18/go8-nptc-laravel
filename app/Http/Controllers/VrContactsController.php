@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use App\Models\VRCompany;
 use App\Models\VrContacts;
@@ -43,7 +44,9 @@ class VrContactsController extends Controller
             return response()->json(['errors' => $errors], 422);
         }
 
-        return redirect()->route('vr-contacts.index')->with('success', 'Contacts created successfully.');
+        if(Auth::user()->hasRole(['Temp User'])){
+            Auth::logout();
+        }
     }
 
     public function store(Request $request)
@@ -68,6 +71,8 @@ class VrContactsController extends Controller
             'Position' => $request->Position,
         ]);
 
-        return redirect()->route('vr-contacts.index')->with('success', 'VR Contact created successfully.');
+        if(Auth::user()->hasRole(['Temp User'])){
+            Auth::logout();
+        }
     }
 }

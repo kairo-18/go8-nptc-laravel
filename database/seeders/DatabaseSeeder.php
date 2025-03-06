@@ -29,6 +29,7 @@ class DatabaseSeeder extends Seeder
         Role::create(['name' => 'VR Admin']);
         Role::create(['name' => 'Operator']);
         Role::create(['name' => 'Driver']);
+        Role::create(['name' => 'Temp User']);
 
         $user = User::factory()->create([
             'username' => 'Test User',

@@ -24,8 +24,10 @@ class VRAdminController extends Controller
             'ContactNumber' => 'required|string',
         ]);
 
+        // For example January 1 2005 = 01012005
         $formattedBirthDate = date('mdY', strtotime($request->BirthDate));
 
+        //Add Last Name
         $generatedPassword = $request->LastName . $formattedBirthDate;
 
         // Create the VR Admin user
