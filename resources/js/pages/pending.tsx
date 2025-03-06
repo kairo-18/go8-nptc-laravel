@@ -1,12 +1,25 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import { ArrowUpDown, Ellipsis } from 'lucide-react';
+import {
+    ArrowUpDown,
+    ChevronLeft,
+    ChevronRight,
+    ChevronsLeft,
+    ChevronsRight,
+    ChevronsUpDown,
+    Ellipsis,
+    Filter,
+    SlidersHorizontal,
+} from 'lucide-react';
 import { useState } from 'react';
 import MainLayout from './mainLayout';
 
@@ -25,10 +38,10 @@ interface Operator {
 
 export default function Pending() {
     const [selectedOperator, setSelectedOperator] = useState<Operator | null>(null);
-    const [activeTab, setActiveTab] = useState('vehicleTab');
+    const [selectedItemDD1, setSelectedItemDD1] = useState('All');
+    const [selectedItemDD2, setSelectedItemDD2] = useState('All');
 
     const breadcrumbs: BreadcrumbItem[] = [{ title: 'Pending' }];
-
     const operators: Operator[] = [
         {
             Status: 'Complete',
@@ -89,259 +102,271 @@ export default function Pending() {
         },
     ];
 
-    const vehicles: Vehicles[] = [
-        {
-            Model: 'HiAce Grandia 2020',
-            Brand: 'Toyota',
-            PlateNumber: 'ABC-1234',
-            Seats: 12,
-            OrImage: 'https://ltoportal.net/wp-content/uploads/2024/04/Duplicate-OR-CR.jpg',
-            CrImage: 'https://d1hv7ee95zft1i.cloudfront.net/custom/blog-post-photo/gallery/new-lto-certificate-of-registration-604addbf02645.jpg',
-            IdCard: 12,
-            GpsImage: 'https://shorturl.at/RGaxr',
-            InspectionCertification: 'https://ltoportal.ph/wp-content/uploads/2023/04/LTO-MVIR-Report-Form.jpg',
-            CarFront:
-                'https://d1hv7ee95zft1i.cloudfront.net/custom/blog-post-photo/mobile/gallery/20202-toyota-hiace-gl-grandia-tourer-exterior-front-5e5e1f1a19aad.jpg',
-            CarSideLeft: 'https://toyotasantarosa.com.ph/wp-content/uploads/2023/09/IMG_4267.jpg',
-            CarSideRight: 'https://images.summitmedia-digital.com/topgear/images/2019/12/27/toyota-hiace-styling-1577454694.jpg',
-            CarBack: 'https://images.summitmedia-digital.com/topgear/images/2019/12/27/toyota-hiace-4-1577454701.jpg',
-        },
-        {
-            Model: 'Innova',
-            Brand: 'Toyota',
-            PlateNumber: 'ABC-1234',
-            Seats: 8,
-            OrImage: 'https://ltoportal.net/wp-content/uploads/2024/04/Duplicate-OR-CR.jpg',
-            CrImage: 'https://d1hv7ee95zft1i.cloudfront.net/custom/blog-post-photo/gallery/new-lto-certificate-of-registration-604addbf02645.jpg',
-            IdCard: 8,
-            GpsImage: 'https://shorturl.at/RGaxr',
-            InspectionCertification: 'https://ltoportal.ph/wp-content/uploads/2023/04/LTO-MVIR-Report-Form.jpg',
-            CarFront: 'https://shorturl.at/il6Z5',
-            CarSideLeft: 'https://files.prokerala.com/automobile/images/photo/full/toyota-innova-17/toyota-innova-left-view.jpg',
-            CarSideRight:
-                'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi-Xjwu208Q90uzlaSETz-oyXty0McvH9ohqAUqV6nthqfjg8AWBOBTewjtAPu-2zewN5PYtqYrBDj2OTWuSQnP3mgZuODEpaa7cBm_bBSFWQe9DrSapipDF3wKeA-xOn1knV2R4NKSwqa7/s1600/2012_toyota_innova_04.jpg',
-            CarBack: 'https://www.motoroids.com/wp-content/uploads/2015/04/2015-toyota-Innova-rear-20.jpg',
-        },
-    ];
-
-    const drivers: Driver[] = [
-        {
-            LastName: 'Cortel',
-            FirstName: 'Lance Ruzzell',
-            Birthday: '12/25/1999',
-            Address: '36 Marcelo H. Del Pilar St, Malabon, 1470 Metro Manila',
-            ContactNumber: '09163939373',
-            email: 'lance@alps.com',
-            LicenseNumber: '1897217292',
-            LicenseImg: 'https://img.youtube.com/vi/3PYzRJxMeRc/0.jpg',
-            Photo1x1: 'https://m.media-amazon.com/images/I/61eJzhuJS9L._SX300_CR0%2C0%2C300%2C300_.jpg',
-            NbiClearance: 'https://nbiclearance.org/wp-content/themes/NBI%20Clearance%20V4/img/NBI%20Clearance.png',
-            PoliceClearance: 'https://policeclearanceph.ph/wp-content/uploads/2024/05/police-clearance-sample.webp',
-            BirClearance: 'https://policeclearanceph.ph/wp-content/uploads/2024/05/police-clearance-sample.webp',
-        },
-        {
-            LastName: 'Doria',
-            FirstName: 'Charles Jefferson',
-            Birthday: '10/10/1999',
-            Address: '310 MacArthur Hwy, Valenzuela, Metro Manila',
-            ContactNumber: '09163937890',
-            email: 'charles@nokarin.com',
-            LicenseNumber: '1897217292',
-            LicenseImg: 'https://i.redd.it/3r1pbj2arasc1.jpeg',
-            Photo1x1:
-                'https://preview.redd.it/okarun-mclovin-v0-5ffo9ddswqsd1.png?width=612&format=png&auto=webp&s=c4e25858d73fc581ea5d85a00a03eb7c0067ccaf',
-            NbiClearance: 'https://nbiclearance.org/wp-content/themes/NBI%20Clearance%20V4/img/NBI%20Clearance.png',
-            PoliceClearance: 'https://policeclearanceph.ph/wp-content/uploads/2024/05/police-clearance-sample.webp',
-            BirClearance: 'https://policeclearanceph.ph/wp-content/uploads/2024/05/police-clearance-sample.webp',
-        },
-        {
-            LastName: 'Parayno',
-            FirstName: 'Alexander III',
-            Birthday: '09/11/1945',
-            Address: '223 Cordero St, Valenzuela, Metro Manila',
-            ContactNumber: '09336539323',
-            email: 'parayno@alps.com',
-            LicenseNumber: '6727215678',
-            LicenseImg: 'https://upload.wikimedia.org/wikipedia/commons/6/62/UMID_EMV_sample.png',
-            Photo1x1: 'https://i.pinimg.com/736x/81/1e/cb/811ecb8e1cd31d2d36725bcb6286b0fe.jpg',
-            NbiClearance: 'https://nbiclearance.org/wp-content/themes/NBI%20Clearance%20V4/img/NBI%20Clearance.png',
-            PoliceClearance: 'https://policeclearanceph.ph/wp-content/uploads/2024/05/police-clearance-sample.webp',
-            BirClearance: 'https://policeclearanceph.ph/wp-content/uploads/2024/05/police-clearance-sample.webp',
-        },
-    ];
-
-    const StatusButton = ({ color, text }: { color: 'red' | 'green'; text: string }) => {
+    const StatusButton = ({ color, text, onClick }: { color: 'red' | 'green'; text: string; onClick?: () => void }) => {
         const colorClasses = {
             red: 'border-red-500 text-red-500 hover:bg-red-50',
             green: 'border-green-500 text-green-500 hover:bg-green-50',
         };
-        return <Button className={`rounded-sm border bg-transparent px-4 py-2 text-sm ${colorClasses[color]}`}>{text}</Button>;
+        return (
+            <Button className={`rounded-sm border bg-transparent px-4 py-2 text-sm ${colorClasses[color]}`} onClick={onClick}>
+                {text}
+            </Button>
+        );
     };
 
-    const OperatorInfoSection = ({ operator }: { operator: Operator }) => (
-        <div className="mt-5 rounded-sm border border-gray-300 p-2">
-            <h3 className="ml-2 text-lg font-semibold">Operator Information</h3>
-            <Separator className="my-2" />
-            <div className="grid grid-cols-3 gap-5 p-2">
-                {Object.entries(operator).map(([key, value], index) => (
-                    <div key={key}>
-                        <p className="text-sm text-gray-500">{key.replace(/([A-Z])/g, ' $1').trim()}</p>
-                        <p className="text-base text-black">{value}</p>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
+    // RejectButtonDialog Component
+    const RejectButtonDialog = () => {
+        const handleReject = () => {
+            console.log('Application rejected');
+        };
 
-    const VehicleTabContent = () => (
-        <div className="mt-4">
-            <h4 className="text-lg font-semibold">Vehicles</h4>
-            <div className="grid grid-cols-1 gap-4">
-                {vehicles.map((vehicle, index) => (
-                    <div key={index} className="rounded-sm border border-gray-300 p-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-sm text-gray-500">Model</p>
-                                <p className="text-base text-black">{vehicle.Model}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Brand</p>
-                                <p className="text-base text-black">{vehicle.Brand}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Plate Number</p>
-                                <p className="text-base text-black">{vehicle.PlateNumber}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Seats</p>
-                                <p className="text-base text-black">{vehicle.Seats}</p>
-                            </div>
-                        </div>
-                        <div className="mt-4 grid grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-sm text-gray-500">OR Image</p>
-                                <img src={vehicle.OrImage} alt="OR Image" className="h-32 w-auto rounded-sm" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">CR Image</p>
-                                <img src={vehicle.CrImage} alt="CR Image" className="h-32 w-auto rounded-sm" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">GPS Image</p>
-                                <img src={vehicle.GpsImage} alt="GPS Image" className="h-32 w-auto rounded-sm" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Inspection Certification</p>
-                                <img src={vehicle.InspectionCertification} alt="Inspection Certification" className="h-32 w-auto rounded-sm" />
-                            </div>
-                        </div>
-                        <div className="mt-4 grid grid-cols-4 gap-4">
-                            <div>
-                                <p className="text-sm text-gray-500">Car Front</p>
-                                <img src={vehicle.CarFront} alt="Car Front" className="h-32 w-auto rounded-sm" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Car Side Left</p>
-                                <img src={vehicle.CarSideLeft} alt="Car Side Left" className="h-32 w-auto rounded-sm" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Car Side Right</p>
-                                <img src={vehicle.CarSideRight} alt="Car Side Right" className="h-32 w-auto rounded-sm" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Car Back</p>
-                                <img src={vehicle.CarBack} alt="Car Back" className="h-32 w-auto rounded-sm" />
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-
-    const DriversTabContent = () => (
-        <div className="mt-4">
-            <h4 className="text-lg font-semibold">Drivers</h4>
-            <div className="grid grid-cols-1 gap-4">
-                {drivers.map((driver, index) => (
-                    <div key={index} className="rounded-sm border border-gray-300 p-4">
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-sm text-gray-500">Name</p>
-                                <p className="text-base text-black">{`${driver.FirstName} ${driver.LastName}`}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Contact Number</p>
-                                <p className="text-base text-black">{driver.ContactNumber}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Email</p>
-                                <p className="text-base text-black">{driver.email}</p>
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">License Number</p>
-                                <p className="text-base text-black">{driver.LicenseNumber}</p>
-                            </div>
-                        </div>
-                        <div className="mt-4 grid grid-cols-2 gap-4">
-                            <div>
-                                <p className="text-sm text-gray-500">License Image</p>
-                                <img src={driver.LicenseImg} alt="License Image" className="h-32 w-auto rounded-sm" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">1x1 Photo</p>
-                                <img src={driver.Photo1x1} alt="1x1 Photo" className="h-32 w-auto rounded-sm" />
-                            </div>
-                        </div>
-                        <div className="mt-4 grid grid-cols-3 gap-4">
-                            <div>
-                                <p className="text-sm text-gray-500">NBI Clearance</p>
-                                <img src={driver.NbiClearance} alt="NBI Clearance" className="h-32 w-auto rounded-sm" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">Police Clearance</p>
-                                <img src={driver.PoliceClearance} alt="Police Clearance" className="h-32 w-auto rounded-sm" />
-                            </div>
-                            <div>
-                                <p className="text-sm text-gray-500">BIR Clearance</p>
-                                <img src={driver.BirClearance} alt="BIR Clearance" className="h-32 w-auto rounded-sm" />
-                            </div>
-                        </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-
-    const TabContent = ({ value, title, onPrevious, onNext }: { value: string; title: string; onPrevious: () => void; onNext: () => void }) => (
-        <TabsContent value={value} className="w-full rounded-sm border border-gray-300 p-2">
-            <div className="flex items-center justify-between py-2">
-                <h3 className="ml-2 scroll-m-20 text-lg font-semibold tracking-tight">{title}</h3>
-                <div className="mr-2 flex items-center space-x-2">
+        return (
+            <Dialog>
+                <DialogTrigger asChild>
                     <StatusButton color="red" text="Reject and add notes" />
-                    <StatusButton color="green" text="Approve and generate documents" />
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                    <DialogTitle className="text-lg text-red-500">Reject application</DialogTitle>
+                    <DialogDescription>Are you sure you want to reject this application?</DialogDescription>
+                    <Textarea placeholder="Let them know why you rejected their application. Type your message here." rows={4} />
+                    <DialogFooter className="mt-4">
+                        <DialogClose asChild>
+                            <Button
+                                variant="secondary"
+                                className="border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-600"
+                            >
+                                Cancel
+                            </Button>
+                        </DialogClose>
+                        <Button variant="destructive" onClick={handleReject} className="bg-red-500 text-white hover:bg-red-600">
+                            Reject and send
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        );
+    };
+
+    const ApproveButtonDialog = () => {
+        const handleApprove = () => {
+            // Add logic to handle approval (e.g., send message, update status, etc.)
+            console.log('Application approved');
+        };
+
+        return (
+            <Dialog>
+                <DialogTrigger asChild>
+                    <StatusButton color="green" text="Approve and prompt for payment" />
+                </DialogTrigger>
+                <DialogContent className="max-w-md">
+                    <DialogTitle className="text-lg text-green-500">Approve application</DialogTitle>
+                    <DialogDescription>Success! The billing will be automatically sent to the VR’s mail in a few moments.</DialogDescription>
+
+                    <DialogFooter className="mt-4">
+                        <DialogClose asChild>
+                            <Button
+                                variant="secondary"
+                                className="border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-600"
+                            >
+                                Cancel
+                            </Button>
+                        </DialogClose>
+                        <Button variant="primary" onClick={handleApprove} className="bg-green-500 text-white hover:bg-green-600">
+                            Approve
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+        );
+    };
+
+    const OwnerInfoSection = ({ operator }: { operator: Operator }) => (
+        <div className="mt-5 rounded-sm border border-gray-300 p-2">
+            <h3 className="ml-2 text-lg font-semibold">Owner Information</h3>
+            <p className="ml-2 text-sm text-gray-500">Details of the Company Owner</p>
+            <Separator className="my-2" />
+
+            <div className="m-2">
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="w-full">
+                        <Label>Company Name</Label>
+                        <Input disabled className="w-full" placeholder={operator.vrCompany} />
+                    </div>
+                    <div className="w-full">
+                        <Label>Email</Label>
+                        <Input disabled className="w-full" type="email" placeholder={operator.email} />
+                    </div>
+                </div>
+
+                {/* Name Fields */}
+                <div className="mt-4 grid grid-cols-3 gap-4">
+                    <div>
+                        <Label>Last Name</Label>
+                        <Input disabled placeholder={operator.LastName} />
+                    </div>
+                    <div>
+                        <Label>First Name</Label>
+                        <Input placeholder={operator.FirstName} disabled />
+                    </div>
+                    <div>
+                        <Label>Middle Name</Label>
+                        <Input placeholder={operator.MiddleName} disabled />
+                    </div>
+                </div>
+
+                {/* BirthDate & Contact Number */}
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-3 gap-2">
+                        <div>
+                            <Label>BirthDate</Label>
+                            <Input placeholder="January" disabled />
+                        </div>
+                        <div>
+                            <Label>&nbsp;</Label>
+                            <Input placeholder="1" disabled />
+                        </div>
+                        <div>
+                            <Label>&nbsp;</Label>
+                            <Input placeholder="1987" disabled />
+                        </div>
+                    </div>
+                    <div>
+                        <Label>Contact Number</Label>
+                        <Input placeholder={operator.ContactNumber} disabled />
+                    </div>
+                </div>
+
+                {/* Address */}
+                <div className="mt-4">
+                    <Label>Address</Label>
+                    <Input placeholder={operator.Address} disabled />
                 </div>
             </div>
+        </div>
+    );
+
+    const PreviewButton = () => (
+        <Button
+            variant="outline"
+            className="absolute top-1/2 right-2 h-7 -translate-y-1/2 border border-blue-500 bg-transparent px-10 text-sm text-blue-500 hover:bg-blue-50"
+        >
+            Preview
+        </Button>
+    );
+
+    const CompanyInfoSection = ({ operator }: { operator: Operator }) => (
+        <div className="mt-5 rounded-sm border border-gray-300 p-2">
+            <h3 className="ml-2 text-lg font-semibold">Company Information</h3>
+            <p className="ml-2 text-sm text-gray-500">Details of Vehicle Rental Company Owner</p>
             <Separator className="my-2" />
 
-            {value === 'vehicleTab' ? <VehicleTabContent /> : <DriversTabContent />}
+            <div className="m-2 mt-5">
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="w-full">
+                        <Label>DTI or SEC Permit</Label>
+                        <div className="relative w-full">
+                            <Input disabled className="w-full pr-16" placeholder={operator.vrCompany} />
+                            <PreviewButton />
+                        </div>
+                    </div>
+                    <div className="w-full">
+                        <Label>BIR 2303</Label>
+                        <div className="relative w-full">
+                            <Input disabled className="w-full pr-16" placeholder={operator.Email} />
+                            <PreviewButton />
+                        </div>
+                    </div>
+                </div>
 
-            <div className="mt-4 flex justify-end space-x-3">
-                <Button variant="outline" onClick={onPrevious} className="bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white">
-                    Previous
-                </Button>
-                <Button variant="outline" onClick={onNext} className="bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white">
-                    {value === 'vehicleTab' ? 'Go to Driver' : 'Finish'}
-                </Button>
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                    <div className="w-full">
+                        <Label>Business Permit</Label>
+                        <div className="relative w-full">
+                            <Input disabled className="w-full pr-16" placeholder={operator.ContactNumber} />
+                            <PreviewButton />
+                        </div>
+                    </div>
+                    <div className="w-full">
+                        <Label>Brand Logo</Label>
+                        <div className="relative w-full">
+                            <Input disabled className="w-full pr-16" placeholder={operator.Address} />
+                            <PreviewButton />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                    <div className="w-full">
+                        <Label>Business Permit Number</Label>
+                        <div className="relative w-full">
+                            <Input disabled className="w-full pr-16" placeholder={operator.ContactNumber} />
+                        </div>
+                    </div>
+                    <div className="w-full">
+                        <Label>Samples Sales Invoice</Label>
+                        <div className="relative w-full">
+                            <Input disabled className="w-full pr-16" placeholder={operator.Address} />
+                            <PreviewButton />
+                        </div>
+                    </div>
+                </div>
             </div>
-        </TabsContent>
+        </div>
+    );
+
+    const ContactInfoSection = ({ operator }: { operator: Operator }) => (
+        <div className="mt-5 rounded-sm border border-gray-300 p-2">
+            <h3 className="ml-2 text-lg font-semibold">Contact Information</h3>
+            <p className="ml-2 text-sm text-gray-500">Details of the Organizational hierarchy</p>
+            <Separator className="my-2" />
+
+            <div className="m-2">
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="w-full">
+                        <Label>Company Name</Label>
+                        <Input disabled className="w-full" placeholder={operator.vrCompany} />
+                    </div>
+                    <div className="w-full">
+                        <Label>Email</Label>
+                        <Input disabled className="w-full" placeholder={operator.Email} />
+                    </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-3 gap-4">
+                    <div>
+                        <Label>Last Name</Label>
+                        <Input placeholder={operator.LastName} disabled />
+                    </div>
+                    <div>
+                        <Label>First Name</Label>
+                        <Input placeholder={operator.FirstName} disabled />
+                    </div>
+                    <div>
+                        <Label>Middle Name</Label>
+                        <Input placeholder={operator.MiddleName} disabled />
+                    </div>
+                </div>
+
+                <div className="mt-4 grid grid-cols-2 gap-4">
+                    <div className="w-full">
+                        <Label>Position</Label>
+                        <Input disabled className="w-full" placeholder="Head of Marketing Department" />
+                    </div>
+                    <div className="w-full">
+                        <Label>Contact Number</Label>
+                        <Input disabled className="w-full" placeholder={operator.ContactNumber} />
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
             <Head title="Pending" />
-            <div className="rounded-sm border border-gray-300 p-5">
-                {selectedOperator ? (
+
+            {selectedOperator ? (
+                <div className="rounded-sm border border-gray-300 p-5">
                     <div>
                         <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">Operator Info</h4>
                         <p className="text-sm text-gray-600">Details of Operator Info</p>
@@ -365,40 +390,107 @@ export default function Pending() {
                                 </div>
                             </div>
                             <div className="flex items-center space-x-2">
-                                <StatusButton color="red" text="Reject and add notes" />
-                                <StatusButton color="green" text="Approve and generate documents" />
+                                <RejectButtonDialog />
+                                <ApproveButtonDialog />
                             </div>
                         </div>
-                        <OperatorInfoSection operator={selectedOperator} />
-                        <div className="mx-auto mt-5 flex w-full flex-col items-center">
-                            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                                <div className="flex justify-center">
-                                    <TabsList className="bg-[#2A2A92] text-white">
-                                        <TabsTrigger value="vehicleTab" className="px-20">
-                                            Vehicle
-                                        </TabsTrigger>
-                                        <TabsTrigger value="driversTab" className="px-20">
-                                            Drivers
-                                        </TabsTrigger>
-                                    </TabsList>
-                                </div>
-                                <TabContent
-                                    value="vehicleTab"
-                                    title="Vehicle/Unit"
-                                    onPrevious={() => setSelectedOperator(null)}
-                                    onNext={() => setActiveTab('driversTab')}
-                                />
-                                <TabContent
-                                    value="driversTab"
-                                    title="Drivers"
-                                    onPrevious={() => setActiveTab('vehicleTab')}
-                                    onNext={() => setSelectedOperator(null)}
-                                />
-                            </Tabs>
+
+                        <OwnerInfoSection operator={selectedOperator} />
+
+                        <CompanyInfoSection operator={selectedOperator} />
+
+                        <ContactInfoSection operator={selectedOperator} />
+                    </div>
+                </div>
+            ) : (
+                <>
+                    <div className="ml-5 flex items-center">
+                        <h2 className="text-xl font-semibold">{selectedItemDD1}</h2>
+                        {/*  Sort by ID and Title */}
+                        <div className="ml-auto">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        className="flex w-40 items-center justify-start gap-2 bg-white text-black hover:bg-[#2A2A92] hover:text-white"
+                                    >
+                                        {selectedItemDD1}
+                                        <Filter className="ml-auto h-4 w-4" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent className="w-40">
+                                    <DropdownMenuItem
+                                        onClick={() => {
+                                            setSelectedItemDD1('All');
+                                        }}
+                                    >
+                                        All
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => {
+                                            setSelectedItemDD1('Vehicle Rentals');
+                                        }}
+                                    >
+                                        Vehicle Rentals
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => {
+                                            setSelectedItemDD1('Operators');
+                                        }}
+                                    >
+                                        Operators
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => {
+                                            setSelectedItemDD1('Vehicle');
+                                        }}
+                                    >
+                                        Vehicle
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={() => {
+                                            setSelectedItemDD1('Drivers');
+                                        }}
+                                    >
+                                        Drivers
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
                         </div>
                     </div>
-                ) : (
-                    <>
+                    <div className="rounded-sm border border-gray-300 p-5">
+                        <div className="mb-5 flex items-center space-x-2">
+                            <Input placeholder="Filter application" className="w-60" />
+                            {/* Sort the Header Titles */}
+                            <div className="ml-auto">
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            className="flex items-center justify-start gap-2 bg-white text-black hover:bg-[#2A2A92] hover:text-white"
+                                        >
+                                            <SlidersHorizontal className="h-4 w-4" /> {selectedItemDD2}
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent className="w-40">
+                                        <DropdownMenuItem
+                                            onClick={() => {
+                                                setSelectedItemDD2('Hello');
+                                            }}
+                                        >
+                                            Hello
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => {
+                                                setSelectedItemDD2('World');
+                                            }}
+                                        >
+                                            World
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                        </div>
                         <Table className="w-full rounded-sm border border-gray-300 text-sm">
                             <TableHeader>
                                 <TableRow>
@@ -411,7 +503,7 @@ export default function Pending() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {operators.map((operator, index) => (
+                                {operators.map((operator) => (
                                     <TableRow
                                         key={operator.Email}
                                         className="cursor-pointer transition hover:bg-gray-100"
@@ -446,20 +538,69 @@ export default function Pending() {
                                 ))}
                             </TableBody>
                         </Table>
-                        <div className="mt-5 flex items-center justify-between">
-                            <p className="text-sm text-gray-500">Showing 0 of 5 row(s) selected</p>
-                            <div className="flex justify-end space-x-3">
-                                <Button variant="outline" className="bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white">
-                                    Previous
-                                </Button>
-                                <Button variant="outline" className="bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white">
-                                    Next
-                                </Button>
+
+                        {/* Pagination */}
+                        <div className="mt-2 flex items-center justify-between">
+                            {/* Left Side */}
+                            <p className="text-sm text-gray-500">0 of 100 row(s) selected.</p>
+
+                            {/* Right Side */}
+                            <div className="flex items-center space-x-4">
+                                {/* Rows per page dropdown */}
+                                <div className="flex items-center space-x-2">
+                                    <p className="text-sm">Rows per page</p>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button
+                                                variant="outline"
+                                                className="mr-5 flex w-20 items-center justify-between bg-white text-black hover:bg-[#2A2A92] hover:text-white"
+                                            >
+                                                10 <ChevronsUpDown className="h-4 w-4" />
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent>
+                                            <DropdownMenuItem>10</DropdownMenuItem>
+                                            <DropdownMenuItem>20</DropdownMenuItem>
+                                            <DropdownMenuItem>30</DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
+
+                                {/* Page information */}
+                                <p className="mr-10 text-sm">Page 1 of 10</p>
+
+                                {/* Pagination buttons */}
+                                <div className="flex items-center space-x-2">
+                                    <Button
+                                        variant="outline"
+                                        className="flex items-center justify-center bg-white text-black hover:bg-[#2A2A92] hover:text-white"
+                                    >
+                                        <ChevronsLeft />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="flex items-center justify-center bg-white text-black hover:bg-[#2A2A92] hover:text-white"
+                                    >
+                                        <ChevronLeft />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="flex items-center justify-center bg-white text-black hover:bg-[#2A2A92] hover:text-white"
+                                    >
+                                        <ChevronRight />
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="flex items-center justify-center bg-white text-black hover:bg-[#2A2A92] hover:text-white"
+                                    >
+                                        <ChevronsRight />
+                                    </Button>
+                                </div>
                             </div>
                         </div>
-                    </>
-                )}
-            </div>
+                    </div>
+                </>
+            )}
         </MainLayout>
     );
 }
