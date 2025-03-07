@@ -21,7 +21,9 @@ export default function Registration({
     console.log('selected' + selectedCompanyId);
 
     // Breadcrumbs with onClick navigation
+    const breadcrumbs = [
         { label: activeTab.replace('-', ' ').toUpperCase(), title: activeTab.replace('-', ' ').toUpperCase(), href: '#', onClick: () => {} },
+    ];
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>

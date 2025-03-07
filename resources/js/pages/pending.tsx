@@ -1,12 +1,8 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogClose, DialogContent, DialogDescription, DialogFooter, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Textarea } from '@/components/ui/textarea';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import {
@@ -22,6 +18,31 @@ import {
 } from 'lucide-react';
 import { useState } from 'react';
 import MainLayout from './mainLayout';
+import { OperatorDetails } from './pending-operator-details';
+
+interface Owner {
+    LastName: string;
+    FirstName: string;
+    Address: string;
+    BirthDate: string;
+    ContactNumber: string;
+    Email: string;
+}
+
+interface VR {
+    BusinessPermit: media;
+    BusinessPermitNumber: string;
+    CompanyName: string;
+    BIR_2303: media;
+    DTI_Permit: media;
+    BrandLogo: media;
+    SalesInvoice: media;
+    FirstName: string;
+    LastName: string;
+    Position: string;
+    ContactNumber: string;
+    Email: string;
+}
 
 interface Operator {
     Status: string;
@@ -42,8 +63,10 @@ export default function Pending() {
     const [selectedItemDD2, setSelectedItemDD2] = useState('All');
 
     const breadcrumbs: BreadcrumbItem[] = [{ title: 'Pending' }];
+
     const operators: Operator[] = [
         {
+            VR_ID: 1,
             Status: 'Complete',
             vrCompany: 'Nokarin',
             LastName: 'Co Young',
@@ -56,6 +79,7 @@ export default function Pending() {
             Email: 'coyoung@nokarin.com',
         },
         {
+            VR_ID: 2,
             Status: 'Complete',
             vrCompany: 'Nokarin',
             LastName: 'Latko',
@@ -68,6 +92,7 @@ export default function Pending() {
             Email: 'latko@nokarin.com',
         },
         {
+            VR_ID: 1,
             Status: 'Pending',
             vrCompany: 'Alps',
             LastName: 'Owako',
@@ -79,17 +104,19 @@ export default function Pending() {
             Email: 'owako@alps.com',
         },
         {
+            VR_ID: 1,
             Status: 'Pending',
-            vrCompany: 'Victory',
+            vrCompany: 'Alps',
             LastName: 'Kalbo',
             FirstName: 'Allen',
             DateApplied: '2024-04-05',
             Birthdate: '12/30/1984',
             Address: 'BB Fisher Mall Malabon #23 Batumbakal Street',
             ContactNumber: '09163939373',
-            Email: 'kalbo@victory.com',
+            Email: 'kalbo@alps.com',
         },
         {
+            VR_ID: 1,
             Status: 'Rejected',
             vrCompany: 'Alps',
             LastName: 'James III',
@@ -102,334 +129,86 @@ export default function Pending() {
         },
     ];
 
-    const StatusButton = ({ color, text, onClick }: { color: 'red' | 'green'; text: string; onClick?: () => void }) => {
-        const colorClasses = {
-            red: 'border-red-500 text-red-500 hover:bg-red-50',
-            green: 'border-green-500 text-green-500 hover:bg-green-50',
-        };
-        return (
-            <Button className={`rounded-sm border bg-transparent px-4 py-2 text-sm ${colorClasses[color]}`} onClick={onClick}>
-                {text}
-            </Button>
-        );
-    };
+    const owners: Owner[] = [
+        {
+            VR_ID: 1,
+            LastName: 'Laxamana',
+            FirstName: 'Justin',
+            Address: 'BB Fisher Mall Malabon #23 Batumbakal Street',
+            BirthDate: '12/30/1984',
+            ContactNumber: '09163939373',
+            Email: 'kalbo@victory.com',
+        },
+        {
+            VR_ID: 2,
+            LastName: 'Aquino',
+            FirstName: 'Crystal Kate',
+            Address: 'BB Fisher Mall Malabon #23 Batumbakal Street',
+            BirthDate: '12/30/2002',
+            ContactNumber: '09163939373',
+            Email: 'aquino@nokarin.com',
+        },
+    ];
 
-    // RejectButtonDialog Component
-    const RejectButtonDialog = () => {
-        const handleReject = () => {
-            console.log('Application rejected');
-        };
-
-        return (
-            <Dialog>
-                <DialogTrigger asChild>
-                    <StatusButton color="red" text="Reject and add notes" />
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                    <DialogTitle className="text-lg text-red-500">Reject application</DialogTitle>
-                    <DialogDescription>Are you sure you want to reject this application?</DialogDescription>
-                    <Textarea placeholder="Let them know why you rejected their application. Type your message here." rows={4} />
-                    <DialogFooter className="mt-4">
-                        <DialogClose asChild>
-                            <Button
-                                variant="secondary"
-                                className="border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-600"
-                            >
-                                Cancel
-                            </Button>
-                        </DialogClose>
-                        <Button variant="destructive" onClick={handleReject} className="bg-red-500 text-white hover:bg-red-600">
-                            Reject and send
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        );
-    };
-
-    const ApproveButtonDialog = () => {
-        const handleApprove = () => {
-            // Add logic to handle approval (e.g., send message, update status, etc.)
-            console.log('Application approved');
-        };
-
-        return (
-            <Dialog>
-                <DialogTrigger asChild>
-                    <StatusButton color="green" text="Approve and prompt for payment" />
-                </DialogTrigger>
-                <DialogContent className="max-w-md">
-                    <DialogTitle className="text-lg text-green-500">Approve application</DialogTitle>
-                    <DialogDescription>Success! The billing will be automatically sent to the VR’s mail in a few moments.</DialogDescription>
-
-                    <DialogFooter className="mt-4">
-                        <DialogClose asChild>
-                            <Button
-                                variant="secondary"
-                                className="border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-600"
-                            >
-                                Cancel
-                            </Button>
-                        </DialogClose>
-                        <Button variant="primary" onClick={handleApprove} className="bg-green-500 text-white hover:bg-green-600">
-                            Approve
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        );
-    };
-
-    const OwnerInfoSection = ({ operator }: { operator: Operator }) => (
-        <div className="mt-5 rounded-sm border border-gray-300 p-2">
-            <h3 className="ml-2 text-lg font-semibold">Owner Information</h3>
-            <p className="ml-2 text-sm text-gray-500">Details of the Company Owner</p>
-            <Separator className="my-2" />
-
-            <div className="m-2">
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="w-full">
-                        <Label>Company Name</Label>
-                        <Input disabled className="w-full" placeholder={operator.vrCompany} />
-                    </div>
-                    <div className="w-full">
-                        <Label>Email</Label>
-                        <Input disabled className="w-full" type="email" placeholder={operator.email} />
-                    </div>
-                </div>
-
-                {/* Name Fields */}
-                <div className="mt-4 grid grid-cols-3 gap-4">
-                    <div>
-                        <Label>Last Name</Label>
-                        <Input disabled placeholder={operator.LastName} />
-                    </div>
-                    <div>
-                        <Label>First Name</Label>
-                        <Input placeholder={operator.FirstName} disabled />
-                    </div>
-                    <div>
-                        <Label>Middle Name</Label>
-                        <Input placeholder={operator.MiddleName} disabled />
-                    </div>
-                </div>
-
-                {/* BirthDate & Contact Number */}
-                <div className="mt-4 grid grid-cols-2 gap-4">
-                    <div className="grid grid-cols-3 gap-2">
-                        <div>
-                            <Label>BirthDate</Label>
-                            <Input placeholder="January" disabled />
-                        </div>
-                        <div>
-                            <Label>&nbsp;</Label>
-                            <Input placeholder="1" disabled />
-                        </div>
-                        <div>
-                            <Label>&nbsp;</Label>
-                            <Input placeholder="1987" disabled />
-                        </div>
-                    </div>
-                    <div>
-                        <Label>Contact Number</Label>
-                        <Input placeholder={operator.ContactNumber} disabled />
-                    </div>
-                </div>
-
-                {/* Address */}
-                <div className="mt-4">
-                    <Label>Address</Label>
-                    <Input placeholder={operator.Address} disabled />
-                </div>
-            </div>
-        </div>
-    );
-
-    const PreviewButton = ({ imageUrl }: { imageUrl: string }) => {
-        return (
-            <Dialog>
-                <DialogTrigger asChild>
-                    <Button
-                        variant="outline"
-                        className="absolute top-1/2 right-2 h-7 -translate-y-1/2 border border-blue-500 bg-transparent px-10 text-sm text-blue-500 hover:bg-blue-50"
-                    >
-                        Preview
-                    </Button>
-                </DialogTrigger>
-                <DialogContent className="max-w-2xl">
-                    <DialogTitle className="text-lg font-semibold">Image Preview</DialogTitle>
-                    <DialogDescription>Here is the preview of the image.</DialogDescription>
-                    <div className="mt-2 flex items-center justify-center">
-                        <img src={imageUrl} alt="Preview" className="h-auto max-h-[400px] w-auto max-w-[400px] rounded-lg" />
-                    </div>
-                    <DialogFooter className="mt-4">
-                        <DialogClose asChild>
-                            <Button
-                                variant="secondary"
-                                className="border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-600"
-                            >
-                                Close
-                            </Button>
-                        </DialogClose>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        );
-    };
-
-    const CompanyInfoSection = ({ operator }: { operator: Operator }) => (
-        <div className="mt-5 rounded-sm border border-gray-300 p-2">
-            <h3 className="ml-2 text-lg font-semibold">Company Information</h3>
-            <p className="ml-2 text-sm text-gray-500">Details of Vehicle Rental Company Owner</p>
-            <Separator className="my-2" />
-
-            <div className="m-2 mt-5">
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="w-full">
-                        <Label>DTI or SEC Permit</Label>
-                        <div className="relative w-full">
-                            <Input disabled className="w-full pr-16" placeholder={operator.vrCompany} />
-                            <PreviewButton imageUrl="https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png" />
-                        </div>
-                    </div>
-                    <div className="w-full">
-                        <Label>BIR 2303</Label>
-                        <div className="relative w-full">
-                            <Input disabled className="w-full pr-16" placeholder={operator.Email} />
-                            <PreviewButton imageUrl="https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png" />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mt-4 grid grid-cols-2 gap-4">
-                    <div className="w-full">
-                        <Label>Business Permit</Label>
-                        <div className="relative w-full">
-                            <Input disabled className="w-full pr-16" placeholder={operator.ContactNumber} />
-                            <PreviewButton imageUrl="https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png" />
-                        </div>
-                    </div>
-                    <div className="w-full">
-                        <Label>Brand Logo</Label>
-                        <div className="relative w-full">
-                            <Input disabled className="w-full pr-16" placeholder={operator.Address} />
-                            <PreviewButton imageUrl="https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png" />
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mt-4 grid grid-cols-2 gap-4">
-                    <div className="w-full">
-                        <Label>Business Permit Number</Label>
-                        <div className="relative w-full">
-                            <Input disabled className="w-full pr-16" placeholder={operator.ContactNumber} />
-                        </div>
-                    </div>
-                    <div className="w-full">
-                        <Label>Samples Sales Invoice</Label>
-                        <div className="relative w-full">
-                            <Input disabled className="w-full pr-16" placeholder={operator.Address} />
-                            <PreviewButton imageUrl="https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-
-    const ContactInfoSection = ({ operator }: { operator: Operator }) => (
-        <div className="mt-5 rounded-sm border border-gray-300 p-2">
-            <h3 className="ml-2 text-lg font-semibold">Contact Information</h3>
-            <p className="ml-2 text-sm text-gray-500">Details of the Organizational hierarchy</p>
-            <Separator className="my-2" />
-
-            <div className="m-2">
-                <div className="grid grid-cols-2 gap-4">
-                    <div className="w-full">
-                        <Label>Company Name</Label>
-                        <Input disabled className="w-full" placeholder={operator.vrCompany} />
-                    </div>
-                    <div className="w-full">
-                        <Label>Email</Label>
-                        <Input disabled className="w-full" placeholder={operator.Email} />
-                    </div>
-                </div>
-
-                <div className="mt-4 grid grid-cols-3 gap-4">
-                    <div>
-                        <Label>Last Name</Label>
-                        <Input placeholder={operator.LastName} disabled />
-                    </div>
-                    <div>
-                        <Label>First Name</Label>
-                        <Input placeholder={operator.FirstName} disabled />
-                    </div>
-                    <div>
-                        <Label>Middle Name</Label>
-                        <Input placeholder={operator.MiddleName} disabled />
-                    </div>
-                </div>
-
-                <div className="mt-4 grid grid-cols-2 gap-4">
-                    <div className="w-full">
-                        <Label>Position</Label>
-                        <Input disabled className="w-full" placeholder="Head of Marketing Department" />
-                    </div>
-                    <div className="w-full">
-                        <Label>Contact Number</Label>
-                        <Input disabled className="w-full" placeholder={operator.ContactNumber} />
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
+    const vrs: VR[] = [
+        {
+            VR_ID: 1,
+            BusinessPermit:
+                'https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png',
+            BusinessPermitNumber: '123456789',
+            CompanyName: 'Nokarin',
+            BIR_2303:
+                'https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png',
+            DTI_Permit:
+                'https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png',
+            BrandLogo:
+                'https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png',
+            SalesInvoice:
+                'https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png',
+            FirstName: 'Sue',
+            LastName: 'Co Young',
+            MiddleName: 'B',
+            Position: 'CEO',
+            ContactNumber: '09163939373',
+            Email: 'coyoung@nokarin.com',
+        },
+        {
+            VR_ID: 2,
+            BusinessPermit:
+                'https://preview.redd.it/no-spoilers-give-me-your-arcane-memes-and-i-shall-giveth-v0-xietz7vij81e1.jpeg?width=640&crop=smart&auto=webp&s=a14e22f16d97fc5426767364b1e64fd44e3065be0',
+            BusinessPermitNumber: '123456789',
+            CompanyName: 'Alps',
+            BIR_2303:
+                'https://preview.redd.it/no-spoilers-give-me-your-arcane-memes-and-i-shall-giveth-v0-xietz7vij81e1.jpeg?width=640&crop=smart&auto=webp&s=a14e22f16d97fc5426767364b1e64fd44e3065be',
+            DTI_Permit:
+                'https://preview.redd.it/no-spoilers-give-me-your-arcane-memes-and-i-shall-giveth-v0-xietz7vij81e1.jpeg?width=640&crop=smart&auto=webp&s=a14e22f16d97fc5426767364b1e64fd44e3065be',
+            BrandLogo:
+                'https://preview.redd.it/no-spoilers-give-me-your-arcane-memes-and-i-shall-giveth-v0-xietz7vij81e1.jpeg?width=640&crop=smart&auto=webp&s=a14e22f16d97fc5426767364b1e64fd44e3065be',
+            SalesInvoice:
+                'https://preview.redd.it/no-spoilers-give-me-your-arcane-memes-and-i-shall-giveth-v0-xietz7vij81e1.jpeg?width=640&crop=smart&auto=webp&s=a14e22f16d97fc5426767364b1e64fd44e3065be ',
+            FirstName: 'Bob',
+            LastName: 'Owako',
+            Position: 'CEO',
+            ContactNumber: '09163939373',
+            Email: 'owako@alps.com',
+        },
+    ];
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
             <Head title="Pending" />
 
             {selectedOperator ? (
-                <div className="rounded-sm border border-gray-300 p-5">
-                    <div>
-                        <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">Operator Info</h4>
-                        <p className="text-sm text-gray-600">Details of Operator Info</p>
-                        <div className="mt-3 flex items-center justify-between space-x-5 rounded-sm border border-gray-300 p-5">
-                            <div className="flex space-x-4">
-                                <Avatar className="h-25 w-25 rounded-sm border border-gray-300">
-                                    <AvatarImage
-                                        src="https://ih1.redbubble.net/image.5497566438.4165/bg,f8f8f8-flat,750x,075,f-pad,750x1000,f8f8f8.jpg"
-                                        alt="AvatarProfile"
-                                    />
-                                    <AvatarFallback className="rounded-lg bg-neutral-200 text-5xl text-black dark:bg-neutral-700 dark:text-white">
-                                        {selectedOperator.FirstName?.charAt(0)}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div className="flex flex-col leading-tight">
-                                    <h2 className="font-bold">
-                                        {selectedOperator.FirstName} {selectedOperator.MiddleName ? selectedOperator.MiddleName + ' ' : ''}
-                                        {selectedOperator.LastName}
-                                    </h2>
-                                    <p className="text-sm text-gray-600">Operator</p>
-                                </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <RejectButtonDialog />
-                                <ApproveButtonDialog />
-                            </div>
-                        </div>
-
-                        <OwnerInfoSection operator={selectedOperator} />
-
-                        <CompanyInfoSection operator={selectedOperator} />
-
-                        <ContactInfoSection operator={selectedOperator} />
-                    </div>
-                </div>
+                <OperatorDetails
+                    operator={selectedOperator}
+                    onBack={() => setSelectedOperator(null)}
+                    vr={vrs.find((vr) => vr.CompanyName === selectedOperator.vrCompany) || null}
+                    owner={owners.find((owner) => owner.VR_ID === vrs.find((vr) => vr.CompanyName === selectedOperator.vrCompany)?.VR_ID) || null}
+                />
             ) : (
                 <>
                     <div className="ml-5 flex items-center">
-                        <h2 className="text-xl font-semibold">{selectedItemDD1}</h2>
-                        {/*  Sort by ID and Title */}
+                        <h2 className="text-xl font-semibold">{selectedItemDD1} - (Still not functional)</h2>
                         <div className="ml-auto">
                             <DropdownMenu>
                                 <DropdownMenuTrigger asChild>
@@ -442,41 +221,11 @@ export default function Pending() {
                                     </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent className="w-40">
-                                    <DropdownMenuItem
-                                        onClick={() => {
-                                            setSelectedItemDD1('All');
-                                        }}
-                                    >
-                                        All
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        onClick={() => {
-                                            setSelectedItemDD1('Vehicle Rentals');
-                                        }}
-                                    >
-                                        Vehicle Rentals
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        onClick={() => {
-                                            setSelectedItemDD1('Operators');
-                                        }}
-                                    >
-                                        Operators
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        onClick={() => {
-                                            setSelectedItemDD1('Vehicle');
-                                        }}
-                                    >
-                                        Vehicle
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                        onClick={() => {
-                                            setSelectedItemDD1('Drivers');
-                                        }}
-                                    >
-                                        Drivers
-                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSelectedItemDD1('All')}>All</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSelectedItemDD1('Vehicle Rentals')}>Vehicle Rentals</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSelectedItemDD1('Operators')}>Operators</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSelectedItemDD1('Vehicle')}>Vehicle</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => setSelectedItemDD1('Drivers')}>Drivers</DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         </div>
@@ -484,7 +233,6 @@ export default function Pending() {
                     <div className="rounded-sm border border-gray-300 p-5">
                         <div className="mb-5 flex items-center space-x-2">
                             <Input placeholder="Filter application" className="w-60" />
-                            {/* Sort the Header Titles */}
                             <div className="ml-auto">
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild>
@@ -496,20 +244,8 @@ export default function Pending() {
                                         </Button>
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent className="w-40">
-                                        <DropdownMenuItem
-                                            onClick={() => {
-                                                setSelectedItemDD2('Hello');
-                                            }}
-                                        >
-                                            Hello
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                            onClick={() => {
-                                                setSelectedItemDD2('World');
-                                            }}
-                                        >
-                                            World
-                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setSelectedItemDD2('Hello')}>Hello</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => setSelectedItemDD2('World')}>World</DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
@@ -562,14 +298,10 @@ export default function Pending() {
                             </TableBody>
                         </Table>
 
-                        {/* Pagination */}
                         <div className="mt-2 flex items-center justify-between">
-                            {/* Left Side */}
                             <p className="text-sm text-gray-500">0 of 100 row(s) selected.</p>
 
-                            {/* Right Side */}
                             <div className="flex items-center space-x-4">
-                                {/* Rows per page dropdown */}
                                 <div className="flex items-center space-x-2">
                                     <p className="text-sm">Rows per page</p>
                                     <DropdownMenu>
@@ -589,10 +321,8 @@ export default function Pending() {
                                     </DropdownMenu>
                                 </div>
 
-                                {/* Page information */}
                                 <p className="mr-10 text-sm">Page 1 of 10</p>
 
-                                {/* Pagination buttons */}
                                 <div className="flex items-center space-x-2">
                                     <Button
                                         variant="outline"

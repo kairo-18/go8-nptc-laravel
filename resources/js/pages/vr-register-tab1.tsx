@@ -22,8 +22,7 @@ const TemporaryAccountTabContent = () => {
     const [isAppIdCopied, setIsAppIdCopied] = useState(false);
     const [generatedPassword, setGeneratedPassword] = useState('pass@123');
     const [email, setEmail] = useState('');
-    const [isDialogOpen, setIsDialogOpen] = useState(false); // State to control dialog visibility
-    const generatedApplicationId = 'app-456';
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     // Manage form state with useState
     const [values, setValues] = useState({
@@ -86,17 +85,7 @@ const TemporaryAccountTabContent = () => {
                             onChange={handleChange}
                         />
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Username</label>
-                        <input
-                            id="username"
-                            type="text"
-                            placeholder="Enter username"
-                            className="mt-1 block w-full rounded-md border border-gray-300 p-2"
-                            value={values.username}
-                            onChange={handleChange}
-                        />
-                    </div>
+
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Middle Name</label>
                         <input
@@ -140,6 +129,7 @@ const TemporaryAccountTabContent = () => {
                             />
                         </div>
                     </div>
+
                     <div className="col-span-2">
                         <label className="block text-sm font-medium text-gray-700">Email</label>
                         <input
@@ -154,6 +144,17 @@ const TemporaryAccountTabContent = () => {
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700">Username</label>
+                        <input
+                            id="username"
+                            type="text"
+                            placeholder="Enter username"
+                            className="mt-1 block w-full rounded-md border border-gray-300 p-2"
+                            value={values.username}
+                            onChange={handleChange}
+                        />
+                    </div>
                     <div>
                         <label className="block text-sm font-medium text-gray-700">Default Password</label>
                         <input
@@ -182,7 +183,7 @@ const TemporaryAccountTabContent = () => {
                                 <span className="ml-2 text-gray-500">Email</span>
                                 <span className="text-black"> {email}</span>
                             </p>
-                            <CopyButton text={email} isCopied={isAppIdCopied} setIsAppIdCopied={setIsAppIdCopied} />
+                            <CopyButton text={email} isCopied={isAppIdCopied} setIsCopied={setIsAppIdCopied} />
                         </div>
                         <div className="flex items-center justify-between rounded border border-gray-300 p-2">
                             <div className="flex-1">
