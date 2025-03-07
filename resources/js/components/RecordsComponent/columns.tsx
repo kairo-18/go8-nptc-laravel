@@ -103,7 +103,14 @@ export const generateColumns = (
 
                             {entityType === 'companies' ? (
                                 <>
-                                    <DropdownMenuItem onClick={() => alert(`Editing Company: ${data.CompanyName}`)}>Edit Company</DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            alert(`Editing Company: ${data.CompanyName}`);
+                                        }}
+                                    >
+                                        Edit Company
+                                    </DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                         onClick={(e) => {

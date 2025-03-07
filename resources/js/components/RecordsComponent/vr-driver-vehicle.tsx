@@ -10,11 +10,18 @@ interface DriverProps {
 }
 
 export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverProps) {
+    const formatHeader = (key) =>
+        key
+            .replace(/_count$/, '') // Remove "_count" suffix
+            .replace(/^vr_/, 'VR ') // Replace "vr_" prefix with "VR "
+            .replace(/_/g, ' ') // Replace underscores with spaces
+            .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize each word
+
     const driverHeaders =
         drivers.length > 0
             ? Object.keys(drivers[0]).map((key) => ({
                   key,
-                  label: key.replace(/([A-Z])/g, ' $1').trim(),
+                  label: formatHeader(key),
               }))
             : [];
 
@@ -22,7 +29,7 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
         vehicles.length > 0
             ? Object.keys(vehicles[0]).map((key) => ({
                   key,
-                  label: key.replace(/([A-Z])/g, ' $1').trim(),
+                  label: formatHeader(key),
               }))
             : [];
 
