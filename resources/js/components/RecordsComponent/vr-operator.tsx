@@ -5,6 +5,7 @@ import { DataTable } from './data-table';
 export default function Operator({ operators, onNextTab }) {
     const [operatorData, setOperatorData] = useState([]);
     const [operatorHeaders, setOperatorHeaders] = useState<{ key: string; label: string }[]>([]);
+    console.log('Operators' + operators);
 
     useEffect(() => {
         // Simulate fetching operator data (replace with actual API call if needed)

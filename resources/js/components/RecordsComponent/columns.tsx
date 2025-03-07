@@ -24,9 +24,10 @@ export const generateColumns = (
         statusColumns?: string[];
         actions?: boolean;
         entityType?: 'companies' | 'operators';
+        onViewFiles?: (company: any) => void; // <-- New callback function
     },
 ): ColumnDef<DataRow>[] => {
-    const { sortableColumns = [], statusColumns = [], actions = true, entityType } = options || {};
+    const { sortableColumns = [], statusColumns = [], actions = true, entityType, onViewFiles } = options || {};
 
     console.log('Status Columns Config:', statusColumns); // Debugging
 
@@ -109,10 +110,13 @@ export const generateColumns = (
                                     <DropdownMenuItem onClick={() => alert(`Editing Company: ${data.CompanyName}`)}>Edit Company</DropdownMenuItem>
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem
-                                        onClick={() => alert(`Removing Company: ${data.CompanyName}`)}
-                                        className="bg-red-500 text-white hover:bg-red-600"
+                                        onClick={(e) => {
+                                            e.stopPropagation(); // Prevents triggering row click
+                                            onViewFiles?.(data);
+                                        }}
+                                        className="cursor-pointer"
                                     >
-                                        Remove Company
+                                        View Files
                                     </DropdownMenuItem>
                                 </>
                             ) : entityType === 'operators' ? (
