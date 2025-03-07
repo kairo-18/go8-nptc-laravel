@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\VRAdminController;
+use App\Http\Controllers\VrContactsController;
+use App\Http\Controllers\VRCompanyController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\NptcAdminController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -19,5 +22,13 @@ Route::post('temp-registration', [RegisteredUserController::class, 'storeTempAcc
                     );
                 }
             )->name('registration');
+
+            Route::patch('vr-admins.update', [VRAdminController::class, 'update'])->name('vr-admins.update');
+            Route::patch('vr-company.update', [VRCompanyController::class, 'update'])
+                ->name('vr-company.update');
+            Route::post('vr-company.upload-files', [VRCompanyController::class, 'uploadMedia'])->name('vr-company.upload-files');
+
+            Route::patch('vr-contacts.update', [VrContactsController::class, 'update'])->name('vr-contacts.update');
+            Route::patch('vr-contacts.update-multiple', [VrContactsController::class, 'updateMultiple'])->name('vr-contacts.update-multiple');
         }
     );
