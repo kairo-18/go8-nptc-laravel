@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\VRCompanyController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
