@@ -23,4 +23,8 @@ class Operator extends Model
     public function vehicles(){
         return $this->hasMany(Vehicle::class);
     }
+
+    public function driver(){
+        return $this->hasMany(Driver::class);
+    }
 }

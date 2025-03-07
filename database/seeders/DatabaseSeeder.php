@@ -8,6 +8,7 @@ use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use App\Models\VRCompany;
 use App\Models\VrContacts;
+use App\Models\Vehicle;
 use Database\Factories\VrCompanyFactory;
 
 /**
@@ -62,19 +63,7 @@ class DatabaseSeeder extends Seeder
 
 
         $user2->assignRole("NPTC Admin");
-
-        if ($user2->hasRole("Driver")) {
-            $user2->driver()->create(
-                [
-                'License' => 'path/to/license',
-                'LicenseNumber' => '1234567890',
-                'Photo' => 'path/to/photo',
-                'NBI_clearance' => 'path/to/nbi',
-                'Police_clearance' => 'path/to/police',
-                'BIR_clearance' => 'path/to/bir',
-                ]
-            );
-        }
+        
 
         VRCompany::factory()->create(
             [
@@ -105,6 +94,50 @@ class DatabaseSeeder extends Seeder
             'Status' => 'Approved'
             ]
         );
+
+        $user4 = User::factory()->create([
+            'username' => 'Driver1',
+            'email' => 'driver1@example.com',
+            'FirstName' => 'Driver',
+            'LastName' => 'One',
+            'Address' => 'Test Address',
+            'BirthDate' => '2000-01-01',
+            'ContactNumber' => '09123456789',
+        ]);
+        $user4->assignRole("Driver");
+
+        Vehicle::create([
+            'operator_id' => 1, 
+            'PlateNumber' => 'ABC1234',
+            'Model' => 'Toyota Corolla',
+            'Brand' => 'Toyota',
+            'SeatNumber' => 4,
+            'Status' => 'Approved'
+        ]);
+
+        Vehicle::create([
+            'operator_id' => 1,
+            'PlateNumber' => 'XYZ5678',
+            'Model' => 'Honda Civic',
+            'Brand' => 'Honda',
+            'SeatNumber' => 5,
+            'Status' => 'Pending'
+        ]);
+
+            $user4->driver()->create([
+                'operator_id' => 1, 
+                'vr_company_id' => 1, 
+                'vehicle_id'=> 1,
+                'License' => 'path/to/license',
+                'LicenseNumber' => '1234567890',
+                'Photo' => 'path/to/photo',
+                'NBI_clearance' => 'path/to/nbi',
+                'Police_clearance' => 'path/to/police',
+                'BIR_clearance' => 'path/to/bir',
+            ]);
+        
+            
+       
 
 
     }

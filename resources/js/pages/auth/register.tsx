@@ -39,7 +39,9 @@ export default function Register() {
         post(route('register'), {
             onFinish: () => reset('password', 'password_confirmation'),
         });
-    };
+    }; 
+    ']'
+    
 
     return (
         <AuthLayout title="Create an account" description="Enter your details below to create your account">
