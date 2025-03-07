@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { generateColumns } from './columns'; // Import dynamic column generator
 import { DataTable } from './data-table';
 
-export default function Operator({ operators, onNextTab }) {
+export default function Operator({ operators, onNextTab, onSelectOperator }) {
+    const [selectedOperator, setSelectedOperator] = useState(null);
+
     const [operatorData, setOperatorData] = useState([]);
     const [operatorHeaders, setOperatorHeaders] = useState<{ key: string; label: string }[]>([]);
     console.log('Operators' + operators);
@@ -23,5 +25,5 @@ export default function Operator({ operators, onNextTab }) {
 
     const columns = generateColumns(operatorHeaders, { entityType: 'operators' });
 
-    return <DataTable data={operatorData} columns={columns} />;
+    return <DataTable data={operatorData} ColumnFilterName="FirstName" columns={columns} onRowClick={(row) => onSelectOperator(row.id)} />;
 }

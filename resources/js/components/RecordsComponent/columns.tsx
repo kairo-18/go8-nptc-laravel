@@ -29,8 +29,6 @@ export const generateColumns = (
 ): ColumnDef<DataRow>[] => {
     const { sortableColumns = [], statusColumns = [], actions = true, entityType, onViewFiles } = options || {};
 
-    console.log('Status Columns Config:', statusColumns); // Debugging
-
     const dynamicColumns: ColumnDef<DataRow>[] = headers.map(({ key, label }) => ({
         id: key,
         accessorKey: key,
@@ -48,8 +46,6 @@ export const generateColumns = (
         cell: ({ row }) => {
             const rawValue = row.getValue(key);
             const value = String(rawValue || '').trim(); // Ensure it's a string
-
-            console.log(`Row Value for ${key}:`, value); // Debugging
 
             if (statusColumns.includes(key)) {
                 const statusColors: Record<string, string> = {

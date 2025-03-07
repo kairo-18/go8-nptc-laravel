@@ -63,7 +63,7 @@ class DatabaseSeeder extends Seeder
 
 
         $user2->assignRole("NPTC Admin");
-        
+
 
         VRCompany::factory()->create(
             [
@@ -107,7 +107,7 @@ class DatabaseSeeder extends Seeder
         $user4->assignRole("Driver");
 
         Vehicle::create([
-            'operator_id' => 1, 
+            'operator_id' => 1,
             'PlateNumber' => 'ABC1234',
             'Model' => 'Toyota Corolla',
             'Brand' => 'Toyota',
@@ -124,20 +124,20 @@ class DatabaseSeeder extends Seeder
             'Status' => 'Pending'
         ]);
 
-            $user4->driver()->create([
-                'operator_id' => 1, 
-                'vr_company_id' => 1, 
-                'vehicle_id'=> 1,
-                'License' => 'path/to/license',
-                'LicenseNumber' => '1234567890',
-                'Photo' => 'path/to/photo',
-                'NBI_clearance' => 'path/to/nbi',
-                'Police_clearance' => 'path/to/police',
-                'BIR_clearance' => 'path/to/bir',
-            ]);
-        
-            
-       
+        $user4->driver()->create([
+            'operator_id' => 1,
+            'vr_company_id' => 1,
+            'vehicle_id'=> 1,
+            'License' => 'path/to/license',
+            'LicenseNumber' => '1234567890',
+            'Photo' => 'path/to/photo',
+            'NBI_clearance' => 'path/to/nbi',
+            'Police_clearance' => 'path/to/police',
+            'BIR_clearance' => 'path/to/bir',
+        ]);
+
+
+
 
 
     }

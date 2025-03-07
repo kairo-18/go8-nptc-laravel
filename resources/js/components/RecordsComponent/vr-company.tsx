@@ -34,7 +34,7 @@ export default function Company({ companies, companiesWithMedia, onSelectCompany
 
     return (
         <>
-            <DataTable data={companies} columns={columns} onRowClick={(row) => onSelectCompany(row.id)} />
+            <DataTable data={companies} columns={columns} ColumnFilterName="CompanyName" onRowClick={(row) => onSelectCompany(row.id)} />
 
             <CompanyFiles selectedCompany={selectedCompany} companiesWithMedia={companiesWithMedia} open={open} setOpen={setOpen} />
         </>
