@@ -7,7 +7,6 @@ export default function Operator({ operators, onNextTab, onSelectOperator }) {
 
     const [operatorData, setOperatorData] = useState([]);
     const [operatorHeaders, setOperatorHeaders] = useState<{ key: string; label: string }[]>([]);
-    console.log('Operators' + operators);
 
     useEffect(() => {
         // Simulate fetching operator data (replace with actual API call if needed)
@@ -17,13 +16,18 @@ export default function Operator({ operators, onNextTab, onSelectOperator }) {
         if (operators.length > 0) {
             const headers = Object.keys(operators[0]).map((key) => ({
                 key,
-                label: key.charAt(0).toUpperCase() + key.slice(1), // Capitalize the label
+                label: key
+                    .replace(/_count$/, '') // Remove "_count" suffix
+                    .replace(/^vr_/, 'VR ') // Replace "vr_" prefix with "VR "
+                    .replace(/_/g, ' ') // Replace underscores with spaces
+                    .replace(/\b\w/g, (char) => char.toUpperCase()), // Capitalize each word
             }));
+
             setOperatorHeaders(headers);
         }
     }, [operators]);
 
-    const columns = generateColumns(operatorHeaders, { entityType: 'operators' });
+    const columns = generateColumns(operatorHeaders, { entityType: 'operators', statusColumns: 'Status' });
 
     return <DataTable data={operatorData} ColumnFilterName="FirstName" columns={columns} onRowClick={(row) => onSelectOperator(row.id)} />;
 }
