@@ -43,7 +43,6 @@ class VrContactsController extends Controller
             return response()->json(['errors' => $errors], 422);
         }
 
-        return redirect()->route('vr-contacts.index')->with('success', 'Contacts created successfully.');
     }
 
     public function store(Request $request)
@@ -69,5 +68,75 @@ class VrContactsController extends Controller
         ]);
 
         return redirect()->route('vr-contacts.index')->with('success', 'VR Contact created successfully.');
+    }
+
+    public function update(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|integer|exists:vr_contacts,id',
+            'vr_company_id' => 'required|integer|exists:vr_companies,id',
+            'email' => 'required|email|unique:vr_contacts,email,' . $request->id,
+            'ContactNumber' => 'required|string',
+            'LastName' => 'required|string',
+            'FirstName' => 'required|string',
+            'MiddleName' => 'nullable|string',
+            'Position' => 'required|string',
+        ]);
+
+        $vrContact = VrContacts::findOrFail($request->id);
+        $vrContact->update([
+            'vr_company_id' => $request->vr_company_id,
+            'email' => $request->email,
+            'ContactNumber' => $request->ContactNumber,
+            'LastName' => $request->LastName,
+            'FirstName' => $request->FirstName,
+            'MiddleName' => $request->MiddleName,
+            'Position' => $request->Position,
+        ]);
+
+        return redirect()->route('vr-contacts.index')->with('success', 'VR Contact updated successfully.');
+    }
+
+    public function updateMultiple(Request $request){
+        $contacts = $request->contacts;
+        $errors = [];
+
+        foreach ($contacts as $index => $contactData) {
+            $rules = [
+                'vr_company_id' => 'sometimes|exists:vr_companies,id',
+                'email' => 'sometimes|email',
+                'ContactNumber' => 'sometimes|string',
+                'LastName' => 'sometimes|string',
+                'FirstName' => 'sometimes|string',
+                'MiddleName' => 'nullable|string',
+                'Position' => 'sometimes|string',
+            ];
+
+            // Add 'id' validation only if the contact is being updated
+            if (isset($contactData['id'])) {
+                $rules['id'] = 'required|integer|exists:vr_contacts,id';
+            }
+
+            $validator = \Illuminate\Support\Facades\Validator::make($contactData, $rules);
+
+            if ($validator->fails()) {
+                $errors["contacts.$index"] = $validator->errors()->toArray();
+            } else {
+                if (isset($contactData['id'])) {
+                    // Update existing contact
+                    $vrContact = VrContacts::findOrFail($contactData['id']);
+                    $vrContact->update($contactData);
+                } else {
+                    // Create new contact
+                    VrContacts::create($contactData);
+                }
+            }
+        }
+
+        if (!empty($errors)) {
+            return response()->json(['errors' => $errors], 422);
+        }
+
+        \Log::info('Updated contacts:', $contacts);
     }
 }

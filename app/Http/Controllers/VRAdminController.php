@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
 use Spatie\Permission\Models\Role;
+use App\Models\VRCompany;
 
 class VRAdminController extends Controller
 {
@@ -51,4 +52,44 @@ class VRAdminController extends Controller
 
         event(new Registered($user));
     }
+
+    public function update(Request $request)
+    {
+        // Log the incoming request data for debugging
+        \Log::info('Update Request Data:', $request->all());
+
+        // Validate the `vr_company_id` before using it
+        $vrCompanyId = $request->input('vr_company_id');
+        if (!$vrCompanyId || !is_numeric($vrCompanyId)) {
+            return response()->json(['error' => 'Invalid or missing vr_company_id.'], 400);
+        }
+
+        // Find the VR company
+        $vrCompany = VRCompany::find((int) $vrCompanyId);
+        if (!$vrCompany || !$vrCompany->owner || !$vrCompany->owner->user) {
+            return response()->json(['error' => 'VR Admin user not found for the specified company.'], 404);
+        }
+
+        // Retrieve the target user
+        $targetUser = $vrCompany->owner->user;
+
+        // Validate the request data (now using `$targetUser->id` for unique validation)
+        $validated = $request->validate([
+            'vr_company_id' => 'sometimes|integer|exists:vr_companies,id',
+            'username' => 'sometimes|string|max:255|unique:users,username,' . $targetUser->id,
+            'email' => 'sometimes|string|lowercase|email|max:255|unique:users,email,' . $targetUser->id,
+            'FirstName' => 'sometimes|string',
+            'LastName' => 'sometimes|string',
+            'Address' => 'nullable|string|max:255',
+            'BirthDate' => 'nullable|date',
+            'ContactNumber' => 'sometimes|string|max:255',
+        ]);
+
+        // Update the target user's details
+        $targetUser->fill($validated);
+        $targetUser->save(); // Ensure changes are saved
+
+        \Log::info('Update Complete');
+    }
+
 }
