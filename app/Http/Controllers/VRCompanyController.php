@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\VRCompany;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use function Laravel\Prompts\warning;
 
 class VRCompanyController extends Controller
 {
@@ -15,7 +17,8 @@ class VRCompanyController extends Controller
         \Log::info('Update Request Data:', $request->all());
 
         // Validate input fields and file uploads
-        $request->validate([
+        $request->validate(
+            [
             'CompanyName' => 'required|string',
             'BusinessPermitNumber' => 'required|integer',
             'BusinessPermit' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
@@ -23,13 +26,19 @@ class VRCompanyController extends Controller
             'DTI_Permit' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
             'BrandLogo' => 'nullable|file|mimes:jpg,png|max:1024',
             'SalesInvoice' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-        ]);
+            ]
+        );
 
 
-        $vrCompany = VRCompany::create([
+        $userRoles = Auth::user()->getRoleNames();
+
+        $vrCompany = VRCompany::create(
+            [
             'BusinessPermitNumber' => $request->BusinessPermitNumber,
             "CompanyName" => $request->CompanyName,
-        ]);
+            "Status" => $userRoles->contains('NPTC Super Admin') || $userRoles->contains('NPTC Admin') ? 'Approved' : 'Pending',
+            ]
+        );
 
         // Upload media files (only if provided)
         if ($request->hasFile('BusinessPermit')) {
@@ -54,6 +63,8 @@ class VRCompanyController extends Controller
 
         \Log::info('VR Company created successfully', ['id' => $vrCompany->id], $request->all());
         \Log::info('VR Company created successfully', ['id' => $vrCompany->id, 'files' => $request->allFiles()]);
+        \Log::info('VR Company created successfully', ['id' => $vrCompany->id]);
+
     }
 
     public function downloadMedia($mediaId)
@@ -79,9 +90,11 @@ class VRCompanyController extends Controller
     {
         $companies = VRCompany::select('id', 'BusinessPermitNumber')->get();
 
-        return Inertia::render('registration', [
+        return Inertia::render(
+            'registration', [
             'companies' => $companies
-        ]);
+            ]
+        );
     }
 
     public function update(Request $request)
