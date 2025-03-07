@@ -46,7 +46,7 @@ export default function VrRegistration() {
                         </TabsList>
                     </div>
 
-                    <TabContent value="tempoAccountTab" title="Temporary Account" description="Details of the Company Owner" />
+                    <TabContent value="tempoAccountTab" title="Create Temporary Account" description="Details of the Company Owner" />
                     <TabContent value="appStatsTab" title="Application Status" description="Check the current status of your application" />
                 </Tabs>
             </div>
