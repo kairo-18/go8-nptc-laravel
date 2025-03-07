@@ -7,15 +7,18 @@ import MainLayout from './mainLayout';
 export default function Registration({
     companies,
     operators,
+    companiesWithMedia,
 }: {
     companies: { id: number; BusinessPermitNumber: string }[];
     operators: { id: number; name: string; status: string; vr_company_id: number }[];
+    companiesWithMedia: { id: number; media: any[] }[];
 }) {
     const [activeTab, setActiveTab] = useState('vr-company');
     const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
 
     // Filter operators based on selectedCompanyId
     const filteredOperators = selectedCompanyId ? operators.filter((op) => op.vr_company_id === selectedCompanyId) : operators;
+    console.log('selected' + selectedCompanyId);
 
     // Breadcrumbs with onClick navigation
     const breadcrumbs = [
@@ -49,6 +52,7 @@ export default function Registration({
                 {activeTab === 'vr-company' && (
                     <Company
                         companies={companies}
+                        companiesWithMedia={companiesWithMedia}
                         onSelectCompany={(companyId) => {
                             setSelectedCompanyId(companyId);
                             setActiveTab('operator');
