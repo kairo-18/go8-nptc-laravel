@@ -15,9 +15,9 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin'])->gro
     Route::get('vr-owner', function () {
        return Inertia::render('records', [
           'users' => \App\Models\User::role('VR Admin')->get(),
-             'operators' => \App\Models\User::role('Operator')
-                    ->join('operators', 'users.id', '=', 'operators.user_id')
-                    ->get(['users.id', 'users.FirstName', 'users.LastName', 'operators.vr_company_id'])
+                'operators' => \App\Models\Operator::withCount(['vehicles', 'drivers'])
+                    ->join('users', 'users.id', '=', 'operators.user_id')
+                    ->get(['users.FirstName', 'users.LastName', 'operators.vr_company_id', 'operators.id', 'operators.vehicles_count', 'operators.drivers_count'])
                     ->makeHidden(['created_at', 'updated_at', 'email_verified_at']),
                 'drivers' => \App\Models\User::role('Driver')
                     ->join('drivers', 'users.id', '=', 'drivers.user_id')
@@ -29,7 +29,11 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin'])->gro
                         $vehicle->operator_id = $vehicle->operator->id;
                         return $vehicle;
                     }),
-                'companies' => \App\Models\VRCompany::all()->makeHidden(['created_at', 'updated_at']),
+                'companies' => \App\Models\VRCompany::with('owner.user')->get()->makeHidden(['created_at', 'updated_at', "owner", "operators"])->map(function ($company) {
+                    $company->owner_name = $company->owner ? $company->owner->user->FirstName . " "  . $company->owner->user->LastName : 'No Owner';
+                    $company->operatorCount = $company->operators ? $company->operators->count() : "No Operators";
+                    return $company;
+                }),
                 'companiesWithMedia' => \App\Models\VRCompany::with(['owner.user'])->get()->each(function ($company) {
                     $company->media_files = $company->getMedia();
                 }),

@@ -16,21 +16,28 @@ import {
 } from '@tanstack/react-table';
 import { ChevronDown } from 'lucide-react';
 import * as React from 'react';
+import { useEffect } from 'react';
 
 type DataTableProps<TData, TValue> = {
     data: TData[];
     columns: any;
+    ColumnFilterName: string;
 };
 
 const statusHierarchy = ['Active', 'Inactive', 'Suspended', 'Banned'];
 
-export function DataTable<TData, TValue>({ data, onRowClick, columns }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilterName }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
     const [selectedStatus, setSelectedStatus] = React.useState<string | null>(null);
     const [pageSize, setPageSize] = React.useState(5); // Default page size
+    const [selectedColumnFilter, setSelectedColumnFilter] = React.useState<string | null>(null);
+
+    useEffect(() => {
+        setSelectedColumnFilter(ColumnFilterName);
+    }, []);
 
     const table = useReactTable({
         data,
@@ -71,8 +78,8 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns }: DataTabl
             <div className="flex items-center justify-between py-4">
                 <Input
                     placeholder="Filter data..."
-                    value={(table.getColumn('CompanyName')?.getFilterValue() as string) ?? ''}
-                    onChange={(event) => table.getColumn('CompanyName')?.setFilterValue(event.target.value)}
+                    value={(table.getColumn(selectedColumnFilter)?.getFilterValue() as string) ?? ''}
+                    onChange={(event) => table.getColumn(selectedColumnFilter)?.setFilterValue(event.target.value)}
                     className="max-w-sm"
                 />
 

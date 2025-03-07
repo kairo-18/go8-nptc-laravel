@@ -1,6 +1,6 @@
-import { useState, version } from 'react';
+import { useState } from 'react';
 import Company from '../components/RecordsComponent/vr-company';
-import Driver from '../components/RecordsComponent/vr-driver-vehicle';
+import DriverVehicle from '../components/RecordsComponent/vr-driver-vehicle';
 import Operator from '../components/RecordsComponent/vr-operator';
 import MainLayout from './mainLayout';
 
@@ -19,12 +19,12 @@ export default function Records({
 }) {
     const [activeTab, setActiveTab] = useState('vr-company');
     const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
+    const [selectedOperatorId, setSelectedOperatorId] = useState<number | null>(null);
 
     // Filter operators based on selectedCompanyId
     const filteredOperators = selectedCompanyId ? operators.filter((op) => op.vr_company_id === selectedCompanyId) : operators;
-
-    //list of vehicles
-    console.log(vehicles);
+    const filteredDrivers = selectedOperatorId ? drivers.filter((driver) => driver.operator_id === selectedOperatorId) : drivers;
+    const filteredVehicles = selectedOperatorId ? vehicles.filter((vehicle) => vehicle.operator_id === selectedOperatorId) : vehicles;
 
     // Breadcrumbs with onClick navigation
     const breadcrumbs = [
@@ -65,10 +65,19 @@ export default function Records({
                         }}
                     />
                 )}
-                {activeTab === 'operator' && <Operator operators={filteredOperators} onNextTab={() => setActiveTab('driver')} />}
-                {activeTab === 'driver' &&  <Driver drivers={drivers} onNextTab={() => setActiveTab('vehicle')} vehicles={vehicles} activeTab={''} setActiveTab={function (tab: string): void {
-                    
-                } } />}         
+                {activeTab === 'operator' && (
+                    <Operator
+                        operators={filteredOperators}
+                        onSelectOperator={(operatorId) => {
+                            setSelectedOperatorId(operatorId);
+                            setActiveTab('driver');
+                        }}
+                        onNextTab={() => setActiveTab('driver')}
+                    />
+                )}
+                {activeTab === 'driver' && (
+                    <DriverVehicle drivers={filteredDrivers} onNextTab={() => setActiveTab('vehicle')} vehicles={filteredVehicles} activeTab={''} />
+                )}
             </div>
         </MainLayout>
     );
