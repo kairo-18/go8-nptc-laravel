@@ -17,6 +17,7 @@ class VRCompany extends Model implements HasMedia
     protected $fillable = [
         'CompanyName',
         'BusinessPermitNumber',
+        'Status'
     ];
     //
     //
@@ -25,7 +26,8 @@ class VRCompany extends Model implements HasMedia
         return $this->hasOne(VehicleRentalOwner::class, 'vr_company_id');
     }
 
-    public function operators(){
+    public function operators()
+    {
         return $this->hasMany(Operator::class);
     }
 
