@@ -45,7 +45,10 @@ Route::group(
                         return Inertia::render(
                             'records', [
                             'users' => \App\Models\User::role('VR Admin')->get(),
-                            'operators' => \App\Models\User::role('Operator')->get()->makeHidden(['created_at', 'updated_at', 'email_verified_at']),
+                            'operators' => \App\Models\User::role('Operator')
+                                ->join('operators', 'users.id', '=', 'operators.user_id')
+                                ->get(['users.id', 'users.FirstName', 'users.LastName', 'operators.vr_company_id'])
+                                ->makeHidden(['created_at', 'updated_at', 'email_verified_at']),
                             'companies' => \App\Models\VRCompany::all()->makeHidden(['created_at', 'updated_at']),
                             'companiesWithMedia' => \App\Models\VRCompany::with(['owner.user'])->get()->each(
                                 function ($company) {

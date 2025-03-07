@@ -9,9 +9,13 @@ export default function Registration({
     operators,
 }: {
     companies: { id: number; BusinessPermitNumber: string }[];
-    operators: { id: number; name: string; status: string }[];
+    operators: { id: number; name: string; status: string; vr_company_id: number }[];
 }) {
     const [activeTab, setActiveTab] = useState('vr-company');
+    const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
+
+    // Filter operators based on selectedCompanyId
+    const filteredOperators = selectedCompanyId ? operators.filter((op) => op.vr_company_id === selectedCompanyId) : operators;
 
     // Breadcrumbs with onClick navigation
     const breadcrumbs = [
@@ -42,8 +46,16 @@ export default function Registration({
                 </div>
 
                 {/* Tab Content */}
-                {activeTab === 'vr-company' && <Company companies={companies} onNextTab={() => setActiveTab('operator')} />}
-                {activeTab === 'operator' && <Operator operators={operators} onNextTab={() => setActiveTab('driver')} />}
+                {activeTab === 'vr-company' && (
+                    <Company
+                        companies={companies}
+                        onSelectCompany={(companyId) => {
+                            setSelectedCompanyId(companyId);
+                            setActiveTab('operator');
+                        }}
+                    />
+                )}
+                {activeTab === 'operator' && <Operator operators={filteredOperators} onNextTab={() => setActiveTab('driver')} />}
                 {activeTab === 'driver' && <Driver companies={companies} onNextTab={() => setActiveTab('vehicle')} />}
             </div>
         </MainLayout>

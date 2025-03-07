@@ -24,7 +24,7 @@ type DataTableProps<TData, TValue> = {
 
 const statusHierarchy = ['Active', 'Inactive', 'Suspended', 'Banned'];
 
-export function DataTable<TData, TValue>({ data, columns }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ data, onRowClick, columns }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -114,7 +114,7 @@ export function DataTable<TData, TValue>({ data, columns }: DataTableProps<TData
                     <TableBody>
                         {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} data-state={row.getIsSelected() ? 'selected' : undefined}>
+                                <TableRow key={row.id} className="cursor-pointer hover:bg-gray-100" onClick={() => onRowClick?.(row.original)}>
                                     {row.getVisibleCells().map((cell) => (
                                         <TableCell key={cell.id}>
                                             {typeof cell.column.columnDef.cell === 'function'

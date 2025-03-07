@@ -3,20 +3,20 @@ import { DataTable } from './data-table';
 
 interface CompanyProps {
     companies: { id: number; BusinessPermitNumber: string; CompanyName: string }[];
-    onNextTab: () => void;
+    onSelectCompany: (companyId: number) => void;
 }
 
-export default function Company({ companies, onNextTab }: CompanyProps) {
-    // Generate headers dynamically from the companies array
+export default function Company({ companies, onSelectCompany }: CompanyProps) {
     const companyHeaders =
         companies.length > 0
             ? Object.keys(companies[0]).map((key) => ({
                   key,
-                  label: key.replace(/([A-Z])/g, ' $1').trim(), // Format camelCase/snake_case to readable text
+                  label: key.replace(/([A-Z])/g, ' $1').trim(),
               }))
             : [];
 
-    const columns = generateColumns(companyHeaders, { entityType: 'companies' });
+    const columns = generateColumns(companyHeaders, { entityType: 'companies', statusColumns: ['Status'] });
+    console.log(columns);
 
-    return <DataTable data={companies} columns={columns} />;
+    return <DataTable data={companies} columns={columns} onRowClick={(row) => onSelectCompany(row.id)} />;
 }

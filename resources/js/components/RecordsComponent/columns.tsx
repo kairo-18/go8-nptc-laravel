@@ -23,13 +23,15 @@ export const generateColumns = (
         sortableColumns?: string[];
         statusColumns?: string[];
         actions?: boolean;
-        entityType?: 'companies' | 'operators'; // Add entityType for conditional actions
+        entityType?: 'companies' | 'operators';
     },
 ): ColumnDef<DataRow>[] => {
     const { sortableColumns = [], statusColumns = [], actions = true, entityType } = options || {};
 
+    console.log('Status Columns Config:', statusColumns); // Debugging
+
     const dynamicColumns: ColumnDef<DataRow>[] = headers.map(({ key, label }) => ({
-        id: key, // Ensure each column has a unique ID
+        id: key,
         accessorKey: key,
         header: ({ column }) => {
             if (sortableColumns.includes(key)) {
@@ -40,30 +42,29 @@ export const generateColumns = (
                     </Button>
                 );
             }
-            return label; // Ensuring the default header is a string
+            return label;
         },
         cell: ({ row }) => {
-            const value = row.getValue(key);
+            const rawValue = row.getValue(key);
+            const value = String(rawValue || '').trim(); // Ensure it's a string
+
+            console.log(`Row Value for ${key}:`, value); // Debugging
+
             if (statusColumns.includes(key)) {
-                return (
-                    <span
-                        className={`rounded px-2 py-1 text-white ${
-                            {
-                                Active: 'bg-green-500',
-                                Inactive: 'bg-red-500',
-                                Suspended: 'bg-yellow-500',
-                                Banned: 'bg-violet-500',
-                                Approved: 'bg-blue-500',
-                                Rejected: 'bg-black-500',
-                                Pending: 'bg-orange-500',
-                            }[value] || 'bg-gray-500'
-                        }`}
-                    >
-                        {value}
-                    </span>
-                );
+                const statusColors: Record<string, string> = {
+                    Active: 'bg-green-500',
+                    Inactive: 'bg-red-500',
+                    Suspended: 'bg-yellow-500',
+                    Banned: 'bg-violet-500',
+                    Approved: 'bg-blue-500',
+                    Rejected: 'bg-black-500',
+                    Pending: 'bg-orange-500',
+                };
+
+                return <span className={`rounded px-2 py-1 text-white ${statusColors[value] || 'bg-gray-500'}`}>{value || 'Unknown'}</span>;
             }
-            return value; // Ensure default cell rendering
+
+            return value || 'N/A'; // Default text if empty
         },
     }));
 
@@ -103,7 +104,6 @@ export const generateColumns = (
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
 
-                            {/* Different actions based on entity type */}
                             {entityType === 'companies' ? (
                                 <>
                                     <DropdownMenuItem onClick={() => alert(`Editing Company: ${data.CompanyName}`)}>Edit Company</DropdownMenuItem>
