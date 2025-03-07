@@ -44,13 +44,21 @@ Route::group(
                     'vr-owner', function () {
                         return Inertia::render(
                             'records', [
-                            'users' => \App\Models\User::role('VR Admin')->get(),
-                            'operators' => \App\Models\User::role('Operator')
-                                ->join('operators', 'users.id', '=', 'operators.user_id')
-                                ->get(['users.id', 'users.FirstName', 'users.LastName', 'operators.vr_company_id'])
-                                ->makeHidden(['created_at', 'updated_at', 'email_verified_at']),
-                            'companies' => \App\Models\VRCompany::all()->makeHidden(['created_at', 'updated_at']),
-                            'companiesWithMedia' => \App\Models\VRCompany::with(['owner.user'])->get()->each(
+                                'users' => \App\Models\User::role('VR Admin')->get(),
+                                'operators' => \App\Models\User::role('Operator')
+                                    ->join('operators', 'users.id', '=', 'operators.user_id')
+                                    ->get(['users.id', 'users.FirstName', 'users.LastName', 'operators.vr_company_id'])
+                                    ->makeHidden(['created_at', 'updated_at', 'email_verified_at']),
+                                'drivers' => \App\Models\User::role('Driver')
+                                    ->join('drivers', 'users.id', '=', 'drivers.user_id')
+                                    ->get(['users.id', 'users.FirstName', 'users.LastName', 'drivers.operator_id'])
+                                    ->makeHidden(['created_at', 'updated_at', 'email_verified_at']),
+                                'vehicles' => \App\Models\Vehicle::all()->makeHidden(['created_at', 'updated_at', 'operator'])->map(function ($vehicle) {
+                                    $vehicle->operator_id = $vehicle->operator->id;
+                                    return $vehicle;
+                                }),
+                                'companies' => \App\Models\VRCompany::all()->makeHidden(['created_at', 'updated_at']),
+                                'companiesWithMedia' => \App\Models\VRCompany::with(['owner.user'])->get()->each(
                                 function ($company) {
                                     $company->media_files = $company->getMedia();
                                 }
