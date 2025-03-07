@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, version } from 'react';
 import Company from '../components/RecordsComponent/vr-company';
 import Driver from '../components/RecordsComponent/vr-driver-vehicle';
 import Operator from '../components/RecordsComponent/vr-operator';
@@ -66,7 +66,9 @@ export default function Records({
                     />
                 )}
                 {activeTab === 'operator' && <Operator operators={filteredOperators} onNextTab={() => setActiveTab('driver')} />}
-                {activeTab === 'driver' && <Driver drivers={drivers} onNextTab={() => setActiveTab('vehicle')} />}
+                {activeTab === 'driver' &&  <Driver drivers={drivers} onNextTab={() => setActiveTab('vehicle')} vehicles={vehicles} activeTab={''} setActiveTab={function (tab: string): void {
+                    
+                } } />}         
             </div>
         </MainLayout>
     );
