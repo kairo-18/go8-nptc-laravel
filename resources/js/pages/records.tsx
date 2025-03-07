@@ -4,13 +4,17 @@ import Driver from '../components/RecordsComponent/vr-driver-vehicle';
 import Operator from '../components/RecordsComponent/vr-operator';
 import MainLayout from './mainLayout';
 
-export default function Registration({
+export default function Records({
     companies,
     operators,
+    drivers,
+    vehicles,
     companiesWithMedia,
 }: {
     companies: { id: number; BusinessPermitNumber: string }[];
     operators: { id: number; name: string; status: string; vr_company_id: number }[];
+    drivers: { id: number; name: string; status: string; operator_id: number }[];
+    vehicles: { id: number; name: string; status: string; operator_id: number }[];
     companiesWithMedia: { id: number; media: any[] }[];
 }) {
     const [activeTab, setActiveTab] = useState('vr-company');
@@ -18,7 +22,9 @@ export default function Registration({
 
     // Filter operators based on selectedCompanyId
     const filteredOperators = selectedCompanyId ? operators.filter((op) => op.vr_company_id === selectedCompanyId) : operators;
-    console.log('selected' + selectedCompanyId);
+
+    //list of vehicles
+    console.log(vehicles);
 
     // Breadcrumbs with onClick navigation
     const breadcrumbs = [
@@ -60,7 +66,7 @@ export default function Registration({
                     />
                 )}
                 {activeTab === 'operator' && <Operator operators={filteredOperators} onNextTab={() => setActiveTab('driver')} />}
-                {activeTab === 'driver' && <Driver companies={companies} onNextTab={() => setActiveTab('vehicle')} />}
+                {activeTab === 'driver' && <Driver drivers={drivers} onNextTab={() => setActiveTab('vehicle')} />}
             </div>
         </MainLayout>
     );
