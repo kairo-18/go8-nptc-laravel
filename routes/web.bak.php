@@ -1,22 +1,3 @@
-<?php
-
-use App\Http\Controllers\Auth\RegisteredUserController;
-use App\Http\Controllers\OperatorAdminController;
-use App\Http\Controllers\VRCompanyController;
-use App\Http\Controllers\NptcAdminController;
-use App\Http\Controllers\VRAdminController;
-use App\Http\Controllers\VrContactsController;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
-use App\Http\Middleware\NPTCAdminMiddleware;
-
-// Home route
-Route::get(
-    '/', function () {
-        return Inertia::render('welcome');
-    }
-)->name('home');
-
 // Routes restricted to authenticated and verified users
 // Route::group(
 //     ['middleware' => ['auth', 'verified']], function () {
@@ -176,12 +157,3 @@ Route::get(
 // Route::patch('/operators/{operator}', [OperatorAdminController::class, 'update'])->name('operators.update');
 // Route::delete('/operators/{operator}', [OperatorAdminController::class, 'destroy'])->name('operators.destroy');
 
-// Include additional route files
-require __DIR__.'/settings.php';
-require __DIR__.'/auth.php';
-require __DIR__.'/temp_reg.php';
-require __DIR__.'/nptc_admin.php';
-require __DIR__.'/vr_admin.php';
-require __DIR__.'/vr_company.php';
-require __DIR__.'/vr_contacts.php';
-require __DIR__.'/operator.php';

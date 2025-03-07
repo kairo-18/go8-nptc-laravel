@@ -1,27 +1,34 @@
 import { useState } from 'react';
 import Company from '../components/RecordsComponent/vr-company';
-import Driver from '../components/RecordsComponent/vr-driver-vehicle';
+import DriverVehicle from '../components/RecordsComponent/vr-driver-vehicle';
 import Operator from '../components/RecordsComponent/vr-operator';
 import MainLayout from './mainLayout';
 
-export default function Registration({
+export default function Records({
     companies,
     operators,
+    drivers,
+    vehicles,
     companiesWithMedia,
 }: {
     companies: { id: number; BusinessPermitNumber: string }[];
     operators: { id: number; name: string; status: string; vr_company_id: number }[];
+    drivers: { id: number; name: string; status: string; operator_id: number }[];
+    vehicles: { id: number; name: string; status: string; operator_id: number }[];
     companiesWithMedia: { id: number; media: any[] }[];
 }) {
     const [activeTab, setActiveTab] = useState('vr-company');
     const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
+    const [selectedOperatorId, setSelectedOperatorId] = useState<number | null>(null);
 
     // Filter operators based on selectedCompanyId
     const filteredOperators = selectedCompanyId ? operators.filter((op) => op.vr_company_id === selectedCompanyId) : operators;
-    console.log('selected' + selectedCompanyId);
+    const filteredDrivers = selectedOperatorId ? drivers.filter((driver) => driver.operator_id === selectedOperatorId) : drivers;
+    const filteredVehicles = selectedOperatorId ? vehicles.filter((vehicle) => vehicle.operator_id === selectedOperatorId) : vehicles;
 
     // Breadcrumbs with onClick navigation
     const breadcrumbs = [
+        { label: 'Records', title: 'Records', href: '#', onClick: () => setActiveTab('vr-company') },
         { label: activeTab.replace('-', ' ').toUpperCase(), title: activeTab.replace('-', ' ').toUpperCase(), href: '#', onClick: () => {} },
     ];
 
@@ -58,8 +65,19 @@ export default function Registration({
                         }}
                     />
                 )}
-                {activeTab === 'operator' && <Operator operators={filteredOperators} onNextTab={() => setActiveTab('driver')} />}
-                {activeTab === 'driver' && <Driver companies={companies} onNextTab={() => setActiveTab('vehicle')} />}
+                {activeTab === 'operator' && (
+                    <Operator
+                        operators={filteredOperators}
+                        onSelectOperator={(operatorId) => {
+                            setSelectedOperatorId(operatorId);
+                            setActiveTab('driver');
+                        }}
+                        onNextTab={() => setActiveTab('driver')}
+                    />
+                )}
+                {activeTab === 'driver' && (
+                    <DriverVehicle drivers={filteredDrivers} onNextTab={() => setActiveTab('vehicle')} vehicles={filteredVehicles} activeTab={''} />
+                )}
             </div>
         </MainLayout>
     );

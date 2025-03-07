@@ -17,10 +17,14 @@ class Operator extends Model
     }
 
     public function vrCompany(){
-        return $this->belongsTo(VRCompany::class);
+        return $this->belongsTo(VRCompany::class, 'vr_company_id');
     }
 
     public function vehicles(){
         return $this->hasMany(Vehicle::class);
+    }
+
+    public function drivers(){
+        return $this->hasMany(Driver::class);
     }
 }

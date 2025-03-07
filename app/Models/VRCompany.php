@@ -28,12 +28,17 @@ class VRCompany extends Model implements HasMedia
 
     public function operators()
     {
-        return $this->hasMany(Operator::class);
+        return $this->hasMany(Operator::class, 'vr_company_id');
     }
 
     public function contacts()
     {
         return $this->hasOne(VrContacts::class);
+    }
+
+    public function driver()
+    {
+        return $this->hasMany(Driver::class);
     }
 
 }
