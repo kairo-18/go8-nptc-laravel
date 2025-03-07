@@ -115,10 +115,6 @@ class OperatorAdminController extends Controller
         ]);
     }
     
-    
-    
-    
-
     /**
      * Remove an operator.
      */

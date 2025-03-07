@@ -36,4 +36,9 @@ class VRCompany extends Model implements HasMedia
         return $this->hasOne(VrContacts::class);
     }
 
+    public function driver()
+    {
+        return $this->hasMany(Driver::class);
+    }
+
 }
