@@ -23,46 +23,41 @@ class OperatorAdminController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'user.username' => 'required|string|unique:users,username',
-            'user.email' => 'required|email|unique:users,email',
-            'user.FirstName' => 'required|string',
-            'user.LastName' => 'required|string',
-            'user.Address' => 'required|string',
-            'user.BirthDate' => 'required|date',
-            'user.ContactNumber' => 'required|string',
-            'user.password' => 'required|string|min:6',
-
-            'operator.vr_company_id' => 'required|exists:vr_companies,id',
-
+            'username' => 'required|string|unique:users,username',
+            'email' => 'required|email|unique:users,email',
+            'FirstName' => 'required|string',
+            'LastName' => 'required|string',
+            'Address' => 'required|string',
+            'BirthDate' => 'required|date',
+            'ContactNumber' => 'required|string',
+            'password' => 'required|string|min:6',
+            'vr_company_id' => 'required|exists:vr_companies,id',
+            'Status' => 'nullable|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected,For Payment',
         ]);
-
+        
         // Create the user
         $user = User::create([
-            'username' => $validatedData['user']['username'],
-            'email' => $validatedData['user']['email'],
-            'FirstName' => $validatedData['user']['FirstName'],
-            'LastName' => $validatedData['user']['LastName'],
-            'Address' => $validatedData['user']['Address'],
-            'BirthDate' => $validatedData['user']['BirthDate'],
-            'ContactNumber' => $validatedData['user']['ContactNumber'],
-            'password' => Hash::make($validatedData['user']['password']),
+            'username' => $validatedData['username'],
+            'email' => $validatedData['email'],
+            'FirstName' => $validatedData['FirstName'],
+            'LastName' => $validatedData['LastName'],
+            'Address' => $validatedData['Address'],
+            'BirthDate' => $validatedData['BirthDate'],
+            'ContactNumber' => $validatedData['ContactNumber'],
+            'password' => Hash::make($validatedData['password']),
+            'Status' => $validatedData['Status'],
         ]);
-
-        // Assign the "Operator" role
+        
         $user->assignRole('Operator');
-
+        
         // Create the Operator record linked to the User
         $operator = $user->operator()->create([
-            'vr_company_id' => $validatedData['operator']['vr_company_id'],
-            'user_id' => $user->id,  // <- This was missing
-            'Status' => 'Pending',
+            'vr_company_id' => $validatedData['vr_company_id'],
+            'user_id' => $user->id,
+            'Status' => $validatedData['Status'],
         ]);
-
-        return response()->json([
-            'message' => 'Operator created successfully',
-            'user' => $user,
-            'operator' => $operator,
-        ], 201);
+        
+        return redirect()->route('create-operator.admin')->with('success', 'Operator created successfully!');
     }
 
     /**
@@ -77,43 +72,45 @@ class OperatorAdminController extends Controller
      * Update an operator.
      */
     public function update(Request $request, Operator $operator)
-    {
-        $validatedData = $request->validate([
-            'user.username' => 'sometimes|string|unique:users,username,' . $operator->user_id,
-            'user.email' => 'sometimes|email|unique:users,email,' . $operator->user_id,
-            'user.FirstName' => 'sometimes|string',
-            'user.LastName' => 'sometimes|string',
-            'user.Address' => 'sometimes|string',
-            'user.BirthDate' => 'sometimes|date',
-            'user.ContactNumber' => 'sometimes|string',
-            'user.password' => 'sometimes|string|min:6',
+{
+    $validatedData = $request->validate([
+        'username' => 'sometimes|string|unique:users,username,' . $operator->user_id,
+        'email' => 'sometimes|email|unique:users,email,' . $operator->user_id,
+        'FirstName' => 'sometimes|string',
+        'LastName' => 'sometimes|string',
+        'Address' => 'sometimes|string',
+        'BirthDate' => 'sometimes|date',
+        'ContactNumber' => 'sometimes|string',
+        'password' => 'sometimes|string|min:6',
 
-            'operator.vr_company_id' => 'sometimes|exists:vr_companies,id',
-            'operator.Status' => 'sometimes|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected',
-        ]);
+        'vr_company_id' => 'sometimes|exists:vr_companies,id',
+        'Status' => 'sometimes|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected',
+    ]);
 
+    // Update User Details
+    $userData = array_intersect_key($validatedData, array_flip([
+        'username', 'email', 'FirstName', 'LastName', 'Address', 'BirthDate', 'ContactNumber', 'password'
+    ]));
 
-
-
-        // Update User Details
-        if (isset($validatedData['user'])) {
-            $userData = $validatedData['user'];
-            if (isset($userData['password'])) {
-                $userData['password'] = Hash::make($userData['password']); // Hash password if provided
-            }
-            $operator->user()->update($userData);
-        }
-
-        // Update Operator Details
-        if (isset($validatedData['operator'])) {
-            $operator->update($validatedData['operator']);
-        }
-
-        return response()->json([
-            'message' => 'Operator updated successfully',
-            'operator' => $operator->load('user', 'vrCompany'), // Ensure latest data is returned
-        ]);
+    if (isset($userData['password'])) {
+        $userData['password'] = Hash::make($userData['password']); // Hash password if provided
     }
+
+    $operator->user()->update($userData);
+
+    // Update Operator Details
+    $operatorData = array_intersect_key($validatedData, array_flip([
+        'vr_company_id', 'Status'
+    ]));
+
+    $operator->update($operatorData);
+
+    return response()->json([
+        'message' => 'Operator updated successfully',
+        'operator' => $operator->load('user', 'vrCompany'), // Ensure latest data is returned
+    ]);
+}
+
 
     /**
      * Remove an operator.

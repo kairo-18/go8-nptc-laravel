@@ -10,7 +10,10 @@ import { Link, usePage } from '@inertiajs/react';
 
 export function NavMain({ items = [] }: { items: NavItem[] }) {
     const page = usePage();
-    const currentUrl = page.url; // Get the current page URL
+    const currentUrl = page.url; 
+
+    const isActive = (item: NavItem) =>
+        item.url === currentUrl || (item.children && item.children.some((child) => child.url === currentUrl));
 
     return (
         <SidebarGroup className="px-2 py-0">
@@ -18,8 +21,9 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
             <SidebarMenu>
                 {items.map((item) => (
                     <div key={item.title}>
+
                         <SidebarMenuItem>
-                            <SidebarMenuButton asChild isActive={item.url === currentUrl}>
+                            <SidebarMenuButton asChild isActive={isActive(item)}>
                                 <Link href={item.url} prefetch className="flex items-center space-x-2">
                                     {item.icon && <item.icon />}
                                     <span>{item.title}</span>
@@ -27,8 +31,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                             </SidebarMenuButton>
                         </SidebarMenuItem>
 
-                        {/* Show children ONLY if the current page is "VR Registration" */}
-                        {item.children && item.url === currentUrl && (
+                        {item.children && isActive(item) && (
                             <div className="ml-6 border-l border-gray-500 pl-4">
                                 {item.children.map((child) => (
                                     <SidebarMenuItem key={child.title} className="mt-1">
