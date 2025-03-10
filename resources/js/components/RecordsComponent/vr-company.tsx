@@ -4,9 +4,9 @@ import { DataTable } from './data-table';
 import CompanyFiles from './vr-company-files'; // Import CompanyFiles component
 
 interface CompanyProps {
-    companies: { id: number; BusinessPermitNumber: string; CompanyName: string; media?: any[] }[];
+    companies: { id: number; Status?: string; BusinessPermitNumber: string; CompanyName: string; media?: any[] }[];
     companiesWithMedia: { id: number; media: any[] }[];
-    onSelectCompany: (companyId: number) => void; // Update to pass the company ID
+    onSelectCompany: (companyId: number) => void;
 }
 
 export default function Company({ companies, companiesWithMedia, onSelectCompany }: CompanyProps) {
@@ -18,25 +18,47 @@ export default function Company({ companies, companiesWithMedia, onSelectCompany
         setOpen(true);
     };
 
-    const companyHeaders =
-        companies.length > 0
-            ? Object.keys(companies[0]).map((key) => ({
-                  key,
-                  label: key.replace(/([A-Z])/g, ' $1').trim(),
-              }))
-            : [];
+    const transformedCompanies = companies.map((company) => ({
+        ...company,
+        CompanyName: `${company.Status ? `${company.Status} ` : ''}${company.CompanyName}`,
+    }));
 
-    const columns = generateColumns(companyHeaders, {
-        entityType: 'companies',
-        statusColumns: ['Status'],
-        onViewFiles: handleViewFiles, // Pass view function
-    });
+    const companyHeaders = companies.length > 0 ? Object.keys(companies[0]) : [];
+
+    // Define primary, secondary, and other columns
+    const primaryColumns = ['id', 'CompanyName'];
+    const otherColumns = companyHeaders.filter((key) => !primaryColumns.includes(key) && key !== 'Status');
+    
+    // Arrange columns with hierarchy
+    const orderedHeaders = [...primaryColumns, ...otherColumns];
+
+    const columns = generateColumns(
+        orderedHeaders.map((key) => ({
+            key,
+            label: key.replace(/([A-Z])/g, ' $1').trim(),
+        })),
+        {
+            entityType: 'companies',
+            statusColumns: ['Status'],
+            onViewFiles: handleViewFiles, // Pass view function
+        }
+    );
 
     return (
         <>
-            <DataTable data={companies} columns={columns} ColumnFilterName="CompanyName" onRowClick={(row) => onSelectCompany(row.id)} />
+            <DataTable 
+                data={transformedCompanies} 
+                columns={columns} 
+                ColumnFilterName="CompanyName" 
+                onRowClick={(row) => onSelectCompany(row.id)} 
+            />
 
-            <CompanyFiles selectedCompany={selectedCompany} companiesWithMedia={companiesWithMedia} open={open} setOpen={setOpen} />
+            <CompanyFiles 
+                selectedCompany={selectedCompany} 
+                companiesWithMedia={companiesWithMedia} 
+                open={open} 
+                setOpen={setOpen} 
+            />
         </>
     );
 }
