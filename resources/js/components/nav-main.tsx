@@ -10,9 +10,7 @@ import { Link, usePage } from '@inertiajs/react';
 
 export function NavMain({ items = [] }: { items: NavItem[] }) {
     const page = usePage();
-    const currentUrl = page.url; 
-
-    const isOnRegistrationPage = currentUrl === '/registration' || currentUrl === '/vr-registration';
+    const currentUrl = page.url; // Get the current page URL
 
     return (
         <SidebarGroup className="px-2 py-0">
@@ -28,8 +26,10 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                                 </Link>
                             </SidebarMenuButton>
                         </SidebarMenuItem>
-                        {item.children && isOnRegistrationPage && (
-                            <div className="ml-2 border-l border-gray-500 pl-4">
+
+                        {/* Show children ONLY if the current page is "VR Registration" */}
+                        {item.children && item.url === currentUrl && (
+                            <div className="ml-6 border-l border-gray-500 pl-4">
                                 {item.children.map((child) => (
                                     <SidebarMenuItem key={child.title} className="mt-1">
                                         <SidebarMenuButton asChild isActive={child.url === currentUrl}>

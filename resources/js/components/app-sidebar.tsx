@@ -18,16 +18,28 @@ const mainNavItems: NavItem[] = [
         icon: Folder,
     },
     {
-        title: 'VR Registration',
+        title: 'VR Temp Account Registration',
+        url:'/vr-registration',
+        icon:BadgePlus
+    },
+    {
+        title: 'Registration',
         url: '/registration',
         icon: UserPlus,
-            children: [
-                {
-                    title: 'Temp Acc Registration',
-                    url: '/vr-registration',
-                    icon: BadgePlus,
-                },
-            ],
+         children: [
+            {
+                title: 'VR Registration',
+                url: '/registration',
+            },
+            {
+                title: 'Operator Registration',
+                url: '',
+            },
+            {
+                title: 'Driver Registration',
+                url: '',
+            },
+        ],
     },
     {
         title: 'Pending',
