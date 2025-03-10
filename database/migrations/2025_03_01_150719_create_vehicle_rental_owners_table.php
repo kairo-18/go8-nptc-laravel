@@ -15,6 +15,8 @@ return new class () extends Migration {
             $table->id();
             $table->foreignId('vr_company_id')->constrained("vr_companies")->cascadeOnDelete();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->enum('Status', ['Active', 'Inactive', 'Suspended', 'Banned', 'Pending', 'Approved', 'Rejected', 'For Payment'])
+                  ->default('Pending');
             $table->timestamps();
         });
     }

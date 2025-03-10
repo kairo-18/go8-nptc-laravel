@@ -48,8 +48,9 @@ class VRAdminController extends Controller
 
 
         $vehicleRentalOwner = VehicleRentalOwner::create([
-        'user_id' => $user->id,
-        'vr_company_id' => $request->vr_company_id,
+            'user_id' => $user->id,
+            'vr_company_id' => $request->vr_company_id,
+            'Status' => 'Pending',
         ]);
 
         event(new Registered($user));

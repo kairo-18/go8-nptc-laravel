@@ -16,7 +16,7 @@ return new class () extends Migration {
             $table->id();
             $table->string('CompanyName');
             $table->integer('BusinessPermitNumber');
-            $table->enum('Status', ['Active', 'Inactive', 'Suspended', 'Banned', 'Pending', 'Approved', 'Rejected'])
+            $table->enum('Status', ['Active', 'Inactive', 'Suspended', 'Banned', 'Pending', 'Approved', 'Rejected', 'For Payment'])
                   ->default('Pending');
             $table->timestamps();
         });
