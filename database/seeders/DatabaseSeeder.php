@@ -67,6 +67,21 @@ class DatabaseSeeder extends Seeder
 
         VRCompany::factory()->create(
             [
+            'CompanyName' => 'Company3',
+            'BusinessPermitNumber' => 1231231,
+            'Status' => 'Pending'
+            ]
+        );
+
+        VRCompany::factory()->create(
+            [
+            'CompanyName' => 'Company2',
+            'BusinessPermitNumber' => 123123,
+            'Status' => 'Pending'
+            ]
+        );
+        VRCompany::factory()->create(
+            [
             'CompanyName' => 'Example VR Company',
             'BusinessPermitNumber' => 123456,
             'Status' => 'Approved'
