@@ -14,6 +14,7 @@ class VehicleRentalOwner extends Model
     protected $fillable = [
         'user_id',
         'vr_company_id',
+        'Status'
     ];
 
 

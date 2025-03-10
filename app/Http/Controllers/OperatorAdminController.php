@@ -31,11 +31,11 @@ class OperatorAdminController extends Controller
             'user.BirthDate' => 'required|date',
             'user.ContactNumber' => 'required|string',
             'user.password' => 'required|string|min:6',
-    
+
             'operator.vr_company_id' => 'required|exists:vr_companies,id',
-            
+
         ]);
-    
+
         // Create the user
         $user = User::create([
             'username' => $validatedData['user']['username'],
@@ -47,17 +47,17 @@ class OperatorAdminController extends Controller
             'ContactNumber' => $validatedData['user']['ContactNumber'],
             'password' => Hash::make($validatedData['user']['password']),
         ]);
-    
+
         // Assign the "Operator" role
         $user->assignRole('Operator');
-    
+
         // Create the Operator record linked to the User
         $operator = $user->operator()->create([
             'vr_company_id' => $validatedData['operator']['vr_company_id'],
             'user_id' => $user->id,  // <- This was missing
             'Status' => 'Pending',
         ]);
-    
+
         return response()->json([
             'message' => 'Operator created successfully',
             'user' => $user,
@@ -87,14 +87,14 @@ class OperatorAdminController extends Controller
             'user.BirthDate' => 'sometimes|date',
             'user.ContactNumber' => 'sometimes|string',
             'user.password' => 'sometimes|string|min:6',
-    
+
             'operator.vr_company_id' => 'sometimes|exists:vr_companies,id',
             'operator.Status' => 'sometimes|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected',
         ]);
 
-        
 
-    
+
+
         // Update User Details
         if (isset($validatedData['user'])) {
             $userData = $validatedData['user'];
@@ -108,20 +108,20 @@ class OperatorAdminController extends Controller
         if (isset($validatedData['operator'])) {
             $operator->update($validatedData['operator']);
         }
-    
+
         return response()->json([
             'message' => 'Operator updated successfully',
             'operator' => $operator->load('user', 'vrCompany'), // Ensure latest data is returned
         ]);
     }
-    
+
     /**
      * Remove an operator.
      */
     public function destroy(Operator $operator)
 {
     if ($operator->user) {
-        $operator->user->delete(); 
+        $operator->user->delete();
     }
 
     $operator->delete();
