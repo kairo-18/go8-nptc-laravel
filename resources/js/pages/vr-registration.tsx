@@ -14,12 +14,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-
 export default function VrRegistration({ companies }) {
-
     const [activeTab, setActiveTab] = useState('tempoAccountTab');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    console.log(companies);
 
     const TabContent = ({ value, title, description }: { value: string; title: string; description?: string }) => (
         <TabsContent value={value} className="w-full rounded-sm border border-gray-300 p-2">
@@ -28,9 +25,17 @@ export default function VrRegistration({ companies }) {
                 {description && <p className="text-sm text-gray-600">{description}</p>}
             </div>
             <Separator className="my-2" />
-            {value === 'tempoAccountTab' ? <TemporaryAccountTabContent setIsDialogOpen={setIsDialogOpen} /> : <ApplicationStatusTabContent companies={[companies]} onSelectCompany={function (companyId: number): void {
-                throw new Error('Function not implemented.');
-            } } companiesWithMedia={[]} />}
+            {value === 'tempoAccountTab' ? (
+                <TemporaryAccountTabContent setIsDialogOpen={setIsDialogOpen} />
+            ) : (
+                <ApplicationStatusTabContent
+                    companies={[companies]}
+                    onSelectCompany={function (companyId: number): void {
+                        throw new Error('Function not implemented.');
+                    }}
+                    companiesWithMedia={[]}
+                />
+            )}
         </TabsContent>
     );
 

@@ -15,9 +15,10 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin'])->gro
             'users' => \App\Models\User::role('NPTC Admin')->get()
         ]);
     })->name('nptc-admins');
+
     Route::get('pending', function () {
         return Inertia::render('pending');
-         })->name('pending');
+    })->name('pending');
 
     Route::post('create-nptc-admin', [NptcAdminController::class, 'createNPTCAdmin'])
         ->name('create-nptc-admin');
@@ -30,22 +31,16 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin'])->gro
 
     Route::get('vr-registration', function () {
         return Inertia::render('vr-registration', [
-            'companies' => \App\Models\VRCompany::where("Status", "Pending")->get(),
-    ]);
-        })->name('vr-registration');
+            'companies' => \App\Models\VRCompany::where("Status", "Pending")->get()->makeHidden(['created_at', 'updated_at', "owner", "operators"]),
+        ]);
+    })->name('vr-registration');
 
 });
 
-Route::group(
-    ['middleware' => ['role:Temp User|NPTC Admin|NPTC Super Admin']], function () {
-        Route::get(
-            'registration', function () {
-                return Inertia::render(
-                    'registration', [
-                    'companies' => \App\Models\VRCompany::all(),
-                    ]
-                );
-            }
-        )->name('registration');
-    }
-);
+Route::group(['middleware' => ['role:Temp User|NPTC Admin|NPTC Super Admin']], function () {
+    Route::get('registration', function () {
+        return Inertia::render('registration', [
+            'companies' => \App\Models\VRCompany::all(),
+        ]);
+    })->name('registration');
+});

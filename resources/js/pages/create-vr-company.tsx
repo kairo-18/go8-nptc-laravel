@@ -3,9 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
-import MainLayout from '@/pages/mainLayout';
-import { useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 interface CreateVrCompanyProps {
     companies: { id: number; BusinessPermitNumber: string }[];
@@ -18,7 +16,16 @@ interface CreateVrCompanyProps {
     onSubmitRef?: (submitFn: () => void) => void; // Add this prop
 }
 
-export default function CreateVrCompany({ companies, onNextTab, isTitleDisabled, isButtonDisabled, setCompanyData, companyData, isEditing, onSubmitRef }: CreateVrCompanyProps) {
+export default function CreateVrCompany({
+    companies,
+    onNextTab,
+    isTitleDisabled,
+    isButtonDisabled,
+    setCompanyData,
+    companyData,
+    isEditing,
+    onSubmitRef,
+}: CreateVrCompanyProps) {
     const { data, setData, post, put, patch, progress, transform } = useForm({
         oldCompanyName: '',
         CompanyName: '',
@@ -44,7 +51,6 @@ export default function CreateVrCompany({ companies, onNextTab, isTitleDisabled,
             }));
         }
     }, [isEditing, companyData]);
-
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -158,10 +164,13 @@ export default function CreateVrCompany({ companies, onNextTab, isTitleDisabled,
                             </div>
                             <div>
                                 <Label htmlFor="CompanyName">Company Name</Label>
-                                <Input id="CompanyName" value={data.CompanyName} onChange={(e) => {
-                                    setData({ ...data, 'CompanyName': e.target.value });
-
-                                }} />
+                                <Input
+                                    id="CompanyName"
+                                    value={data.CompanyName}
+                                    onChange={(e) => {
+                                        setData({ ...data, CompanyName: e.target.value });
+                                    }}
+                                />
                                 {errors.CompanyName && <p className="text-sm text-red-500">{errors.CompanyName}</p>}
                             </div>
                         </div>
