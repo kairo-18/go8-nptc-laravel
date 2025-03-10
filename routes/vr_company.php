@@ -17,5 +17,4 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin'])->gro
     Route::get('preview-media/{mediaId}', [VRCompanyController::class, 'previewMedia'])
         ->name('preview-media');
 
-    Route::post('vr-company.store', [VRCompanyController::class, 'store'])->name('vr-company.store');
 });

@@ -54,8 +54,6 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin'])->gro
         ]);
     })->name('create-vr-admin');
 
-    Route::post('vr-admins.store', [VRAdminController::class, 'store'])
-        ->name('vr-admins.store');
     });
 
 });
