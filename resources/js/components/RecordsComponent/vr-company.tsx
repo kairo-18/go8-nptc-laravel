@@ -28,7 +28,7 @@ export default function Company({ companies, companiesWithMedia, onSelectCompany
     // Define primary, secondary, and other columns
     const primaryColumns = ['id', 'CompanyName'];
     const otherColumns = companyHeaders.filter((key) => !primaryColumns.includes(key) && key !== 'Status');
-    
+
     // Arrange columns with hierarchy
     const orderedHeaders = [...primaryColumns, ...otherColumns];
 
@@ -41,24 +41,14 @@ export default function Company({ companies, companiesWithMedia, onSelectCompany
             entityType: 'companies',
             statusColumns: ['Status'],
             onViewFiles: handleViewFiles, // Pass view function
-        }
+        },
     );
 
     return (
         <>
-            <DataTable 
-                data={transformedCompanies} 
-                columns={columns} 
-                ColumnFilterName="CompanyName" 
-                onRowClick={(row) => onSelectCompany(row.id)} 
-            />
+            <DataTable data={transformedCompanies} columns={columns} ColumnFilterName="CompanyName" onRowClick={(row) => onSelectCompany(row.id)} />
 
-            <CompanyFiles 
-                selectedCompany={selectedCompany} 
-                companiesWithMedia={companiesWithMedia} 
-                open={open} 
-                setOpen={setOpen} 
-            />
+            <CompanyFiles selectedCompany={selectedCompany} companiesWithMedia={companiesWithMedia} open={open} setOpen={setOpen} />
         </>
     );
 }

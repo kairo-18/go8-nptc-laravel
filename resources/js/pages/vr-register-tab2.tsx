@@ -1,44 +1,46 @@
-import { SetStateAction, useState } from 'react';
+import { useState } from 'react';
 import { generateColumns } from '../components/RecordsComponent/columns';
 import { DataTable } from '../components/RecordsComponent/data-table';
-import CompanyFiles from '../components/RecordsComponent/vr-company-files'; // Import CompanyFiles component
 
 interface CompanyProps {
     companies: { id: number; BusinessPermitNumber: string; CompanyName: string; media?: any[] }[];
     companiesWithMedia: { id: number; media: any[] }[];
-    onSelectCompany: (companyId: number) => void; // Update to pass the company ID
 }
 
-const ApplicationStatusTabContent = ({ companies, companiesWithMedia, onSelectCompany }: CompanyProps) => {
-    const [selectedCompany, setSelectedCompany] = useState(null);
+const ApplicationStatusTabContent = ({ companies, companiesWithMedia }: CompanyProps) => {
     const [open, setOpen] = useState(false);
 
-    const handleViewFiles = (company: SetStateAction<null>) => {
-        setSelectedCompany(company);
-        setOpen(true);
-    };
+    const formattedCompanies = companies.length > 0 ? companies[0] : [];
+    const transformedCompanies = formattedCompanies.map((company) => ({
+        ...company,
+        CompanyName: `${company.Status ? `${company.Status} ` : ''}${company.CompanyName}`,
+    }));
 
-    const companyHeaders =
-        companies.length > 0
-            ? Object.keys(companies[0]).map((key) => ({
-                  key,
-                  label: key.replace(/([A-Z])/g, ' $1').trim(),
-              }))
-            : [];
+    const companyHeaders = companies.length > 0 ? Object.keys(companies[0][0]) : [];
 
-    const columns = generateColumns(companyHeaders, {
-        entityType: 'companies',
-        statusColumns: ['Status'],
-        onViewFiles: handleViewFiles, // Pass view function
-    });
+    // Define primary, secondary, and other columns
+    const primaryColumns = ['id', 'CompanyName'];
+    const otherColumns = companyHeaders.filter((key) => !primaryColumns.includes(key) && key !== 'Status');
+
+    // Arrange columns with hierarchy
+    const orderedHeaders = [...primaryColumns, ...otherColumns];
+
+    const columns = generateColumns(
+        orderedHeaders.map((key) => ({
+            key,
+            label: key.replace(/([A-Z])/g, ' $1').trim(),
+        })),
+        {
+            entityType: 'companies',
+            statusColumns: ['Status'],
+        },
+    );
 
     return (
         <>
-            <DataTable data={companies} columns={columns} ColumnFilterName="CompanyName" />
-
-            <CompanyFiles selectedCompany={selectedCompany} companiesWithMedia={companiesWithMedia} open={open} setOpen={setOpen} />
+            <DataTable data={transformedCompanies} columns={columns} ColumnFilterName="CompanyName" onRowClick={(row) => onSelectCompany(row.id)} />
         </>
     );
 };
 
-export default ApplicationStatusTabContent
+export default ApplicationStatusTabContent;
