@@ -18,14 +18,16 @@ const mainNavItems: NavItem[] = [
         icon: Folder,
     },
     {
-        title: 'VR Temp Acc Registration',
-        url: '/vr-registration',
-        icon: BadgePlus,
-    },
-    {
         title: 'VR Registration',
         url: '/registration',
         icon: UserPlus,
+            children: [
+                {
+                    title: 'Temp Acc Registration',
+                    url: '/vr-registration',
+                    icon: BadgePlus,
+                },
+            ],
     },
     {
         title: 'Pending',
@@ -34,25 +36,26 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Records',
-        url: '/vr-owner', // Route where VR Owners list will be displayed
-        icon: BookUser, // Icon representing "Records"
+        url: '/vr-owner',
+        icon: BookUser,
     },
     {
         title: 'Billings',
-        url: '', // Route
+        url: '',
         icon: Receipt,
     },
     {
         title: 'Bookings',
-        url: '', // Route
+        url: '',
         icon: Wallet,
     },
     {
         title: 'Notifications',
-        url: '', // Route
+        url: '',
         icon: Mail,
     },
 ];
+
 
 export function AppSidebar() {
     const { props } = usePage();
