@@ -44,9 +44,6 @@ class VrContactsController extends Controller
             return response()->json(['errors' => $errors], 422);
         }
 
-        if(Auth::user()->hasRole(['Temp User'])){
-            Auth::logout();
-        }
     }
 
     public function store(Request $request)
@@ -144,6 +141,11 @@ class VrContactsController extends Controller
         }
 
         \Log::info('Updated contacts:', $contacts);
+
+        if(Auth::user()->hasRole(['Temp User'])){
+            Auth::logout();
+            redirect()->route('login');
+        }
     }
 
 }
