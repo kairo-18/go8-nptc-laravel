@@ -4,8 +4,8 @@ import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import MainLayout from './mainLayout';
-import TemporaryAccountTabContent from './vr-register-tab1.tsx';
-import ApplicationStatusTabContent from './vr-register-tab2.tsx';
+import TemporaryAccountTabContent from './vr-register-tab1';
+import ApplicationStatusTabContent from './vr-register-tab2';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -14,7 +14,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
+
 export default function VrRegistration({ companies }) {
+
     const [activeTab, setActiveTab] = useState('tempoAccountTab');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     console.log(companies);
@@ -26,7 +28,9 @@ export default function VrRegistration({ companies }) {
                 {description && <p className="text-sm text-gray-600">{description}</p>}
             </div>
             <Separator className="my-2" />
-            {value === 'tempoAccountTab' ? <TemporaryAccountTabContent setIsDialogOpen={setIsDialogOpen} /> : <ApplicationStatusTabContent />}
+            {value === 'tempoAccountTab' ? <TemporaryAccountTabContent setIsDialogOpen={setIsDialogOpen} /> : <ApplicationStatusTabContent companies={[companies]} onSelectCompany={function (companyId: number): void {
+                throw new Error('Function not implemented.');
+            } } companiesWithMedia={[]} />}
         </TabsContent>
     );
 
