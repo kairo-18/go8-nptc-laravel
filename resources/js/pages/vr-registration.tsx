@@ -14,9 +14,10 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function VrRegistration() {
+export default function VrRegistration({ companies }) {
     const [activeTab, setActiveTab] = useState('tempoAccountTab');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    console.log(companies);
 
     const TabContent = ({ value, title, description }: { value: string; title: string; description?: string }) => (
         <TabsContent value={value} className="w-full rounded-sm border border-gray-300 p-2">
