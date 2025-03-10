@@ -28,9 +28,11 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin'])->gro
     Route::delete('delete-nptc-admin', [NptcAdminController::class, 'destroy'])
         ->name('delete-nptc-admin');
 
-        Route::get('vr-registration', function () {
-            return Inertia::render('vr-registration');
-            })->name('vr-registration');
+    Route::get('vr-registration', function () {
+        return Inertia::render('vr-registration', [
+            'companies' => \App\Models\VRCompany::where("Status", "Pending")->get(),
+    ]);
+        })->name('vr-registration');
 
 });
 

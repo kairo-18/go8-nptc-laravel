@@ -14,11 +14,9 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-interface VrRegistrationProps {
-    companies: any; // Replace 'any' with the appropriate type if known
-}
 
-export default function VrRegistration({ companies }: VrRegistrationProps) {
+export default function VrRegistration({ companies }) {
+
     const [activeTab, setActiveTab] = useState('tempoAccountTab');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     console.log(companies);
