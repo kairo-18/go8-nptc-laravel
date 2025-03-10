@@ -21,61 +21,72 @@ class DriverController extends Controller
     {
         // Validate input fields and file uploads
         $validatedData = $request->validate([
-            'user.username' => 'required|string|unique:users,username',
-            'user.email' => 'required|email|unique:users,email',
-            'user.FirstName' => 'required|string',
-            'user.LastName' => 'required|string',
-            'user.Address' => 'required|string',
-            'user.BirthDate' => 'required|date',
-            'user.ContactNumber' => 'required|string',
-            'user.password' => 'required|string|min:6',
-
-            'driver.operator_id' => 'required|exists:operators,id',
-            'driver.vr_company_id' => 'required|exists:vr_companies,id',
-            'driver.vehicle_id' => 'nullable|exists:vehicles,id',
-            'driver.LicenseNumber' => 'nullable|string|unique:drivers,LicenseNumber',
+            'username' => 'required|string|unique:users,username',
+            'email' => 'required|email|unique:users,email',
+            'FirstName' => 'required|string',
+            'LastName' => 'required|string',
+            'Address' => 'required|string',
+            'BirthDate' => 'required|date',
+            'ContactNumber' => 'required|string',
+            'password' => 'required|string|min:6',
+    
+            'operator_id' => 'required|exists:operators,id',
+            'vr_company_id' => 'required|exists:vr_companies,id',
+            'vehicle_id' => 'nullable|exists:vehicles,id',
+            'LicenseNumber' => 'nullable|string|unique:drivers,LicenseNumber',
             
-            'driver.License' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'driver.Photo' => 'nullable|file|mimes:jpg,png|max:1024',
-            'driver.NBI_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'driver.Police_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'driver.BIR_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'License' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'Photo' => 'nullable|file|mimes:jpg,png|max:1024',
+            'NBI_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'Police_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'BIR_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
         ]);
-
+    
         // Create the user
         $user = User::create([
-            'username' => $validatedData['user']['username'],
-            'email' => $validatedData['user']['email'],
-            'FirstName' => $validatedData['user']['FirstName'],
-            'LastName' => $validatedData['user']['LastName'],
-            'Address' => $validatedData['user']['Address'],
-            'BirthDate' => $validatedData['user']['BirthDate'],
-            'ContactNumber' => $validatedData['user']['ContactNumber'],
-            'password' => Hash::make($validatedData['user']['password']),
+            'username' => $validatedData['username'],
+            'email' => $validatedData['email'],
+            'FirstName' => $validatedData['FirstName'],
+            'LastName' => $validatedData['LastName'],
+            'Address' => $validatedData['Address'],
+            'BirthDate' => $validatedData['BirthDate'],
+            'ContactNumber' => $validatedData['ContactNumber'],
+            'password' => Hash::make($validatedData['password']),
         ]);
-
+    
         $user->assignRole('Driver');
-
+    
         $driver = $user->driver()->create([
-            'operator_id' => $validatedData['driver']['operator_id'],
-            'vr_company_id' => $validatedData['driver']['vr_company_id'],
-            'LicenseNumber' => $validatedData['driver']['LicenseNumber']??null,
+            'operator_id' => $validatedData['operator_id'],
+            'vr_company_id' => $validatedData['vr_company_id'],
+            'LicenseNumber' => $validatedData['LicenseNumber'] ?? null,
             'Status' => 'Pending',
         ]);
-
+    
         // File uploads
-        if ($request->hasFile('driver.License')) {
-            $driver->addMediaFromRequest('driver.License')->toMediaCollection('license', 'private');
+        if ($request->hasFile('License')) {
+            $driver->addMediaFromRequest('License')->toMediaCollection('license', 'private');
         }
-        if ($request->hasFile('driver.Photo')) {
-            $driver->addMediaFromRequest('driver.Photo')->toMediaCollection('photo', 'private');
+        if ($request->hasFile('Photo')) {
+            $driver->addMediaFromRequest('Photo')->toMediaCollection('photo', 'private');
         }
-        if ($request->hasFile('driver.NBI_clearance')) {
-            $driver->addMediaFromRequest('driver.NBI_clearance')->toMediaCollection('nbi_clearance', 'private');
+        if ($request->hasFile('NBI_clearance')) {
+            $driver->addMediaFromRequest('NBI_clearance')->toMediaCollection('nbi_clearance', 'private');
         }
-
-        return response()->json(['message' => 'Driver created successfully', 'user' => $user,'driver' => $driver], 201);
+        if ($request->hasFile('Police_clearance')) {
+            $driver->addMediaFromRequest('Police_clearance')->toMediaCollection('police_clearance', 'private');
+        }
+        if ($request->hasFile('BIR_clearance')) {
+            $driver->addMediaFromRequest('BIR_clearance')->toMediaCollection('bir_clearance', 'private');
+        }
+    
+        return response()->json([
+            'message' => 'Driver created successfully',
+            'user' => $user,
+            'driver' => $driver
+        ], 201);
     }
+    
 
     public function downloadMedia($mediaId)
     {
@@ -108,67 +119,64 @@ class DriverController extends Controller
     public function update(Request $request, Driver $driver)
 {
     $validatedData = $request->validate([
-        'user.username' => 'sometimes|string|unique:users,username,' . $driver->user_id,
-        'user.email' => 'sometimes|email|unique:users,email,' . $driver->user_id,
-        'user.FirstName' => 'sometimes|string',
-        'user.LastName' => 'sometimes|string',
-        'user.Address' => 'sometimes|string',
-        'user.BirthDate' => 'sometimes|date',
-        'user.ContactNumber' => 'sometimes|string',
-        'user.password' => 'nullable|string|min:6',
+        'username' => 'sometimes|string|unique:users,username,' . $driver->user_id,
+        'email' => 'sometimes|email|unique:users,email,' . $driver->user_id,
+        'FirstName' => 'sometimes|string',
+        'LastName' => 'sometimes|string',
+        'Address' => 'sometimes|string',
+        'BirthDate' => 'sometimes|date',
+        'ContactNumber' => 'sometimes|string',
+        'password' => 'nullable|string|min:6',
 
-        'driver.operator_id' => 'sometimes|exists:operators,id',
-        'driver.vr_company_id' => 'sometimes|exists:vr_companies,id',
-        'driver.Status' => 'sometimes|in:Pending,Approved,Rejected',
-        'driver.LicenseNumber' => 'sometimes|string|unique:drivers,LicenseNumber,' . $driver->id,
+        'operator_id' => 'sometimes|exists:operators,id',
+        'vr_company_id' => 'sometimes|exists:vr_companies,id',
+        'Status' => 'sometimes|in:Pending,Approved,Rejected',
+        'LicenseNumber' => 'sometimes|string|unique:drivers,LicenseNumber,' . $driver->id,
 
-        // File validations
-        'driver.License' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-        'driver.Photo' => 'nullable|file|mimes:jpg,png|max:2048',
-        'driver.NBI_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-        'driver.Police_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-        'driver.BIR_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+        'License' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+        'Photo' => 'nullable|file|mimes:jpg,png|max:2048',
+        'NBI_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+        'Police_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+        'BIR_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
     ]);
 
-    // Update user details if provided
-    if (isset($validatedData['user'])) {
-        $driver->user->update([
-            'username' => $validatedData['user']['username'] ?? $driver->user->username,
-            'email' => $validatedData['user']['email'] ?? $driver->user->email,
-            'FirstName' => $validatedData['user']['FirstName'] ?? $driver->user->FirstName,
-            'LastName' => $validatedData['user']['LastName'] ?? $driver->user->LastName,
-            'Address' => $validatedData['user']['Address'] ?? $driver->user->Address,
-            'BirthDate' => $validatedData['user']['BirthDate'] ?? $driver->user->BirthDate,
-            'ContactNumber' => $validatedData['user']['ContactNumber'] ?? $driver->user->ContactNumber,
-            'password' => isset($validatedData['user']['password']) 
-                ? Hash::make($validatedData['user']['password']) 
-                : $driver->user->password,
-        ]);
-    }
+    // Update User Details
+    $driver->user->update([
+        'username' => $validatedData['username'] ?? $driver->user->username,
+        'email' => $validatedData['email'] ?? $driver->user->email,
+        'FirstName' => $validatedData['FirstName'] ?? $driver->user->FirstName,
+        'LastName' => $validatedData['LastName'] ?? $driver->user->LastName,
+        'Address' => $validatedData['Address'] ?? $driver->user->Address,
+        'BirthDate' => $validatedData['BirthDate'] ?? $driver->user->BirthDate,
+        'ContactNumber' => $validatedData['ContactNumber'] ?? $driver->user->ContactNumber,
+        'password' => isset($validatedData['password']) 
+            ? Hash::make($validatedData['password']) 
+            : $driver->user->password,
+    ]);
 
-    // Update driver details
+    // Update Driver Details
     $driver->update([
-        'LicenseNumber' => $validatedData['driver']['LicenseNumber'] ?? $driver->LicenseNumber,
-        'operator_id' => $validatedData['driver']['operator_id'] ?? $driver->operator_id,
-        'vr_company_id' => $validatedData['driver']['vr_company_id'] ?? $driver->vr_company_id,
-        'Status' => $validatedData['driver']['Status'] ?? $driver->Status,
+        'LicenseNumber' => $validatedData['LicenseNumber'] ?? $driver->LicenseNumber,
+        'operator_id' => $validatedData['operator_id'] ?? $driver->operator_id,
+        'vr_company_id' => $validatedData['vr_company_id'] ?? $driver->vr_company_id,
+        'Status' => $validatedData['Status'] ?? $driver->Status,
     ]);
 
-    // Handle file uploads
-    if ($request->hasFile('driver.License')) {
-        $driver->addMediaFromRequest('driver.License')->toMediaCollection('license', 'private');
+    // Handle File Uploads
+    if ($request->hasFile('License')) {
+        $driver->addMediaFromRequest('License')->toMediaCollection('license', 'private');
     }
-    if ($request->hasFile('driver.Photo')) {
-        $driver->addMediaFromRequest('driver.Photo')->toMediaCollection('photo', 'private');
+    if ($request->hasFile('Photo')) {
+        $driver->addMediaFromRequest('Photo')->toMediaCollection('photo', 'private');
     }
-    if ($request->hasFile('driver.NBI_clearance')) {
-        $driver->addMediaFromRequest('driver.NBI_clearance')->toMediaCollection('nbi_clearance', 'private');
+    if ($request->hasFile('NBI_clearance')) {
+        $driver->addMediaFromRequest('NBI_clearance')->toMediaCollection('nbi_clearance', 'private');
     }
-    if ($request->hasFile('driver.Police_clearance')) {
-        $driver->addMediaFromRequest('driver.Police_clearance')->toMediaCollection('nbi_clearance', 'private');
+    if ($request->hasFile('Police_clearance')) {
+        $driver->addMediaFromRequest('Police_clearance')->toMediaCollection('police_clearance', 'private');
     }
-    if ($request->hasFile('driver.BIR_clearance')) {
-        $driver->addMediaFromRequest('driver.BIR_clearance')->toMediaCollection('nbi_clearance', 'private');
+    if ($request->hasFile('BIR_clearance')) {
+        $driver->addMediaFromRequest('BIR_clearance')->toMediaCollection('bir_clearance', 'private');
     }
 
     return response()->json([
@@ -176,6 +184,7 @@ class DriverController extends Controller
         'driver' => $driver->load('user', 'vrCompany', 'operator'),
     ]);
 }
+
 
     public function destroy(Driver $driver)
     {
