@@ -14,6 +14,7 @@ interface CreateVrAdminProps {
     setAdminData: (data: any) => void;
     adminData: any;
     isEditing: boolean;
+    isEditing2: boolean;
     onSubmitRef?: (submitFn: () => void) => void;
 }
 
@@ -25,6 +26,7 @@ export default function CreateVrAdmin({
     setAdminData,
     adminData,
     isEditing,
+    isEditing2,
     onSubmitRef,
 }: CreateVrAdminProps) {
     const { data, setData, post, patch } = useForm({
@@ -73,8 +75,11 @@ export default function CreateVrAdmin({
         } else {
             post(route('vr-admins.store'), {
                 onSuccess: () => {
-                    setAdminData(data);
-                    onNextTab();
+                    if (!isEditing2) {
+                        setAdminData(data);
+                        onNextTab();
+                    }
+
                     console.log(data);
                 },
                 onError: (errors) => {

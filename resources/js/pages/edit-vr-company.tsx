@@ -254,7 +254,7 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
                         )}
                         <CardContent>
                             {!adminData ? (
-                                <CreateVrAdmin companies={companies} isButtonDisabled={false} />
+                                <CreateVrAdmin companies={companies} isButtonDisabled={false} isEditing={false} isEditing2={true} />
                             ) : (
                                 <>
                                     <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
