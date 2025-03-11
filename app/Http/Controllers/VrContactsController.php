@@ -21,6 +21,7 @@ class VrContactsController extends Controller
     {
         $contacts = $request->contacts;
         $errors = [];
+        $createdContacts = [];
 
         foreach ($contacts as $index => $contactData) {
             $validator = \Illuminate\Support\Facades\Validator::make($contactData, [
@@ -36,13 +37,16 @@ class VrContactsController extends Controller
             if ($validator->fails()) {
                 $errors["contacts.$index"] = $validator->errors()->toArray();
             } else {
-                VrContacts::create($contactData);
+                $createdContact = VrContacts::create($contactData);
+                $createdContacts[] = $createdContact;
             }
         }
 
         if (!empty($errors)) {
             return response()->json(['errors' => $errors], 422);
         }
+
+        return response()->json(['contacts' => $createdContacts]);
 
     }
 
@@ -103,6 +107,9 @@ class VrContactsController extends Controller
     public function updateMultiple(Request $request){
         $contacts = $request->contacts;
         $errors = [];
+        $updatedContacts = [];
+
+        \Log::info('Updating info:', request()->all());
 
         foreach ($contacts as $index => $contactData) {
             $rules = [
@@ -116,7 +123,7 @@ class VrContactsController extends Controller
             ];
 
             // Add 'id' validation only if the contact is being updated
-            if (isset($contactData['id'])) {
+            if (!empty($contactData['id'])) {
                 $rules['id'] = 'required|integer|exists:vr_contacts,id';
             }
 
@@ -125,13 +132,15 @@ class VrContactsController extends Controller
             if ($validator->fails()) {
                 $errors["contacts.$index"] = $validator->errors()->toArray();
             } else {
-                if (isset($contactData['id'])) {
+                if (!empty($contactData['id'])) {
                     // Update existing contact
                     $vrContact = VrContacts::findOrFail($contactData['id']);
                     $vrContact->update($contactData);
+                    $updatedContacts[] = $vrContact; // Store updated contact
                 } else {
                     // Create new contact
-                    VrContacts::create($contactData);
+                    $createdContact = VrContacts::create($contactData);
+                    $updatedContacts[] = $createdContact; // Store new contact too
                 }
             }
         }
@@ -142,9 +151,11 @@ class VrContactsController extends Controller
 
         \Log::info('Updated contacts:', $contacts);
 
+        return response()->json(['contacts' => $updatedContacts]);
+
         if(Auth::user()->hasRole(['Temp User'])){
             Auth::logout();
-            redirect()->route('login');
+            return redirect()->route('login');
         }
     }
 
