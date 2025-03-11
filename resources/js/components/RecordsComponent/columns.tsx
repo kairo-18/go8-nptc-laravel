@@ -10,6 +10,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { router } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import { ArrowUpDown, MoreHorizontal } from 'lucide-react';
 
@@ -106,7 +107,7 @@ export const generateColumns = (
                                     <DropdownMenuItem
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            alert(`Editing Company: ${data.CompanyName}`);
+                                            router.visit(`/vr-company/edit/${data.id}`);
                                         }}
                                     >
                                         Edit Company

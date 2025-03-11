@@ -33,12 +33,24 @@ class VRCompany extends Model implements HasMedia
 
     public function contacts()
     {
-        return $this->hasOne(VrContacts::class);
+        return $this->hasMany(VrContacts::class, 'vr_company_id');
     }
 
     public function driver()
     {
         return $this->hasMany(Driver::class);
+    }
+
+    public function getMediaUrlsAttribute()
+    {
+        return $this->media->map(function ($media) {
+            return [
+                'id' => $media->id,
+                'name' => $media->name,
+                'mime_type' => $media->mime_type,
+                'url' => $media->getUrl(),
+            ];
+        });
     }
 
 }

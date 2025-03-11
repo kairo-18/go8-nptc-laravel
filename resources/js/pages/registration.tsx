@@ -2,8 +2,8 @@ import { useState } from 'react';
 import CreateVrAdmin from './create-vr-admin';
 import CreateVrCompany from './create-vr-company';
 import CreateVrContacts from './create-vr-contacts';
-import Summary from './summary';
 import MainLayout from './mainLayout';
+import Summary from './summary';
 
 export default function Registration({ companies }: { companies: { id: number; BusinessPermitNumber: string }[] }) {
     const [activeTab, setActiveTab] = useState('company');
@@ -22,7 +22,7 @@ export default function Registration({ companies }: { companies: { id: number; B
         if (activeTab === 'company' || activeTab === 'owner' || activeTab === 'contacts') return false;
         else if (activeTab === 'summary') return true;
         else return false;
-    }
+    };
 
     return (
         <MainLayout breadcrumbs={[{ title: 'Registration', href: '/registration' }]}>
@@ -49,10 +49,50 @@ export default function Registration({ companies }: { companies: { id: number; B
                 </div>
 
                 {/* Tab Content */}
-                {activeTab === 'company' && <CreateVrCompany companies={companies} onNextTab={goToNextTab} isTitleDisabled={checkDisable()} isButtonDisabled={checkDisable()} setCompanyData={setCompanyData} companyData={companyData} isEditing={false} />}
-                {activeTab === 'owner' && <CreateVrAdmin companies={companies} onNextTab={goToNextTab} isTitleDisabled={checkDisable()} isButtonDisabled={checkDisable()} setAdminData={setAdminData} adminData={adminData} isEditing={false} />}
-                {activeTab === 'contacts' && <CreateVrContacts companies={companies} onNextTab={goToNextTab} isTitleDisabled={checkDisable()} isButtonDisabled={checkDisable()} setContactsData={setContactsData} contactsData={contactsData} isEditing={false} />}
-                {activeTab === 'summary' && <Summary companies={companies} companyData={companyData} adminData={adminData} contactsData={contactsData} isTitleDisabled={checkDisable()} isButtonDisabled={checkDisable()} setIsEditing={setIsEditing} />}
+                {activeTab === 'company' && (
+                    <CreateVrCompany
+                        companies={companies}
+                        onNextTab={goToNextTab}
+                        isTitleDisabled={checkDisable()}
+                        isButtonDisabled={checkDisable()}
+                        setCompanyData={setCompanyData}
+                        companyData={companyData}
+                        isEditing={false}
+                    />
+                )}
+                {activeTab === 'owner' && (
+                    <CreateVrAdmin
+                        companies={companies}
+                        onNextTab={goToNextTab}
+                        isTitleDisabled={checkDisable()}
+                        isButtonDisabled={checkDisable()}
+                        setAdminData={setAdminData}
+                        adminData={adminData}
+                        isEditing={false}
+                    />
+                )}
+                {activeTab === 'contacts' && (
+                    <CreateVrContacts
+                        companies={companies}
+                        onNextTab={goToNextTab}
+                        isTitleDisabled={checkDisable()}
+                        isButtonDisabled={checkDisable()}
+                        setContactsData={setContactsData}
+                        contactsData={contactsData}
+                        isEditing={false}
+                    />
+                )}
+                {activeTab === 'summary' && (
+                    <Summary
+                        companies={companies}
+                        companyData={companyData}
+                        adminData={adminData}
+                        contactsData={contactsData}
+                        isTitleDisabled={checkDisable()}
+                        isButtonDisabled={checkDisable()}
+                        setIsEditing={setIsEditing}
+                    />
+                )}
             </div>
         </MainLayout>
     );

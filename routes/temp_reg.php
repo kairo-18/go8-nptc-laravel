@@ -28,8 +28,10 @@ Route::group(
             ->name('vr-admins.store');
 
         Route::patch('vr-admins.update', [VRAdminController::class, 'update'])->name('vr-admins.update');
+
         Route::patch('vr-company.update', [VRCompanyController::class, 'update'])
             ->name('vr-company.update');
+
         Route::post('vr-company.upload-files', [VRCompanyController::class, 'uploadMedia'])->name('vr-company.upload-files');
 
         Route::patch('vr-contacts.update', [VrContactsController::class, 'update'])->name('vr-contacts.update');

@@ -17,4 +17,9 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin'])->gro
     Route::get('preview-media/{mediaId}', [VRCompanyController::class, 'previewMedia'])
         ->name('preview-media');
 
+    Route::get('/vr-company/edit/{id}', [VRCompanyController::class, 'editView'])->name('company.edit');
+
+    //route for edit function in the controller vrcompany
+    Route::patch('vr-company/edit', [VRCompanyController::class, 'edit'])->name('company.update');
+
 });

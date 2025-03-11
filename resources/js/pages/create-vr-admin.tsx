@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface CreateVrAdminProps {
     companies: { id: number; BusinessPermitNumber: string }[];
@@ -17,7 +17,16 @@ interface CreateVrAdminProps {
     onSubmitRef?: (submitFn: () => void) => void;
 }
 
-export default function CreateVrAdmin({ companies, onNextTab, isTitleDisabled, isButtonDisabled, setAdminData, adminData, isEditing, onSubmitRef }: CreateVrAdminProps) {
+export default function CreateVrAdmin({
+    companies,
+    onNextTab,
+    isTitleDisabled,
+    isButtonDisabled,
+    setAdminData,
+    adminData,
+    isEditing,
+    onSubmitRef,
+}: CreateVrAdminProps) {
     const { data, setData, post, patch } = useForm({
         vr_company_id: adminData?.vr_company_id || '',
         username: adminData?.username || '',
@@ -85,7 +94,7 @@ export default function CreateVrAdmin({ companies, onNextTab, isTitleDisabled, i
 
     useEffect(() => {
         if (onSubmitRef) {
-            onSubmitRef(() => handleSubmit({ preventDefault: () => { } } as React.FormEvent));
+            onSubmitRef(() => handleSubmit({ preventDefault: () => {} } as React.FormEvent));
         }
     }, [handleSubmit]);
 
@@ -108,10 +117,7 @@ export default function CreateVrAdmin({ companies, onNextTab, isTitleDisabled, i
                         <div className="grid grid-cols-2 gap-4">
                             <div>
                                 <Label htmlFor="vr_company_id">Select VR Company</Label>
-                                <Select
-                                    value={String(data.vr_company_id)}
-                                    onValueChange={(value) => setData('vr_company_id', value)}
-                                >
+                                <Select value={String(data.vr_company_id)} onValueChange={(value) => setData('vr_company_id', value)}>
                                     <SelectTrigger>
                                         <SelectValue placeholder="Select a company" />
                                     </SelectTrigger>

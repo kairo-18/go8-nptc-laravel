@@ -38,7 +38,7 @@ const ApplicationStatusTabContent = ({ companies, companiesWithMedia }: CompanyP
 
     return (
         <>
-            <DataTable data={transformedCompanies} columns={columns} ColumnFilterName="CompanyName" onRowClick={(row) => onSelectCompany(row.id)} />
+            <DataTable data={transformedCompanies} columns={columns} ColumnFilterName="CompanyName" />
         </>
     );
 };

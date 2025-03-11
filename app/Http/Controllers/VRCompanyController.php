@@ -97,6 +97,22 @@ class VRCompanyController extends Controller
         );
     }
 
+    public function edit(Request $request){
+        $validated = $request->validate([
+            'CompanyName' => 'sometimes|string',
+            'BusinessPermitNumber' => 'sometimes|integer',
+        ]);
+
+        $vrCompany = VRCompany::find($request->id);
+
+        $vrCompany->update([
+            'CompanyName' => $request->CompanyName,
+            'BusinessPermitNumber' => $request->BusinessPermitNumber,
+        ]);
+
+        return response()->json(['Success' => 'Updated Succesfully'], 200);
+    }
+
     public function update(Request $request)
     {
         \Log::info('Update Request Data:', $request->all());
@@ -141,7 +157,9 @@ class VRCompanyController extends Controller
     {
         \Log::info('Uploading media files', $request->all());
 
+        // Validate request
         $request->validate([
+            'vr_company_id' => 'nullable|integer|exists:vr_companies,id',
             'oldCompanyName' => 'sometimes|string',
             'BusinessPermit' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
             'BIR_2303' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
@@ -150,10 +168,16 @@ class VRCompanyController extends Controller
             'SalesInvoice' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
         ]);
 
-        $vrCompany = VRCompany::where('CompanyName', $request->oldCompanyName)->first();
+        // Find company using vr_company_id or oldCompanyName
+        $vrCompany = $request->vr_company_id
+            ? VRCompany::find($request->vr_company_id)
+            : VRCompany::where('CompanyName', $request->oldCompanyName)->first();
+
         if (!$vrCompany) {
             return response()->json(['error' => 'Company not found for File Uploads'], 404);
         }
+
+        \Log::info("Company found: {$vrCompany->CompanyName}");
 
         // Upload media files
         $files = [
@@ -165,16 +189,39 @@ class VRCompanyController extends Controller
         ];
 
         foreach ($files as $fileKey => $collection) {
-            \log::info("Reached");
             if ($request->hasFile($fileKey)) {
-                \Log::info("Uploading new file for: " . $fileKey);
+                \Log::info("Uploading new file for: {$fileKey}");
+
+                // Clear existing media
                 $vrCompany->clearMediaCollection($collection);
+
+                // Upload new file
                 $mediaItem = $vrCompany->addMediaFromRequest($fileKey)->toMediaCollection($collection, 'private');
-                \Log::info("Uploaded file for {$fileKey}: " . $mediaItem->file_name);
+
+                \Log::info("Uploaded file for {$fileKey}: {$mediaItem->file_name}");
             }
         }
 
-        \log::info("Files Uploaded");
+        return response()->json(['Success' => $vrCompany->CompanyName], 200);
     }
 
+    public function editView($id)
+    {
+        $company = VRCompany::with('owner.user', 'contacts')->find($id);
+
+        if (!$company) {
+            return abort(404, 'Company not found');
+        }
+
+        $companyMedia = $company->getMedia("*");
+
+        return Inertia::render('edit-vr-company', [
+            'company' => $company,
+            'companies' => VRCompany::all(),
+            'companyMedia' => $companyMedia, // Send media files separately if needed
+            'admin' => $company->owner->user ?? null,
+            'contacts' => $company->contacts,
+            'companies' => VRCompany::all(),
+        ]);
+    }
 }
