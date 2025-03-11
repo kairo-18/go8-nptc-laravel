@@ -31,7 +31,6 @@ export default function CreateVrContacts({
     const { data, setData } = useForm({
         contacts: Array.isArray(contactsData?.contacts) ? contactsData.contacts : [
             {
-                id: null, // Default for new contacts
                 vr_company_id: '',
                 email: '',
                 ContactNumber: '',
@@ -68,8 +67,10 @@ export default function CreateVrContacts({
                 data: { contacts: data.contacts },
             });
 
-            // response.data.contact is an array, so set it properly
-            setContactsData({ contacts: response.data.contacts ?? [] });
+            // Ensure contacts data is updated properly
+            setContactsData({ contacts: response.data.contacts });
+            setData({ contacts: response.data.contacts ?? [] });
+            console.log(response.data.contacts);
             onNextTab();
         } catch (error) {
             setErrors(error.response?.data?.errors || {});
@@ -95,7 +96,6 @@ export default function CreateVrContacts({
         setData('contacts', [
             ...data.contacts,
             {
-                id: null, // Ensure `id` is included for new contacts
                 vr_company_id: '',
                 email: '',
                 ContactNumber: '',
