@@ -19,4 +19,8 @@ class VrContacts extends Model
     public function vehicleRentalCompany(){
         $this->belongsTo(VRCompany::class, 'vehicle_rental_owner_id', 'id');
     }
+
+    public function vrCompany() {
+        $this->belongsTo(VRCompany::class, 'vr_company_id', 'id');
+    }
 }

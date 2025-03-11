@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm } from '@inertiajs/react';
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 
 interface CreateVrContactsProps {
     companies: { id: number; BusinessPermitNumber: string }[];
@@ -17,9 +17,18 @@ interface CreateVrContactsProps {
     onSubmitRef?: (submitFn: () => void) => void;
 }
 
-export default function CreateVrContacts({ companies, onNextTab, isTitleDisabled, isButtonDisabled, setContactsData, contactsData, isEditing, onSubmitRef}: CreateVrContactsProps) {
+export default function CreateVrContacts({
+    companies,
+    onNextTab,
+    isTitleDisabled,
+    isButtonDisabled,
+    setContactsData,
+    contactsData,
+    isEditing,
+    onSubmitRef,
+}: CreateVrContactsProps) {
     const { data, setData, post, patch } = useForm({
-        contacts: contactsData?.contacts.map(contact => ({
+        contacts: contactsData?.contacts.map((contact) => ({
             id: contact.id || null, // Include the `id` field for existing contacts
             vr_company_id: contact.vr_company_id || '',
             email: contact.email || '',
@@ -28,18 +37,19 @@ export default function CreateVrContacts({ companies, onNextTab, isTitleDisabled
             FirstName: contact.FirstName || '',
             MiddleName: contact.MiddleName || '',
             Position: contact.Position || '',
-        })) || [{
-            id: null, // Default `id` for new contacts
-            vr_company_id: '',
-            email: '',
-            ContactNumber: '',
-            LastName: '',
-            FirstName: '',
-            MiddleName: '',
-            Position: '',
-        }],
+        })) || [
+            {
+                id: null, // Default `id` for new contacts
+                vr_company_id: '',
+                email: '',
+                ContactNumber: '',
+                LastName: '',
+                FirstName: '',
+                MiddleName: '',
+                Position: '',
+            },
+        ],
     });
-
 
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
@@ -47,7 +57,7 @@ export default function CreateVrContacts({ companies, onNextTab, isTitleDisabled
     useEffect(() => {
         if (isEditing && contactsData) {
             setData({
-                contacts: contactsData.contacts, // Populate the form with existing contacts data
+                contacts: contactsData?.length ? contactsData : contactsData?.contacts || [],
             });
         }
     }, [isEditing, contactsData]);

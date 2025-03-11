@@ -10,7 +10,7 @@ interface CompanyFilesProps {
     companiesWithMedia: { id: number; media: any[] }[];
 }
 
-export default function CompanyFiles({ selectedCompany, open, setOpen, companiesWithMedia }: CompanyFilesProps) {
+export default function CompanyFiles({ selectedCompany, companyWithMedia, open, setOpen, companiesWithMedia }: CompanyFilesProps) {
     const [selectedPreview, setSelectedPreview] = useState(null);
     const [companyMedia, setCompanyMedia] = useState<any[]>([]);
 

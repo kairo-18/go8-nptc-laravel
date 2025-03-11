@@ -1,8 +1,8 @@
+import { Button } from '@/components/ui/button';
 import React, { useEffect, useRef, useState } from 'react';
 import CreateVrAdmin from './create-vr-admin';
 import CreateVrCompany from './create-vr-company';
 import CreateVrContacts from './create-vr-contacts';
-import { Button } from '@/components/ui/button';
 
 interface CreateSummaryProps {
     companies: { id: number; BusinessPermitNumber: string }[];
@@ -14,7 +14,15 @@ interface CreateSummaryProps {
     setIsEditing: (isEditing: boolean) => void;
 }
 
-export default function Summary({ companies, isTitleDisabled, isButtonDisabled, companyData, adminData, contactsData, setIsEditing }: CreateSummaryProps) {
+export default function Summary({
+    companies,
+    isTitleDisabled,
+    isButtonDisabled,
+    companyData,
+    adminData,
+    contactsData,
+    setIsEditing,
+}: CreateSummaryProps) {
     const [processing, setProcessing] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
 
@@ -73,7 +81,7 @@ export default function Summary({ companies, isTitleDisabled, isButtonDisabled, 
     };
 
     return (
-        <div className='mx-auto mt-6 w-full max-w-6xl'>
+        <div className="mx-auto mt-6 w-full max-w-6xl">
             <h1 className="text-2xl font-semibold">Vehicle Rental Company Summary</h1>
             <p className="text-gray-500">Contains all details of the Vehicle Rental Company.</p>
             <CreateVrCompany
@@ -81,7 +89,7 @@ export default function Summary({ companies, isTitleDisabled, isButtonDisabled, 
                 setCompanyData={(data) => {
                     companyFormData.current = data; // Update the current company form data
                 }}
-                onNextTab={() => { }}
+                onNextTab={() => {}}
                 isTitleDisabled={isTitleDisabled}
                 isButtonDisabled={isButtonDisabled}
                 companyData={companyData}
@@ -95,7 +103,7 @@ export default function Summary({ companies, isTitleDisabled, isButtonDisabled, 
                 setAdminData={(data) => {
                     adminFormData.current = data; // Update the current admin form data
                 }}
-                onNextTab={() => { }}
+                onNextTab={() => {}}
                 isTitleDisabled={isTitleDisabled}
                 isButtonDisabled={isButtonDisabled}
                 adminData={adminData}
@@ -109,7 +117,7 @@ export default function Summary({ companies, isTitleDisabled, isButtonDisabled, 
                 setContactsData={(data) => {
                     contactsFormData.current = data; // Update the current contacts form data
                 }}
-                onNextTab={() => { }}
+                onNextTab={() => {}}
                 isTitleDisabled={isTitleDisabled}
                 isButtonDisabled={isButtonDisabled}
                 contactsData={contactsData}
@@ -119,7 +127,7 @@ export default function Summary({ companies, isTitleDisabled, isButtonDisabled, 
                 }}
             />
 
-            <div className="flex justify-end mt-6">
+            <div className="mt-6 flex justify-end">
                 <Button
                     type="submit"
                     onClick={handleSaveChanges}
