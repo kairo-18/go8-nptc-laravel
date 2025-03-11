@@ -50,15 +50,24 @@ export function NavMain({
               className="group/collapsible"
             >
               <SidebarMenuItem>
-                <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={item.title}>
-                    {item.icon && <item.icon />}
-                    <span>{item.title}</span>
-                    {item.children && (
-                      <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    )}
-                  </SidebarMenuButton>
-                </CollapsibleTrigger>
+
+                <SidebarMenuButton asChild tooltip={item.title}>
+                  <div>
+                <Link href={item.url} prefetch className="flex items-center space-x-2 w-full">
+                  {item.icon && <item.icon />}
+                  <span className="truncate">{item.title}</span>
+                  </Link>
+                  {item.children && (
+                    <CollapsibleTrigger asChild>
+                      <button className="ml-auto p-2">
+                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                    </button>
+                    </CollapsibleTrigger>
+                  )}
+                  </div>
+           
+              </SidebarMenuButton>
+                
                 
                 {/* Collapsible Dropdown Content */}
                 {item.children && (
