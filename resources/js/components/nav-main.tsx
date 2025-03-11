@@ -54,7 +54,7 @@ export function NavMain({
                 <SidebarMenuButton asChild tooltip={item.title}>
                   <div>
                 <Link href={item.url} prefetch className="flex items-center space-x-2 w-full">
-                  {item.icon && <item.icon />}
+                  {item.icon && <item.icon className="shrink-0" />}
                   <span className="truncate">{item.title}</span>
                   </Link>
                   {item.children && (
