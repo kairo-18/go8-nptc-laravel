@@ -21,6 +21,7 @@ class VrContactsController extends Controller
     {
         $contacts = $request->contacts;
         $errors = [];
+        $createdContacts = [];
 
         foreach ($contacts as $index => $contactData) {
             $validator = \Illuminate\Support\Facades\Validator::make($contactData, [
@@ -36,13 +37,16 @@ class VrContactsController extends Controller
             if ($validator->fails()) {
                 $errors["contacts.$index"] = $validator->errors()->toArray();
             } else {
-                VrContacts::create($contactData);
+                $createdContact = VrContacts::create($contactData);
+                $createdContacts[] = $createdContact;
             }
         }
 
         if (!empty($errors)) {
             return response()->json(['errors' => $errors], 422);
         }
+
+        return response()->json(['contacts' => $createdContacts]);
 
     }
 

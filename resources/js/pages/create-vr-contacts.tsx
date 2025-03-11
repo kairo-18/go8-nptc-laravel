@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 interface CreateVrContactsProps {
     companies: { id: number; BusinessPermitNumber: string }[];
@@ -27,19 +28,10 @@ export default function CreateVrContacts({
     isEditing,
     onSubmitRef,
 }: CreateVrContactsProps) {
-    const { data, setData, post, patch } = useForm({
-        contacts: contactsData?.contacts.map((contact) => ({
-            id: contact.id || null, // Include the `id` field for existing contacts
-            vr_company_id: contact.vr_company_id || '',
-            email: contact.email || '',
-            ContactNumber: contact.ContactNumber || '',
-            LastName: contact.LastName || '',
-            FirstName: contact.FirstName || '',
-            MiddleName: contact.MiddleName || '',
-            Position: contact.Position || '',
-        })) || [
+    const { data, setData } = useForm({
+        contacts: Array.isArray(contactsData?.contacts) ? contactsData.contacts : [
             {
-                id: null, // Default `id` for new contacts
+                id: null, // Default for new contacts
                 vr_company_id: '',
                 email: '',
                 ContactNumber: '',
@@ -57,39 +49,32 @@ export default function CreateVrContacts({
     useEffect(() => {
         if (isEditing && contactsData) {
             setData({
-                contacts: contactsData?.length ? contactsData : contactsData?.contacts || [],
+                contacts: Array.isArray(contactsData.contacts) ? contactsData.contacts : [],
             });
         }
     }, [isEditing, contactsData]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setProcessing(true);
 
-        if (isEditing) {
-            patch(route('vr-contacts.update-multiple'), {
-                contacts: data.contacts, // Send the `contacts` array directly
-                onSuccess: () => {
-                    setContactsData(data);
-                    onNextTab();
-                },
-                onError: (errors) => {
-                    setErrors(errors);
-                    setProcessing(false);
-                },
+        try {
+            const url = isEditing ? route('vr-contacts.update-multiple') : route('vr-contacts.store-multiple');
+            const method = isEditing ? 'patch' : 'post';
+
+            const response = await axios({
+                method,
+                url,
+                data: { contacts: data.contacts },
             });
-        } else {
-            post(route('vr-contacts.store-multiple'), {
-                contacts: data.contacts, // Send the `contacts` array directly
-                onSuccess: () => {
-                    setContactsData(data);
-                    onNextTab();
-                },
-                onError: (errors) => {
-                    setErrors(errors);
-                    setProcessing(false);
-                },
-            });
+
+            // response.data.contact is an array, so set it properly
+            setContactsData({ contacts: response.data.contacts ?? [] });
+            onNextTab();
+        } catch (error) {
+            setErrors(error.response?.data?.errors || {});
+        } finally {
+            setProcessing(false);
         }
     };
 
@@ -102,7 +87,7 @@ export default function CreateVrContacts({
 
     useEffect(() => {
         if (onSubmitRef) {
-            onSubmitRef(() => handleSubmit({ preventDefault: () => {} } as React.FormEvent));
+            onSubmitRef(() => handleSubmit({ preventDefault: () => { } } as React.FormEvent));
         }
     }, [handleSubmit]);
 
@@ -123,9 +108,9 @@ export default function CreateVrContacts({
     };
 
     const updateContact = (index, field, value) => {
-        const newContacts = [...data.contacts];
-        newContacts[index][field] = value;
-        setData('contacts', newContacts);
+        setData('contacts', data.contacts.map((contact, i) =>
+            i === index ? { ...contact, id: contact.id ?? null, [field]: value } : contact
+        ));
     };
 
     return (
