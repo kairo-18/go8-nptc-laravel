@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { router } from '@inertiajs/react';
 
 interface CreateVrContactsProps {
     companies: { id: number; BusinessPermitNumber: string }[];
@@ -66,16 +67,20 @@ export default function CreateVrContacts({
                 url,
                 data: { contacts: data.contacts },
             });
-
-            // Ensure contacts data is updated properly
             setContactsData({ contacts: response.data.contacts });
             setData({ contacts: response.data.contacts ?? [] });
             console.log(response.data.contacts);
             onNextTab();
+
+           
         } catch (error) {
             setErrors(error.response?.data?.errors || {});
         } finally {
             setProcessing(false);
+            setTimeout(() => {
+                window.location.href = window.location.href; // This reloads the current page
+            }, 500);
+            
         }
     };
 
