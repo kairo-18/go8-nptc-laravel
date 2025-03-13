@@ -16,6 +16,7 @@ export default function CompanyFiles({ selectedCompany, companyWithMedia, open, 
 
     // Find and set media files when selectedCompany changes
     useEffect(() => {
+        console.log(companiesWithMedia);
         if (selectedCompany) {
             const companyWithMedia = companiesWithMedia.find((company) => company.id === selectedCompany.id);
             setCompanyMedia(companyWithMedia ? companyWithMedia.media : []);

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OperatorAdminController;
+use App\Models\Operator;
 use Inertia\Inertia;
 
 Route::get(
@@ -23,3 +24,9 @@ Route::post('operators.store', [OperatorAdminController::class, 'store'])->name(
 Route::get('/operators/{operator}/edit', [OperatorAdminController::class, 'edit'])->name('operators.edit');
 Route::patch('/operators/{operator}', [OperatorAdminController::class, 'update'])->name('operators.update');
 Route::delete('/operators/{operator}', [OperatorAdminController::class, 'destroy'])->name('operators.destroy');
+Route::get('/operators/{vr_company_id}', function ($vr_company_id) {
+    $operators = Operator::where('vr_company_id', $vr_company_id)
+    ->with('user')
+    ->get();
+    return response()->json($operators);
+})->name('operators.get');

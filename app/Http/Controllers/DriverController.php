@@ -10,6 +10,7 @@ use Illuminate\Auth\Events\Registered;
 use Spatie\Permission\Models\Role;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
+
 class DriverController extends Controller
 {
     public function index()
@@ -34,7 +35,7 @@ class DriverController extends Controller
             'vr_company_id' => 'required|exists:vr_companies,id',
             'vehicle_id' => 'nullable|exists:vehicles,id',
             'LicenseNumber' => 'nullable|string|unique:drivers,LicenseNumber',
-            
+    
             'License' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
             'Photo' => 'nullable|file|mimes:jpg,png|max:1024',
             'NBI_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
@@ -63,21 +64,26 @@ class DriverController extends Controller
             'Status' => 'Pending',
         ]);
     
-        // File uploads
+        // File uploads and storing the path under "license"
         if ($request->hasFile('License')) {
-            $driver->addMediaFromRequest('License')->toMediaCollection('license', 'private');
+            $media = $driver->addMediaFromRequest('License')->toMediaCollection('license', 'private');
+            $driver->update(['License' => $media->getPath()]); // Store file path in the "License" column
         }
         if ($request->hasFile('Photo')) {
-            $driver->addMediaFromRequest('Photo')->toMediaCollection('photo', 'private');
+            $media = $driver->addMediaFromRequest('Photo')->toMediaCollection('photo', 'private');
+            $driver->update(['Photo' => $media->getPath()]);
         }
         if ($request->hasFile('NBI_clearance')) {
-            $driver->addMediaFromRequest('NBI_clearance')->toMediaCollection('nbi_clearance', 'private');
+            $media = $driver->addMediaFromRequest('NBI_clearance')->toMediaCollection('nbi_clearance', 'private');
+            $driver->update(['NBI_clearance' => $media->getPath()]);
         }
         if ($request->hasFile('Police_clearance')) {
-            $driver->addMediaFromRequest('Police_clearance')->toMediaCollection('police_clearance', 'private');
+            $media = $driver->addMediaFromRequest('Police_clearance')->toMediaCollection('police_clearance', 'private');
+            $driver->update(['Police_clearance' => $media->getPath()]);
         }
         if ($request->hasFile('BIR_clearance')) {
-            $driver->addMediaFromRequest('BIR_clearance')->toMediaCollection('bir_clearance', 'private');
+            $media = $driver->addMediaFromRequest('BIR_clearance')->toMediaCollection('bir_clearance', 'private');
+            $driver->update(['BIR_clearance' => $media->getPath()]);
         }
     
         return response()->json([
@@ -86,6 +92,7 @@ class DriverController extends Controller
             'driver' => $driver
         ], 201);
     }
+    
     
 
     public function downloadMedia($mediaId)
