@@ -22,4 +22,5 @@ Route::get('/operators/create', [OperatorAdminController::class, 'create'])->nam
 Route::post('operators.store', [OperatorAdminController::class, 'store'])->name('operators.store');
 Route::get('/operators/{operator}/edit', [OperatorAdminController::class, 'edit'])->name('operators.edit');
 Route::patch('/operators/{operator}', [OperatorAdminController::class, 'update'])->name('operators.update');
+Route::patch('operator/updateStatus/{id}', [OperatorAdminController::class, 'updateStatus'])->name('operator.updateStatus');
 Route::delete('/operators/{operator}', [OperatorAdminController::class, 'destroy'])->name('operators.destroy');

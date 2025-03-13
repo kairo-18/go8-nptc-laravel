@@ -22,4 +22,6 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin'])->gro
     //route for edit function in the controller vrcompany
     Route::patch('vr-company/edit', [VRCompanyController::class, 'edit'])->name('company.update');
 
+    Route::patch('vr-company/updateStatus/{id}', [VRCompanyController::class, 'updateStatus'])->name('vr-company.updateStatus');
+
 });

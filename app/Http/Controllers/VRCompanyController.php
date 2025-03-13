@@ -224,4 +224,22 @@ class VRCompanyController extends Controller
             'companies' => VRCompany::all(),
         ]);
     }
+
+    public function updateStatus(Request $request, $id)
+    {
+
+        $company = VRCompany::findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|string|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected,For Payment',
+        ]);
+
+        $company->Status = $request->status;
+        $company->save();
+
+
+        \Log::info('Company status updated', ['id' => $company->id, 'status' => $company->status]);
+
+        return response()->json(['message' => 'Status updated successfully'], 200);
+    }
 }
