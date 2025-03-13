@@ -8,7 +8,9 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Events\RegisteredVrCompany;
 use function Laravel\Prompts\warning;
+
 
 class VRCompanyController extends Controller
 {
@@ -61,10 +63,8 @@ class VRCompanyController extends Controller
             $vrCompany->addMedia($request->file('SalesInvoice'))->toMediaCollection('sales_invoice', 'private');
         }
 
-        \Log::info('VR Company created successfully', ['id' => $vrCompany->id], $request->all());
-        \Log::info('VR Company created successfully', ['id' => $vrCompany->id, 'files' => $request->allFiles()]);
-        \Log::info('VR Company created successfully', ['id' => $vrCompany->id]);
-
+        //Dispatch RegistedVrCompany Event
+        RegisteredVrCompany::dispatch($vrCompany);
     }
 
     public function downloadMedia($mediaId)
@@ -223,5 +223,23 @@ class VRCompanyController extends Controller
             'contacts' => $company->contacts,
             'companies' => VRCompany::all(),
         ]);
+    }
+
+    public function updateStatus(Request $request, $id)
+    {
+
+        $company = VRCompany::findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|string|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected,For Payment',
+        ]);
+
+        $company->Status = $request->status;
+        $company->save();
+
+
+        \Log::info('Company status updated', ['id' => $company->id, 'status' => $company->status]);
+
+        return response()->json(['message' => 'Status updated successfully'], 200);
     }
 }

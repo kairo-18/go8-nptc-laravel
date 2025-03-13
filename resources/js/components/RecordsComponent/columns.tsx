@@ -24,11 +24,13 @@ export const generateColumns = (
         sortableColumns?: string[];
         statusColumns?: string[];
         actions?: boolean;
-        entityType?: 'companies' | 'operators';
+        entityType?: 'companies' | 'operators' | 'drivers' | 'vehicles';
         onViewFiles?: (company: any) => void; // <-- New callback function
+        updateStatus?: (statusData: any) => void; // <-- New callback function
+        handleContainer?: (containerType: any) => void; // <-- New callback function
     },
 ): ColumnDef<DataRow>[] => {
-    const { sortableColumns = [], statusColumns = [], actions = true, entityType, onViewFiles } = options || {};
+    const { sortableColumns = [], statusColumns = [], actions = true, entityType, onViewFiles, updateStatus, handleContainer } = options || {};
 
     const dynamicColumns: ColumnDef<DataRow>[] = headers.map(({ key, label }) => ({
         id: key,
@@ -51,11 +53,11 @@ export const generateColumns = (
             if (statusColumns.includes(key)) {
                 const statusColors: Record<string, string> = {
                     Active: 'bg-green-500',
-                    Inactive: 'bg-red-500',
+                    Inactive: 'bg-gray-500',
                     Suspended: 'bg-yellow-500',
-                    Banned: 'bg-violet-500',
+                    Banned: 'bg-purple-500',
                     Approved: 'bg-blue-500',
-                    Rejected: 'bg-black-500',
+                    Rejected: 'bg-red-500',
                     Pending: 'bg-orange-500',
                 };
 
@@ -104,33 +106,46 @@ export const generateColumns = (
 
                             {entityType === 'companies' ? (
                                 <>
-                                    <DropdownMenuItem
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            router.visit(`/vr-company/edit/${data.id}`);
-                                        }}
-                                    >
-                                        Edit Company
-                                    </DropdownMenuItem>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem
-                                        onClick={(e) => {
-                                            e.stopPropagation(); // Prevents triggering row click
-                                            onViewFiles?.(data);
-                                        }}
-                                        className="cursor-pointer"
-                                    >
-                                        View Files
-                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); router.visit(`/vr-company/edit/${data.id}`); }}>Edit Company</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('suspend'); }} className="cursor-pointer">Suspend</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('ban'); }} className="cursor-pointer">Ban</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onViewFiles?.(data); }} className="cursor-pointer">View Files</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Set Status</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('remove'); }} className="cursor-pointer">Remove</DropdownMenuItem>
                                 </>
                             ) : entityType === 'operators' ? (
                                 <>
-                                    <DropdownMenuItem onClick={() => alert(`Editing Operator: ${data.username}`)}>Edit Operator</DropdownMenuItem>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => alert(`Deactivating Operator: ${data.username}`)}>
-                                        Deactivate Operator
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => alert(`Removing Operator: ${data.username}`)}>Remove Operator</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => alert(`Editing Operator: ${data.username}`)}>
+                                    Edit Operator</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Set Status</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('email'); }} className="cursor-pointer">Send Email</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('suspend'); }} className="cursor-pointer">Suspend</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('ban'); }} className="cursor-pointer">Ban</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('remove'); }} className="cursor-pointer">Remove</DropdownMenuItem>
+                                </>
+                            ) : entityType === 'drivers' ? (
+                                <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => alert(`Editing Driver: ${data.username}`)}>
+                                    Edit Driver</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Set Status</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('email'); }} className="cursor-pointer">Send Email</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('suspend'); }} className="cursor-pointer">Suspend</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('ban'); }} className="cursor-pointer">Ban</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('remove'); }} className="cursor-pointer">Remove</DropdownMenuItem>
+                                </>
+                            ) : entityType === 'vehicles' ? (
+                                <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem onClick={() => alert(`Editing Operator: ${data.username}`)}>
+                                    Edit Vehicle</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Set Status</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Suspend</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Ban</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => alert(`Removing Vehicle: ${data.username}`)} className="cursor-pointer hover-bg-red-500 t">
+                                    Remove Vehicle</DropdownMenuItem>
                                 </>
                             ) : null}
                         </DropdownMenuContent>

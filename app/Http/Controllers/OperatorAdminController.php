@@ -34,7 +34,7 @@ class OperatorAdminController extends Controller
             'vr_company_id' => 'required|exists:vr_companies,id',
             'Status' => 'nullable|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected,For Payment',
         ]);
-        
+
         // Create the user
         $user = User::create([
             'username' => $validatedData['username'],
@@ -47,16 +47,16 @@ class OperatorAdminController extends Controller
             'password' => Hash::make($validatedData['password']),
             'Status' => $validatedData['Status'],
         ]);
-        
+
         $user->assignRole('Operator');
-        
+
         // Create the Operator record linked to the User
         $operator = $user->operator()->create([
             'vr_company_id' => $validatedData['vr_company_id'],
             'user_id' => $user->id,
             'Status' => $validatedData['Status'],
         ]);
-        
+
         return redirect()->route('create-operator.admin')->with('success', 'Operator created successfully!');
     }
 
@@ -125,4 +125,22 @@ class OperatorAdminController extends Controller
 
     return response()->json(['message' => 'Operator and associated user deleted successfully']);
 }
+
+    public function updateStatus(Request $request, $id)
+    {
+
+        $operator = Operator::findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|string|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected,For Payment',
+        ]);
+
+        $operator->Status = $request->status;
+        $operator->save();
+
+
+        \Log::info('Operator status updated', ['id' => $operator->id, 'status' => $operator->Status]);
+
+        return response()->json(['message' => 'Status updated successfully'], 200);
+    }
 }

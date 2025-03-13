@@ -1,6 +1,10 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { generateColumns } from './columns'; // Import dynamic column generator
+import { generateColumns } from './columns';
 import { DataTable } from './data-table';
+import { useState, useEffect } from 'react';
+import SetStatus from './set-status';
+import Container from './container';
+import axios from 'axios';
 
 interface DriverProps {
     drivers: { [key: string]: any }[];
@@ -10,6 +14,11 @@ interface DriverProps {
 }
 
 export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverProps) {
+    const [containerType, setContainerType] = useState(String);
+    const [openStatusModal, setOpenStatusModal] = useState(false);
+    const [openContainerModal, setOpenContainerModal] = useState(false);
+    const [selectedStatus, setSelectedStatus] = useState('');
+    const [inputValue, setInputValue] = useState('');
     const formatHeader = (key) =>
         key
             .replace(/_count$/, '') // Remove "_count" suffix
@@ -34,12 +43,12 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
             : [];
 
     const driverColumns = generateColumns(driverHeaders, {
-        entityType: 'drivers' as 'companies' | 'operators' | undefined,
+        entityType: 'drivers',
         statusColumns: ['Status'],
     });
 
     const vehicleColumns = generateColumns(vehicleHeaders, {
-        entityType: 'vehicles' as 'companies' | 'operators' | undefined,
+        entityType: 'vehicles',
         statusColumns: ['Status'],
     });
 

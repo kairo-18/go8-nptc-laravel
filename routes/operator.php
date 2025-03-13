@@ -23,6 +23,7 @@ Route::get('/operators/create', [OperatorAdminController::class, 'create'])->nam
 Route::post('operators.store', [OperatorAdminController::class, 'store'])->name('operators.store');
 Route::get('/operators/{operator}/edit', [OperatorAdminController::class, 'edit'])->name('operators.edit');
 Route::patch('/operators/{operator}', [OperatorAdminController::class, 'update'])->name('operators.update');
+
 Route::delete('/operators/{operator}', [OperatorAdminController::class, 'destroy'])->name('operators.destroy');
 Route::get('/operators/{vr_company_id}', function ($vr_company_id) {
     $operators = Operator::where('vr_company_id', $vr_company_id)
@@ -30,3 +31,7 @@ Route::get('/operators/{vr_company_id}', function ($vr_company_id) {
     ->get();
     return response()->json($operators);
 })->name('operators.get');
+
+Route::patch('operator/updateStatus/{id}', [OperatorAdminController::class, 'updateStatus'])->name('operator.updateStatus');
+Route::delete('/operators/{operator}', [OperatorAdminController::class, 'destroy'])->name('operators.destroy');
+
