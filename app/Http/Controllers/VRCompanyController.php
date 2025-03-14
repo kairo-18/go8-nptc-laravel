@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
 use App\Events\RegisteredVrCompany;
-use function Laravel\Prompts\warning;
 
+use function Laravel\Prompts\warning;
 
 class VRCompanyController extends Controller
 {
@@ -91,13 +91,15 @@ class VRCompanyController extends Controller
         $companies = VRCompany::select('id', 'BusinessPermitNumber')->get();
 
         return Inertia::render(
-            'registration', [
+            'registration',
+            [
             'companies' => $companies
             ]
         );
     }
 
-    public function edit(Request $request){
+    public function edit(Request $request)
+    {
         $validated = $request->validate([
             'CompanyName' => 'sometimes|string',
             'BusinessPermitNumber' => 'sometimes|integer',

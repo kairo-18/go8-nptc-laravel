@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\MailReceive;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\OperatorAdminController;
 use App\Http\Controllers\VRCompanyController;
@@ -9,172 +10,95 @@ use App\Http\Controllers\VrContactsController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Middleware\NPTCAdminMiddleware;
+use Illuminate\Http\Request;
+use App\Models\Mail;
+use App\Models\Thread;
+use App\Models\User;
+use App\Events\NewThreadCreated;
 
 // Home route
 Route::get(
-    '/', function () {
+    '/',
+    function () {
         return Inertia::render('welcome');
     }
 )->name('home');
 
-// Routes restricted to authenticated and verified users
-// Route::group(
-//     ['middleware' => ['auth', 'verified']], function () {
+Route::get(
+    '/mails',
+    function () {
+        return Inertia::render('mails');
+    }
+)->middleware(['auth', 'verified'])->name('dashboard');
 
-//         // Routes restricted to NPTC Admins only
-//         Route::group(
-//             ['middleware' => ['role:NPTC Admin|NPTC Super Admin']], function () {
-//                 Route::get(
-//                     'dashboard', function () {
-//                         return Inertia::render('dashboard');
-//                     }
-//                 )->name('dashboard');
+Route::get('mails/threads', function () {
+    $threads = Thread::where('sender_id', auth()->id())
+        ->orWhere('receiver_id', auth()->id())
+        ->with(['mails', 'sender', 'receiver'])
+        ->get();
 
-//                 Route::get(
-//                     'nptc-admins', function () {
-//                         return Inertia::render(
-//                             'nptc-admins', [
-//                             'users' => \App\Models\User::role('NPTC Admin')->get()
-//                             ]
-//                         );
-//                     }
-//                 )->name('nptc-admins');
+    return response()->json(['threads' => $threads]);
+});
 
-//                 Route::get(
-//                     'vr-owner', function () {
-//                         return Inertia::render(
-//                             'records', [
-//                                 'users' => \App\Models\User::role('VR Admin')->get(),
-//                                 'operators' => \App\Models\User::role('Operator')
-//                                     ->join('operators', 'users.id', '=', 'operators.user_id')
-//                                     ->get(['users.id', 'users.FirstName', 'users.LastName', 'operators.vr_company_id'])
-//                                     ->makeHidden(['created_at', 'updated_at', 'email_verified_at']),
-//                                 'drivers' => \App\Models\User::role('Driver')
-//                                     ->join('drivers', 'users.id', '=', 'drivers.user_id')
-//                                     ->get(['users.id', 'users.FirstName', 'users.LastName', 'drivers.operator_id'])
-//                                     ->makeHidden(['created_at', 'updated_at', 'email_verified_at']),
-//                                 'vehicles' => \App\Models\Vehicle::all()->makeHidden(['created_at', 'updated_at', 'operator'])->map(function ($vehicle) {
-//                                     $vehicle->operator_id = $vehicle->operator->id;
-//                                     return $vehicle;
-//                                 }),
-//                                 'companies' => \App\Models\VRCompany::all()->makeHidden(['created_at', 'updated_at']),
-//                                 'companiesWithMedia' => \App\Models\VRCompany::with(['owner.user'])->get()->each(
-//                                 function ($company) {
-//                                     $company->media_files = $company->getMedia();
-//                                 }
-//                             ),
-//                             ]
-//                         );
-//                     }
-//                 )->name('vr-owner');
+Route::get('mails/thread/{thread}', function (Thread $thread) {
+    $thread->load(['mails', 'sender', 'receiver']);
 
-//                 Route::get(
-//                     'pending', function () {
-//                         return Inertia::render('pending');
-//                     }
-//                 )->name('pending');
+    return response()->json(['thread' => $thread]);
+});
 
-//                 Route::get(
-//                     'create-vr-company-page', function () {
-//                         return Inertia::render(
-//                             'create-vr-company', [
-//                             'users' => \App\Models\User::role('VR Admin')->get()
-//                             ]
-//                         );
-//                     }
-//                 )->name('create-vr-company-page');
+Route::post('mails/new-mail', function (Request $request) {
+    $request->validate([
+        'email' => 'required|email|exists:users,email',
+        'thread_id' => 'nullable|exists:threads,id',
+        'subject' => 'required|string',
+        'content' => 'required|string',
+    ]);
 
-//                 Route::get('create-vr-contacts', [VrContactsController::class, 'index'])->name('vr-contacts.index');
+    $receiver = User::where('email', $request->email)->firstOrFail();
+    $thread = null;
+    $isNewThread = false; // Track if a new thread is created
 
-//                 Route::get(
-//                     'create-vr-admin', function () {
-//                         return Inertia::render(
-//                             'create-vr-admin', [
-//                             'companies' => \App\Models\VRCompany::all()
-//                             ]
-//                         );
-//                     }
-//                 )->name('create-vr-admin');
-//             }
-//         );
+    if ($request->thread_id) {
+        $thread = Thread::findOrFail($request->thread_id);
+    } else {
+        // Check if a thread already exists between the sender and receiver
+        $thread = Thread::where(function ($query) use ($receiver) {
+            $query->where('sender_id', auth()->id())
+                  ->where('receiver_id', $receiver->id);
+        })->orWhere(function ($query) use ($receiver) {
+            $query->where('sender_id', $receiver->id)
+                  ->where('receiver_id', auth()->id());
+        })->first();
 
-//         //Route for vr-registration
-//         Route::get(
-//             'vr-registration', function () {
-//                 return Inertia::render('vr-registration');
-//             }
-//         )->name('vr-registration');
+        // If no thread exists, create a new one
+        if (!$thread) {
+            $thread = Thread::create([
+                'sender_id' => auth()->id(),
+                'receiver_id' => $receiver->id,
+            ]);
+            $isNewThread = true; // Mark that a new thread is created
+        }
+    }
 
-//         // Registration page exposed to Temp Users
-//         Route::group(
-//             ['middleware' => ['role:Temp User|NPTC Admin|NPTC Super Admin']], function () {
-//                 Route::get(
-//                     'registration', function () {
-//                         return Inertia::render(
-//                             'registration', [
-//                             'companies' => \App\Models\VRCompany::all(),
-//                             ]
-//                         );
-//                     }
-//                 )->name('registration');
-//             }
-//         );
-//     }
-// );
+    $mail = Mail::create([
+        'sender_id' => auth()->id(),
+        'thread_id' => $thread->id,
+        'subject' => $request->subject,
+        'content' => $request->content,
+    ]);
 
-// // NPTC Admin routes
-// Route::post('create-nptc-admin', [NptcAdminController::class, 'createNPTCAdmin'])
-//     ->name('create-nptc-admin');
+    // Dispatch real-time mail event
+    MailReceive::dispatch($mail);
 
-// Route::middleware(['auth', 'verified', NPTCAdminMiddleware::class])->group(
-//     function () {
-//         Route::patch('update-nptc-admin', [NptcAdminController::class, 'updateNPTCAdmin'])
-//         ->name('update-nptc-admin');
+    // If this is a new thread, broadcast it
+    if ($isNewThread) {
+        NewThreadCreated::dispatch($thread, $receiver->id);
+    }
 
-//         Route::delete('delete-nptc-admin', [NptcAdminController::class, 'destroy'])
-//         ->name('delete-nptc-admin');
-//     }
-// );
+    return response()->json(['mail' => $mail]);
+});
 
-// // VR Company routes
-// Route::get('download-media/{mediaId}', [VRCompanyController::class, 'downloadMedia'])
-//     ->name('download-media');
 
-// Route::get('preview-media/{mediaId}', [VRCompanyController::class, 'previewMedia'])
-//     ->name('preview-media');
-
-// Route::post('vr-company.store', [VRCompanyController::class, 'store'])->name('vr-company.store');
-
-// // Contacts routes
-// Route::post('vr-contacts.store', [VrContactsController::class, 'store'])->name('vr-contacts.store');
-// Route::post('vr-contacts.store-multiple', [VrContactsController::class, 'storeMultiple'])->name('vr-contacts.store-multiple');
-
-// // VR Admin routes
-// Route::post('vr-admins.store', [VRAdminController::class, 'store'])
-//     ->name('vr-admins.store');
-
-// // Route for temporary registration page
-// Route::post('temp-registration', [RegisteredUserController::class, 'storeTempAcc'])
-//     ->name('temp-registration');
-
-// //Operator
-// Route::get(
-//     '/create-operator-admin', function () {
-//         return Inertia::render('create-operator-admin');
-//     }
-// )->name('create-operator.admin');
-
-// Route::get(
-//     '/operator-admin', function () {
-//         return Inertia::render('operator-admin');
-//     }
-// )->name('operator.admin');
-// Route::get('/operators', [OperatorAdminController::class, 'index'])->name('operators.index');
-// Route::get('/operators/create', [OperatorAdminController::class, 'create'])->name('operators.create');
-// Route::post('/operators', [OperatorAdminController::class, 'store'])->name('operators.store');
-// Route::get('/operators/{operator}/edit', [OperatorAdminController::class, 'edit'])->name('operators.edit');
-// Route::patch('/operators/{operator}', [OperatorAdminController::class, 'update'])->name('operators.update');
-// Route::delete('/operators/{operator}', [OperatorAdminController::class, 'destroy'])->name('operators.destroy');
 
 // Include additional route files
 require __DIR__.'/settings.php';
