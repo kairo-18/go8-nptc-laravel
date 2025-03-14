@@ -37,7 +37,7 @@ const mainNavItems: NavItem[] = [
             },
             {
                 title: 'Driver Registration',
-                url: '',
+                url: '/create-driver',
             },
         ],
     },
