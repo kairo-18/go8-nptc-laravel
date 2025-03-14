@@ -6,6 +6,13 @@ import { useState } from 'react';
 import { Head, usePage } from '@inertiajs/react';
 import { type SharedData } from '@/types';
 
+interface MediaFile {
+    id: number;
+    name: string;
+    mime_type: string;
+    url: string;
+}
+
 interface Driver {
     id: number;
     FirstName: string;
@@ -15,13 +22,9 @@ interface Driver {
     ContactNumber: string;
     LicenseNumber: string | null;
     Status: string;
-    License: string | null;
-    Photo: string | null;
-    NBI_clearance: string | null;
-    Police_clearance: string | null;
-    BIR_clearance: string | null;
     operator: { id: number; FirstName: string; LastName: string };
     vrCompany: { id: number; CompanyName: string };
+    media_files: MediaFile[];
 }
 
 interface DriversProps {
@@ -31,6 +34,7 @@ interface DriversProps {
 export default function Drivers({ drivers }: DriversProps) {
     const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
     const { auth } = usePage<SharedData>().props;
+    const [selectedMedia, setSelectedMedia] = useState<MediaFile | null>(null);
 
     const handleRowClick = (driver: Driver) => {
         setSelectedDriver(driver);
@@ -40,12 +44,16 @@ export default function Drivers({ drivers }: DriversProps) {
         setSelectedDriver(null);
     };
 
-    const breadcrumbs = [
-        { title: 'Drivers', href: '/drivers' },
-    ];
+    const previewMedia = (media: MediaFile) => {
+        setSelectedMedia(media);
+    };
+    
+    const handleDownload = (mediaId: number) => {
+        window.location.href = route('download-driver-media', { mediaId });
+    };
 
     return (
-        <MainLayout breadcrumbs={breadcrumbs}>
+        <MainLayout breadcrumbs={[{ title: 'Drivers', href: '/drivers' }]}>
             <Head title="Drivers" />
             <div className="p-5">
                 <Table>
@@ -89,6 +97,7 @@ export default function Drivers({ drivers }: DriversProps) {
                 </Table>
             </div>
 
+            {/* Modal for Driver Details */}
             <Dialog open={!!selectedDriver} onOpenChange={closeDialog}>
                 <DialogContent>
                     <DialogHeader>
@@ -101,16 +110,37 @@ export default function Drivers({ drivers }: DriversProps) {
                             <p><strong>Operator:</strong> {selectedDriver.operator?.FirstName} {selectedDriver.operator?.LastName ?? 'N/A'}</p>
                             <p><strong>Company:</strong> {selectedDriver.vrCompany?.CompanyName ?? 'N/A'}</p>
                             <p><strong>Status:</strong> {selectedDriver.Status}</p>
-                            <div className="mt-4 space-y-2">
-                                <strong>Documents:</strong>
-                                <div className="grid grid-cols-2 gap-4">
-                                    {selectedDriver.License && <img src={"/storage/11/JUVENILE_TIER_EMBLEM.png"} alt="License" className="w-full h-32 object-cover rounded-lg border" />}
-                                    {selectedDriver.Photo && <img src={selectedDriver.Photo} alt="Photo" className="w-full h-32 object-cover rounded-lg border" />}
-                                    {selectedDriver.NBI_clearance && <img src={selectedDriver.NBI_clearance} alt="NBI Clearance" className="w-full h-32 object-cover rounded-lg border" />}
-                                    {selectedDriver.Police_clearance && <img src={selectedDriver.Police_clearance} alt="Police Clearance" className="w-full h-32 object-cover rounded-lg border" />}
-                                    {selectedDriver.BIR_clearance && <img src={selectedDriver.BIR_clearance} alt="BIR Clearance" className="w-full h-32 object-cover rounded-lg border" />}
-                                </div>
-                            </div>
+                            
+                            {selectedDriver.media_files.length > 0 && (
+    <div>
+        <h3 className="font-bold">Media Files</h3>
+        <ul className="space-y-2">
+            {selectedDriver.media_files.map((file) => (
+                <li key={file.id} className="flex items-center space-x-2">
+                    <span>{file.name}</span>
+                    <Button variant="outline" size="sm" onClick={() => previewMedia(file)}>
+                        Preview
+                    </Button>
+                </li>
+            ))}
+        </ul>
+
+        {/* Show the media inside the modal */}
+        {selectedMedia && (
+            <div className="mt-4 p-3 border rounded-lg">
+                <h4 className="font-semibold">Preview: {selectedMedia.name}</h4>
+                {selectedMedia.mime_type.startsWith('image/') ? (
+                    <img src={selectedMedia.url} alt={selectedMedia.name} className="max-w-full h-auto rounded-md" />
+                ) : selectedMedia.mime_type === 'application/pdf' ? (
+                    <iframe src={selectedMedia.url} className="w-full h-64 border rounded-md"></iframe>
+                ) : (
+                    <p>Preview not available for this file type.</p>
+                )}
+            </div>
+        )}
+    </div>
+)}
+
                         </div>
                     )}
                 </DialogContent>

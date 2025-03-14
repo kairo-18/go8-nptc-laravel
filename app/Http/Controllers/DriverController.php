@@ -9,15 +9,58 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
 use Spatie\Permission\Models\Role;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Inertia\Inertia;
+use Inertia\Response;
+use Illuminate\Support\Facades\Log;
 
 
 class DriverController extends Controller
 {
-    public function index()
-    {
-        $driver = Driver::with('user', 'vrCompany','operator')->get();
-        return response()->json($driver);
-    }
+    public function index(): Response
+{
+    $drivers = Driver::with(['user', 'operator.user', 'vrCompany'])
+    ->get()
+    ->map(function ($driver) {
+        $mediaCollections = ['license', 'photo', 'nbi_clearance', 'police_clearance', 'bir_clearance'];
+        
+        // Flatten media collections into a single array
+        $mediaFiles = collect($mediaCollections)->flatMap(function ($collection) use ($driver) {
+            return $driver->getMedia($collection)->map(fn($media) => [
+                'id' => $media->id,
+                'name' => $media->file_name,
+                'mime_type' => $media->mime_type,
+                'url' => route('preview-driver-media', ['mediaId' => $media->id]),
+            ]);
+        })->values(); // Ensure it's a proper array
+
+        return [
+            'id' => $driver->id,
+            'FirstName' => $driver->user->FirstName,
+            'LastName' => $driver->user->LastName,
+            'username' => $driver->user->username,
+            'email' => $driver->user->email,
+            'ContactNumber' => $driver->user->ContactNumber,
+            'LicenseNumber' => $driver->LicenseNumber,
+            'Status' => $driver->Status,
+            'operator' => $driver->operator ? [
+                'id' => $driver->operator->id,
+                'FirstName' => $driver->operator->user->FirstName ?? 'N/A',
+                'LastName' => $driver->operator->user->LastName ?? 'N/A',
+            ] : null,
+            'vrCompany' => $driver->vrCompany ? [
+                'id' => $driver->vrCompany->id,
+                'CompanyName' => $driver->vrCompany->CompanyName ?? 'N/A',
+            ] : null,
+            'media_files' => $mediaFiles, // 🔹 Now it's a flat array instead of an object
+        ];
+    });
+
+return Inertia::render('drivers', [
+    'drivers' => $drivers,
+]);
+
+}
+
     public function store(Request $request)
     {
         // Validate input fields and file uploads
