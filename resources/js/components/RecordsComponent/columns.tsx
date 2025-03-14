@@ -128,7 +128,7 @@ export const generateColumns = (
                             ) : entityType === 'drivers' ? (
                                 <>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => alert(`Editing Driver: ${data.username}`)}>
+                                    <DropdownMenuItem onClick={() => router.visit(`/drivers`)}>
                                     Edit Driver</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Set Status</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('email'); }} className="cursor-pointer">Send Email</DropdownMenuItem>
