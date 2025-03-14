@@ -1,6 +1,13 @@
+<<<<<<< Updated upstream
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { generateColumns } from "./columns"; // Import dynamic column generator
 import { DataTable } from "./data-table";
+=======
+import { useEffect, useState } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { generateColumns } from './columns';
+import { DataTable } from './data-table';
+>>>>>>> Stashed changes
 
 interface DriverProps {
   drivers: { [key: string]: any }[];
@@ -10,6 +17,7 @@ interface DriverProps {
   onNextTab: () => void;
 }
 
+<<<<<<< Updated upstream
 export default function Driver({ drivers, vehicles, activeTab, setActiveTab }: DriverProps) {
   const driverHeaders =
     drivers.length > 0
@@ -18,6 +26,36 @@ export default function Driver({ drivers, vehicles, activeTab, setActiveTab }: D
           label: key.replace(/([A-Z])/g, " $1").trim(),
         }))
       : [];
+=======
+export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverProps) {
+    const [driverData, setDriverData] = useState(drivers);
+    const [vehicleData, setVehicleData] = useState(vehicles);
+
+    useEffect(() => {
+        setDriverData(drivers);
+    }, [drivers]);
+
+    useEffect(() => {
+        setVehicleData(vehicles);
+    }, [vehicles]);
+
+    const transformDriverData = driverData.map((driver) => ({
+        ...driver,
+        Driver: `${driver.Status ? `${driver.Status} ` : ''}${driver.FirstName}  ${driver.LastName}`,
+    }));
+
+    const transformVehicleData = vehicleData.map((vehicle) => ({
+        ...vehicle,
+        Vehicle: `${vehicle.Status ? `${vehicle.Status} ` : ''}${vehicle.Model}`,
+    }));
+    
+    const formatHeader = (key: string) =>
+        key
+            .replace(/_count$/, '')
+            .replace(/^vr_/, 'VR ')
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, (char) => char.toUpperCase());
+>>>>>>> Stashed changes
 
   const vehicleHeaders =
     vehicles.length > 0
@@ -32,6 +70,7 @@ export default function Driver({ drivers, vehicles, activeTab, setActiveTab }: D
     statusColumns: ["Status"],
   });
 
+<<<<<<< Updated upstream
   const vehicleColumns = generateColumns(vehicleHeaders, {
     entityType: "vehicles" as "companies" | "operators" | undefined,
     statusColumns: ["Status"],
@@ -52,6 +91,50 @@ export default function Driver({ drivers, vehicles, activeTab, setActiveTab }: D
             Vehicles
           </TabsTrigger>
           </TabsList>
+=======
+    const primaryColumns = ['id', 'Driver'];
+    
+    const driverOtherColumns = driverHeaders.map(header => header.key).filter((key) => key !== 'Status' && key !== 'id');
+    const orderedDriverHeaders = [...primaryColumns, ...driverOtherColumns];
+
+
+    const driverColumns = generateColumns(orderedDriverHeaders.map(key => ({ key, label: formatHeader(key) })), {
+        entityType: 'drivers' as 'companies' | 'operators' | undefined,
+        statusColumns: ['Status'],
+    });
+
+    const primaryVehicleColumns = ['id', 'Vehicle'];
+    const vehicleOtherColumns = vehicleHeaders.map(header => header.key).filter((key) => key !== 'Status' && key !== 'Model' && key !== 'id');
+    const orderedVehicleHeaders = [...primaryVehicleColumns, ...vehicleOtherColumns];
+
+    const vehicleColumns = generateColumns(orderedVehicleHeaders.map(key => ({ key, label: formatHeader(key) })), {
+        entityType: 'vehicles' as 'companies' | 'operators' | undefined,
+        statusColumns: ['Status'],
+    });
+
+    return (
+        <div>
+            <Tabs defaultValue="drivers" className="w-full">
+                <div className="flex justify-end">
+                    <TabsList className="bg-[#2A2A92] text-white">
+                        <TabsTrigger value="drivers" className="px-10">
+                            Drivers
+                        </TabsTrigger>
+                        <TabsTrigger value="vehicles" className="px-10">
+                            Vehicles
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
+
+                <TabsContent value="drivers">
+                    <DataTable data={transformDriverData} ColumnFilterName="Driver" columns={driverColumns} />
+                </TabsContent>
+
+                <TabsContent value="vehicles">
+                    <DataTable data={transformVehicleData} ColumnFilterName="Vehicle" columns={vehicleColumns} />
+                </TabsContent>
+            </Tabs>
+>>>>>>> Stashed changes
         </div>
 
         <TabsContent value="drivers">

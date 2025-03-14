@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+<<<<<<< Updated upstream
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -10,6 +11,10 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+=======
+import {DropdownMenu,DropdownMenuContent,DropdownMenuItem,DropdownMenuLabel,DropdownMenuSeparator,DropdownMenuTrigger,} from '@/components/ui/dropdown-menu';
+import { router } from '@inertiajs/react';
+>>>>>>> Stashed changes
 import { ColumnDef } from '@tanstack/react-table';
 import { ArrowUpDown, MoreHorizontal } from 'lucide-react';
 
@@ -24,7 +29,7 @@ export const generateColumns = (
         statusColumns?: string[];
         actions?: boolean;
         entityType?: 'companies' | 'operators';
-        onViewFiles?: (company: any) => void; // <-- New callback function
+        onViewFiles?: (company: any) => void;
     },
 ): ColumnDef<DataRow>[] => {
     const { sortableColumns = [], statusColumns = [], actions = true, entityType, onViewFiles } = options || {};
@@ -56,16 +61,20 @@ export const generateColumns = (
                     Active: 'bg-green-500',
                     Inactive: 'bg-red-500',
                     Suspended: 'bg-yellow-500',
-                    Banned: 'bg-violet-500',
+                    Banned: 'bg-purple-500',
                     Approved: 'bg-blue-500',
-                    Rejected: 'bg-black-500',
+                    Rejected: 'bg-gray-800',
                     Pending: 'bg-orange-500',
                 };
 
-                return <span className={`rounded px-2 py-1 text-white ${statusColors[value] || 'bg-gray-500'}`}>{value || 'Unknown'}</span>;
+                return (
+                    <span className={`rounded px-2 py-1 text-white ${statusColors[value] || 'bg-gray-500'}`}>
+                        {value || 'Unknown'}
+                    </span>
+                );
             }
 
-            return value || 'N/A'; // Default text if empty
+            return value || 'N/A';
         },
     }));
 
