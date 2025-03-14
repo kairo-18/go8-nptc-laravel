@@ -28,6 +28,7 @@ class DriverController extends Controller
             return $driver->getMedia($collection)->map(fn($media) => [
                 'id' => $media->id,
                 'name' => $media->file_name,
+                'collection_name' => $media->collection_name,
                 'mime_type' => $media->mime_type,
                 'url' => route('preview-driver-media', ['mediaId' => $media->id]),
             ]);
@@ -38,6 +39,8 @@ class DriverController extends Controller
             'FirstName' => $driver->user->FirstName,
             'LastName' => $driver->user->LastName,
             'username' => $driver->user->username,
+            'Address' => $driver->user->Address,
+            'BirthDate' => $driver->user->BirthDate,
             'email' => $driver->user->email,
             'ContactNumber' => $driver->user->ContactNumber,
             'LicenseNumber' => $driver->LicenseNumber,
