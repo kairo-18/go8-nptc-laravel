@@ -48,9 +48,10 @@ export default function CreateDriver({ companies }) {
             const response = await axios.post(route('driver.store'), formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-    
-            console.log("Success:", response.data);
+            alert('Driver registered successfully!');
             setProcessing(false);
+            window.location.href = '/drivers';
+        
         } catch (error) {
             console.error("Error submitting form:", error.response?.data);
             setErrors(error.response?.data || {});
@@ -184,12 +185,7 @@ export default function CreateDriver({ companies }) {
                             </div>
 
                             {/* File Uploads */}
-                            <div className="grid grid-cols-2 gap-4">
-                                {['License', 'Photo', 'NBI_clearance', 'Police_clearance', 'BIR_clearance'].map((field) => (
-                                    <div key={field}>
-                                        <Label htmlFor={field}>{field.replace('_', ' ')}</Label>
-                                        <Input id={field} type="file" onChange={(e) => setData(field, e.target.files?.[0] || null)} />
-                                        {errors[field] && <p className="text-sm text-red-500">{errors[field]}</p>}
+                            <div className="grid grid-cols-2 gap-4"> {['License', 'Photo', 'NBI_clearance', 'Police_clearance', 'BIR_clearance'].map((field) => ( <div key={field}> <Label htmlFor={field}>{field.replace('_', ' ')}</Label> <Input id={field} type="file" onChange={(e) => setData(field, e.target.files?.[0] || null)} /> {errors[field] && <p className="text-sm text-red-500">{errors[field]}</p>}
                                     </div>
                                 ))}
                             </div>
@@ -202,6 +198,5 @@ export default function CreateDriver({ companies }) {
                     </CardContent>
                 </Card>
             </div>
-        </MainLayout>
-    );
+        </MainLayout>);
 }

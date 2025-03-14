@@ -1,10 +1,31 @@
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
 import MainLayout from '@/pages/mainLayout';
+import { Head } from '@inertiajs/react';
+import { Label } from '@/components/ui/label';
 import { useState } from 'react';
-import { Head, usePage } from '@inertiajs/react';
-import { type SharedData } from '@/types';
+
+// Modal Component (smaller version)
+function Modal({ isOpen, onClose, file }: { isOpen: boolean; onClose: () => void; file: MediaFile | null }) {
+    if (!isOpen || !file) return null;
+
+    return (
+<div className="fixed inset-0 flex justify-center items-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 50 }}>
+    <div className="bg-white p-4 rounded-lg max-w-lg relative z-60">
+        <Button onClick={onClose} className="absolute top-2 right-2 p-2" variant="outline">
+            ✕
+        </Button>
+        {file.mime_type.startsWith('image') ? (
+            <img src={file.url} alt={file.name} className="w-64 h-auto object-contain" />
+        ) : (
+            <div className="text-center">Preview for non-image file: {file.name}</div>
+        )}
+    </div>
+</div>
+
+    );
+}
 
 interface MediaFile {
     id: number;
@@ -19,6 +40,8 @@ interface Driver {
     LastName: string;
     username: string;
     email: string;
+    BirthDate: string;
+    Address: string;
     ContactNumber: string;
     LicenseNumber: string | null;
     Status: string;
@@ -29,122 +52,177 @@ interface Driver {
 
 interface DriversProps {
     drivers: Driver[];
+    totalPages: number;
 }
 
-export default function Drivers({ drivers }: DriversProps) {
-    const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
-    const { auth } = usePage<SharedData>().props;
-    const [selectedMedia, setSelectedMedia] = useState<MediaFile | null>(null);
-
-    const handleRowClick = (driver: Driver) => {
-        setSelectedDriver(driver);
-    };
-
-    const closeDialog = () => {
-        setSelectedDriver(null);
-    };
-
-    const previewMedia = (media: MediaFile) => {
-        setSelectedMedia(media);
-    };
+export default function Drivers({ drivers, totalPages }: DriversProps) {
+    const [currentPage, setCurrentPage] = useState(1);
+    const [isEditing, setIsEditing] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<MediaFile | null>(null); // For storing selected file for preview
+    const [isModalOpen, setIsModalOpen] = useState(false); // To control the modal visibility
     
-    const handleDownload = (mediaId: number) => {
-        window.location.href = route('download-driver-media', { mediaId });
+    // Number of drivers to display per page
+    const driversPerPage = 5;
+    
+    // Calculate the starting and ending indices for the current page
+    const startIndex = (currentPage - 1) * driversPerPage;
+    const endIndex = startIndex + driversPerPage;
+    
+    // Slice the drivers array based on current page
+    const driversToDisplay = drivers.slice(startIndex, endIndex);
+
+    const handlePageChange = (page: number) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
+    };
+
+    const handlePreview = (file: MediaFile) => {
+        setSelectedFile(file);
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+        setSelectedFile(null);
     };
 
     return (
-        <MainLayout breadcrumbs={[{ title: 'Drivers', href: '/drivers' }]}>
+        <MainLayout breadcrumbs={[{ title: 'Drivers', href: '/drivers' }]} >
             <Head title="Drivers" />
-            <div className="p-5">
-                <Table>
-                    <TableCaption>List of all registered drivers.</TableCaption>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>ID</TableHead>
-                            <TableHead>First Name</TableHead>
-                            <TableHead>Last Name</TableHead>
-                            <TableHead>Username</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Contact Number</TableHead>
-                            <TableHead>License Number</TableHead>
-                            <TableHead>Operator</TableHead>
-                            <TableHead>Company</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {drivers.map((driver) => (
-                            <TableRow key={driver.id}>
-                                <TableCell>{driver.id}</TableCell>
-                                <TableCell>{driver.FirstName}</TableCell>
-                                <TableCell>{driver.LastName}</TableCell>
-                                <TableCell>{driver.username}</TableCell>
-                                <TableCell>{driver.email}</TableCell>
-                                <TableCell>{driver.ContactNumber}</TableCell>
-                                <TableCell>{driver.LicenseNumber ?? 'N/A'}</TableCell>
-                                <TableCell>{driver.operator?.FirstName} {driver.operator?.LastName ?? 'N/A'}</TableCell>
-                                <TableCell>{driver.vrCompany?.CompanyName ?? 'N/A'}</TableCell>
-                                <TableCell>{driver.Status}</TableCell>
-                                <TableCell>
-                                    <Button size="sm" onClick={() => handleRowClick(driver)}>
-                                        View Details
-                                    </Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </div>
+            <div className="p-5 flex justify-center">
+                <div className="w-full max-w-3xl">
+                    {driversToDisplay.length === 0 ? (
+                        <p className="text-center text-gray-500">No drivers available.</p>
+                    ) : (
+                        driversToDisplay.map((driver) => {
+                            const profilePhoto = driver.media_files.find(file => file.mime_type.startsWith('image'));
+                            return (
+                                <Card key={driver.id} className="shadow-md p-6 mb-6">
+                                    <CardHeader>
+                                        <div className="flex items-center space-x-6">
+                                            {/* Profile Image */}
+                                            {profilePhoto ? (
+                                                <img 
+                                                    src={profilePhoto.url} 
+                                                    alt="Profile" 
+                                                    className="w-24 h-24 rounded-full object-cover border border-gray-300"
+                                                />
+                                            ) : (
+                                                <div className="w-24 h-24 flex items-center justify-center bg-gray-300 text-white font-bold rounded-full text-3xl">
+                                                    {driver.FirstName.charAt(0)}
+                                                </div>
+                                            )}
 
-            {/* Modal for Driver Details */}
-            <Dialog open={!!selectedDriver} onOpenChange={closeDialog}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Driver Details</DialogTitle>
-                    </DialogHeader>
-                    {selectedDriver && (
-                        <div className="space-y-2">
-                            <p><strong>Name:</strong> {selectedDriver.FirstName} {selectedDriver.LastName}</p>
-                            <p><strong>Email:</strong> {selectedDriver.email}</p>
-                            <p><strong>Operator:</strong> {selectedDriver.operator?.FirstName} {selectedDriver.operator?.LastName ?? 'N/A'}</p>
-                            <p><strong>Company:</strong> {selectedDriver.vrCompany?.CompanyName ?? 'N/A'}</p>
-                            <p><strong>Status:</strong> {selectedDriver.Status}</p>
-                            
-                            {selectedDriver.media_files.length > 0 && (
-    <div>
-        <h3 className="font-bold">Media Files</h3>
-        <ul className="space-y-2">
-            {selectedDriver.media_files.map((file) => (
-                <li key={file.id} className="flex items-center space-x-2">
-                    <span>{file.name}</span>
-                    <Button variant="outline" size="sm" onClick={() => previewMedia(file)}>
-                        Preview
-                    </Button>
-                </li>
-            ))}
-        </ul>
+                                            {/* Driver's Name & Company */}
+                                            <div>
+                                                <CardTitle className="text-2xl font-semibold">
+                                                    {driver.FirstName} {driver.LastName}
+                                                </CardTitle>
+                                                <p className="text-gray-500">{driver.vrCompany.CompanyName}</p>
+                                            </div>
+                                        </div>
+                                    </CardHeader>
 
-        {/* Show the media inside the modal */}
-        {selectedMedia && (
-            <div className="mt-4 p-3 border rounded-lg">
-                <h4 className="font-semibold">Preview: {selectedMedia.name}</h4>
-                {selectedMedia.mime_type.startsWith('image/') ? (
-                    <img src={selectedMedia.url} alt={selectedMedia.name} className="max-w-full h-auto rounded-md" />
-                ) : selectedMedia.mime_type === 'application/pdf' ? (
-                    <iframe src={selectedMedia.url} className="w-full h-64 border rounded-md"></iframe>
-                ) : (
-                    <p>Preview not available for this file type.</p>
-                )}
-            </div>
-        )}
-    </div>
-)}
+                                    <CardContent>
+                                        <div className="grid grid-cols-1 gap-6">
+                                            <div className="space-y-2">
+                                                <Label>Username</Label>
+                                                <Input value={driver.username} readOnly={!isEditing} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Email</Label>
+                                                <Input value={driver.email} readOnly={!isEditing} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Contact Number</Label>
+                                                <Input value={driver.ContactNumber} readOnly={!isEditing} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Birth Date</Label>
+                                                <Input value={driver.BirthDate} readOnly={!isEditing} type="date" />
+                                            </div>
 
-                        </div>
+                                            <div className="space-y-2">
+                                                <Label>Address</Label>
+                                                <Input value={driver.Address} readOnly={!isEditing} />
+                                            </div>
+
+                                            <div className="space-y-2">
+                                                <Label>Company Name</Label>
+                                                <Input value={driver.vrCompany.CompanyName} readOnly={!isEditing} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Operator Name</Label>
+                                                <Input value={`${driver.operator.FirstName} ${driver.operator.LastName}`} readOnly={!isEditing} />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label>Status</Label>
+                                                <Input value={driver.Status} readOnly={!isEditing} />
+                                            </div>
+                                        </div>
+
+                                        {/* Media Files Section */}
+                                        <div className="mt-6 space-y-4">
+                                            <h3 className="text-md font-medium">Media Files</h3>
+                                            {driver.media_files.length > 0 ? (
+                                                driver.media_files.map((file) => (
+                                                    <div key={file.id} className="flex items-center gap-2">
+                                                        <Label>{file.collection_name}</Label>
+                                                        <Input value={file.name} readOnly />
+                                                        <Button type="button" variant="outline" onClick={() => handlePreview(file)}>
+                                                            Preview
+                                                        </Button>
+                                                    </div>
+                                                ))
+                                            ) : (
+                                                <p className="text-gray-500">No media files available.</p>
+                                            )}
+
+                                            {/* File Upload - Only When Editing */}
+                                            {isEditing && (
+                                                <div className="mt-4">
+                                                    <Label>Upload New File</Label>
+                                                    <Input type="file" />
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {/* Update Button */}
+                                        <div className="mt-6 flex justify-end space-x-4">
+                                            <Button onClick={() => setIsEditing(!isEditing)}>
+                                                {isEditing ? "Save Changes" : "Update"}
+                                            </Button>
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            );
+                        })
                     )}
-                </DialogContent>
-            </Dialog>
+                </div>
+            </div>
+
+            {/* Custom Pagination */}
+            <div className="mt-6 flex justify-center items-center space-x-4">
+                <Button 
+                    variant="outline" 
+                    onClick={() => handlePageChange(currentPage - 1)} 
+                    disabled={currentPage === 1}
+                >
+                    Previous
+                </Button>
+                <span className="text-lg">{currentPage} of {totalPages}</span>
+                <Button 
+                    variant="outline" 
+                    onClick={() => handlePageChange(currentPage + 1)} 
+                    disabled={currentPage === totalPages}
+                >
+                    Next
+                </Button>
+            </div>
+
+            {/* Modal for file preview */}
+            <Modal isOpen={isModalOpen} onClose={closeModal} file={selectedFile} />
         </MainLayout>
     );
 }

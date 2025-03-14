@@ -23,12 +23,14 @@ export default function CreateOperator({ companies }) {
     const { flash } = usePage().props;
 
     // Handle form submission
-    const handleSubmit = (e) => {
+    const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
     
         post(route("operators.store"), {
-            onSuccess: () =>  reset(),
-            
+            onSuccess: () => {
+                alert('Operator created successfully!');
+                reset();
+            }
         });
     };
 
@@ -40,7 +42,7 @@ export default function CreateOperator({ companies }) {
 
                 {flash?.success && (
                     <div className="mb-4 rounded-lg bg-green-100 p-3 text-green-700">
-                        {flash.success}
+                        {flash.success} 
                     </div>
                 )}
 
