@@ -15,10 +15,12 @@ export default function Mails() {
     const [selectedThread, setSelectedThread] = useState(null);
     const messagesEndRef = useRef(null);
     const [newMail, setNewMail] = useState({ email: '', subject: '', content: '' });
+    const [loading, setLoading] = useState(false);
     const auth = usePage().props.auth;
 
     const handleSend = async () => {
         if (!selectedThread) return;
+        setLoading(true);
 
         // Determine the recipient email
         const recipientEmail =
@@ -34,8 +36,12 @@ export default function Mails() {
             });
 
             console.log('Mail sent:', response.data.mail);
+       
+            setNewMail({ email: '', subject: '', content: '' });
         } catch (error) {
             console.error('Error sending mail:', error);
+        } finally{
+            setLoading(false);
         }
     };
 
@@ -64,6 +70,7 @@ export default function Mails() {
     }, []);
 
     useEffect(() => {
+        if (threads.length === 0) return;
         // ✅ Listen for real-time updates
         const threadIds = threads.map((thread) => thread.id);
         threadIds.forEach((threadId) => {
@@ -91,7 +98,7 @@ export default function Mails() {
                 echo.leave(`thread.${threadId}`);
             });
         };
-    });
+    },[threads]);
 
     return (
         <MainLayout>
@@ -197,9 +204,16 @@ export default function Mails() {
                                 />
                                 <div className="mt-2 flex items-center justify-between">
                                     <div className="flex items-center space-x-2 text-gray-500"></div>
-                                    <Button onClick={handleSend} className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700">
-                                        Send
-                                    </Button>
+                                    <Button 
+                                    onClick={handleSend} 
+                                    disabled={loading} 
+                                    className={`rounded-lg px-4 py-2 text-white transition ${
+                                        loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
+                                    }`}
+                                >
+                                    {loading ? "Sending..." : "Send"}
+                                </Button>
+
                                 </div>
                             </div>
                         </>
