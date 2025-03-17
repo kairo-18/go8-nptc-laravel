@@ -6,9 +6,6 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 import MainLayout from './mainLayout';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Card, CardContent } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 import echo from '@/echo'; // Import the Echo instance
 import { usePage } from '@inertiajs/react';
 import MainMailContent from '@/components/Mail/main-mail-content'; // Import the modal component
@@ -22,9 +19,6 @@ export default function Mails() {
     const [filter, setFilter] = useState('');
     const auth = usePage().props.auth;
     const [selectedThread, setSelectedThread] = useState(null); // Track the selected thread
-    const messagesEndRef = useRef(null);
-    const [newMail, setNewMail] = useState({ email: '', subject: '', content: '' });
-    const [loading, setLoading] = useState(false);
 
     const breadcrumbs = [
         {
