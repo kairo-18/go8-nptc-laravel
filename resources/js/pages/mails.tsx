@@ -20,8 +20,8 @@ export default function Mails() {
 
     const handleSend = async () => {
         if (!selectedThread) return;
+      
         setLoading(true);
-
         // Determine the recipient email
         const recipientEmail =
             selectedThread.sender.id === auth.user.id
@@ -38,11 +38,11 @@ export default function Mails() {
             console.log('Mail sent:', response.data.mail);
        
             setNewMail({ email: '', subject: '', content: '' });
+            setTimeout(() => setLoading(false), 1000);
         } catch (error) {
             console.error('Error sending mail:', error);
-        } finally{
             setLoading(false);
-        }
+        } 
     };
 
     useEffect(() => {
