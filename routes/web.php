@@ -46,12 +46,20 @@ Route::get('mails/thread/{thread}', function (Thread $thread) {
     return response()->json(['thread' => $thread]);
 });
 
+Route::put('mails/mark-read/{thread}', function (Thread $thread) {
+    $thread->mails()->update(['is_read' => true]);
+
+    return response()->json(['thread' => $thread]);
+});
+
 Route::post('mails/new-mail', function (Request $request) {
+
     $request->validate([
         'email' => 'required|email|exists:users,email',
         'thread_id' => 'nullable|exists:threads,id',
         'subject' => 'required|string',
         'content' => 'required|string',
+        'is_read' => 'boolean',
     ]);
 
     $receiver = User::where('email', $request->email)->firstOrFail();
@@ -85,6 +93,7 @@ Route::post('mails/new-mail', function (Request $request) {
         'thread_id' => $thread->id,
         'subject' => $request->subject,
         'content' => $request->content,
+        'is_read' => $request->is_read ?? false,
     ]);
 
     // Dispatch real-time mail event

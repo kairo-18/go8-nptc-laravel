@@ -1,49 +1,117 @@
 import ComposeMail from '@/components/Mail/compose-mail';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import MainLayout from './mainLayout';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Card, CardContent } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import echo from '@/echo'; // Import the Echo instance
 import { usePage } from '@inertiajs/react';
-import axios from 'axios';
-import { useEffect, useRef, useState } from 'react';
-import MainLayout from './mainLayout';
+import MainMailContent from '@/components/Mail/main-mail-content'; // Import the modal component
+import { Dialog, DialogContent } from '@/components/ui/dialog'; // Import Dialog and DialogContent
 
 export default function Mails() {
+    const [selectedThreads, setSelectedThreads] = useState(new Set());
     const [threads, setThreads] = useState([]);
-    const [selectedThread, setSelectedThread] = useState(null);
+    const [filteredThreads, setFilteredThreads] = useState([]);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [filter, setFilter] = useState('');
+    const auth = usePage().props.auth;
+    const [selectedThread, setSelectedThread] = useState(null); // Track the selected thread
     const messagesEndRef = useRef(null);
     const [newMail, setNewMail] = useState({ email: '', subject: '', content: '' });
     const [loading, setLoading] = useState(false);
-    const auth = usePage().props.auth;
 
-    const handleSend = async () => {
-        if (!selectedThread) return;
-      
-        setLoading(true);
-        // Determine the recipient email
-        const recipientEmail =
-            selectedThread.sender.id === auth.user.id
-                ? selectedThread.receiver.email // If logged-in user is the sender, send to receiver
-                : selectedThread.sender.email; // Otherwise, send to sender
+    const breadcrumbs = [
+        {
+            title: 'Mails',
+            href: '/mails',
+        },
+    ];
 
-        try {
-            const response = await axios.post('mails/new-mail', {
-                email: recipientEmail, // Pass the correct email
-                subject: newMail.subject,
-                content: newMail.content,
-            });
-
-            console.log('Mail sent:', response.data.mail);
-       
-            setNewMail({ email: '', subject: '', content: '' });
-            setTimeout(() => setLoading(false), 1000);
-        } catch (error) {
-            console.error('Error sending mail:', error);
-            setLoading(false);
-        } 
+    const handleHeaderCheckboxClick = () => {
+        if (selectedThreads.size === filteredThreads.length) {
+            // If all are selected, deselect all
+            setSelectedThreads(new Set());
+        } else {
+            // Otherwise, select all
+            const allThreadIds = new Set(filteredThreads.map(thread => thread.id));
+            setSelectedThreads(allThreadIds);
+        }
     };
+
+    const isAllSelected = selectedThreads.size === filteredThreads.length;
+    const isIndeterminate = selectedThreads.size > 0 && selectedThreads.size < filteredThreads.length;
+
+    const handleThreadCheckboxClick = (threadId) => {
+        const newSelectedThreads = new Set(selectedThreads);
+        if (newSelectedThreads.has(threadId)) {
+            newSelectedThreads.delete(threadId); // Deselect
+        } else {
+            newSelectedThreads.add(threadId); // Select
+        }
+        setSelectedThreads(newSelectedThreads);
+    };
+
+    const markThreadAsRead = async (threadId) => {
+        try {
+            await axios.put(`mails/mark-read/${threadId}`);
+            setThreads((prevThreads) =>
+                prevThreads.map((thread) =>
+                    thread.id === threadId
+                        ? {
+                              ...thread,
+                              mails: thread.mails.map((mail) => ({ ...mail, is_read: true })), // Mark all mails as read
+                          }
+                        : thread
+                )
+            );
+        } catch (error) {
+            console.error('Error marking thread as read:', error);
+        }
+    };
+
+    const handleRowClick = (thread) => {
+        if (!thread.mails.every(mail => mail.is_read)) {
+            markThreadAsRead(thread.id); // Mark the thread as read
+        }
+        setSelectedThread(thread); // Open the modal
+    };
+
+    useEffect(() => {
+        axios.get('mails/threads').then((response) => {
+            setThreads(response.data.threads);
+            setFilteredThreads(response.data.threads);
+            console.log(response.data.threads);
+        })
+        .catch((error) => {
+            console.error('Error fetching mail threads:', error);
+        });
+    }, []);
+
+    useEffect(() => {
+        let filtered = threads;
+        if (searchQuery) {
+            filtered = filtered.filter(thread =>
+                thread.receiver.FirstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                thread.mails.some(mail => mail.subject.toLowerCase().includes(searchQuery.toLowerCase()))
+            );
+        }
+        if (filter === 'Read') {
+            filtered = filtered.filter(thread => thread.mails.every(mail => mail.is_read));
+        } else if (filter === 'Unread') {
+            filtered = filtered.filter(thread => !thread.mails.every(mail => mail.is_read));
+        } else if (filter === 'Date (Latest)') {
+            filtered = [...filtered].sort((a, b) => new Date(b.mails[b.mails.length - 1].created_at) - new Date(a.mails[a.mails.length - 1].created_at));
+        } else if (filter === 'Date (Oldest)') {
+            filtered = [...filtered].sort((a, b) => new Date(a.mails[a.mails.length - 1].created_at) - new Date(b.mails[b.mails.length - 1].created_at));
+        }
+        setFilteredThreads(filtered);
+    }, [searchQuery, filter, threads]);
 
     useEffect(() => {
         console.log(`user.${auth.user.id}`);
@@ -52,21 +120,26 @@ export default function Mails() {
             setThreads((prevThreads) => [...prevThreads, event.thread]);
         });
 
+        // Listen for MailMarkedAsRead event
+        window.Echo.private(`user.${auth.user.id}`).listen('MailMarkedAsRead', (event) => {
+            console.log('Mail marked as read:', event);
+            setThreads((prevThreads) =>
+                prevThreads.map((thread) =>
+                    thread.id === event.threadId
+                        ? {
+                              ...thread,
+                              mails: thread.mails.map((mail) =>
+                                  mail.id === event.mailId ? { ...mail, is_read: true } : mail
+                              ),
+                          }
+                        : thread
+                )
+            );
+        });
+
         return () => {
             window.Echo.leave(`user.${auth.user.id}`);
         };
-    }, []);
-
-    useEffect(() => {
-        axios
-            .get('mails/threads')
-            .then((response) => {
-                setThreads(response.data.threads);
-                console.log(response.data.threads);
-            })
-            .catch((error) => {
-                console.error('Error fetching mail threads:', error);
-            });
     }, []);
 
     useEffect(() => {
@@ -101,126 +174,106 @@ export default function Mails() {
     },[threads]);
 
     return (
-        <MainLayout>
-            <div className="flex h-full">
-                {/* Sidebar */}
-                <div className="w-2/7 overflow-y-auto border-r p-4">
-                    <div className="mb-5 flex w-full justify-between">
-                        <h2 className="mb-4 text-lg font-bold">Mails</h2>
+        <MainLayout breadcrumbs={breadcrumbs}>
+            <div className="p-6 bg-white rounded-lg shadow">
+                <div className="flex justify-between items-center mb-4">
+                    <Input
+                        className="w-1/3"
+                        placeholder="Search from mails"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                    <div className="flex gap-2">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className='text-white'>Filter</Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent>
+                                {['Read', 'Unread', 'Date (Latest)', 'Date (Oldest)'].map(option => (
+                                    <DropdownMenuItem key={option} onClick={() => setFilter(option)}>
+                                        {option}
+                                    </DropdownMenuItem>
+                                ))}
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                         <ComposeMail />
                     </div>
-                    {threads.map((thread) => (
-                        <Card
-                            key={thread.id}
-                            className={`cursor-pointer rounded-lg border border-gray-200 bg-white text-gray-900 shadow-md transition-all ${
-                                selectedThread?.id === thread.id ? 'border-blue-500 bg-blue-50' : ''
-                            }`}
-                            onClick={() => setSelectedThread(thread)}
-                        >
-                            <CardContent className="p-4">
-                                <div className="flex items-center justify-between">
-                                    <h3 className="font-semibold text-gray-800">
-                                        {thread.mails.length > 0 && thread.mails[thread.mails.length - 1].sender_id === auth.user.id
-                                            ? 'To: '
-                                            : 'From: '}{' '}
-                                        {thread.receiver.FirstName + ' ' + thread.receiver.LastName}
-                                    </h3>
-                                    <p className="text-xs text-gray-500">
-                                        {new Date(thread.mails[thread.mails.length - 1].created_at).toLocaleDateString('en-US', {
-                                            year: 'numeric',
-                                            month: 'long',
-                                            day: 'numeric',
-                                        })}
-                                    </p>
-                                </div>
-                                <p className="text-sm text-gray-600">{thread.receiver.email}</p>
-                                <p className="mt-2 text-sm font-medium text-gray-700">{thread.mails[thread.mails.length - 1].subject}</p>
-                            </CardContent>
-                        </Card>
-                    ))}
                 </div>
-                {/* Main Content */}
-                <div className="flex h-[85vh] w-5/7 flex-col p-4">
-                    {selectedThread ? (
-                        <>
-                            {/* Scrollable Chat History */}
-                            <div className="flex-1 space-y-4 overflow-y-auto p-2">
-                                {selectedThread.mails.map((mail) => {
-                                    const sender = mail.sender_id === selectedThread.sender.id ? selectedThread.sender : selectedThread.receiver;
-                                    return (
-                                        <Card key={mail.id} className="rounded-lg border border-gray-200 bg-white shadow-sm">
-                                            <CardContent className="p-6">
-                                                <div className="flex items-start justify-between">
-                                                    <div className="flex items-center space-x-4">
-                                                        <Avatar className="h-10 w-10">
-                                                            <AvatarFallback>
-                                                                {sender.FirstName[0]}
-                                                                {sender.LastName[0]}
-                                                            </AvatarFallback>
-                                                        </Avatar>
-                                                        <div>
-                                                            <h3 className="text-sm font-semibold text-gray-900">
-                                                                {sender.FirstName} {sender.LastName}
-                                                            </h3>
-                                                            <p className="text-xs text-gray-500">{sender.email}</p>
-                                                        </div>
-                                                    </div>
-                                                    <p className="text-xs text-gray-400">
-                                                        {new Date(mail.created_at).toLocaleString('en-US', {
-                                                            year: 'numeric',
-                                                            month: 'long',
-                                                            day: 'numeric',
-                                                            hour: '2-digit',
-                                                            minute: '2-digit',
-                                                            hour12: true,
-                                                        })}
-                                                    </p>
-                                                </div>
-                                                <div className="mt-3">
-                                                    <p className="text-sm font-medium text-gray-800">{mail.subject}</p>
-                                                    <p className="mt-2 text-sm text-gray-700">{mail.content}</p>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    );
-                                })}
-                                {/* Auto-scroll to bottom */}
-                                <div ref={messagesEndRef} />
-                            </div>
-
-                            {/* Fixed Input Box */}
-                            <div className="sticky bottom-0 left-0 w-full border-t bg-white p-4 pt-4 shadow-md">
-                                <Input
-                                    type="text"
-                                    placeholder="Subject"
-                                    value={newMail.subject}
-                                    onChange={(e) => setNewMail({ ...newMail, subject: e.target.value })}
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>
+                                <input
+                                    type="checkbox"
+                                    checked={isAllSelected}
+                                    ref={(el) => {
+                                        if (el) {
+                                            el.indeterminate = isIndeterminate;
+                                        }
+                                    }}
+                                    onChange={handleHeaderCheckboxClick}
                                 />
-                                <Textarea
-                                    value={newMail.content}
-                                    onChange={(e) => setNewMail({ ...newMail, content: e.target.value })}
-                                    placeholder="Type a email content..."
-                                    className="w-full rounded-md border border-gray-300 p-2 focus:ring focus:ring-blue-300"
-                                />
-                                <div className="mt-2 flex items-center justify-between">
-                                    <div className="flex items-center space-x-2 text-gray-500"></div>
-                                    <Button 
-                                    onClick={handleSend} 
-                                    disabled={loading} 
-                                    className={`rounded-lg px-4 py-2 text-white transition ${
-                                        loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700'
-                                    }`}
-                                >
-                                    {loading ? "Sending..." : "Send"}
-                                </Button>
+                            </TableHead>
+                            <TableHead>To/From</TableHead>
+                            <TableHead>Subject</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead></TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {filteredThreads.map((thread) => (
+                            <TableRow
+                                key={thread.id}
+                                onClick={() => handleRowClick(thread)}
+                                className={`cursor-pointer ${
+                                    thread.mails.every(mail => mail.is_read) ? 'bg-gray-100' : 'bg-white'
+                                } hover:bg-gray-200`}
+                            >
+                                <TableCell>
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedThreads.has(thread.id)}
+                                        onChange={() => handleThreadCheckboxClick(thread.id)}
+                                        onClick={(e) => e.stopPropagation()} // Prevent row click event
+                                    />
+                                </TableCell>
+                                <TableCell>{thread.receiver.FirstName} {thread.receiver.LastName}</TableCell>
+                                <TableCell className="font-medium">{thread.mails[thread.mails.length - 1]?.subject}</TableCell>
+                                <TableCell className={thread.mails.every(mail => mail.is_read) ? 'text-green-600' : 'text-red-600'}>
+                                    {thread.mails.every(mail => mail.is_read) ? 'Read' : 'Unread'}
+                                </TableCell>
+                                <TableCell>
+                                    {new Date(thread.mails[thread.mails.length - 1]?.created_at).toLocaleDateString('en-US', {
+                                        year: 'numeric', month: 'short', day: 'numeric'
+                                    })}
+                                </TableCell>
+                                <TableCell>
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost">...</Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent>
+                                            <DropdownMenuItem>Pin to top</DropdownMenuItem>
+                                            <DropdownMenuItem className="text-red-500">Delete</DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
 
-                                </div>
-                            </div>
-                        </>
-                    ) : (
-                        <p className="mt-4 text-gray-500">Select a thread to view the conversation.</p>
+                {/* Render the Modal */}
+                <Dialog open={!!selectedThread} onOpenChange={(open) => !open && setSelectedThread(null)}>
+                    {selectedThread && (
+                        <MainMailContent
+                            selectedThread={selectedThread}
+                            auth={auth}
+                            onClose={() => setSelectedThread(null)}
+                        />
                     )}
-                </div>{' '}
+                </Dialog>
             </div>
         </MainLayout>
     );
