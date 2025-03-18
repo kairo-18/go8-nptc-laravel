@@ -12,8 +12,9 @@ return new class () extends Migration {
     {
         Schema::create('threads', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('sender_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('receiver_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('original_sender_id')->constrained('users', 'id')->cascadeOnDelete();
+            $table->foreignId('sender_id')->constrained('users', 'id')->cascadeOnDelete();
+            $table->foreignId('receiver_id')->constrained('users', 'id')->cascadeOnDelete();
             $table->timestamps();
         });
     }

@@ -70,7 +70,7 @@ export default function Mails() {
     };
 
     const handleRowClick = (thread) => {
-        if (!thread.mails.every(mail => mail.is_read)) {
+        if (auth.user.id === thread.receiver.id && !thread.mails.every(mail => mail.is_read)) {
             markThreadAsRead(thread.id); // Mark the thread as read
         }
         setSelectedThread(thread); // Open the modal
@@ -110,7 +110,7 @@ export default function Mails() {
     useEffect(() => {
         console.log(`user.${auth.user.id}`);
         window.Echo.private(`user.${auth.user.id}`).listen('NewThreadCreated', (event) => {
-            console.log('New thread received:', event);
+            console.log('New thread received:', event, auth.user.id);
             setThreads((prevThreads) => [...prevThreads, event.thread]);
         });
 
@@ -173,7 +173,7 @@ export default function Mails() {
                 <div className="flex justify-between items-center mb-4">
                     <Input
                         className="w-1/3"
-                        placeholder="Search from mails"
+                        placeholder="Search mails by keyword"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />

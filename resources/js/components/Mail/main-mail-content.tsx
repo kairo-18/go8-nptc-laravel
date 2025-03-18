@@ -23,7 +23,7 @@ export default function MainMailContent({ selectedThread, auth }) {
                 email: recipientEmail,
                 subject: originalSubject,
                 content: newMail.content,
-                is_read: true,
+                is_read: false,
             });
             console.log('Mail sent:', newMail);
             setNewMail({ subject: '', content: '' });

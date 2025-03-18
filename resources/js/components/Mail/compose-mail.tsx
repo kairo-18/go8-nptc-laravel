@@ -7,13 +7,17 @@ import { useState } from 'react';
 
 export default function ComposeMail() {
     const [newMail, setNewMail] = useState({ email: '', subject: '', content: '' });
+    const [isLoading, setIsLoading] = useState(false);
 
     const sendNewMail = async () => {
+        setIsLoading(true);
         try {
             const response = await axios.post('mails/new-mail', newMail);
             console.log('Mail sent:', response.data.mail);
+            setIsLoading(false);
         } catch (error) {
             console.error('Error sending mail:', error);
+            setIsLoading(false);
         }
     };
 
@@ -43,7 +47,7 @@ export default function ComposeMail() {
                 </div>
                 <DialogFooter>
                     <Button onClick={sendNewMail} variant="default">
-                        Send Mail
+                    {isLoading ? 'Sending...' : 'Send Mail'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

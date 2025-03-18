@@ -53,41 +53,50 @@ Route::put('mails/mark-read/{thread}', function (Thread $thread) {
 });
 
 Route::post('mails/new-mail', function (Request $request) {
-
     $request->validate([
         'email' => 'required|email|exists:users,email',
-        'thread_id' => 'nullable|exists:threads,id',
         'subject' => 'required|string',
         'content' => 'required|string',
         'is_read' => 'boolean',
     ]);
 
+    // Find the receiver by email
+    $sender = auth()->user();
     $receiver = User::where('email', $request->email)->firstOrFail();
-    $thread = null;
+
+    // Check if a thread already exists between the sender and receiver with the same subject
+    $thread = Thread::where(function ($query) use ($receiver, $request) {
+        $query->where('sender_id', auth()->id())
+              ->where('receiver_id', $receiver->id)
+              ->whereHas('mails', function ($q) use ($request) {
+                  $q->where('subject', $request->subject);
+              });
+    })->orWhere(function ($query) use ($receiver, $request) {
+        $query->where('sender_id', $receiver->id)
+              ->where('receiver_id', auth()->id())
+              ->whereHas('mails', function ($q) use ($request) {
+                  $q->where('subject', $request->subject);
+              });
+    })->first();
+
     $isNewThread = false; // Track if a new thread is created
 
-    if ($request->thread_id) {
-        $thread = Thread::findOrFail($request->thread_id);
+    // If no thread exists with the same subject, create a new one
+    if (!$thread) {
+        $thread = Thread::create([
+            'original_sender_id' => auth()->id(), // Set the original sender
+            'sender_id' => auth()->id(), // Current sender
+            'receiver_id' => $receiver->id, // Receiver
+        ]);
+        $isNewThread = true; // Mark that a new thread is created
     } else {
-        // Check if a thread already exists between the sender and receiver
-        $thread = Thread::where(function ($query) use ($receiver) {
-            $query->where('sender_id', auth()->id())
-                  ->where('receiver_id', $receiver->id);
-        })->orWhere(function ($query) use ($receiver) {
-            $query->where('sender_id', $receiver->id)
-                  ->where('receiver_id', auth()->id());
-        })->first();
-
-        // If no thread exists, create a new one
-        if (!$thread) {
-            $thread = Thread::create([
-                'sender_id' => auth()->id(),
-                'receiver_id' => $receiver->id,
-            ]);
-            $isNewThread = true; // Mark that a new thread is created
-        }
+        $thread->update([
+            'sender_id' => $sender->id,
+            'receiver_id' => $receiver->id,
+        ]);
     }
 
+    // Create the mail
     $mail = Mail::create([
         'sender_id' => auth()->id(),
         'thread_id' => $thread->id,
