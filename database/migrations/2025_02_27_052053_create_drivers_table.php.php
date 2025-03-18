@@ -16,10 +16,10 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
             $table->foreignId('operator_id')->constrained()->cascadeOnDelete();
             $table->foreignId('vr_company_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('vehicle_id')->nullable()->constrained()->cascadeOnDelete();
+            $table->foreignId('vehicle_id')->nullable();
             $table->string('License')->nullable(); // Path to uploaded license file
             $table->string('LicenseNumber')->nullable()->unique();
-            $table->string('Photo')->nullable(); // Path to 1x1 photo file
+            $table->string('Photo')->nullable(); // Path to 1x1 photo file  
             $table->string('NBI_clearance')->nullable(); // Path to NBI clearance file
             $table->string('Police_clearance')->nullable(); // Path to Police clearance file
             $table->string('BIR_clearance')->nullable(); // Path to BIR clearance file

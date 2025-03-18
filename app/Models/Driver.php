@@ -34,7 +34,7 @@ class Driver extends Model implements HasMedia
 
     public function vehicle()
     {
-        return $this->hasOne(Vehicle::class);
+        return $this->hasMany(Vehicle::class);
     }
 
     public function operator()

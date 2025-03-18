@@ -21,7 +21,7 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin'])->gro
                     ->makeHidden(['created_at', 'updated_at', 'email_verified_at']),
                 'drivers' => \App\Models\User::role('Driver')
                     ->join('drivers', 'users.id', '=', 'drivers.user_id')
-                    ->get(['users.id', 'users.FirstName', 'users.LastName', 'Status', 'drivers.operator_id'])
+                    ->get(['drivers.id', 'users.FirstName', 'users.LastName', 'Status', 'drivers.operator_id'])
                     ->makeHidden(['created_at', 'updated_at', 'email_verified_at']),
                 'vehicles' => \App\Models\Vehicle::all()
                     ->makeHidden(['created_at', 'updated_at', 'operator'])
@@ -57,3 +57,5 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin'])->gro
     });
 
 });
+
+

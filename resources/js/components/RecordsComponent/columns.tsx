@@ -92,7 +92,8 @@ export const generateColumns = (
             enableHiding: false,
             cell: ({ row }) => {
                 const data = row.original;
-                const operatorData = row.original;
+                const operatorData = row.original;               
+
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -127,8 +128,9 @@ export const generateColumns = (
                             ) : entityType === 'drivers' ? (
                                 <>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => router.visit(`/drivers`)}>
-                                    Edit Driver</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => router.visit(`/drivers?id=${data.id}`)}>
+                                    Edit Driver
+                                    </DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Set Status</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('email'); }} className="cursor-pointer">Send Email</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('suspend'); }} className="cursor-pointer">Suspend</DropdownMenuItem>
