@@ -92,7 +92,7 @@ export const generateColumns = (
             enableHiding: false,
             cell: ({ row }) => {
                 const data = row.original;
-
+                const operatorData = row.original;
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -117,9 +117,8 @@ export const generateColumns = (
                             ) : entityType === 'operators' ? (
                                 <>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => alert(`Editing Operator: ${data.username}`)}>
-                                    Edit Operator</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Set Status</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); router.visit(`/operator/edit/${operatorData.id}`); }}>Edit Operator</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(operatorData); }} className="cursor-pointer">Set Status</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('email'); }} className="cursor-pointer">Send Email</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('suspend'); }} className="cursor-pointer">Suspend</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('ban'); }} className="cursor-pointer">Ban</DropdownMenuItem>

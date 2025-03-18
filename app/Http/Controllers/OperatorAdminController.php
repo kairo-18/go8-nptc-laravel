@@ -9,6 +9,9 @@ use App\Models\VRCompany;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
 use Spatie\Permission\Models\Role;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Redirect;
+
 class OperatorAdminController extends Controller
 {
     public function index()
@@ -73,9 +76,10 @@ class OperatorAdminController extends Controller
      */
     public function update(Request $request, Operator $operator)
 {
+    
     $validatedData = $request->validate([
-        'username' => 'sometimes|string|unique:users,username,' . $operator->user_id,
-        'email' => 'sometimes|email|unique:users,email,' . $operator->user_id,
+        'username' => 'sometimes|string|unique:users,username,' . $operator->user->id,
+        'email' => 'sometimes|email|unique:users,email,' . $operator->user->id,
         'FirstName' => 'sometimes|string',
         'LastName' => 'sometimes|string',
         'Address' => 'sometimes|string',
@@ -86,6 +90,8 @@ class OperatorAdminController extends Controller
         'vr_company_id' => 'sometimes|exists:vr_companies,id',
         'Status' => 'sometimes|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected',
     ]);
+
+
 
     // Update User Details
     $userData = array_intersect_key($validatedData, array_flip([
@@ -143,4 +149,20 @@ class OperatorAdminController extends Controller
 
         return response()->json(['message' => 'Status updated successfully'], 200);
     }
+
+    public function editView($id)
+    {
+        $operator = Operator::with('user')->find($id);
+
+        if (!$operator  ) {
+            return abort(404, 'Company not found');
+        }
+
+        return Inertia::render('edit-operator', [
+            'operator' => $operator,
+            'companies' => VRCompany::all(),
+        ]);
+    }
+
+
 }

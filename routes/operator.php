@@ -35,3 +35,12 @@ Route::get('/operators/{vr_company_id}', function ($vr_company_id) {
 Route::patch('operator/updateStatus/{id}', [OperatorAdminController::class, 'updateStatus'])->name('operator.updateStatus');
 Route::delete('/operators/{operator}', [OperatorAdminController::class, 'destroy'])->name('operators.destroy');
 
+Route::get('/operator/edit/{id}', [OperatorAdminController::class, 'editView'])->name('operator.edit');
+
+
+//route for edit function in the controller vrcompany
+Route::patch('operator/update/{operator}', [OperatorAdminController::class, 'update'])->name('operator.update');
+
+
+Route::patch('operator/updateStatus/{id}', [OperatorAdminController::class, 'updateStatus'])->name('operator.updateStatus');
+
