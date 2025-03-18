@@ -5,33 +5,59 @@ import axios from 'axios';
 import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Paperclip } from 'lucide-react';
 
 export default function MainMailContent({ selectedThread, auth }) {
     const [newMail, setNewMail] = useState({ subject: '', content: '' });
+    const [attachments, setAttachments] = useState([]); // State for file attachments
     const [loading, setLoading] = useState(false);
     const messagesEndRef = useRef(null);
+    const [uploadProgress, setUploadProgress] = useState(0); // Track upload progress
 
     const handleSend = async () => {
         if (!selectedThread) return;
 
         setLoading(true);
+        setUploadProgress(0); // Reset progress
+
         const recipientEmail = selectedThread.sender.id === auth.user.id ? selectedThread.receiver.email : selectedThread.sender.email;
         const originalSubject = selectedThread.mails[0]?.subject || 'No Subject';
 
+        const formData = new FormData();
+        formData.append('email', recipientEmail);
+        formData.append('subject', originalSubject);
+        formData.append('content', newMail.content.trim() !== '' ? newMail.content : 'No Content');
+        attachments.forEach((file) => formData.append('attachments[]', file));
+
         try {
-            await axios.post('mails/new-mail', {
-                email: recipientEmail,
-                subject: originalSubject,
-                content: newMail.content,
-                is_read: true,
+            const response = await axios.post('mails/new-mail', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+                    setUploadProgress(percentCompleted); // Update progress
+                },
             });
-            console.log('Mail sent:', newMail);
+
+            console.log('Mail sent:', response.data.mail);
             setNewMail({ subject: '', content: '' });
+            setAttachments([]);
+            setUploadProgress(0);
             setTimeout(() => setLoading(false), 1000);
         } catch (error) {
             console.error('Error sending mail:', error);
+            setUploadProgress(0);
             setLoading(false);
         }
+    };
+
+    const handleFileChange = (e) => {
+        const files = Array.from(e.target.files);
+        setAttachments(files);
+        setUploadProgress(0); // Reset progress
+    };
+
+    const handleRemoveFile = (index) => {
+        setAttachments((prevAttachments) => prevAttachments.filter((_, i) => i !== index));
     };
 
     useEffect(() => {
@@ -70,6 +96,25 @@ export default function MainMailContent({ selectedThread, auth }) {
                                         <div className="mt-4 py-3">
                                             <p className="text-base md:text-lg font-medium text-gray-800">{mail.subject}</p>
                                             <p className="mt-2 text-sm md:text-base text-gray-700">{mail.content}</p>
+
+                                            {/* Display attachments */}
+                                            {mail.media && mail.media.length > 0 && (
+                                                <div className="mt-4">
+                                                    <h4 className="text-sm font-semibold text-gray-900">Attachments</h4>
+                                                    <div className="flex flex-wrap gap-2 mt-2">
+                                                        {mail.media.map((media) => {
+                                                            return (
+                                                                <img
+                                                                    key={media.id}
+                                                                    src={route('preview-media', media.id)}
+                                                                    alt="Attachment"
+                                                                    className="w-24 h-24 object-cover rounded-lg"
+                                                                />
+                                                            );
+                                                        })}
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -85,7 +130,26 @@ export default function MainMailContent({ selectedThread, auth }) {
                             placeholder="Reply to this thread..."
                             className="w-full rounded-lg border border-gray-300 p-4 focus:ring focus:ring-blue-300 shadow-sm bg-gray-50 text-base md:text-lg"
                         />
-                        <div className="mt-3 flex items-center justify-between">
+
+                        {attachments.length > 0 && (
+                            <div className="mt-3 w-full">
+                                {attachments.map((file, index) => (
+                                    <div key={index} className="mb-2 flex items-center justify-between">
+                                        <div className="flex items-center gap-2 w-full">
+                                            <span className="truncate max-w-[70%] text-sm text-gray-700">{file.name}</span>
+                                        </div>
+                                        <button
+                                            onClick={() => handleRemoveFile(index)}
+                                            className="text-red-500 hover:text-red-700 text-sm font-medium ml-2"
+                                        >
+                                            ✖
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="mt-3 flex items-center jusitfy">
                             <Button
                                 onClick={handleSend}
                                 disabled={loading}
@@ -94,6 +158,19 @@ export default function MainMailContent({ selectedThread, auth }) {
                             >
                                 {loading ? "Sending..." : "Send"}
                             </Button>
+
+                            {/* File input for attachments */}
+                            <div className="px-5 flex items-center">
+                                <label className="cursor-pointer">
+                                    <Paperclip className="w-6 h-6 text-gray-500 hover:text-gray-700" />
+                                    <input
+                                        type="file"
+                                        multiple // Allow multiple files
+                                        onChange={handleFileChange}
+                                        className="hidden"
+                                    />
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
