@@ -15,6 +15,8 @@ use App\Models\Mail;
 use App\Models\Thread;
 use App\Models\User;
 use App\Events\NewThreadCreated;
+use Illuminate\Support\Facades\Storage;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 // Home route
 Route::get(
@@ -34,17 +36,32 @@ Route::get(
 Route::get('mails/threads', function () {
     $threads = Thread::where('sender_id', auth()->id())
         ->orWhere('receiver_id', auth()->id())
-        ->with(['mails', 'sender', 'receiver'])
+        ->with(['mails', 'sender', 'receiver', 'mails.media'])
         ->get();
+
+    // Attach preview URLs for media
+    $threads->each(function ($thread) {
+        $thread->mails->each(function ($mail) {
+            $mail->media->each(function ($media) {
+                $media->preview_url = url('/preview-media/' . $media->id);
+                $media->append('preview_url'); // Append the preview_url to the response
+            });
+        });
+    });
 
     return response()->json(['threads' => $threads]);
 });
 
 Route::get('mails/thread/{thread}', function (Thread $thread) {
-    $thread->load(['mails', 'sender', 'receiver']);
-
+    // Ensure the authenticated user has access to this thread
+    if ($thread->sender_id !== auth()->id() && $thread->receiver_id !== auth()->id()) {
+        abort(403, 'Forbidden');
+    }
     return response()->json(['thread' => $thread]);
 });
+
+Route::get('preview-media/{mediaId}', [MailController::class, 'previewMedia'])
+    ->middleware('auth'); // Add authentication middleware if needed
 
 Route::put('mails/mark-read/{thread}', function (Thread $thread) {
     $thread->mails()->update(['is_read' => true]);
@@ -56,8 +73,10 @@ Route::post('mails/new-mail', function (Request $request) {
     $request->validate([
         'email' => 'required|email|exists:users,email',
         'subject' => 'required|string',
-        'content' => 'required|string',
-        'is_read' => 'boolean',
+        'content' => 'sometimes|string',
+        'is_read' => 'sometimes|boolean',
+        'attachments' => 'nullable|array', // Allow multiple file uploads
+        'attachments.*' => 'file|mimes:jpeg,png,gif|max:2048', // Validate file types and size
     ]);
 
     // Find the receiver by email
@@ -84,16 +103,11 @@ Route::post('mails/new-mail', function (Request $request) {
     // If no thread exists with the same subject, create a new one
     if (!$thread) {
         $thread = Thread::create([
-            'original_sender_id' => auth()->id(), // Set the original sender
-            'sender_id' => auth()->id(), // Current sender
-            'receiver_id' => $receiver->id, // Receiver
-        ]);
-        $isNewThread = true; // Mark that a new thread is created
-    } else {
-        $thread->update([
-            'sender_id' => $sender->id,
+            'original_sender_id' => auth()->id(),
+            'sender_id' => auth()->id(),
             'receiver_id' => $receiver->id,
         ]);
+        $isNewThread = true; // Mark that a new thread is created
     }
 
     // Create the mail
@@ -101,9 +115,16 @@ Route::post('mails/new-mail', function (Request $request) {
         'sender_id' => auth()->id(),
         'thread_id' => $thread->id,
         'subject' => $request->subject,
-        'content' => $request->content,
+        'content' => $request->content ?? "",
         'is_read' => $request->is_read ?? false,
     ]);
+
+    // Attach files to the mail
+    if ($request->hasFile('attachments')) {
+        foreach ($request->file('attachments') as $file) {
+            $mail->addMedia($file)->toMediaCollection('attachments');
+        }
+    }
 
     // Dispatch real-time mail event
     MailReceive::dispatch($mail);
