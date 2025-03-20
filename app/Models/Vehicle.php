@@ -35,6 +35,10 @@ class Vehicle extends Model implements HasMedia
         return $this->belongsTo(Operator::class);
     }
 
+    public function trips(){
+        return $this->hasMany(Trip::class);
+    }
+
     public function driver(){
         return $this->belongsTo(Driver::class);
     }
