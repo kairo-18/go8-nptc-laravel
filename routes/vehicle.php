@@ -21,3 +21,8 @@ Route::get('/unit-registration', function () {
 })->name('unit-registration');
 
 Route::resource('vehicles', VehicleController::class);
+
+Route::get('preview-vehicle-media/{mediaId}', [VehicleController::class, 'previewMedia'])
+->name('preview-vehicle-media');
+
+Route::post('/vehicles/{vehicle}/upload-files', [VehicleController::class, 'updateVehicleMedia'])->name('vehicle.upload-files');

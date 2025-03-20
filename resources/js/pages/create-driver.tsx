@@ -18,6 +18,7 @@ export default function CreateDriver({ companies,latestVehicle,operator,company,
         username: '',
         email: '',
         FirstName: '',
+        MiddleName:'',
         LastName: '',
         Address: '',
         BirthDate: '',
@@ -128,6 +129,11 @@ export default function CreateDriver({ companies,latestVehicle,operator,company,
                                     <Label htmlFor="FirstName">First Name</Label>
                                     <Input id="FirstName" value={data.FirstName} onChange={(e) => setData('FirstName', e.target.value)} />
                                     {errors.FirstName && <p className="text-sm text-red-500">{errors.FirstName}</p>}
+                                </div>
+                                <div>
+                                    <Label htmlFor="FirstName">Middle Name</Label>
+                                    <Input id="FirstName" value={data.MiddleName} onChange={(e) => setData('MiddleName', e.target.value)} />
+                                    {errors.MiddleName && <p className="text-sm text-red-500">{errors.MiddleName}</p>}
                                 </div>
                                 <div>
                                     <Label htmlFor="LastName">Last Name</Label>

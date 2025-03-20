@@ -15,6 +15,7 @@ class Driver extends Model implements HasMedia
     protected $fillable = [
         'operator_id',
         'vr_company_id',
+        'MiddleName',
         'vehicle_id',
         'user_id',
         'Status',

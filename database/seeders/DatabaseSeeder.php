@@ -95,6 +95,7 @@ class DatabaseSeeder extends Seeder
             'username' => 'Driver1',
             'email' => 'driver1@example.com',
             'FirstName' => 'Driver',
+            'MiddleName' => 'PointFive',
             'LastName' => 'One',
             'Address' => 'Test Address',
             'BirthDate' => '2000-01-01',

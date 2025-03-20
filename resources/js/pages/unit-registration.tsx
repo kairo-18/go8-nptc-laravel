@@ -5,10 +5,15 @@ import CreateVehicle from './create-vehicle';
 
 export default function UnitRegistration({ companies, latestVehicle, operator, company, operators }) {
     const [activeTab, setActiveTab] = useState('vehicle');
+    const [vehicleCompleted, setVehicleCompleted] = useState(false);
 
     const goToNextTab = () => {
-        if (activeTab === 'vehicle') setActiveTab('driver');
-        else if (activeTab === 'driver') alert('Registration complete!');
+        if (activeTab === 'vehicle') {
+            setVehicleCompleted(true);
+            setActiveTab('driver');
+        } else if (activeTab === 'driver') {
+            alert('Registration complete!');
+        }
     };
 
     return (
@@ -19,8 +24,9 @@ export default function UnitRegistration({ companies, latestVehicle, operator, c
                     {[{ key: 'vehicle', label: 'Vehicle' }, { key: 'driver', label: 'Driver' }].map((tab) => (
                         <button
                             key={tab.key}
-                            onClick={() => setActiveTab(tab.key)}
-                            className={`text-sm font-medium ${activeTab === tab.key ? 'font-semibold text-black' : 'hover:text-black'}`}
+                            onClick={() => tab.key === 'vehicle' || (tab.key === 'driver' && vehicleCompleted) ? setActiveTab(tab.key) : null}
+                            className={`text-sm font-medium ${activeTab === tab.key ? 'font-semibold text-black' : 'hover:text-black'} ${tab.key === 'driver' && !vehicleCompleted ? 'cursor-not-allowed text-gray-400' : ''}`}
+                            disabled={tab.key === 'driver' && !vehicleCompleted}
                         >
                             {tab.label}
                         </button>

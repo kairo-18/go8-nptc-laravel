@@ -44,6 +44,7 @@ class DriverController extends Controller
                 return [
                     'id' => $driver->id,
                     'FirstName' => $driver->user->FirstName,
+                    'MiddleName' => $driver->user->MiddleName,
                     'LastName' => $driver->user->LastName,
                     'username' => $driver->user->username,
                     'Address' => $driver->user->Address,
@@ -79,6 +80,7 @@ class DriverController extends Controller
             'username' => 'required|string|unique:users,username',
             'email' => 'required|email|unique:users,email',
             'FirstName' => 'required|string',
+            'MiddleName'=>'required|string',
             'LastName' => 'required|string',
             'Address' => 'required|string',
             'BirthDate' => 'required|date',
@@ -102,6 +104,7 @@ class DriverController extends Controller
             'username' => $validatedData['username'],
             'email' => $validatedData['email'],
             'FirstName' => $validatedData['FirstName'],
+            'MiddleName'=>$validatedData['MiddleName'],
             'LastName' => $validatedData['LastName'],
             'Address' => $validatedData['Address'],
             'BirthDate' => $validatedData['BirthDate'],
@@ -149,7 +152,6 @@ class DriverController extends Controller
     }
     
     public function updateDriverMedia(Request $request, Driver $driver){
-        \Log::info('Uploading media files for vehicle', ['vehicle_id' => $vehicle->id, 'request_data' => $request->all()]);
 
         // Validate request
         $request->validate([
@@ -176,16 +178,15 @@ class DriverController extends Controller
                 \Log::info("Uploading new file for: {$fileKey}");
     
                 // Clear existing media for this collection
-                $vehicle->clearMediaCollection($collection);
+                $driver->clearMediaCollection($collection);
     
                 // Upload new file to the private media collection
-                $mediaItem = $vehicle->addMediaFromRequest($fileKey)->toMediaCollection($collection, 'private');
+                $mediaItem = $driver->addMediaFromRequest($fileKey)->toMediaCollection($collection, 'private');
     
                 \Log::info("Uploaded file for {$fileKey}: {$mediaItem->file_name}");
             }
         }
     
-        return response()->json(['Success' => "Media files updated for vehicle ID {$vehicle->id}"], 200);
     }
     
 
@@ -223,6 +224,7 @@ class DriverController extends Controller
         'username' => 'sometimes|string|unique:users,username,' . $driver->user_id,
         'email' => 'sometimes|email|unique:users,email,' . $driver->user_id,
         'FirstName' => 'sometimes|string',
+        'MiddleName'=>'sometimes|string',
         'LastName' => 'sometimes|string',
         'Address' => 'sometimes|string',
         'BirthDate' => 'sometimes|date',
@@ -231,7 +233,7 @@ class DriverController extends Controller
 
         'operator_id' => 'sometimes|exists:operators,id',
         'vr_company_id' => 'sometimes|exists:vr_companies,id',
-        'Status' => 'sometimes|in:Pending,Approved,Rejected',
+        'Status' => 'sometimes|in:Pending,Approved,Rejected',   
         'LicenseNumber' => 'sometimes|string|unique:drivers,LicenseNumber,' . $driver->id,
 
         'License' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
@@ -246,6 +248,7 @@ class DriverController extends Controller
         'username' => $validatedData['username'] ?? $driver->user->username,
         'email' => $validatedData['email'] ?? $driver->user->email,
         'FirstName' => $validatedData['FirstName'] ?? $driver->user->FirstName,
+        'MiddleName' =>$validatedData['MiddleName']?? $driver->user->MiddleName,
         'LastName' => $validatedData['LastName'] ?? $driver->user->LastName,
         'Address' => $validatedData['Address'] ?? $driver->user->Address,
         'BirthDate' => $validatedData['BirthDate'] ?? $driver->user->BirthDate,
@@ -280,10 +283,7 @@ class DriverController extends Controller
         $driver->addMediaFromRequest('BIR_clearance')->toMediaCollection('bir_clearance', 'private');
     }
 
-    return response()->json([
-        'message' => 'Driver updated successfully',
-        'driver' => $driver->load('user', 'vrCompany', 'operator'),
-    ]);
+    
 }
 
 

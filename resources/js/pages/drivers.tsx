@@ -5,6 +5,7 @@ import MainLayout from '@/pages/mainLayout';
 import { Head } from '@inertiajs/react';
 import { Label } from '@/components/ui/label';
 import { useState } from 'react';
+import { router } from '@inertiajs/react';
 
 // Modal Component (smaller version)
 function Modal({ isOpen, onClose, file }: { isOpen: boolean; onClose: () => void; file: MediaFile | null }) {
@@ -60,6 +61,8 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
     const [selectedFile, setSelectedFile] = useState<MediaFile | null>(null); 
     const [isModalOpen, setIsModalOpen] = useState(false); 
     const [passwordVisible, setPasswordVisible] = useState(false);
+    const [formData, setFormData] = useState<Driver | null>(null);
+
 
     
     const handlePreview = (file: MediaFile) => {
@@ -72,65 +75,60 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
         setSelectedFile(null);
     };
 
+    
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-    
-        // Handle form submission when saving changes
-        const driverData = {
-            username: driver.username,
-            email: driver.email,
-            ContactNumber: driver.ContactNumber,
-            BirthDate: driver.BirthDate,
-            Address: driver.Address,
-            Status: driver.Status,
-            vrCompanyId: driver.vrCompany.id,
-            operatorId: driver.operator.id
-        };
-    
-        try {
-            // Update driver data (text fields)
-            const response = await fetch(`/driver/${driver.id}`, {
-                method: 'PATCH', // or 'PUT'
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(driverData),
-            });
-    
-            if (!response.ok) {
-                throw new Error('Failed to update driver data');
-            }
-    
-            // Handle file uploads (media files) with POST if needed
-            const formData = new FormData();
-            const fileFields = ['License', 'Photo', 'NBI_clearance', 'Police_clearance', 'BIR_clearance'];
-    
-            fileFields.forEach((field) => {
-                const file = selectedFile[field];
-                if (file) {
-                    formData.append(field, file);
-                }
-            });
-    
-            if (formData.has('License') || formData.has('Photo') || formData.has('NBI_clearance') || formData.has('Police_clearance') || formData.has('BIR_clearance')) {
-                const fileResponse = await fetch('/updateDriverMedia', {
-                    method: 'POST',
-                    body: formData,
-                });
-    
-                if (!fileResponse.ok) {
-                    throw new Error('Failed to update driver media');
-                }
-            }
-    
-            // If everything is successful, close the modal and reset the form
-            setIsEditing(false);
-            setIsModalOpen(false);
-        } catch (error) {
-            console.error('Error:', error);
-            // Handle the error, e.g., show an error message
+      
+        if (!formData) {
+          console.error('No driver data available');
+          return;
         }
-    };
+      
+        try {
+          // Step 1: PATCH - Update Driver Details
+          await router.patch(`/drivers/${formData.id}`, {
+            FirstName: formData.FirstName,
+            LastName: formData.LastName,
+            username: formData.username,
+            email: formData.email,
+            ContactNumber: formData.ContactNumber,
+            BirthDate: formData.BirthDate,
+            Address: formData.Address,
+            Status: formData.Status,
+            vrCompanyId: formData.vrCompany.id,
+            operatorId: formData.operator.id,
+          });
+      
+          console.log('Driver details updated successfully');
+      
+          // Step 2: POST - Upload Files (if any)
+          const uploadData = new FormData();
+          const fileFields = ['License', 'Photo', 'NBI_clearance', 'Police_clearance', 'BIR_clearance'];
+          let hasFiles = false;
+      
+          fileFields.forEach((field) => {
+            const file = selectedFile?.[field];
+            if (file) {
+              uploadData.append(field, file);
+              hasFiles = true;
+            }
+          });
+      
+          if (hasFiles) {
+            await router.post(route('driver.upload-files', { driver: formData.id }), uploadData);
+            console.log('Files uploaded successfully');
+          }
+      
+          setIsEditing(false);
+          setSelectedFile(null);
+        } catch (error) {
+          console.error('Error:', error);
+        }
+      };
+      
+      
+      
     
     const handleFileChange = (field: string, e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files) {
@@ -138,12 +136,22 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
             setSelectedFile((prev) => ({ ...prev, [field]: file }));
         }
     };
-    
+
+    const startEditing = (driver: Driver) => {
+        setFormData({...driver});
+        setIsEditing(true);
+      };
+
+      const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+        const { name, value } = e.target;
+        setFormData((prev) => (prev ? { ...prev, [name]: value } : null));
+    };
+          
     return (
         <MainLayout breadcrumbs={[{ title: 'Drivers', href: '/drivers' }]} >
             <Head title="Drivers" />
             <div className="p-5 flex justify-center">
-                <div className="w-full max-w-3xl">
+            <div className="mx-auto mt-6 w-full max-w-6xl">
                     {drivers.length === 0 ? (
                         <p className="text-center text-gray-500">No drivers available.</p>
                     ) : (
@@ -169,7 +177,7 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                             {/* Driver's Name & Company */}
                                             <div>
                                                 <CardTitle className="text-2xl font-semibold">
-                                                    {driver.FirstName} {driver.LastName}
+                                                    {driver.FirstName} {driver.LastName} 
                                                 </CardTitle>
                                                 <p className="text-gray-500">{driver.vrCompany.CompanyName}</p>
                                             </div>
@@ -177,59 +185,110 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                     </CardHeader>
 
                                     <CardContent>
-                                        <div className="grid grid-cols-1 gap-6">
-                                            <div className="space-y-2">
-                                            <div className="space-y-2">
-                                                <Label>Company Name</Label>
-                                                <Input value={driver.vrCompany.CompanyName} readOnly={!isEditing} />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Operator Name</Label>
-                                                <Input value={`${driver.operator.FirstName} ${driver.operator.LastName}`} readOnly={!isEditing} />
-                                            </div>
+                                    <div className="grid grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label>First Name</Label>
+                                        <Input
+                                        name="FirstName"
+                                        value={isEditing ? formData?.FirstName ?? driver.FirstName : driver.FirstName}
+                                        onChange={handleChange}
+                                        readOnly={!isEditing}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Last Name</Label>
+                                        <Input
+                                        name="LastName"
+                                        value={isEditing ? formData?.LastName ?? driver.LastName : driver.LastName}
+                                        onChange={handleChange}
+                                        readOnly={!isEditing}
+                                        />
+                                    </div>
+                                    
+                                    <div className="space-y-2">
+                                        <Label>Username</Label>
+                                        <Input
+                                        name="username"
+                                        value={isEditing ? formData?.username ?? driver.username : driver.username}
+                                        onChange={handleChange}
+                                        readOnly={!isEditing}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Email</Label>
+                                        <Input
+                                        name="email"
+                                        value={isEditing ? formData?.email ?? driver.email : driver.email}
+                                        onChange={handleChange}
+                                        readOnly={!isEditing}
+                                        />
+                                    </div>
 
-                                                <Label>Username</Label>
-                                                <Input value={driver.username} readOnly={!isEditing} />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Email</Label>
-                                                <Input value={driver.email} readOnly={!isEditing} />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Contact Number</Label>
-                                                <Input value={driver.ContactNumber} readOnly={!isEditing} />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Birth Date</Label>
-                                                <Input value={driver.BirthDate} readOnly={!isEditing} type="date" />
-                                            </div>
+                                    <div className="space-y-2">
+                                        <Label>Contact Number</Label>
+                                        <Input
+                                        name="ContactNumber"
+                                        value={isEditing ? formData?.ContactNumber ?? driver.ContactNumber : driver.ContactNumber}
+                                        onChange={handleChange}
+                                        readOnly={!isEditing}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Birth Date</Label>
+                                        <Input
+                                        name="BirthDate"
+                                        type="date"
+                                        value={isEditing ? formData?.BirthDate ?? driver.BirthDate : driver.BirthDate}
+                                        onChange={handleChange}
+                                        readOnly={!isEditing}
+                                        />
+                                    </div>
 
-                                            <div className="space-y-2">
-                                                <Label>Address</Label>
-                                                <Input value={driver.Address} readOnly={!isEditing} />
-                                            </div>
+                                    <div className="space-y-2">
+                                        <Label>Address</Label>
+                                        <Input
+                                        name="Address"
+                                        value={isEditing ? formData?.Address ?? driver.Address : driver.Address}
+                                        onChange={handleChange}
+                                        readOnly={!isEditing}
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Status</Label>
+                                        {isEditing ? (
+                                        <select
+                                            name="Status"
+                                            value={formData?.Status ?? driver.Status}
+                                            onChange={handleChange}
+                                            className="border p-2 rounded"
+                                        >
+                                            {['Active', 'Inactive', 'Suspended', 'Banned', 'Pending', 'Approved', 'Rejected', 'For Payment'].map((status) => (
+                                            <option key={status} value={status}>{status}</option>
+                                            ))}
+                                        </select>
+                                        ) : (
+                                        <Input value={driver.Status} readOnly />
+                                        )}
+                                    </div>
 
-                                           
-                                            <div className="space-y-2">
-                                                <Label>Status</Label>
-                                                <Input value={driver.Status} readOnly={!isEditing} />
-                                            </div>
-                                            <div className="space-y-2">
-                                                <Label>Password</Label>
-                                                <Input
-                                                    value={driver.password} 
-                                                    type={passwordVisible ? 'text' : 'password'}
-                                                    readOnly={!isEditing}
-                                                />
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    onClick={() => setPasswordVisible((prev) => !prev)}
-                                                >
-                                                    {passwordVisible ? 'Hide Password' : 'See Password'}
-                                                </Button>
-                                            </div>
-                                        </div>
+                                    <div className="space-y-2">
+                                        <Label>Password</Label>
+                                        <Input
+                                        name="password"
+                                        type={passwordVisible ? 'text' : 'password'}
+                                        value={isEditing ? formData?.password ?? driver.password : driver.password}
+                                        onChange={handleChange}
+                                        readOnly={!isEditing}
+                                        />
+                                        <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => setPasswordVisible((prev) => !prev)}
+                                        >
+                                        {passwordVisible ? 'Hide Password' : 'See Password'}
+                                        </Button>
+                                    </div>
+                                    </div>
 
                                         {/* Media Files Section */}
                                         <div className="mt-6 space-y-4">
@@ -279,16 +338,14 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
 
                                         {/* Update Button */}
                                         <div className="mt-6 flex justify-end space-x-4">
-                                        <Button 
-                                            onClick={() => {
-                                                if (isEditing) {
-                                                    handleSubmit(); // Trigger form submission when in Save Changes mode
-                                                } else {
-                                                    setIsEditing(true); // Otherwise, switch to edit mode
-                                                }
-                                            }} 
-                                        >
-                                            {isEditing ? "Save Changes" : "Update"}
+                                        <Button onClick={(e) => {
+                                        if (isEditing) {
+                                            handleSubmit(e, driver);
+                                        } else {
+                                            startEditing(driver);
+                                        }
+                                        }}>
+                                        {isEditing ? "Save Changes" : "Update"}
                                         </Button>
 
                                         </div>

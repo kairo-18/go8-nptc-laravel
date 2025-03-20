@@ -11,15 +11,54 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class VehicleController extends Controller
 {
-    public function index() //Response
+    
+    public function index(Request $request): Response
     {
-        $vehicles = Vehicle::with('operator', 'driver')->get();
-        return response()->json(['vehicles' => $vehicles]);
-        // return Inertia::render('vehicles', [
-        //     'vehicles' => $vehicles,
-        // ]);
-    }
+        $vehiclesQuery = Vehicle::with(['operator.user', 'driver.user']);
 
+        if ($request->has('id')) {
+            $vehiclesQuery->where('id', $request->input('id'));
+        }
+
+        $vehicles = $vehiclesQuery->get()->map(function ($vehicle) {
+            $mediaCollections = ['front_image', 'back_image', 'left_side_image', 'right_side_image', 'or_image', 'cr_image', 'id_card_image', 'gps_certificate_image', 'inspection_certificate_image'];
+
+            $mediaFiles = collect($mediaCollections)->flatMap(function ($collection) use ($vehicle) {
+                return $vehicle->getMedia($collection)->map(fn($media) => [
+                    'id' => $media->id,
+                    'name' => $media->file_name,
+                    'collection_name' => $media->collection_name,
+                    'mime_type' => $media->mime_type,
+                    'url' => route('preview-vehicle-media', ['mediaId' => $media->id]),
+                ]);
+            })->values();
+
+            return [
+                'id' => $vehicle->id,
+                'PlateNumber' => $vehicle->PlateNumber,
+                'Model' => $vehicle->Model,
+                'Brand' => $vehicle->Brand,
+                'SeatNumber' => $vehicle->SeatNumber,
+                'Status' => $vehicle->Status,
+                'operator' => $vehicle->operator ? [
+                    'id' => $vehicle->operator->id,
+                    'FirstName' => $vehicle->operator->user->FirstName ?? 'N/A',
+                    'LastName' => $vehicle->operator->user->LastName ?? 'N/A',
+                ] : null,
+                'driver' => $vehicle->driver ? [
+                    'id' => $vehicle->driver->id,
+                    'FirstName' => $vehicle->driver->user->FirstName ?? 'N/A',
+                    'LastName' => $vehicle->driver->user->LastName ?? 'N/A',
+                    'LicenseNumber'=>$vehicle->driver->LicenseNumber?? 'N/A',
+                ] : null,
+                'media_files' => $mediaFiles,
+            ];
+        });
+
+        return Inertia::render('vehicles', [
+            'vehicles' => $vehicles,
+        ]);
+    }
     public function store(Request $request)
     {   
         $validatedData = $request->validate([
@@ -68,7 +107,6 @@ class VehicleController extends Controller
     }
     public function updateVehicleMedia(Request $request, Vehicle $vehicle)
 {
-    \Log::info('Uploading media files for vehicle', ['vehicle_id' => $vehicle->id, 'request_data' => $request->all()]);
 
     // Validate request
     $request->validate([
@@ -98,7 +136,6 @@ class VehicleController extends Controller
 
     foreach ($files as $fileKey => $collection) {
         if ($request->hasFile($fileKey)) {
-            \Log::info("Uploading new file for: {$fileKey}");
 
             // Clear existing media for this collection
             $vehicle->clearMediaCollection($collection);
@@ -106,11 +143,22 @@ class VehicleController extends Controller
             // Upload new file to the private media collection
             $mediaItem = $vehicle->addMediaFromRequest($fileKey)->toMediaCollection($collection, 'private');
 
-            \Log::info("Uploaded file for {$fileKey}: {$mediaItem->file_name}");
         }
     }
 
-    return response()->json(['Success' => "Media files updated for vehicle ID {$vehicle->id}"], 200);
+}
+
+public function previewMedia($mediaId)
+{
+    $media = Media::findOrFail($mediaId);
+    $filePath = $media->getPath();
+    $mimeType = $media->mime_type;
+
+    if (!file_exists($filePath)) {
+        abort(404, 'File not found');
+    }
+
+    return response()->file($filePath, ['Content-Type' => $mimeType]);
 }
 
 

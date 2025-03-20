@@ -36,7 +36,7 @@ const mainNavItems: NavItem[] = [
                 url: '/create-operator',
             },
             {
-                title: 'Driver Registration',
+                title: 'Unit Registration',
                 url: '/unit-registration',
             },
         ],
