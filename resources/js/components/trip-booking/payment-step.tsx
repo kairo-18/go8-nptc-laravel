@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { BookingFormData } from '@/lib/types';
 import axios from 'axios';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import PaymentSuccessModal from './payment-success-modal';
 
 interface PaymentStepProps {
     formData: BookingFormData;
@@ -18,20 +19,62 @@ interface PaymentStepProps {
 export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentStepProps) {
     const { baseFee, additionalFee, passengerInsurance, others } = formData.payment;
     const total = baseFee + additionalFee + passengerInsurance + others;
+    const [linkId, setLinkId] = useState('');
+    const [paymentSuccess, setPaymentSuccess] = useState(false);
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const formatCurrency = (amount: number) => {
         return `Php ${amount.toFixed(2)}`;
     };
 
-    const handleProceedToPayment = () => {
-        // Handle payment processing logic here
-        alert('Processing payment...');
+    const handleProceedToPayment = async () => {
+        try {
+            const response = await axios.post('/api/generate-payment-link', {
+                amount: 15000, // Amount in cents (150 PHP)
+                description: 'NPTC Trip Ticket Payment',
+            });
+
+            if (response.data && response.data.data) {
+                const paymentUrl = response.data.data.attributes.checkout_url;
+                setLinkId(response.data.data.id);
+
+                window.open(paymentUrl, '_blank');
+            } else {
+                console.error('Payment link creation failed:', response.data);
+                alert('Failed to generate payment link. Please try again.');
+            }
+        } catch (error) {
+            console.error('Error creating payment link:', error);
+            alert('An error occurred while processing the payment.');
+        }
     };
+
+    useEffect(() => {
+        if (!linkId) return;
+
+        const interval = setInterval(async () => {
+            try {
+                const response = await axios.get(`/api/check-payment-status/${linkId}`);
+
+                if (response.data?.data?.attributes?.status === 'paid') {
+                    clearInterval(interval);
+                    handleSubmitBooking();
+                }
+            } catch (error) {
+                console.error('Error checking payment status:', error);
+            }
+        }, 5000); // Poll every 5 seconds
+
+        return () => clearInterval(interval); // Cleanup on unmount
+    }, [linkId]);
 
     const onSubmitPassengers = async () => {
         try {
             const response = await axios.post('/api/add-passengers', formData);
             console.log(response.data);
+            setPaymentSuccess(true);
+            setIsModalOpen(true);
         } catch (e) {
             console.log(e);
         }
@@ -101,8 +144,17 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
                 <Button className="bg-white" variant="outline" onClick={onPrevious}>
                     Previous
                 </Button>
-                <Button onClick={handleSubmitBooking}>Proceed to payment</Button>
+                <Button onClick={handleProceedToPayment}>Proceed to Payment</Button>
             </div>
+            <PaymentSuccessModal
+                isOpen={isModalOpen}
+                onClose={() => {
+                    window.location.href = '/dashboard';
+                }}
+                amount={total}
+                title="Payment Successful!"
+                description="Thank you for your purchase. Your transaction has been completed successfully."
+            />
         </div>
     );
 }
