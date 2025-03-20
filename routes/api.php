@@ -6,11 +6,11 @@ use App\Http\Controllers\VRAdminController;
 use App\Http\Controllers\VrContactsController;
 use App\Http\Controllers\VRCompanyController;
 use App\Http\Controllers\DriverController;
-use App\Http\Controllers\VehicleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\TripController;
 use function Pest\Laravel\json;
 
 Route::get('/user', function () {
@@ -64,9 +64,12 @@ Route::apiResource('operators', OperatorAdminController::class);
 
 Route::apiResource('drivers',DriverController::class);
 
-Route::apiResource('vehicles',VehicleController::class);
+Route::post('/create-booking', [TripController::class, 'store'])
+    ->name('create-booking');
 
 
+Route::post('/add-passengers', [TripController::class, 'addPassengers'])
+    ->name('add-passengers');
 
 // Catch-all for unhandled API routes
 Route::fallback(function () {

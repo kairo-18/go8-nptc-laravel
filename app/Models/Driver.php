@@ -26,7 +26,7 @@ class Driver extends Model implements HasMedia
         'Police_clearance',
         'BIR_clearance',
     ];
-    
+
 
     public function user()
     {
@@ -59,4 +59,11 @@ class Driver extends Model implements HasMedia
             ];
         });
     }
+
+    public function trips()
+    {
+        return $this->hasMany(Trip::class);
+    }
+
+
 }
