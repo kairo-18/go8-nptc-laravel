@@ -52,6 +52,8 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
         statusColumns: ['Status'],
     });
 
+    console.log(drivers);
+
     return (
         <div>
             <Tabs defaultValue="drivers" className="w-full">

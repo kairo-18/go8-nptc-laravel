@@ -149,3 +149,4 @@ require __DIR__.'/vr_company.php';
 require __DIR__.'/vr_contacts.php';
 require __DIR__.'/operator.php';
 require __DIR__.'/driver.php';
+require __DIR__.'/vehicle.php';

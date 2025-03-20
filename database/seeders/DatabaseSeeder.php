@@ -11,11 +11,7 @@ use App\Models\VrContacts;
 use App\Models\Vehicle;
 use Database\Factories\VrCompanyFactory;
 
-/**
- * Class DatabaseSeeder
- *
- * Seed the application's database.
- */
+
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -63,23 +59,8 @@ class DatabaseSeeder extends Seeder
 
 
         $user2->assignRole("NPTC Admin");
+        
 
-
-        VRCompany::factory()->create(
-            [
-            'CompanyName' => 'Company3',
-            'BusinessPermitNumber' => 1231231,
-            'Status' => 'Pending'
-            ]
-        );
-
-        VRCompany::factory()->create(
-            [
-            'CompanyName' => 'Company2',
-            'BusinessPermitNumber' => 123123,
-            'Status' => 'Pending'
-            ]
-        );
         VRCompany::factory()->create(
             [
             'CompanyName' => 'Example VR Company',
@@ -114,6 +95,7 @@ class DatabaseSeeder extends Seeder
             'username' => 'Driver1',
             'email' => 'driver1@example.com',
             'FirstName' => 'Driver',
+            'MiddleName' => 'PointFive',
             'LastName' => 'One',
             'Address' => 'Test Address',
             'BirthDate' => '2000-01-01',
@@ -121,8 +103,20 @@ class DatabaseSeeder extends Seeder
         ]);
         $user4->assignRole("Driver");
 
+        $user4->driver()->create([
+            'operator_id' => 1, 
+            'vr_company_id' => 1, 
+            'License' => 'path/to/license',
+            'LicenseNumber' => '1234567890',
+            'Photo' => 'path/to/photo',
+            'NBI_clearance' => 'path/to/nbi',
+            'Police_clearance' => 'path/to/police',
+            'BIR_clearance' => 'path/to/bir',
+        ]);
+
         Vehicle::create([
-            'operator_id' => 1,
+            'operator_id' => 1, 
+            'driver_id' => 1,
             'PlateNumber' => 'ABC1234',
             'Model' => 'Toyota Corolla',
             'Brand' => 'Toyota',
@@ -132,6 +126,7 @@ class DatabaseSeeder extends Seeder
 
         Vehicle::create([
             'operator_id' => 1,
+            'driver_id' => 1,
             'PlateNumber' => 'XYZ5678',
             'Model' => 'Honda Civic',
             'Brand' => 'Honda',
@@ -139,20 +134,11 @@ class DatabaseSeeder extends Seeder
             'Status' => 'Pending'
         ]);
 
-        $user4->driver()->create([
-            'operator_id' => 1,
-            'vr_company_id' => 1,
-            'vehicle_id'=> 1,
-            'License' => 'path/to/license',
-            'LicenseNumber' => '1234567890',
-            'Photo' => 'path/to/photo',
-            'NBI_clearance' => 'path/to/nbi',
-            'Police_clearance' => 'path/to/police',
-            'BIR_clearance' => 'path/to/bir',
-        ]);
 
-
-
+         
+        
+            
+       
 
 
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\VRAdminController;
 use App\Http\Controllers\VrContactsController;
 use App\Http\Controllers\VRCompanyController;
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\VehicleController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
@@ -62,6 +63,9 @@ Route::post('vr-admins', [VRAdminController::class, 'store'])
 Route::apiResource('operators', OperatorAdminController::class);
 
 Route::apiResource('drivers',DriverController::class);
+
+Route::apiResource('vehicles',VehicleController::class);
+
 
 
 // Catch-all for unhandled API routes

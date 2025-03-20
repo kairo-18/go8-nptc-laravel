@@ -15,6 +15,7 @@ class Driver extends Model implements HasMedia
     protected $fillable = [
         'operator_id',
         'vr_company_id',
+        'MiddleName',
         'vehicle_id',
         'user_id',
         'Status',
@@ -34,7 +35,7 @@ class Driver extends Model implements HasMedia
 
     public function vehicle()
     {
-        return $this->hasOne(Vehicle::class);
+        return $this->hasMany(Vehicle::class);
     }
 
     public function operator()

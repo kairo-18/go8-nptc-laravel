@@ -16,53 +16,62 @@ use Illuminate\Support\Facades\Log;
 
 class DriverController extends Controller
 {
-    public function index(): Response
-{
-    $drivers = Driver::with(['user', 'operator.user', 'vrCompany'])
-    ->get()
-    ->map(function ($driver) {
-        $mediaCollections = ['license', 'photo', 'nbi_clearance', 'police_clearance', 'bir_clearance'];
+    public function index(Request $request): Response
+    {
+        $driversQuery = Driver::with(['user', 'operator.user', 'vrCompany']);
         
-        // Flatten media collections into a single array
-        $mediaFiles = collect($mediaCollections)->flatMap(function ($collection) use ($driver) {
-            return $driver->getMedia($collection)->map(fn($media) => [
-                'id' => $media->id,
-                'name' => $media->file_name,
-                'collection_name' => $media->collection_name,
-                'mime_type' => $media->mime_type,
-                'url' => route('preview-driver-media', ['mediaId' => $media->id]),
-            ]);
-        })->values(); // Ensure it's a proper array
-
-        return [
-            'id' => $driver->id,
-            'FirstName' => $driver->user->FirstName,
-            'LastName' => $driver->user->LastName,
-            'username' => $driver->user->username,
-            'Address' => $driver->user->Address,
-            'BirthDate' => $driver->user->BirthDate,
-            'email' => $driver->user->email,
-            'ContactNumber' => $driver->user->ContactNumber,
-            'LicenseNumber' => $driver->LicenseNumber,
-            'Status' => $driver->Status,
-            'operator' => $driver->operator ? [
-                'id' => $driver->operator->id,
-                'FirstName' => $driver->operator->user->FirstName ?? 'N/A',
-                'LastName' => $driver->operator->user->LastName ?? 'N/A',
-            ] : null,
-            'vrCompany' => $driver->vrCompany ? [
-                'id' => $driver->vrCompany->id,
-                'CompanyName' => $driver->vrCompany->CompanyName ?? 'N/A',
-            ] : null,
-            'media_files' => $mediaFiles, // 🔹 Now it's a flat array instead of an object
-        ];
-    });
-
-return Inertia::render('drivers', [
-    'drivers' => $drivers,
-]);
-
-}
+        // If an ID is provided in the query, filter by that ID
+        if ($request->has('id')) {
+            $driversQuery->where('id', $request->input('id'));
+        }
+    
+        // Get the drivers
+        $drivers = $driversQuery->get()
+            ->map(function ($driver) {
+                $mediaCollections = ['license', 'photo', 'nbi_clearance', 'police_clearance', 'bir_clearance'];
+    
+                // Flatten media collections into a single array
+                $mediaFiles = collect($mediaCollections)->flatMap(function ($collection) use ($driver) {
+                    return $driver->getMedia($collection)->map(fn($media) => [
+                        'id' => $media->id,
+                        'name' => $media->file_name,
+                        'collection_name' => $media->collection_name,
+                        'mime_type' => $media->mime_type,
+                        'url' => route('preview-driver-media', ['mediaId' => $media->id]),
+                    ]);
+                })->values();
+    
+                return [
+                    'id' => $driver->id,
+                    'FirstName' => $driver->user->FirstName,
+                    'MiddleName' => $driver->user->MiddleName,
+                    'LastName' => $driver->user->LastName,
+                    'username' => $driver->user->username,
+                    'Address' => $driver->user->Address,
+                    'BirthDate' => $driver->user->BirthDate,
+                    'email' => $driver->user->email,
+                    'ContactNumber' => $driver->user->ContactNumber,
+                    'password' => $driver->user->password, 
+                    'LicenseNumber' => $driver->LicenseNumber,
+                    'Status' => $driver->Status,
+                    'operator' => $driver->operator ? [
+                        'id' => $driver->operator->id,
+                        'FirstName' => $driver->operator->user->FirstName ?? 'N/A',
+                        'LastName' => $driver->operator->user->LastName ?? 'N/A',
+                    ] : null,
+                    'vrCompany' => $driver->vrCompany ? [
+                        'id' => $driver->vrCompany->id,
+                        'CompanyName' => $driver->vrCompany->CompanyName ?? 'N/A',
+                    ] : null,
+                    'media_files' => $mediaFiles,
+                ];
+            });
+    
+        return Inertia::render('drivers', [
+            'drivers' => $drivers,
+        ]);
+    }
+    
 
     public function store(Request $request)
     {
@@ -71,6 +80,7 @@ return Inertia::render('drivers', [
             'username' => 'required|string|unique:users,username',
             'email' => 'required|email|unique:users,email',
             'FirstName' => 'required|string',
+            'MiddleName'=>'required|string',
             'LastName' => 'required|string',
             'Address' => 'required|string',
             'BirthDate' => 'required|date',
@@ -94,6 +104,7 @@ return Inertia::render('drivers', [
             'username' => $validatedData['username'],
             'email' => $validatedData['email'],
             'FirstName' => $validatedData['FirstName'],
+            'MiddleName'=>$validatedData['MiddleName'],
             'LastName' => $validatedData['LastName'],
             'Address' => $validatedData['Address'],
             'BirthDate' => $validatedData['BirthDate'],
@@ -106,6 +117,7 @@ return Inertia::render('drivers', [
         $driver = $user->driver()->create([
             'operator_id' => $validatedData['operator_id'],
             'vr_company_id' => $validatedData['vr_company_id'],
+            'vehicle_id' => $validatedData['vehicle_id'] ?? null,
             'LicenseNumber' => $validatedData['LicenseNumber'] ?? null,
             'Status' => 'Pending',
         ]);
@@ -139,6 +151,43 @@ return Inertia::render('drivers', [
         ], 201);
     }
     
+    public function updateDriverMedia(Request $request, Driver $driver){
+
+        // Validate request
+        $request->validate([
+
+            'License' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'Photo' => 'nullable|file|mimes:jpg,png|max:2048',
+            'NBI_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'Police_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'BIR_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+        ]);
+    
+        // File collections mapping
+        $files = [
+            'License' => 'license',
+            'Photo' => 'photo',
+            'NBI_clearance' => 'nbi_clearance',
+            'Police_clearance' => 'police_clearance',
+            'BIR_clearance' => 'bir_clearance',
+    
+        ];
+    
+        foreach ($files as $fileKey => $collection) {
+            if ($request->hasFile($fileKey)) {
+                \Log::info("Uploading new file for: {$fileKey}");
+    
+                // Clear existing media for this collection
+                $driver->clearMediaCollection($collection);
+    
+                // Upload new file to the private media collection
+                $mediaItem = $driver->addMediaFromRequest($fileKey)->toMediaCollection($collection, 'private');
+    
+                \Log::info("Uploaded file for {$fileKey}: {$mediaItem->file_name}");
+            }
+        }
+    
+    }
     
 
     public function downloadMedia($mediaId)
@@ -175,6 +224,7 @@ return Inertia::render('drivers', [
         'username' => 'sometimes|string|unique:users,username,' . $driver->user_id,
         'email' => 'sometimes|email|unique:users,email,' . $driver->user_id,
         'FirstName' => 'sometimes|string',
+        'MiddleName'=>'sometimes|string',
         'LastName' => 'sometimes|string',
         'Address' => 'sometimes|string',
         'BirthDate' => 'sometimes|date',
@@ -183,7 +233,7 @@ return Inertia::render('drivers', [
 
         'operator_id' => 'sometimes|exists:operators,id',
         'vr_company_id' => 'sometimes|exists:vr_companies,id',
-        'Status' => 'sometimes|in:Pending,Approved,Rejected',
+        'Status' => 'sometimes|in:Pending,Approved,Rejected',   
         'LicenseNumber' => 'sometimes|string|unique:drivers,LicenseNumber,' . $driver->id,
 
         'License' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
@@ -198,6 +248,7 @@ return Inertia::render('drivers', [
         'username' => $validatedData['username'] ?? $driver->user->username,
         'email' => $validatedData['email'] ?? $driver->user->email,
         'FirstName' => $validatedData['FirstName'] ?? $driver->user->FirstName,
+        'MiddleName' =>$validatedData['MiddleName']?? $driver->user->MiddleName,
         'LastName' => $validatedData['LastName'] ?? $driver->user->LastName,
         'Address' => $validatedData['Address'] ?? $driver->user->Address,
         'BirthDate' => $validatedData['BirthDate'] ?? $driver->user->BirthDate,
@@ -232,10 +283,7 @@ return Inertia::render('drivers', [
         $driver->addMediaFromRequest('BIR_clearance')->toMediaCollection('bir_clearance', 'private');
     }
 
-    return response()->json([
-        'message' => 'Driver updated successfully',
-        'driver' => $driver->load('user', 'vrCompany', 'operator'),
-    ]);
+    
 }
 
 

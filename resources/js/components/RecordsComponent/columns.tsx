@@ -92,7 +92,8 @@ export const generateColumns = (
             enableHiding: false,
             cell: ({ row }) => {
                 const data = row.original;
-                const operatorData = row.original;
+                const operatorData = row.original;               
+
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -127,23 +128,24 @@ export const generateColumns = (
                             ) : entityType === 'drivers' ? (
                                 <>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => router.visit(`/drivers`)}>
-                                    Edit Driver</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => router.visit(`/drivers?id=${data.id}`)}>
+                                    Edit Driver
+                                    </DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Set Status</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('email'); }} className="cursor-pointer">Send Email</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('suspend'); }} className="cursor-pointer">Suspend</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('ban'); }} className="cursor-pointer">Ban</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('remove'); }} className="cursor-pointer">Remove</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => router.delete(`/driver/${data.id}`)} className="cursor-pointer">Remove</DropdownMenuItem>
                                 </>
                             ) : entityType === 'vehicles' ? (
                                 <>
                                     <DropdownMenuSeparator />
-                                    <DropdownMenuItem onClick={() => alert(`Editing Operator: ${data.username}`)}>
+                                    <DropdownMenuItem onClick={() => router.visit(`/vehicles?id=${data.id}`)}>
                                     Edit Vehicle</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Set Status</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Suspend</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Ban</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => alert(`Removing Vehicle: ${data.username}`)} className="cursor-pointer hover-bg-red-500 t">
+                                    <DropdownMenuItem onClick={() => router.delete(`/vehicles/${data.id}`)} className="cursor-pointer hover-bg-red-500 t">
                                     Remove Vehicle</DropdownMenuItem>
                                 </>
                             ) : null}
