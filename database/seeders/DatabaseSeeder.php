@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
             'username' => 'Test User',
             'email' => 'test@example.com',
             'FirstName' => 'Test',
+            'MiddleName' => 'PointFive',
             'LastName' => 'User',
             'Address' => 'Test Address',
             'BirthDate' => '2000-01-01',
@@ -49,6 +50,7 @@ class DatabaseSeeder extends Seeder
             'username' => 'Alex',
             'email' => 'alez@example.com',
             'FirstName' => 'Alexander',
+            'MiddleName' => 'PointFive',
             'LastName' => 'Parayno',
             'Address' => 'Test Address',
             'BirthDate' => '2000-01-01',
@@ -69,11 +71,28 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
+        VRCompany::factory()->create(
+            [
+            'CompanyName' => 'Company3',
+            'BusinessPermitNumber' => 1231231,
+            'Status' => 'Pending'
+            ]
+        );
+
+        VRCompany::factory()->create(
+            [
+            'CompanyName' => 'Company2',
+            'BusinessPermitNumber' => 123123,
+            'Status' => 'Pending'
+            ]
+        );
+
         $user3 = User::factory()->create(
             [
             'username' => 'Alexis',
             'email' => 'alex@example.com',
             'FirstName' => 'Alexander',
+            'MiddleName' => 'PointFive',
             'LastName' => 'Parayno',
             'Address' => 'Test Address',
             'BirthDate' => '2000-01-01',

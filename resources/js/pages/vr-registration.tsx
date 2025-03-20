@@ -15,6 +15,7 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function VrRegistration({ companies }) {
+    console.log(companies)
     const [activeTab, setActiveTab] = useState('tempoAccountTab');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
