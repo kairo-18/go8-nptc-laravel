@@ -71,6 +71,13 @@ Route::post('/create-booking', [TripController::class, 'store'])
 Route::post('/add-passengers', [TripController::class, 'addPassengers'])
     ->name('add-passengers');
 
+Route::post('/generate-payment-link', [TripController::class, 'generatePaymentLink'])
+    ->name('generate-payment-link');
+
+Route::get('/check-payment-status/{id}', [TripController::class, 'checkStatus'])
+    ->name('check-status');
+
+
 // Catch-all for unhandled API routes
 Route::fallback(function () {
     return response()->json(['error' => 'Route not found'], 404);

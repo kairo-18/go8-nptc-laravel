@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Trip;
+use Illuminate\Support\Facades\Http;
 
 class TripController extends Controller
 {
@@ -72,6 +73,37 @@ class TripController extends Controller
             'message' => 'Passengers added successfully',
             'trip' => $trip,
         ]);
+    }
+
+    public function generatePaymentLink(Request $request){
+        $amount = $request->input('amount', 15000); // Default: 150 PHP
+
+        $description = $request->input('description', 'NPTC Trip Ticket Payment');
+
+        $response = Http::withHeaders([
+            'Authorization' => 'Basic ' . base64_encode(env('PAY_MONGO_SECRET_KEY') . ':'),
+            'Accept' => 'application/json',
+            'Content-Type' => 'application/json',
+        ])->post('https://api.paymongo.com/v1/links', [
+            'data' => [
+                'attributes' => [
+                    'amount' => $amount,
+                    'description' => $description,
+                ]
+            ]
+        ]);
+
+        return response()->json($response->json());
+    }
+
+    public function checkStatus($id){
+        $apiKey = env('PAY_MONGO_SECRET_KEY');
+
+        $response = Http::withBasicAuth($apiKey, '')
+            ->acceptJson()
+            ->get("https://api.paymongo.com/v1/links/{$id}");
+
+        return response()->json($response->json());
     }
 
 }
