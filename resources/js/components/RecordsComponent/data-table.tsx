@@ -119,57 +119,62 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                         ))}
                     </TableHeader>
                     <TableBody>
-                    {table.getRowModel().rows?.length ? (
-    table.getRowModel().rows.map((row) => (
-        <TableRow key={row.id} className="cursor-pointer hover:bg-gray-100" onClick={() => onRowClick?.(row.original)}>
-            {row.getVisibleCells().map((cell) => {
-                const cellValue = cell.getValue() as string;
-                const statusWords = ["Pending", "Approved", "Rejected", "For Payment", "Active", "Inactive"];
+                        {table.getRowModel().rows?.length ? (
+                            table.getRowModel().rows.map((row) => (
+                                <TableRow key={row.id} className="cursor-pointer hover:bg-gray-100" onClick={() => onRowClick?.(row.original)}>
+                                    {row.getVisibleCells().map((cell) => {
+                                        const cellValue = cell.getValue() as string;
+                                        const statusWords = ['Pending', 'Approved', 'Rejected', 'For Payment', 'Active', 'Inactive'];
 
-                // Highlight statuses if it's the CompanyName column
-                if (cell.column.id === "CompanyName" && typeof cellValue === "string") {
-                    const highlightedText = cellValue.split(new RegExp(`(${statusWords.join("|")})`, "gi")).map((part, index) =>
-                        statusWords.includes(part) ? (
-                            <span key={index} className={`px-2 py-0.5 rounded text-white font-medium ${
-                                part === "Pending" ? "bg-yellow-500" :
-                                part === "Approved" ? "bg-green-500" :
-                                part === "Rejected" ? "bg-red-500" :
-                                part === "For Payment" ? "bg-blue-500" :
-                                part === "Active" ? "bg-green-600" :
-                                "bg-gray-400"
-                            }`}>
-                                {part}
-                            </span>
+                                        // Highlight statuses if it's the CompanyName column
+                                        if (cell.column.id === 'CompanyName' && typeof cellValue === 'string') {
+                                            const highlightedText = cellValue
+                                                .split(new RegExp(`(${statusWords.join('|')})`, 'gi'))
+                                                .map((part, index) =>
+                                                    statusWords.includes(part) ? (
+                                                        <span
+                                                            key={index}
+                                                            className={`rounded px-2 py-0.5 font-medium text-white ${
+                                                                part === 'Pending'
+                                                                    ? 'bg-yellow-500'
+                                                                    : part === 'Approved'
+                                                                      ? 'bg-green-500'
+                                                                      : part === 'Rejected'
+                                                                        ? 'bg-red-500'
+                                                                        : part === 'For Payment'
+                                                                          ? 'bg-blue-500'
+                                                                          : part === 'Active'
+                                                                            ? 'bg-green-600'
+                                                                            : 'bg-gray-400'
+                                                            }`}
+                                                        >
+                                                            {part}
+                                                        </span>
+                                                    ) : (
+                                                        part
+                                                    ),
+                                                );
+
+                                            return <TableCell key={cell.id}>{highlightedText}</TableCell>;
+                                        }
+
+                                        return (
+                                            <TableCell key={cell.id}>
+                                                {typeof cell.column.columnDef.cell === 'function'
+                                                    ? cell.column.columnDef.cell(cell.getContext())
+                                                    : (cellValue as React.ReactNode)}
+                                            </TableCell>
+                                        );
+                                    })}
+                                </TableRow>
+                            ))
                         ) : (
-                            part
-                        )
-                    );
-
-                    return (
-                        <TableCell key={cell.id}>
-                            {highlightedText}
-                        </TableCell>
-                    );
-                }
-
-                return (
-                    <TableCell key={cell.id}>
-                        {typeof cell.column.columnDef.cell === "function"
-                            ? cell.column.columnDef.cell(cell.getContext())
-                            : (cellValue as React.ReactNode)}
-                    </TableCell>
-                );
-            })}
-        </TableRow>
-    ))
-) : (
-    <TableRow>
-        <TableCell colSpan={columns.length} className="text-center">
-            No results.
-        </TableCell>
-    </TableRow>
-)}
-
+                            <TableRow>
+                                <TableCell colSpan={columns.length} className="text-center">
+                                    No results.
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                 </Table>
             </div>

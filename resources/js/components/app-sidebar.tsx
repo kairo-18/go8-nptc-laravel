@@ -3,7 +3,7 @@ import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BadgePlus, BookUser, Folder, LayoutGrid, Mail, Receipt, UserPlus, Wallet, BellRing } from 'lucide-react';
+import { BadgePlus, BellRing, BookUser, Folder, LayoutGrid, Mail, Receipt, UserPlus, Wallet } from 'lucide-react';
 import AppLogo from './app-logo';
 
 const mainNavItems: NavItem[] = [
@@ -19,14 +19,14 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'VR Temp Account Registration',
-        url:'/vr-registration',
-        icon:BadgePlus
+        url: '/vr-registration',
+        icon: BadgePlus,
     },
     {
         title: 'Registration',
         url: '/registration',
         icon: UserPlus,
-         children: [
+        children: [
             {
                 title: 'VR Registration',
                 url: '/registration',
@@ -58,7 +58,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Bookings',
-        url: '',
+        url: '/bookings',
         icon: Wallet,
     },
     {
@@ -72,7 +72,6 @@ const mainNavItems: NavItem[] = [
         icon: Mail,
     },
 ];
-
 
 export function AppSidebar() {
     const { props } = usePage();
