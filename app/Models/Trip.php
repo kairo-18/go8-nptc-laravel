@@ -14,6 +14,7 @@ class Trip extends Model
         'pickupDate',
         'dropoffDate',
         'tripType',
+        'status'
     ];
 
     public function driver()

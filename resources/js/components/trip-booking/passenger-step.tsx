@@ -36,6 +36,17 @@ export function PassengersStep({ formData, updateFormData, onNext, onPrevious }:
         updateFormData('passengers', updatedPassengers);
     };
 
+    // Validation function
+    const isFormValid = () => {
+        return formData.passengers.every(
+            (passenger) =>
+                passenger.LastName.trim() !== '' &&
+                passenger.FirstName.trim() !== '' &&
+                passenger.ContactNumber.trim() !== '' &&
+                passenger.Address.trim() !== '',
+        );
+    };
+
     return (
         <div className="space-y-6">
             {formData.passengers.map((passenger, index) => (
@@ -53,18 +64,20 @@ export function PassengersStep({ formData, updateFormData, onNext, onPrevious }:
                             <Input
                                 id={`lastName-${index}`}
                                 placeholder="Enter last name"
-                                value={passenger.lastName}
+                                value={passenger.LastName}
                                 onChange={(e) => handleInputChange(index, 'LastName', e.target.value)}
                             />
+                            {passenger.LastName.trim() === '' && <p className="text-sm text-red-500">Last name is required.</p>}
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor={`firstName-${index}`}>First Name</Label>
                             <Input
                                 id={`firstName-${index}`}
                                 placeholder="Enter first name"
-                                value={passenger.firstName}
+                                value={passenger.FirstName}
                                 onChange={(e) => handleInputChange(index, 'FirstName', e.target.value)}
                             />
+                            {passenger.FirstName.trim() === '' && <p className="text-sm text-red-500">First name is required.</p>}
                         </div>
                     </div>
 
@@ -74,18 +87,20 @@ export function PassengersStep({ formData, updateFormData, onNext, onPrevious }:
                             <Input
                                 id={`contactNumber-${index}`}
                                 placeholder="Enter contact number"
-                                value={passenger.contactNumber}
+                                value={passenger.ContactNumber}
                                 onChange={(e) => handleInputChange(index, 'ContactNumber', e.target.value)}
                             />
+                            {passenger.ContactNumber.trim() === '' && <p className="text-sm text-red-500">Contact number is required.</p>}
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor={`address-${index}`}>Address</Label>
                             <Input
                                 id={`address-${index}`}
                                 placeholder="Enter address"
-                                value={passenger.address}
+                                value={passenger.Address}
                                 onChange={(e) => handleInputChange(index, 'Address', e.target.value)}
                             />
+                            {passenger.Address.trim() === '' && <p className="text-sm text-red-500">Address is required.</p>}
                         </div>
                     </div>
                 </div>
@@ -100,7 +115,9 @@ export function PassengersStep({ formData, updateFormData, onNext, onPrevious }:
                 <Button variant="outline" className="bg-white" onClick={onPrevious}>
                     Previous
                 </Button>
-                <Button onClick={onNext}>Next</Button>
+                <Button onClick={onNext} disabled={!isFormValid()}>
+                    Next
+                </Button>
             </div>
         </div>
     );

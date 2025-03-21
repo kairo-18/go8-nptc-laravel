@@ -15,6 +15,9 @@ interface GeneralStepProps {
     isFirstStep: boolean;
     isLastStep: boolean;
     drivers: any[];
+    companies: any[];
+    operators: any[];
+    vehicles: any[];
 }
 
 export function GeneralStep({
@@ -38,10 +41,10 @@ export function GeneralStep({
 
     const [plateNumber, setPlateNumber] = useState('');
 
-    const [selectedCompany, setSelectedCompany] = useState('');
-    const [selectedOperator, setSelectedOperator] = useState('');
-    const [selectedVehicle, setSelectedVehicle] = useState('');
-    const [selectedDriver, setSelectedDriver] = useState('');
+    const [selectedCompany, setSelectedCompany] = useState<any>({});
+    const [selectedOperator, setSelectedOperator] = useState<any>({});
+    const [selectedVehicle, setSelectedVehicle] = useState<any>({});
+    const [selectedDriver, setSelectedDriver] = useState<any>({});
 
     const tripTypes = [
         'Drop-off',
@@ -61,16 +64,7 @@ export function GeneralStep({
         setOperatorsData(operators);
         setVehiclesData(vehicles);
         setDriversData(drivers);
-
-        // console.log('drivers');
-        // console.log(drivers);
-        // console.log('operators');
-        // console.log(operators);
-        // console.log('vehicles');
-        // console.log(vehicles);
-        // console.log('companies');
-        // console.log(companies);
-    });
+    }, [companies, operators, vehicles, drivers]);
 
     const handleInputChange = (field: string, value: string) => {
         updateFormData('general', {
@@ -87,10 +81,10 @@ export function GeneralStep({
             const operator = operatorsData.find((o) => o.OperatorId === driver?.OperatorId);
             const company = companiesData.find((c) => c.VRCompanyId === operator?.VRCompanyId);
 
-            setSelectedCompany(company || '');
-            setSelectedOperator(operator || '');
-            setSelectedVehicle(vehicle || '');
-            setSelectedDriver(driver || '');
+            setSelectedCompany(company || {});
+            setSelectedOperator(operator || {});
+            setSelectedVehicle(vehicle || {});
+            setSelectedDriver(driver || {});
             updateFormData('general', {
                 ...formData.general,
                 unitId: vehicle.id,
@@ -113,6 +107,31 @@ export function GeneralStep({
         setSelectedTripType(type);
         handleInputChange('tripType', type);
         setShowTripTypeDropdown(false);
+    };
+
+    // Validation function
+    const isFormValid = () => {
+        const { tripType, pickupAddress, dropoffAddress, pickupDate, dropoffDate, plateNumber, driverId, unitId } = formData.general;
+
+        // Check if all required fields are filled
+        const areRequiredFieldsFilled =
+            tripType &&
+            pickupAddress &&
+            dropoffAddress &&
+            pickupDate.day &&
+            pickupDate.month &&
+            pickupDate.year &&
+            dropoffDate.day &&
+            dropoffDate.month &&
+            dropoffDate.year &&
+            plateNumber &&
+            driverId &&
+            unitId;
+
+        // Check if addresses are longer than 10 characters
+        const areAddressesValid = pickupAddress.length > 10 && dropoffAddress.length > 10;
+
+        return areRequiredFieldsFilled && areAddressesValid;
     };
 
     return (
@@ -167,6 +186,7 @@ export function GeneralStep({
                             handlePlateNumberChange(e.target.value);
                         }}
                     />
+                    {!plateNumber && <p className="text-sm text-red-500">Plate number is required.</p>}
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="numberOfSeats">Number of Seats</Label>
@@ -212,6 +232,10 @@ export function GeneralStep({
                         value={formData.general.pickupAddress}
                         onChange={(e) => handleInputChange('pickupAddress', e.target.value)}
                     />
+                    {!formData.general.pickupAddress && <p className="text-sm text-red-500">Pick-up address is required.</p>}
+                    {formData.general.pickupAddress.length <= 10 && formData.general.pickupAddress.length > 0 && (
+                        <p className="text-sm text-red-500">Pick-up address must be more than 10 characters.</p>
+                    )}
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="dropoffAddress">Drop-off Address</Label>
@@ -221,6 +245,10 @@ export function GeneralStep({
                         value={formData.general.dropoffAddress}
                         onChange={(e) => handleInputChange('dropoffAddress', e.target.value)}
                     />
+                    {!formData.general.dropoffAddress && <p className="text-sm text-red-500">Drop-off address is required.</p>}
+                    {formData.general.dropoffAddress.length <= 10 && formData.general.dropoffAddress.length > 0 && (
+                        <p className="text-sm text-red-500">Drop-off address must be more than 10 characters.</p>
+                    )}
                 </div>
             </div>
 
@@ -244,6 +272,9 @@ export function GeneralStep({
                             onChange={(e) => handleDateChange('pickup', 'year', e.target.value)}
                         />
                     </div>
+                    {(!formData.general.pickupDate.day || !formData.general.pickupDate.month || !formData.general.pickupDate.year) && (
+                        <p className="text-sm text-red-500">Pick-up date is required.</p>
+                    )}
                 </div>
                 <div className="space-y-2">
                     <Label>Drop-off Date</Label>
@@ -264,6 +295,9 @@ export function GeneralStep({
                             onChange={(e) => handleDateChange('dropoff', 'year', e.target.value)}
                         />
                     </div>
+                    {(!formData.general.dropoffDate.day || !formData.general.dropoffDate.month || !formData.general.dropoffDate.year) && (
+                        <p className="text-sm text-red-500">Drop-off date is required.</p>
+                    )}
                 </div>
             </div>
 
@@ -291,13 +325,16 @@ export function GeneralStep({
                         </div>
                     )}
                 </div>
+                {!formData.general.tripType && <p className="text-sm text-red-500">Trip type is required.</p>}
             </div>
 
             <div className="mt-6 flex justify-end gap-2">
                 <Button variant="outline" className="bg-white" onClick={onPrevious} disabled={isFirstStep}>
                     Previous
                 </Button>
-                <Button onClick={onNext}>Next</Button>
+                <Button onClick={onNext} disabled={!isFormValid()}>
+                    Next
+                </Button>
             </div>
         </div>
     );

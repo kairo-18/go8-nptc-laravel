@@ -62,7 +62,7 @@ export default function TripBookingForm({ companies, operators, vehicles, driver
 
     return (
         <MainLayout>
-            <div className="mx-auto w-full max-w-4xl rounded-lg border p-6">
+            <div className="mx-auto w-full max-w-6xl rounded-lg border p-6">
                 <h1 className="mb-2 text-2xl font-bold">Generate Trip Ticket</h1>
                 <div className="text-muted-foreground mb-6 flex items-center text-sm">
                     {steps.map((step, index) => (

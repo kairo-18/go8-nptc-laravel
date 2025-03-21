@@ -1,10 +1,10 @@
+import axios from 'axios';
 import { useState } from 'react';
 import { generateColumns } from './columns';
-import { DataTable } from './data-table';
-import CompanyFiles from './vr-company-files'; // Import CompanyFiles component
-import SetStatus from './set-status'; // Import SetStatus component
 import Container from './container'; // Import Container component
-import axios from 'axios';
+import { DataTable } from './data-table';
+import SetStatus from './set-status'; // Import SetStatus component
+import CompanyFiles from './vr-company-files'; // Import CompanyFiles component
 
 interface CompanyProps {
     companies: { id: number; Status?: string; BusinessPermitNumber: string; CompanyName: string; media?: any[] }[];
@@ -18,14 +18,13 @@ export default function Company({ companies, companiesWithMedia, onSelectCompany
     const [containerType, setContainerType] = useState(String);
     const [openStatusModal, setOpenStatusModal] = useState(false);
     const [openContainerModal, setOpenContainerModal] = useState(false);
-    const [selectedStatus,  setSelectedStatus] = useState('');
+    const [selectedStatus, setSelectedStatus] = useState('');
     const [inputValue, setInputValue] = useState('');
 
     const handleContainer = (containerType: string) => {
         setContainerType(containerType);
         setOpenContainerModal(true);
     };
-
 
     const handleViewFiles = (company) => {
         setSelectedCompany(company);
@@ -35,7 +34,7 @@ export default function Company({ companies, companiesWithMedia, onSelectCompany
     const setStatusData = (statusData) => {
         setSelectedCompany(statusData);
         setOpenStatusModal(true);
-    }
+    };
 
     const transformedCompanies = companies.map((company) => ({
         ...company,
@@ -84,20 +83,35 @@ export default function Company({ companies, companiesWithMedia, onSelectCompany
     };
 
     const handleContainerSubmit = async () => {
-
-        alert("This works");
+        alert('This works');
         setOpenContainerModal(false);
     };
 
+    console.log('Columns');
+    console.log(columns);
     return (
         <>
             <DataTable data={transformedCompanies} columns={columns} ColumnFilterName="CompanyName" onRowClick={(row) => onSelectCompany(row.id)} />
 
             <CompanyFiles selectedCompany={selectedCompany} companiesWithMedia={companiesWithMedia} open={open} setOpen={setOpen} />
 
-            <SetStatus selectedData={selectedCompany} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={setStatusData} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToVRCompany}/>
+            <SetStatus
+                selectedData={selectedCompany}
+                openStatusModal={openStatusModal}
+                setOpenStatusModal={setOpenStatusModal}
+                selectedStatus={selectedStatus}
+                setStatusData={setStatusData}
+                setSelectedStatus={setSelectedStatus}
+                handleSubmit={handleSubmitToVRCompany}
+            />
 
-            <Container openContainerModal={openContainerModal} setOpenContainerModal={setOpenContainerModal} setInputValue={setInputValue} handleSubmit={handleContainerSubmit} containerType={containerType}/>
+            <Container
+                openContainerModal={openContainerModal}
+                setOpenContainerModal={setOpenContainerModal}
+                setInputValue={setInputValue}
+                handleSubmit={handleContainerSubmit}
+                containerType={containerType}
+            />
         </>
     );
 }
