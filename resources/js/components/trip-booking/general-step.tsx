@@ -136,7 +136,33 @@ export function GeneralStep({
 
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-2 gap-6">
+            <div className={`flex flex-col p-2 rounded-xl transition-all duration-300 ${
+                !plateNumber ? 'border border-red-600' : 'border border-transparent'
+            }`}>
+                <div className='grid grid-cols-1 gap-6 py-6'>
+                    <div className="space-y-2">
+                        <Label htmlFor="plateNumber">Plate Number</Label>
+                        <Input
+                            id="plateNumber"
+                            placeholder="Enter Plate Number"
+                            value={plateNumber}
+                            onChange={(e) => {
+                                handleInputChange('plateNumber', e.target.value);
+                                handlePlateNumberChange(e.target.value);
+                            }}
+                        />
+                        {!plateNumber && <p className="text-sm text-red-500">Plate number is required.</p>}
+                    </div>
+                    
+                </div>
+            </div>
+
+
+            <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 transition-opacity duration-300 ${
+                !plateNumber
+                    ? 'opacity-0 pointer-events-none h-0'
+                    : 'opacity-100 pointer-events-auto h-full'
+            }`}>
                 <div className="space-y-2">
                     <Label htmlFor="vrCompanyId">VR Company ID</Label>
                     <Input id="vrCompanyId" placeholder="Search from active VR companies" value={selectedCompany.id} disabled />
@@ -145,9 +171,6 @@ export function GeneralStep({
                     <Label htmlFor="vrCompanyName">VR Company Name</Label>
                     <Input id="vrCompanyName" placeholder="Fetch from entered VR ID" value={selectedCompany.CompanyName} disabled />
                 </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
                     <Label htmlFor="operatorId">Operator ID</Label>
                     <Input id="operatorId" placeholder="Search from active operators" value={selectedOperator.id} disabled />
@@ -161,9 +184,7 @@ export function GeneralStep({
                         disabled
                     />
                 </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
+            
                 <div className="space-y-2">
                     <Label htmlFor="unitId">Unit ID (Vehicle)</Label>
                     <Input id="unitId" placeholder="Search from active operators" value={selectedVehicle.id} disabled />
@@ -172,29 +193,14 @@ export function GeneralStep({
                     <Label htmlFor="unitModel">Unit Model</Label>
                     <Input id="unitModel" placeholder="Fetch from Unit ID" value={selectedVehicle.Model} disabled />
                 </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                    <Label htmlFor="plateNumber">Plate Number</Label>
-                    <Input
-                        id="plateNumber"
-                        placeholder="Enter Plate Number"
-                        value={plateNumber}
-                        onChange={(e) => {
-                            handleInputChange('plateNumber', e.target.value);
-                            handlePlateNumberChange(e.target.value);
-                        }}
-                    />
-                    {!plateNumber && <p className="text-sm text-red-500">Plate number is required.</p>}
-                </div>
+                
                 <div className="space-y-2">
                     <Label htmlFor="numberOfSeats">Number of Seats</Label>
                     <Input id="numberOfSeats" placeholder="Fetch from Unit ID" value={selectedVehicle.SeatNumber} disabled />
                 </div>
-            </div>
+            
 
-            <div className="grid grid-cols-2 gap-6">
+            
                 <div className="space-y-2">
                     <Label htmlFor="driverId">Driver ID</Label>
                     <Input
@@ -214,119 +220,122 @@ export function GeneralStep({
                         disabled
                     />
                 </div>
-            </div>
+            
 
-            <div className="grid grid-cols-2 gap-6">
+            
                 <div className="space-y-2">
                     <Label htmlFor="licenseNumber">License Number</Label>
                     <Input id="licenseNumber" placeholder="Fetch from driver ID" value={selectedDriver.LicenseNumber} disabled />
                 </div>
+            
             </div>
 
-            <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                    <Label htmlFor="pickupAddress">Pick-up Address</Label>
-                    <Input
-                        id="pickupAddress"
-                        placeholder="Enter full address"
-                        value={formData.general.pickupAddress}
-                        onChange={(e) => handleInputChange('pickupAddress', e.target.value)}
-                    />
-                    {!formData.general.pickupAddress && <p className="text-sm text-red-500">Pick-up address is required.</p>}
-                    {formData.general.pickupAddress.length <= 10 && formData.general.pickupAddress.length > 0 && (
-                        <p className="text-sm text-red-500">Pick-up address must be more than 10 characters.</p>
-                    )}
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="dropoffAddress">Drop-off Address</Label>
-                    <Input
-                        id="dropoffAddress"
-                        placeholder="Enter drop-off address"
-                        value={formData.general.dropoffAddress}
-                        onChange={(e) => handleInputChange('dropoffAddress', e.target.value)}
-                    />
-                    {!formData.general.dropoffAddress && <p className="text-sm text-red-500">Drop-off address is required.</p>}
-                    {formData.general.dropoffAddress.length <= 10 && formData.general.dropoffAddress.length > 0 && (
-                        <p className="text-sm text-red-500">Drop-off address must be more than 10 characters.</p>
-                    )}
-                </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                    <Label>Pick-up Date</Label>
-                    <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="pickupAddress">Pick-up Address</Label>
                         <Input
-                            placeholder="MM"
-                            value={formData.general.pickupDate.month}
-                            onChange={(e) => handleDateChange('pickup', 'month', e.target.value)}
+                            id="pickupAddress"
+                            placeholder="Enter full address"
+                            value={formData.general.pickupAddress}
+                            onChange={(e) => handleInputChange('pickupAddress', e.target.value)}
                         />
-                        <Input
-                            placeholder="DD"
-                            value={formData.general.pickupDate.day}
-                            onChange={(e) => handleDateChange('pickup', 'day', e.target.value)}
-                        />
-                        <Input
-                            placeholder="YYYY"
-                            value={formData.general.pickupDate.year}
-                            onChange={(e) => handleDateChange('pickup', 'year', e.target.value)}
-                        />
+                        {!formData.general.pickupAddress && <p className="text-sm text-red-500">Pick-up address is required.</p>}
+                        {formData.general.pickupAddress.length <= 10 && formData.general.pickupAddress.length > 0 && (
+                            <p className="text-sm text-red-500">Pick-up address must be more than 10 characters.</p>
+                        )}
                     </div>
-                    {(!formData.general.pickupDate.day || !formData.general.pickupDate.month || !formData.general.pickupDate.year) && (
-                        <p className="text-sm text-red-500">Pick-up date is required.</p>
-                    )}
-                </div>
-                <div className="space-y-2">
-                    <Label>Drop-off Date</Label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="space-y-2">
+                        <Label htmlFor="dropoffAddress">Drop-off Address</Label>
                         <Input
-                            placeholder="MM"
-                            value={formData.general.dropoffDate.month}
-                            onChange={(e) => handleDateChange('dropoff', 'month', e.target.value)}
+                            id="dropoffAddress"
+                            placeholder="Enter drop-off address"
+                            value={formData.general.dropoffAddress}
+                            onChange={(e) => handleInputChange('dropoffAddress', e.target.value)}
                         />
-                        <Input
-                            placeholder="DD"
-                            value={formData.general.dropoffDate.day}
-                            onChange={(e) => handleDateChange('dropoff', 'day', e.target.value)}
-                        />
-                        <Input
-                            placeholder="YYYY"
-                            value={formData.general.dropoffDate.year}
-                            onChange={(e) => handleDateChange('dropoff', 'year', e.target.value)}
-                        />
+                        {!formData.general.dropoffAddress && <p className="text-sm text-red-500">Drop-off address is required.</p>}
+                        {formData.general.dropoffAddress.length <= 10 && formData.general.dropoffAddress.length > 0 && (
+                            <p className="text-sm text-red-500">Drop-off address must be more than 10 characters.</p>
+                        )}
                     </div>
-                    {(!formData.general.dropoffDate.day || !formData.general.dropoffDate.month || !formData.general.dropoffDate.year) && (
-                        <p className="text-sm text-red-500">Drop-off date is required.</p>
-                    )}
-                </div>
-            </div>
-
-            <div className="space-y-2">
-                <Label htmlFor="tripType">Trip Type</Label>
-                <div className="relative">
-                    <div
-                        className="flex cursor-pointer items-center justify-between rounded-md border px-3 py-2"
-                        onClick={() => setShowTripTypeDropdown(!showTripTypeDropdown)}
-                    >
-                        <span className={selectedTripType === 'Select trip type' ? 'text-muted-foreground' : ''}>{selectedTripType}</span>
-                        <ChevronDown className="h-4 w-4 opacity-50" />
-                    </div>
-                    {showTripTypeDropdown && (
-                        <div className="bg-background absolute z-10 mt-1 w-full rounded-md border shadow-lg">
-                            {tripTypes.map((type) => (
-                                <div
-                                    key={type}
-                                    className="hover:bg-muted cursor-pointer bg-white px-3 py-2"
-                                    onClick={() => handleTripTypeSelect(type)}
-                                >
-                                    {type}
-                                </div>
-                            ))}
+                    <div className="space-y-2">
+                        <Label>Pick-up Date</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                            <Input
+                                placeholder="MM"
+                                value={formData.general.pickupDate.month}
+                                onChange={(e) => handleDateChange('pickup', 'month', e.target.value)}
+                            />
+                            <Input
+                                placeholder="DD"
+                                value={formData.general.pickupDate.day}
+                                onChange={(e) => handleDateChange('pickup', 'day', e.target.value)}
+                            />
+                            <Input
+                                placeholder="YYYY"
+                                value={formData.general.pickupDate.year}
+                                onChange={(e) => handleDateChange('pickup', 'year', e.target.value)}
+                            />
                         </div>
-                    )}
-                </div>
-                {!formData.general.tripType && <p className="text-sm text-red-500">Trip type is required.</p>}
+                        {(!formData.general.pickupDate.day || !formData.general.pickupDate.month || !formData.general.pickupDate.year) && (
+                            <p className="text-sm text-red-500">Pick-up date is required.</p>
+                        )}
+                    </div>
+                    <div className="space-y-2">
+                        <Label>Drop-off Date</Label>
+                        <div className="grid grid-cols-3 gap-2">
+                            <Input
+                                placeholder="MM"
+                                value={formData.general.dropoffDate.month}
+                                onChange={(e) => handleDateChange('dropoff', 'month', e.target.value)}
+                            />
+                            <Input
+                                placeholder="DD"
+                                value={formData.general.dropoffDate.day}
+                                onChange={(e) => handleDateChange('dropoff', 'day', e.target.value)}
+                            />
+                            <Input
+                                placeholder="YYYY"
+                                value={formData.general.dropoffDate.year}
+                                onChange={(e) => handleDateChange('dropoff', 'year', e.target.value)}
+                            />
+                        </div>
+                        {(!formData.general.dropoffDate.day || !formData.general.dropoffDate.month || !formData.general.dropoffDate.year) && (
+                            <p className="text-sm text-red-500">Drop-off date is required.</p>
+                        )}
+                    </div>
             </div>
+            
+            <div className='grid grid-cols-1'>
+                <div className="space-y-2">
+                        <Label htmlFor="tripType">Trip Type</Label>
+                        <div className="relative">
+                            <div
+                                className="flex cursor-pointer items-center justify-between rounded-md border px-3 py-2"
+                                onClick={() => setShowTripTypeDropdown(!showTripTypeDropdown)}
+                                >
+                                <span className={selectedTripType === 'Select trip type' ? 'text-muted-foreground' : ''}>{selectedTripType}</span>
+                                <ChevronDown className="h-4 w-4 opacity-50" />
+                            </div>
+                            {showTripTypeDropdown && (
+                                <div className="bg-background absolute z-10 mt-1 w-full rounded-md border shadow-lg">
+                                    {tripTypes.map((type) => (
+                                        <div
+                                            key={type}
+                                            className="hover:bg-muted cursor-pointer bg-white px-3 py-2"
+                                            onClick={() => handleTripTypeSelect(type)}
+                                        >
+                                            {type}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                            {!formData.general.tripType && <p className="text-sm text-red-500">Trip type is required.</p>}
+                    </div>
+            </div>
+        
+
+            
 
             <div className="mt-6 flex justify-end gap-2">
                 <Button variant="outline" className="bg-white" onClick={onPrevious} disabled={isFirstStep}>
