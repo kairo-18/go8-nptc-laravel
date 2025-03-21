@@ -55,14 +55,16 @@ export default function Bookings({ bookings }) {
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            <Button className="ml-auto w-1/4" onClick={() => (window.location.href = '/book-trip')}>
-                Generate Trip Ticket
-            </Button>
-            <div className="ml-2 flex flex-col items-start py-2">
-                <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">Table for Trips/Bookings</h3>
+            <div className='p-10'>
+                <div className="ml-2 flex flex-row items-start py-2">
+                    <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">Table for Trips/Bookings</h3>
+                    <Button className="ml-auto w-1/4 bg-blue-900 hover:bg-white hover:text-black" onClick={() => (window.location.href = '/book-trip')}>
+                        Generate Trip Ticket
+                    </Button>
+                </div>
+                <DataTable onRowClick={onSelectTrip} columns={columns} data={transformedData} ColumnFilterName="company_name" />
+                {selectedTrip && <TripTicketModal open={open} setOpen={setOpen} selectedTripData={selectedTrip}/>}
             </div>
-            <DataTable onRowClick={onSelectTrip} columns={columns} data={transformedData} ColumnFilterName="company_name" />
-            {selectedTrip && <TripTicketModal open={open} setOpen={setOpen} selectedTripData={selectedTrip} />}
         </MainLayout>
     );
 }
