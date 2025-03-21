@@ -1,26 +1,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { generateColumns } from '@/components/RecordsComponent/columns';
+import { DataTable } from '@/components/RecordsComponent/data-table';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
-import {
-    ArrowUpDown,
-    ChevronLeft,
-    ChevronRight,
-    ChevronsLeft,
-    ChevronsRight,
-    ChevronsUpDown,
-    Ellipsis,
-    Filter,
-    SlidersHorizontal,
-} from 'lucide-react';
+import { Filter } from 'lucide-react';
 import { useState } from 'react';
 import MainLayout from './mainLayout';
 import { OperatorDetails } from './pending-operator-details';
 
 interface Owner {
+    VR_FK: number;
+    Owner_ID: number;
     LastName: string;
     FirstName: string;
     Address: string;
@@ -30,6 +22,7 @@ interface Owner {
 }
 
 interface VR {
+    VR_ID: number;
     BusinessPermit: media;
     BusinessPermitNumber: string;
     CompanyName: string;
@@ -45,6 +38,8 @@ interface VR {
 }
 
 interface Operator {
+    OP_ID: number;
+    VR_FK: number;
     Status: string;
     vrCompany: string;
     LastName: string;
@@ -57,6 +52,43 @@ interface Operator {
     Email: string;
 }
 
+interface Driver {
+    Driver_ID: number;
+    Operator_ID: number;
+    Unit_ID: number;
+    LastName: string;
+    FirstName: string;
+    BirthDate: string;
+    Address: string;
+    ContactNumber: number;
+    Email: string;
+    Status: string;
+    License: media;
+    LicenseNumber: number;
+    Photo: media;
+    NBI_clearance: media;
+    Police_clearance: media;
+    BIR_clearance: media;
+}
+
+interface Unit {
+    Unit_ID: number;
+    Operator_ID: number;
+    Model: string;
+    Brand: string;
+    PlateNumber: string;
+    Seats: number;
+    OR: media;
+    CR: media;
+    ID_card: media;
+    GPS_Certificate: media;
+    Inspection_certificate: media;
+    Front_photo: media;
+    Back_photo: media;
+    Side_photo: media;
+    Front_photo: media;
+}
+
 export default function Pending() {
     const [selectedOperator, setSelectedOperator] = useState<Operator | null>(null);
     const [selectedItemDD1, setSelectedItemDD1] = useState('All');
@@ -64,8 +96,49 @@ export default function Pending() {
 
     const breadcrumbs: BreadcrumbItem[] = [{ title: 'Pending' }];
 
+    const columns = generateColumns(
+        [
+            // Column for displaying the title based on the type of record
+            {
+                key: 'title',
+                label: 'Title',
+                cell: ({ row }) => {
+                    const data = row.original;
+
+                    // If it's a VR, show the company name
+                    if (data.VR_ID) {
+                        return data.CompanyName || 'Unknown Company';
+                    }
+
+                    // If it's an Operator or Driver, show the full name
+                    if (data.OP_ID || data.Driver_ID) {
+                        return `${data.FirstName} ${data.MiddleName ? data.MiddleName + '.' : ''} ${data.LastName}`;
+                    }
+
+                    // If it's a Unit, show the license plate
+                    if (data.Unit_ID) {
+                        return data.PlateNumber || 'Unknown Plate';
+                    }
+
+                    // Default fallback
+                    return 'Unknown';
+                },
+            },
+            // Column for Status
+            { key: 'Status', label: 'Status' },
+            // Column for Date Applied
+            { key: 'DateApplied', label: 'Date Applied' },
+        ],
+        {
+            sortableColumns: ['title', 'Status', 'DateApplied'], // Allow sorting by title, status, and date applied
+            statusColumns: ['Status'], // Apply status styling to the Status column
+            entityType: 'operators', // Set the entity type to operators
+        },
+    );
+
     const operators: Operator[] = [
         {
+            OP_ID: 1234,
             VR_ID: 1,
             Status: 'Complete',
             vrCompany: 'Nokarin',
@@ -79,6 +152,7 @@ export default function Pending() {
             Email: 'coyoung@nokarin.com',
         },
         {
+            OP_ID: 1235,
             VR_ID: 2,
             Status: 'Complete',
             vrCompany: 'Nokarin',
@@ -92,6 +166,7 @@ export default function Pending() {
             Email: 'latko@nokarin.com',
         },
         {
+            OP_ID: 1236,
             VR_ID: 1,
             Status: 'Pending',
             vrCompany: 'Alps',
@@ -104,6 +179,7 @@ export default function Pending() {
             Email: 'owako@alps.com',
         },
         {
+            OP_ID: 1237,
             VR_ID: 1,
             Status: 'Pending',
             vrCompany: 'Alps',
@@ -116,6 +192,7 @@ export default function Pending() {
             Email: 'kalbo@alps.com',
         },
         {
+            OP_ID: 1238,
             VR_ID: 1,
             Status: 'Rejected',
             vrCompany: 'Alps',
@@ -131,6 +208,7 @@ export default function Pending() {
 
     const owners: Owner[] = [
         {
+            Owner_ID: 1331,
             VR_ID: 1,
             LastName: 'Laxamana',
             FirstName: 'Justin',
@@ -140,6 +218,7 @@ export default function Pending() {
             Email: 'kalbo@victory.com',
         },
         {
+            Owner_ID: 1332,
             VR_ID: 2,
             LastName: 'Aquino',
             FirstName: 'Crystal Kate',
@@ -152,7 +231,7 @@ export default function Pending() {
 
     const vrs: VR[] = [
         {
-            VR_ID: 1,
+            VR_ID: 9876,
             BusinessPermit:
                 'https://64.media.tumblr.com/e60b89b8ea13a3c9f2df6d55bfeeb45e/b56bdb39803ed67d-ea/s1280x1920/bc3701015454c0f774ad07982d1e2c9e77ea9936.png',
             BusinessPermitNumber: '123456789',
@@ -173,7 +252,7 @@ export default function Pending() {
             Email: 'coyoung@nokarin.com',
         },
         {
-            VR_ID: 2,
+            VR_ID: 9877,
             BusinessPermit:
                 'https://preview.redd.it/no-spoilers-give-me-your-arcane-memes-and-i-shall-giveth-v0-xietz7vij81e1.jpeg?width=640&crop=smart&auto=webp&s=a14e22f16d97fc5426767364b1e64fd44e3065be0',
             BusinessPermitNumber: '123456789',
@@ -192,6 +271,84 @@ export default function Pending() {
             ContactNumber: '09163939373',
             Email: 'owako@alps.com',
         },
+    ];
+
+    const drivers: Driver[] = [
+        {
+            Driver_ID: 1,
+            Operator_ID: 101,
+            Unit_ID: 201,
+            LastName: 'Dela Cruz',
+            FirstName: 'Juan',
+            BirthDate: '04-15-1985',
+            Address: '123 Sampaguita St., Manila',
+            ContactNumber: 9123456789,
+            Email: 'juan.delacruz@example.com',
+            Status: 'assigned',
+            License: 'https://example.com/licenses/juan_license.jpg',
+            LicenseNumber: 123456789,
+            Photo: 'https://example.com/photos/juan_photo.jpg',
+            NBI_clearance: 'https://example.com/documents/juan_nbi.jpg',
+            Police_clearance: 'https://example.com/documents/juan_police.jpg',
+            BIR_clearance: 'https://example.com/documents/juan_bir.jpg',
+        },
+        {
+            Driver_ID: 2,
+            Operator_ID: 102,
+            Unit_ID: 202,
+            LastName: 'Reyes',
+            FirstName: 'Maria',
+            BirthDate: '08-22-1990',
+            Address: '456 Rizal Ave., Quezon City',
+            ContactNumber: 9123456788,
+            Email: 'maria.reyes@example.com',
+            Status: 'onStandby',
+            License: 'https://example.com/licenses/maria_license.jpg',
+            LicenseNumber: 987654321,
+            Photo: 'https://example.com/photos/maria_photo.jpg',
+            NBI_clearance: 'https://example.com/documents/maria_nbi.jpg',
+            Police_clearance: 'https://example.com/documents/maria_police.jpg',
+            BIR_clearance: 'https://example.com/documents/maria_bir.jpg',
+        },
+    ];
+
+    const units: Unit[] = [
+        [
+            {
+                Unit_ID: 201,
+                Operator_ID: 101,
+                Model: 'HiAce Commuter',
+                Brand: 'Toyota',
+                PlateNumber: 'ABC-1234',
+                Seats: 15,
+                OR: 'https://example.com/documents/vehicle201_or.jpg',
+                CR: 'https://example.com/documents/vehicle201_cr.jpg',
+                ID_card: 'https://example.com/documents/vehicle201_idcard.jpg',
+                GPS_Certificate: 'https://example.com/documents/vehicle201_gps.jpg',
+                Inspection_certificate: 'https://example.com/documents/vehicle201_inspection.jpg',
+                Front_photo: 'https://example.com/photos/vehicle201_front.jpg',
+                Back_photo: 'https://example.com/photos/vehicle201_back.jpg',
+                Side_left_photo: 'https://example.com/photos/vehicle201_left.jpg',
+                Side_right_photo: 'https://example.com/photos/vehicle201_right.jpg',
+            },
+            {
+                Unit_ID: 202,
+                Operator_ID: 102,
+                Model: 'L300 Exceed',
+                Brand: 'Mitsubishi',
+                PlateNumber: 'XYZ-5678',
+                Seats: 17,
+                OR: 'https://example.com/documents/vehicle202_or.jpg',
+                CR: 'https://example.com/documents/vehicle202_cr.jpg',
+                ID_card: 'https://example.com/documents/vehicle202_idcard.jpg',
+                GPS_Certificate: null,
+                Inspection_certificate: 'https://example.com/documents/vehicle202_inspection.jpg',
+                Front_photo: 'https://example.com/photos/vehicle202_front.jpg',
+                Back_photo: 'https://example.com/photos/vehicle202_back.jpg',
+                Side_left_photo: 'https://example.com/photos/vehicle202_left.jpg',
+                Side_right_photo: 'https://example.com/photos/vehicle202_right.jpg',
+            },
+        ],
     ];
 
     return (
@@ -231,126 +388,7 @@ export default function Pending() {
                         </div>
                     </div>
                     <div className="rounded-sm border border-gray-300 p-5">
-                        <div className="mb-5 flex items-center space-x-2">
-                            <Input placeholder="Filter application" className="w-60" />
-                            <div className="ml-auto">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button
-                                            variant="outline"
-                                            className="flex items-center justify-start gap-2 bg-white text-black hover:bg-[#2A2A92] hover:text-white"
-                                        >
-                                            <SlidersHorizontal className="h-4 w-4" /> {selectedItemDD2}
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-40">
-                                        <DropdownMenuItem onClick={() => setSelectedItemDD2('Hello')}>Hello</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => setSelectedItemDD2('World')}>World</DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </div>
-                        </div>
-                        <Table className="w-full rounded-sm border border-gray-300 text-sm">
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead className="w-[80px] px-2 text-center text-gray-500"></TableHead>
-                                    <TableHead className="px-4 py-2 text-gray-600">VR Company</TableHead>
-                                    <TableHead className="px-4 py-2 text-gray-600">
-                                        Operator <ArrowUpDown className="ml-1 inline-block size-4" />
-                                    </TableHead>
-                                    <TableHead className="px-4 py-2 text-right text-gray-600">Date Applied</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {operators.map((operator) => (
-                                    <TableRow
-                                        key={operator.Email}
-                                        className="cursor-pointer transition hover:bg-gray-100"
-                                        onClick={() => setSelectedOperator(operator)}
-                                    >
-                                        <TableCell className="w-[80px] px-2 text-center">
-                                            <div
-                                                className={`inline-block h-4 w-4 rounded-sm border-[3px] ${
-                                                    operator.Status === 'Complete'
-                                                        ? 'border-green-500'
-                                                        : operator.Status === 'Pending'
-                                                          ? 'border-yellow-500'
-                                                          : 'border-red-500'
-                                                }`}
-                                            />
-                                        </TableCell>
-                                        <TableCell className="px-4 py-5 font-medium">{operator.vrCompany ?? 'Unknown'}</TableCell>
-                                        <TableCell className="px-4 py-2">
-                                            {operator.FirstName} {operator.MiddleName ? operator.MiddleName + '.' : ''} {operator.LastName}
-                                        </TableCell>
-                                        <TableCell className="px-7 py-2 text-right">{operator.DateApplied}</TableCell>
-                                        <TableCell className="py-2 text-right">
-                                            <Ellipsis
-                                                className="mx-auto size-4 cursor-pointer"
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    console.log('ellipsis clicked', operator);
-                                                }}
-                                            />
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-
-                        <div className="mt-2 flex items-center justify-between">
-                            <p className="text-sm text-gray-500">0 of 100 row(s) selected.</p>
-
-                            <div className="flex items-center space-x-4">
-                                <div className="flex items-center space-x-2">
-                                    <p className="text-sm">Rows per page</p>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                className="mr-5 flex w-20 items-center justify-between bg-white text-black hover:bg-[#2A2A92] hover:text-white"
-                                            >
-                                                10 <ChevronsUpDown className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent>
-                                            <DropdownMenuItem>10</DropdownMenuItem>
-                                            <DropdownMenuItem>20</DropdownMenuItem>
-                                            <DropdownMenuItem>30</DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
-
-                                <p className="mr-10 text-sm">Page 1 of 10</p>
-
-                                <div className="flex items-center space-x-2">
-                                    <Button
-                                        variant="outline"
-                                        className="flex items-center justify-center bg-white text-black hover:bg-[#2A2A92] hover:text-white"
-                                    >
-                                        <ChevronsLeft />
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        className="flex items-center justify-center bg-white text-black hover:bg-[#2A2A92] hover:text-white"
-                                    >
-                                        <ChevronLeft />
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        className="flex items-center justify-center bg-white text-black hover:bg-[#2A2A92] hover:text-white"
-                                    >
-                                        <ChevronRight />
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        className="flex items-center justify-center bg-white text-black hover:bg-[#2A2A92] hover:text-white"
-                                    >
-                                        <ChevronsRight />
-                                    </Button>
-                                </div>
-                            </div>
-                        </div>
+                        <DataTable data={operators} columns={columns} onRowClick={(row) => setSelectedOperator(row)} />
                     </div>
                 </>
             )}
