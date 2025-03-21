@@ -6,6 +6,7 @@ use App\Http\Controllers\VRAdminController;
 use App\Http\Controllers\VrContactsController;
 use App\Http\Controllers\VRCompanyController;
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\PendingController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
@@ -77,6 +78,10 @@ Route::post('/generate-payment-link', [TripController::class, 'generatePaymentLi
 Route::get('/check-payment-status/{id}', [TripController::class, 'checkStatus'])
     ->name('check-status');
 
+//pending
+Route::get('/pending-data', [PendingController::class, 'index']);
+
+Route::post('/rejection', [PendingController::class, 'rejection']);
 
 // Catch-all for unhandled API routes
 Route::fallback(function () {

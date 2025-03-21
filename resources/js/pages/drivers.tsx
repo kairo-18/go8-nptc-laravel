@@ -86,7 +86,6 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
         }
       
         try {
-          // Step 1: PATCH - Update Driver Details
           await router.patch(`/drivers/${formData.id}`, {
             FirstName: formData.FirstName,
             LastName: formData.LastName,
@@ -102,7 +101,6 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
       
           console.log('Driver details updated successfully');
       
-          // Step 2: POST - Upload Files (if any)
           const uploadData = new FormData();
           const fileFields = ['License', 'Photo', 'NBI_clearance', 'Police_clearance', 'BIR_clearance'];
           let hasFiles = false;
