@@ -8,6 +8,75 @@ import { Separator } from "@/components/ui/separator";
 export default function PendingCompanyDetails({ item }) {
   const [previewFile, setPreviewFile] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRejectionModalOpen, setIsRejectionModalOpen] = useState(false); // Rejection modal state
+  const [rejectionNote, setRejectionNote] = useState(""); // Rejection note state
+  const [isLoading, setIsLoading] = useState(false); // Loading state for rejection
+
+  // Handle rejection button click
+  const handleRejection = async () => {
+    try {
+      setIsLoading(true); // Set loading to true when making the API call
+
+      const response = await fetch('/api/rejection', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: item?.id, // Send item ID
+          type: "vr_company", // Send the entity type as 'company'
+          note: rejectionNote, // Send the rejection note
+          user_id: item?.id
+        }),
+      });
+
+      // Check if response is ok
+      if (!response.ok) {
+        throw new Error('Error submitting rejection');
+      }
+
+      // Handle successful rejection
+      const data = await response.json();
+      if (data.message === 'Entity rejected and note created successfully') {
+        setIsRejectionModalOpen(false); // Close the rejection modal after successful rejection
+        alert('Rejection successful!'); // Show success message
+      }
+    } catch (error) {
+      console.error("Error submitting rejection:", error);
+      alert('Error rejecting company. Please try again.'); // Show error message
+    } finally {
+      setIsLoading(false); // Set loading to false after API call completes
+    }
+  };
+
+  const handleApproval = async () => {
+    try {
+      setIsLoading(true); 
+
+      const response = await fetch('/api/approval', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: item?.id, // Send item ID
+          type: "vr_company", // Send the entity type as 'vehicle'
+          user_id: item?.id, 
+        }),
+      });
+
+      // Handle successful 
+      const data = await response.json();
+      if (data.message === 'Entity approved and note created successfully') {
+        alert('Approval successful! Official documents will be sent to the mail of the driver.');
+        window.location.href;
+      }
+    } catch (error) {
+      console.error("Error submitting rejection:", error);
+    } finally {
+      setIsLoading(false); // Set loading to false after API call completes
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto p-8 space-y-8 bg-white shadow rounded-lg border border-gray-200">
@@ -22,8 +91,17 @@ export default function PendingCompanyDetails({ item }) {
           <h1 className="text-2xl font-bold text-gray-800">{item?.CompanyName || "Company Name"}</h1>
         </div>
         <div className="space-x-3">
-          <Button className="bg-red-500 text-white hover:bg-red-600">Reject and add notes</Button>
-          <Button className="bg-green-500 text-white hover:bg-green-600">Approve and prompt for payment</Button>
+          <Button
+            className="bg-red-500 text-white hover:bg-red-600"
+            onClick={() => setIsRejectionModalOpen(true)} // Open rejection modal
+          >
+            Reject and add notes
+          </Button>
+          <Button className="bg-green-500 text-white hover:bg-green-600"
+          onClick={() => handleApproval()}
+          >
+            Approve and prompt for payment
+          </Button>
         </div>
       </div>
       <Separator />
@@ -60,7 +138,7 @@ export default function PendingCompanyDetails({ item }) {
         <CardContent className="grid grid-cols-2 gap-4">
           {item?.media_files?.map((file, index) => (
             <div key={index} className="flex items-center justify-between border p-3 rounded-lg bg-gray-50">
-                <Label>{file.collection_name}</Label>
+              <Label>{file.collection_name}</Label>
               <span className="text-gray-700 text-sm">{file.name}</span>
               <Button
                 variant="outline"
@@ -103,6 +181,35 @@ export default function PendingCompanyDetails({ item }) {
 
       {/* File Preview Modal */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} file={previewFile} />
+
+      {/* Rejection Note Modal */}
+      {isRejectionModalOpen && (
+        <div className="fixed inset-0 flex justify-center items-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 50 }}>
+          <div className="bg-white p-6 rounded-lg max-w-lg relative z-60">
+            <Button onClick={() => setIsRejectionModalOpen(false)} className="absolute top-2 right-2 p-2" variant="outline">
+              ✕
+            </Button>
+            <h3 className="text-lg font-semibold">Add Rejection Note</h3>
+            <textarea
+              value={rejectionNote}
+              onChange={(e) => setRejectionNote(e.target.value)}
+              className="w-full mt-4 p-2 border border-gray-300 rounded-md"
+              placeholder="Enter rejection note"
+              rows={4}
+            />
+            <div className="mt-4 flex justify-end space-x-4">
+              <Button onClick={() => setIsRejectionModalOpen(false)} variant="outline">Cancel</Button>
+              <Button
+                onClick={handleRejection}
+                className="bg-red-500 text-white"
+                disabled={isLoading || !rejectionNote}
+              >
+                {isLoading ? "Processing..." : "Submit Rejection"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

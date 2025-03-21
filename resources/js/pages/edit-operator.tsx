@@ -26,10 +26,12 @@ export default function EditOperator({ operatorMedia, operator }) {
             ...prevState,
             user: {
                 ...prevState?.user,
-                [name]: value
-            }
+                [name]: value,
+            },
+            [name]: value, 
         }));
     };
+    
 
     const handleOperatorUpdate = async () => {
         try {
@@ -40,6 +42,7 @@ export default function EditOperator({ operatorMedia, operator }) {
                 LastName: operatorData?.user?.LastName || "",
                 Address: operatorData?.user?.Address || "",
                 BirthDate: operatorData?.user?.BirthDate || "",
+                Status:operatorData?.Status||"",
                 ContactNumber: operatorData?.user?.ContactNumber || "",
                 vr_company_id: operatorData?.vr_company_id || null,
             };
