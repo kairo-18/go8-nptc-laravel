@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { BookingFormData } from '@/lib/types';
 import axios from 'axios';
+import { Loader2 } from 'lucide-react'; // Import a loading spinner icon
 import { useEffect, useState } from 'react';
 import PaymentSuccessModal from './payment-success-modal';
 
@@ -21,7 +22,7 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
     const total = baseFee + additionalFee + passengerInsurance + others;
     const [linkId, setLinkId] = useState('');
     const [paymentSuccess, setPaymentSuccess] = useState(false);
-
+    const [isLoading, setIsLoading] = useState(false); // Loading state
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     const formatCurrency = (amount: number) => {
@@ -29,6 +30,7 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
     };
 
     const handleProceedToPayment = async () => {
+        setIsLoading(true); // Start loading
         try {
             const response = await axios.post('/api/generate-payment-link', {
                 amount: 15000, // Amount in cents (150 PHP)
@@ -43,10 +45,12 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
             } else {
                 console.error('Payment link creation failed:', response.data);
                 alert('Failed to generate payment link. Please try again.');
+                setIsLoading(false); // Stop loading on error
             }
         } catch (error) {
             console.error('Error creating payment link:', error);
             alert('An error occurred while processing the payment.');
+            setIsLoading(false); // Stop loading on error
         }
     };
 
@@ -59,10 +63,12 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
 
                 if (response.data?.data?.attributes?.status === 'paid') {
                     clearInterval(interval);
+                    setIsLoading(false); // Stop loading when payment is successful
                     handleSubmitBooking();
                 }
             } catch (error) {
                 console.error('Error checking payment status:', error);
+                setIsLoading(false); // Stop loading on error
             }
         }, 5000); // Poll every 5 seconds
 
@@ -101,7 +107,17 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
     }, [formData.tripId]); // Run this effect whenever tripId changes
 
     return (
-        <div className="flex flex-col items-center">
+        <div className="relative flex flex-col items-center">
+            {/* Full-screen overlay with loading spinner */}
+            {isLoading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+                    <div className="flex flex-col items-center rounded-lg bg-white p-6 shadow-lg">
+                        <Loader2 className="h-8 w-8 animate-spin" /> {/* Loading spinner */}
+                        <p className="mt-2">Processing payment...</p>
+                    </div>
+                </div>
+            )}
+
             <Card className="w-full max-w-md">
                 <CardHeader className="text-center">
                     <CardTitle>Payment</CardTitle>
@@ -141,11 +157,14 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
             </Card>
 
             <div className="mt-6 flex w-full max-w-md justify-end gap-2">
-                <Button className="bg-white" variant="outline" onClick={onPrevious}>
+                <Button className="bg-white" variant="outline" onClick={onPrevious} disabled={isLoading}>
                     Previous
                 </Button>
-                <Button onClick={handleProceedToPayment}>Proceed to Payment</Button>
+                <Button onClick={handleProceedToPayment} disabled={isLoading}>
+                    Proceed to Payment
+                </Button>
             </div>
+
             <PaymentSuccessModal
                 isOpen={isModalOpen}
                 onClose={() => {
