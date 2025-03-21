@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns"; // Helps with date formatting
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function OperatorInformation({ operator, handleChange, handleOperatorUpdate }) {
     return (
@@ -29,13 +30,13 @@ export default function OperatorInformation({ operator, handleChange, handleOper
                     </div>
 
                     {/* ✅ Updated Birth Date Picker using ShadCN Calendar */}
-                    <div className="md:col-span-2 ">
+                    <div className="md:col-span-2">
                         <Label className="mb-2 block">Birth Date</Label>
                         <Popover>
                             <PopoverTrigger asChild>
-                                <Button variant="outline" className="w-full text-left bg-gray-50">
+                                <Button variant="outline" className="w-full text-left bg-black-50">
                                     {operator?.user?.BirthDate
-                                        ? format(new Date(operator.user.BirthDate), "MMMM dd, yyyy")
+                                        ? format(new Date(operator?.user?.BirthDate), "MMMM dd, yyyy")
                                         : "Select Birth Date"}
                                 </Button>
                             </PopoverTrigger>
@@ -56,15 +57,46 @@ export default function OperatorInformation({ operator, handleChange, handleOper
                         </Popover>
                     </div>
 
+                    {/* Status Dropdown with current status displayed */}
+                    <div className="space-y-2">
+                        <Label htmlFor="Status">Status</Label>
+                        <Select
+                            id="Status"
+                            name="Status"
+                            value={operator?.Status || ''}
+                            onValueChange={(value) => handleChange({
+                                target: {
+                                    name: 'Status',
+                                    value: value
+                                }
+                            })}
+                        >
+                            <SelectTrigger>
+                                <SelectValue placeholder={operator?.Status || "Select Status"} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value='Approved'>Approved</SelectItem>
+                                <SelectItem value="Active">Active</SelectItem>
+                                <SelectItem value="Inactive">Inactive</SelectItem>
+                                <SelectItem value="Suspended">Suspended</SelectItem>
+                                <SelectItem value="For Payment">For Payment</SelectItem>
+                                <SelectItem value="Banned">Banned</SelectItem>
+                                <SelectItem value="Pending">Pending</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+
                     <div className="space-y-2">
                         <Label htmlFor="contact-number">Contact Number</Label>
                         <Input id="contact-number" name="ContactNumber" value={operator?.user?.ContactNumber || ''} onChange={handleChange} />
                     </div>
+
                     <div className="space-y-2 md:col-span-2">
                         <Label htmlFor="address">Address</Label>
                         <Input id="address" name="Address" value={operator?.user?.Address || ''} onChange={handleChange} />
                     </div>
                 </div>
+
                 <Button onClick={handleOperatorUpdate} className="mt-4">
                     Update Operator
                 </Button>

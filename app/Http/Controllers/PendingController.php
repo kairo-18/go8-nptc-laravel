@@ -85,9 +85,9 @@ class PendingController extends Controller
             });
 
             $operators = Operator::with(['user', 'vrCompany'])
-            ->whereIn('vr_company_id', VRCompany::whereIn('Status', ['Pending', 'For Payment'])->pluck('id'))
-            ->whereIn('Status', ['Pending', 'For Payment']) 
+            ->whereIn('Status', ['Pending', 'For Payment'])  // Still filtering operators by their own status
             ->get();
+        
         
 
         $operators = $operators->map(function ($operator) {
@@ -157,6 +157,59 @@ class PendingController extends Controller
     // Return a success response
     return response()->json(['message' => 'Entity rejected and note created successfully'], 200);
 }
+public function approval(Request $request)
+{
+    // Validate the request data
+    $validated = $request->validate([
+        'id' => 'required|integer', 
+        'type' => 'required|string|in:driver,vehicle,vr_company,operator', 
+        'user_id' => 'required|integer|exists:users,id', 
+    ]);
+
+    $entity = null;
+    $type = $validated['type'];
+    $entityId = $validated['id'];
+
+    // Switch case to find the entity by type
+    switch ($type) {
+        case 'driver':
+            $entity = Driver::find($entityId);
+            break;
+
+        case 'vehicle':
+            $entity = Vehicle::find($entityId);
+            break;
+
+        case 'vr_company':
+            $entity = VRCompany::find($entityId);
+            break;
+
+        case 'operator':
+            $entity = Operator::find($entityId);
+            break;
+
+        default:
+            return response()->json(['error' => 'Invalid entity type'], 400);
+    }
+
+    // If entity is not found, return an error message
+    if (!$entity) {
+        return response()->json(['error' => 'Entity not found'], 404);
+    }
+
+    if($entity === 'vehicle'){
+        $entity->Status = 'For Payment';
+    }else{
+        $entity->Status = 'Approved';
+    }
+    
+
+    $entity->save();
+
+    // Return a success response
+    return response()->json(['message' => 'Entity approved and note created successfully'], 200);
+}
+
 
 
 }

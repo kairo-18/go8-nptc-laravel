@@ -61,6 +61,34 @@ export default function PendingOperatorDetails({ item }: PendingOperatorDetailsP
       console.error("Error submitting rejection:", error);
     }
   };
+
+  const handleApproval = async (note: string, entityId: string, entityType: string) => {
+    try {
+      const response = await fetch('/api/approval', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: item.id,
+          type: entityType,
+          note,
+          user_id: item.user.id, // Make sure to pass the appropriate user ID
+        }),
+      });
+  
+      // Check if the response is successful
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} - ${response.statusText}`);
+      }
+  
+      const data = await response.json();
+      alert('Approval successful! Official documents will be sent to the mail of the operator.');
+      window.location.href;
+    } catch (error) {
+      console.error("Error submitting rejection:", error);
+    }
+  };
   
   
 
@@ -74,7 +102,9 @@ export default function PendingOperatorDetails({ item }: PendingOperatorDetailsP
           >
             Reject and add notes
           </Button>
-          <Button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+          <Button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
+            onClick={() => handleApproval( operatorId, "operator")}
+          >
             Approve and generate documents
           </Button>
         </div>
