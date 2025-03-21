@@ -20,6 +20,7 @@ return new class extends Migration
             $table->dateTime('pickupDate');
             $table->dateTime('dropOffDate');
             $table->enum('tripType', ['Drop-off', 'Airport Pick-up', 'Wedding', 'City Tour', 'Vacation', 'Team Building', 'Home Transfer', 'Corporate', 'Government', 'Others']);
+            $table->enum('status', ['Cancelled', 'Done', 'Scheduled', 'Ongoing']);
             $table->timestamps();
         });
     }

@@ -44,6 +44,7 @@ class TripController extends Controller
         $trip->pickupDate = $pickupDate;
         $trip->dropOffDate = $dropOffDate;
         $trip->tripType = $request->input('general.tripType');
+        $trip->status = 'Scheduled';
 
         $trip->save();
 

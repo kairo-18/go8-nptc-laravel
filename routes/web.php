@@ -36,6 +36,12 @@ Route::get('/book-trip', function () {
     ]);
 })->name('book-trip');
 
+Route::get('/bookings', function () {
+    return Inertia::render('bookings', [
+        'bookings' => App\Models\Trip::with(['driver.user', 'vehicle', 'driver.operator.vrCompany', 'passengers'])->get(),
+    ]);
+})->name('bookings');
+
 Route::get(
     '/mails',
     function () {
