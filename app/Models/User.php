@@ -66,5 +66,9 @@ class User extends Authenticatable
         return $this->hasOne(VehicleRentalOwner::class);
     }
 
+    public function note(){
+        return $this->hasMany(Notes::class);
+    }
+
 
 }
