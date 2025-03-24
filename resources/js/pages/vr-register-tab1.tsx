@@ -17,7 +17,7 @@ const CopyButton = ({ text, isCopied, setIsCopied }: { text: string; isCopied: b
     </Button>
 );
 
-const TemporaryAccountTabContent = () => {
+const TemporaryAccountTabContent = ({ type }) => {
     const [isCopied, setIsCopied] = useState(false);
     const [isAppIdCopied, setIsAppIdCopied] = useState(false);
     const [generatedPassword, setGeneratedPassword] = useState('pass@123');
@@ -32,8 +32,9 @@ const TemporaryAccountTabContent = () => {
         LastName: '',
         email: '',
         ContactNumber: '12345789',
-        Address: 'hotdog',
+        Address: '#36 Josefina Street 4th Avenue Caloocan City',
         BirthDate: '',
+        Type: type,
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

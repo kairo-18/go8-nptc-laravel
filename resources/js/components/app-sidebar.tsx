@@ -23,6 +23,11 @@ const mainNavItems: NavItem[] = [
         icon: BadgePlus,
     },
     {
+        title: 'Operator Temp Account Registration',
+        url: '/op-registration',
+        icon: BadgePlus,
+    },
+    {
         title: 'Registration',
         url: '/registration',
         icon: UserPlus,
@@ -77,7 +82,35 @@ export function AppSidebar() {
     const { props } = usePage();
     const userRole = props.auth.user?.roles?.[0]?.name;
 
-    const filteredNavItems = userRole === 'Temp User' ? mainNavItems.filter((item) => item.title === 'Registration') : mainNavItems;
+    let filteredNavItems = mainNavItems;
+
+    if (userRole === 'Temp User') {
+        filteredNavItems = mainNavItems
+            .filter((item) => item.title === 'Registration')
+            .map((item) => ({
+                ...item,
+                children: item.children?.filter((child) => child.title === 'VR Registration'),
+            }));
+    } else if (userRole === 'Temp User Operator') {
+        filteredNavItems = mainNavItems
+            .filter((item) => item.title === 'Registration')
+            .map((item) => ({
+                ...item,
+                children: item.children?.filter((child) => child.title === 'Operator Registration'),
+            }));
+    } else if (userRole === 'VR Admin') {
+        const allowedItems = [
+            'Dashboard',
+            'Pending',
+            'Operator Temp Account Registration',
+            'Records',
+            'Billings',
+            'Bookings',
+            'Mail',
+            'Notifications',
+        ];
+        filteredNavItems = mainNavItems.filter((item) => allowedItems.includes(item.title));
+    }
 
     return (
         <Sidebar collapsible="icon" variant="inset">

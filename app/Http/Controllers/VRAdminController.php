@@ -36,7 +36,7 @@ class VRAdminController extends Controller
             'vr_company_id' => $request->vr_company_id,
             'username' => $request->username,
             'email' => $request->email,
-            'password' => Hash::make($generatedPassword),
+            'password' => Hash::make('password'),
             'FirstName' => $request->FirstName,
             'LastName' => $request->LastName,
             'Address' => $request->Address,

@@ -37,6 +37,7 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
+        $user = $request->user()?->load('vrOwner.vrCompany');
 
         return [
             ...parent::share($request),
@@ -45,6 +46,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
                 'roles' => optional($request->user())->roles,
+                'vr_company_id' => optional($user?->vrOwner?->vrCompany)->id,
             ],
         ];
     }

@@ -26,21 +26,24 @@ Route::get(
     }
 )->name('home');
 
-Route::get('/book-trip', function () {
 
-    return Inertia::render('trip-booking', [
-        'companies' => \App\Models\VRCompany::all(),
-        'drivers' => \App\Models\Driver::with(['media', 'user'])->get(),
-        'vehicles' => \App\Models\Vehicle::with(['operator.vrCompany'])->get(),
-        'operators' => \App\Models\Operator::with(['user'])->get(),
-    ]);
-})->name('book-trip');
+Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin|Operator|Driver|VR Admin'])->group(function () {
+    Route::get('/book-trip', function () {
 
-Route::get('/bookings', function () {
-    return Inertia::render('bookings', [
-        'bookings' => App\Models\Trip::with(['driver.user', 'vehicle', 'driver.operator.vrCompany', 'passengers'])->get(),
-    ]);
-})->name('bookings');
+        return Inertia::render('trip-booking', [
+            'companies' => \App\Models\VRCompany::all(),
+            'drivers' => \App\Models\Driver::with(['media', 'user'])->get(),
+            'vehicles' => \App\Models\Vehicle::with(['operator.vrCompany'])->get(),
+            'operators' => \App\Models\Operator::with(['user'])->get(),
+        ]);
+    })->name('book-trip');
+
+    Route::get('/bookings', function () {
+        return Inertia::render('bookings', [
+            'bookings' => App\Models\Trip::with(['driver.user', 'vehicle', 'driver.operator.vrCompany', 'passengers'])->get(),
+        ]);
+    })->name('bookings');
+});
 
 Route::get(
     '/mails',

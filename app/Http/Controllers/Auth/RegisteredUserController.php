@@ -62,7 +62,11 @@ class RegisteredUserController extends Controller
             ]
         );
 
-        $user->assignRole('Temp User');
+        if($request->Type == 'operator'){
+            $user->assignRole('Temp User Operator');
+        }else{
+            $user->assignRole('Temp User');
+        }
 
         event(new Registered($user));
 

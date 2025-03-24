@@ -37,7 +37,10 @@ class AuthenticatedSessionController extends Controller
          if ($user->hasRole(['Temp User'])) {
             $request->session()->regenerate();
              return redirect()->route('registration')->withInput(['Registration' => 'Please input your company details']);
-         }
+        } else if ($user->hasRole('Temp User Operator')){
+            $request->session()->regenerate();
+             return redirect()->route('create-operator.admin')->withInput(['Registration' => 'Please input your operator details']);
+        }
 
         $request->session()->regenerate();
 

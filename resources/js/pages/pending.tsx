@@ -5,6 +5,7 @@ import { Ellipsis, TimerIcon, X } from "lucide-react";
 import { DataTable } from "@/components/RecordsComponent/data-table";
 import { type BreadcrumbItem } from "@/types";
 import { Head } from "@inertiajs/react";
+import { usePage } from "@inertiajs/react";
 import MainLayout from "./mainLayout";
 import axios from "axios";
 import PendingCompanyDetails from "@/components/Pending/pending-company-details";
@@ -26,10 +27,12 @@ interface Operator {
   ContactNumber: string;
   Email: string;
   created_at: string;
+  vr_company_id: number;
 }
 
 interface Driver {
   id: number;
+  operator_id: number;
   Status: string;
   LastName: string;
   FirstName: string;
@@ -44,10 +47,12 @@ interface Driver {
   PoliceClearance: string;
   BirClearance: string;
   created_at: string;
+  vr_company_id: number;
 }
 
 interface Vehicle {
   id: number;
+  driver_id: number;
   Status: string;
   Model: string;
   Brand: string;
@@ -63,6 +68,7 @@ interface Vehicle {
   CarSideRight: string;
   CarBack: string;
   created_at: string;
+  vr_company_id: number;
 }
 
 interface VRCompany {
@@ -80,20 +86,40 @@ export default function Pending() {
   const [data, setData] = useState<ApplicationData[]>([]);
   const [selectedItem, setSelectedItem] = useState<ApplicationData | null>(null);
 
+    const { props } = usePage<{ auth: { user?: { id: number; roles?: { name: string }[] } } }>();
+    const userRole = props.auth.user?.roles?.[0]?.name;
+    const vrCompanyId = props.auth.vr_company_id;
+
   const breadcrumbs: BreadcrumbItem[] = [{ title: "Pending" }];
 
   useEffect(() => {
     axios
       .get("/api/pending-data")
       .then((response) => {
-        const { operators, drivers, vrCompanies, vehicles } = response.data;
+        let { operators, drivers, vrCompanies, vehicles } = response.data;
+
+        if (userRole === "VR Admin") {
+            vrCompanies = [];
+        }
+
+        const filteredOperators =
+        userRole === "VR Admin" ? operators.filter((operator: Operator) => operator.vr_company_id === vrCompanyId)
+        : operators;
+
+        const filteredDrivers =
+        userRole === "VR Admin" ? drivers.filter((driver: Driver) => driver.vr_company_id === vrCompanyId)
+        : drivers;
+
+        const filteredVehicles =
+        userRole === "VR Admin" ? vehicles.filter((vehicle: Vehicle) => filteredDrivers.some((driver: Driver) => driver.id === vehicle.driver_id))
+        : vehicles;
 
         const combinedData: ApplicationData[] = [
-          ...operators.map((operator: Operator) => ({
+          ...filteredOperators.map((operator: Operator) => ({
             ...operator,
             type: "Operator",
           })),
-          ...drivers.map((driver: Driver) => ({
+          ...filteredDrivers.map((driver: Driver) => ({
             ...driver,
             type: "Driver",
           })),
@@ -101,7 +127,7 @@ export default function Pending() {
             ...company,
             type: "VR Company",
           })),
-          ...vehicles.map((vehicle: Vehicle) => ({
+          ...filteredVehicles.map((vehicle: Vehicle) => ({
             ...vehicle,
             type: "Vehicle",
           })),
