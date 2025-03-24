@@ -24,15 +24,18 @@ export default function Operator({ operators, onNextTab, onSelectOperator }: Ope
     useEffect(() => {
         setOperatorData(operators);
         if (operators.length > 0) {
-            const headers = Object.keys(operators[0]).map((key) => ({
-                key,
-                label: key
-                    .replace(/_count$/, '')
-                    .replace(/^vr_/, 'VR ')
-                    .replace(/_/g, ' ')
-                    .replace(/([A-Z])/g, ' $1')
-                    .trim(),
-            }));
+            const headers = Object.keys(operators[0])
+                .filter((key) => key !== 'user') // Exclude the 'user' key
+                .map((key) => ({
+                    key,
+                    label: key
+                        .replace(/_count$/, '')
+                        .replace(/^vr_/, 'VR ')
+                        .replace(/_/g, ' ')
+                        .replace(/([A-Z])/g, ' $1')
+                        .trim(),
+                }));
+
             setOperatorHeaders(headers);
         }
     }, [operators]);
@@ -66,7 +69,7 @@ export default function Operator({ operators, onNextTab, onSelectOperator }: Ope
 
     const transformedOperators = operators.map((operator) => ({
         ...operator,
-        Operator: `${operator.Status ? `${operator.Status} ` : ''}${operator.FirstName} ${operator.LastName}`,
+        Operator: `${operator.Status ? `${operator.Status} ` : ''}${operator.user.FirstName} ${operator.user.LastName}`,
     }));
 
     const primaryColumns = ['id', 'Operator'];

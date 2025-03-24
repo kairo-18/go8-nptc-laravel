@@ -43,10 +43,10 @@ Route::group(['middleware' => ['role:NPTC Admin|NPTC Super Admin|Operator|VR Adm
     Route::get('vr-owner', function () {
        return Inertia::render('records', [
           'users' => \App\Models\User::role('VR Admin')->get(),
-                'operators' => \App\Models\Operator::withCount(['vehicles', 'drivers'])
-                    ->join('users', 'users.id', '=', 'operators.user_id')
-                    ->get(['Status','users.FirstName', 'users.LastName', 'operators.vr_company_id', 'operators.id', 'operators.vehicles_count', 'operators.drivers_count'])
-                    ->makeHidden(['created_at', 'updated_at', 'email_verified_at']),
+            'operators' => \App\Models\Operator::with('user:id,FirstName,LastName')
+                ->withCount(['drivers', 'vehicles']) // Include count of drivers and vehicles
+                ->get()
+                ->makeHidden(['created_at', 'updated_at', 'owner', 'operators']),
                 'drivers' => \App\Models\User::role('Driver')
                     ->join('drivers', 'users.id', '=', 'drivers.user_id')
                     ->get(['drivers.id', 'users.FirstName','users.MiddleName', 'users.LastName', 'Status', 'drivers.operator_id'])
