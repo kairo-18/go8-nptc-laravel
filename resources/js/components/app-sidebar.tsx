@@ -77,7 +77,14 @@ export function AppSidebar() {
     const { props } = usePage();
     const userRole = props.auth.user?.roles?.[0]?.name;
 
-    const filteredNavItems = userRole === 'Temp User' ? mainNavItems.filter((item) => item.title === 'Registration') : mainNavItems;
+    let filteredNavItems = mainNavItems;
+
+    if (userRole === 'Temp User') {
+        filteredNavItems = mainNavItems.filter((item) => item.title === 'Registration');
+    } else if (userRole === 'VR Admin') {
+        const allowedItems = ['Dashboard', 'Pending', 'Records', 'Billings', 'Bookings', 'Mail', 'Notifications'];
+        filteredNavItems = mainNavItems.filter((item) => allowedItems.includes(item.title));
+    }
 
     return (
         <Sidebar collapsible="icon" variant="inset">
