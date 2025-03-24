@@ -1,50 +1,51 @@
 import { useEffect, useState } from 'react';
-import { generateColumns } from './columns'; // Import dynamic column generator
+import { generateColumns } from './columns';
 import { DataTable } from './data-table';
-import SetStatus from './set-status'; // Import SetStatus component
-import Container from './container'; // Import Container component
+import SetStatus from './set-status';
+import Container from './container';
 import axios from 'axios';
 
-export default function Operator({ operators, onNextTab, onSelectOperator }) {
-    const [selectedOperator, setSelectedOperator] = useState(null);
-    const [operatorData, setOperatorData] = useState([]);
+interface OperatorProps {
+    operators: { [key: string]: any }[];
+    onNextTab: () => void;
+    onSelectOperator: (id: string) => void;
+}
+
+export default function Operator({ operators, onNextTab, onSelectOperator }: OperatorProps) {
+    const [selectedOperator, setSelectedOperator] = useState<any>(null);
+    const [operatorData, setOperatorData] = useState(operators);
     const [operatorHeaders, setOperatorHeaders] = useState<{ key: string; label: string }[]>([]);
-    const [containerType, setContainerType] = useState(String);
+    const [containerType, setContainerType] = useState('');
     const [openStatusModal, setOpenStatusModal] = useState(false);
     const [openContainerModal, setOpenContainerModal] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState('');
     const [inputValue, setInputValue] = useState('');
 
-    const setStatusData = (statusData) => {
+    useEffect(() => {
+        setOperatorData(operators);
+        if (operators.length > 0) {
+            const headers = Object.keys(operators[0]).map((key) => ({
+                key,
+                label: key
+                    .replace(/_count$/, '')
+                    .replace(/^vr_/, 'VR ')
+                    .replace(/_/g, ' ')
+                    .replace(/([A-Z])/g, ' $1')
+                    .trim(),
+            }));
+            setOperatorHeaders(headers);
+        }
+    }, [operators]);
+
+    const handleSetStatus = (statusData: any) => {
         setSelectedOperator(statusData);
         setOpenStatusModal(true);
-    }
+    };
 
     const handleContainer = (containerType: string) => {
         setContainerType(containerType);
         setOpenContainerModal(true);
     };
-
-    useEffect(() => {
-        // Simulate fetching operator data (replace with actual API call if needed)
-        setOperatorData(operators);
-
-        // Generate headers dynamically based on the first operator object
-        if (operators.length > 0) {
-            const headers = Object.keys(operators[0]).map((key) => ({
-                key,
-                label: key
-                    .replace(/_count$/, '') // Remove "_count" suffix
-                    .replace(/^vr_/, 'VR ') // Replace "vr_" prefix with "VR "
-                    .replace(/_/g, ' ') // Replace underscores with spaces
-                    .replace(/\b\w/g, (char) => char.toUpperCase()), // Capitalize each word
-            }));
-
-            setOperatorHeaders(headers);
-        }
-    }, [operators]);
-
-    const columns = generateColumns(operatorHeaders, { entityType: 'operators', statusColumns: ['Status'], updateStatus: setStatusData, handleContainer: handleContainer});
 
     const handleSubmitToOperator = async () => {
         if (!selectedOperator) {
@@ -52,32 +53,44 @@ export default function Operator({ operators, onNextTab, onSelectOperator }) {
             return;
         }
 
-        const method = 'PATCH';
-        const url = `operator/updateStatus/${selectedOperator.id}`;
-
-        const response = await axios({
-            method,
-            url,
-            data: { status: selectedStatus },
+        await axios.patch(`operator/updateStatus/${selectedOperator.id}`, {
+            status: selectedStatus,
         });
-
         setOpenStatusModal(false);
     };
 
     const handleContainerSubmit = async () => {
-
-        alert("This works");
+        alert('This works');
         setOpenContainerModal(false);
     };
 
+    const transformedOperators = operators.map((operator) => ({
+        ...operator,
+        Operator: `${operator.Status ? `${operator.Status} ` : ''}${operator.FirstName} ${operator.LastName}`,
+    }));
+
+    const primaryColumns = ['id', 'Operator'];
+    const otherColumns = operatorHeaders.map((header) => header.key).filter((key) => !primaryColumns.includes(key) && key !== 'Status');
+    const orderedHeaders = [...primaryColumns, ...otherColumns];
+
+    const columns = generateColumns(
+        orderedHeaders.map((key) => ({
+            key,
+            label: key.replace(/_count$/, '').replace(/^vr_/, 'VR ').replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim(),
+        })),
+        {
+            entityType: 'operators',
+            statusColumns: ['Status'],
+            updateStatus: handleSetStatus,
+            handleContainer: handleContainer,
+        }
+    );
+
     return (
-            <>
-                <DataTable data={operatorData} ColumnFilterName="FirstName" columns={columns} onRowClick={(row) => onSelectOperator(row.id)} />
-
-                <SetStatus selectedData={selectedOperator} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={setStatusData} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToOperator}/>
-
-                <Container openContainerModal={openContainerModal} setOpenContainerModal={setOpenContainerModal} handleSubmit={handleContainerSubmit} containerType={containerType} setInputValue={setInputValue} />
-            </>
-        );
-
+        <>
+            <DataTable data={transformedOperators} ColumnFilterName="Operator" columns={columns} onRowClick={(row) => onSelectOperator(row.id)} />
+            <SetStatus selectedData={selectedOperator} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={handleSetStatus} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToOperator} />
+            <Container openContainerModal={openContainerModal} setOpenContainerModal={setOpenContainerModal} handleSubmit={handleContainerSubmit} containerType={containerType} setInputValue={setInputValue} />
+        </>
+    );
 }

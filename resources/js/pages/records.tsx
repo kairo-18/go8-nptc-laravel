@@ -34,7 +34,7 @@ export default function Records({
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            <div className="mx-auto mt-6 w-full max-w-6xl">
+            <div className=" mt-6 w-full p-10">
                 {/* Tabs Navigation */}
                 <div className="flex space-x-2 text-gray-500">
                     {[

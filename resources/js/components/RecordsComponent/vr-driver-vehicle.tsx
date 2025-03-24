@@ -2,9 +2,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { generateColumns } from './columns';
 import { DataTable } from './data-table';
 import { useState, useEffect } from 'react';
-import SetStatus from './set-status';
-import Container from './container';
-import axios from 'axios';
+
 
 interface DriverProps {
     drivers: { [key: string]: any }[];
@@ -14,17 +12,33 @@ interface DriverProps {
 }
 
 export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverProps) {
-    const [containerType, setContainerType] = useState(String);
-    const [openStatusModal, setOpenStatusModal] = useState(false);
-    const [openContainerModal, setOpenContainerModal] = useState(false);
-    const [selectedStatus, setSelectedStatus] = useState('');
-    const [inputValue, setInputValue] = useState('');
-    const formatHeader = (key) =>
-        key
-            .replace(/_count$/, '') // Remove "_count" suffix
-            .replace(/^vr_/, 'VR ') // Replace "vr_" prefix with "VR "
-            .replace(/_/g, ' ') // Replace underscores with spaces
-            .replace(/\b\w/g, (char) => char.toUpperCase()); // Capitalize each word
+    const [driverData, setDriverData] = useState(drivers);
+    const [vehicleData, setVehicleData] = useState(vehicles);
+
+    useEffect(() => {
+        setDriverData(drivers);
+    }, [drivers]);
+
+    useEffect(() => {
+        setVehicleData(vehicles);
+    }, [vehicles]);
+
+    
+    const transformDriverData = driverData.map((driver) => ({
+        ...driver,
+        Driver: `${driver.Status ? `${driver.Status} ` : ''}${driver.FirstName}  ${driver.LastName}`,
+    }));
+
+    const transformVehicleData = vehicleData.map((vehicle) => ({
+        ...vehicle,
+        Vehicle: `${vehicle.Status ? `${vehicle.Status} ` : ''}${vehicle.PlateNumber}`,
+    }));
+    
+    const formatHeader = (key: string) =>
+        key.replace(/_count$/, '')
+            .replace(/^vr_/, 'VR ')
+            .replace(/_/g, ' ')
+            .replace(/\b\w/g, (char) => char.toUpperCase());
 
     const driverHeaders =
         drivers.length > 0
@@ -42,38 +56,45 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
               }))
             : [];
 
-    const driverColumns = generateColumns(driverHeaders, {
+    const primaryColumns = ['id', 'Driver'];
+    const driverOtherColumns = driverHeaders.map(header => header.key).filter((key) => key !== 'Status' && key !== 'id');
+    const orderedDriverHeaders = [...primaryColumns, ...driverOtherColumns];
+
+    const driverColumns = generateColumns(orderedDriverHeaders.map(key => ({ key, label: formatHeader(key) })), {
         entityType: 'drivers',
         statusColumns: ['Status'],
     });
 
-    const vehicleColumns = generateColumns(vehicleHeaders, {
+    const primaryVehicleColumns = ['id', 'Vehicle'];
+    const vehicleOtherColumns = vehicleHeaders.map(header => header.key).filter((key) => key !== 'Status' && key !== 'Model' && key !== 'id');
+    const orderedVehicleHeaders = [...primaryVehicleColumns, ...vehicleOtherColumns];
+
+    const vehicleColumns = generateColumns(orderedVehicleHeaders.map(key => ({ key, label: formatHeader(key) })), {
         entityType: 'vehicles',
         statusColumns: ['Status'],
     });
-
-    console.log(drivers);
 
     return (
         <div>
             <Tabs defaultValue="drivers" className="w-full">
                 <div className="flex justify-end">
                     <TabsList className="bg-[#2A2A92] text-white">
-                        <TabsTrigger value="drivers" onClick={() => setActiveTab('drivers')} className="px-10">
+                        <TabsTrigger value="drivers" className="px-10">
                             Drivers
                         </TabsTrigger>
-                        <TabsTrigger value="vehicles" onClick={() => setActiveTab('vehicles')} className="px-10">
+                        <TabsTrigger value="vehicles" className="px-10">
                             Vehicles
                         </TabsTrigger>
                     </TabsList>
                 </div>
 
                 <TabsContent value="drivers">
-                    <DataTable data={drivers} ColumnFilterName="FirstName" columns={driverColumns} />
+                    <DataTable data={transformDriverData} ColumnFilterName="FirstName" columns={driverColumns} />
+
                 </TabsContent>
 
                 <TabsContent value="vehicles">
-                    <DataTable data={vehicles} ColumnFilterName="PlateNumber" columns={vehicleColumns} />
+                    <DataTable data={transformVehicleData} ColumnFilterName="PlateNumber" columns={vehicleColumns} />
                 </TabsContent>
             </Tabs>
         </div>
