@@ -165,15 +165,15 @@ export function GeneralStep({
             }`}>
                 <div className="space-y-2">
                     <Label htmlFor="vrCompanyId">VR Company ID</Label>
-                    <Input id="vrCompanyId" placeholder="Search from active VR companies" value={selectedCompany.id} disabled />
+                    <Input id="vrCompanyId" placeholder="Search from active VR companies" value={selectedCompany.id} disabled className='border-0 shadow-none bg-transparent'/>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="vrCompanyName">VR Company Name</Label>
-                    <Input id="vrCompanyName" placeholder="Fetch from entered VR ID" value={selectedCompany.CompanyName} disabled />
+                    <Input id="vrCompanyName" placeholder="Fetch from entered VR ID" value={selectedCompany.CompanyName} disabled className='border-0 shadow-none bg-transparent'/>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="operatorId">Operator ID</Label>
-                    <Input id="operatorId" placeholder="Search from active operators" value={selectedOperator.id} disabled />
+                    <Input id="operatorId" placeholder="Search from active operators" value={selectedOperator.id} disabled className='border-0 shadow-none bg-transparent'/>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="operatorName">Operator Name</Label>
@@ -182,21 +182,22 @@ export function GeneralStep({
                         placeholder="Fetch from entered operator ID"
                         value={`${selectedOperator.user?.FirstName || ''} ${selectedOperator.user?.LastName || ''}`}
                         disabled
+                        className='border-0 shadow-none bg-transparent'
                     />
                 </div>
             
                 <div className="space-y-2">
                     <Label htmlFor="unitId">Unit ID (Vehicle)</Label>
-                    <Input id="unitId" placeholder="Search from active operators" value={selectedVehicle.id} disabled />
+                    <Input id="unitId" placeholder="Search from active operators" value={selectedVehicle.id} disabled className='border-0 shadow-none bg-transparent'/>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="unitModel">Unit Model</Label>
-                    <Input id="unitModel" placeholder="Fetch from Unit ID" value={selectedVehicle.Model} disabled />
+                    <Input id="unitModel" placeholder="Fetch from Unit ID" value={selectedVehicle.Model} disabled className='border-0 shadow-none bg-transparent'/>
                 </div>
                 
                 <div className="space-y-2">
                     <Label htmlFor="numberOfSeats">Number of Seats</Label>
-                    <Input id="numberOfSeats" placeholder="Fetch from Unit ID" value={selectedVehicle.SeatNumber} disabled />
+                    <Input id="numberOfSeats" placeholder="Fetch from Unit ID" value={selectedVehicle.SeatNumber} disabled className='border-0 shadow-none bg-transparent'/>
                 </div>
             
 
@@ -209,7 +210,7 @@ export function GeneralStep({
                         value={selectedDriver.id}
                         onChange={(e) => handleInputChange('driverId', e.target.value)}
                         disabled
-                    />
+                        className='border-0 shadow-none bg-transparent'/>
                 </div>
                 <div className="space-y-2">
                     <Label htmlFor="driverName">Driver Name</Label>
@@ -218,14 +219,14 @@ export function GeneralStep({
                         placeholder="Fetch from driver ID"
                         value={`${selectedDriver.user?.FirstName || ''} ${selectedDriver.user?.LastName || ''}`}
                         disabled
-                    />
+                        className='border-0 shadow-none bg-transparent'/>
                 </div>
             
 
             
                 <div className="space-y-2">
                     <Label htmlFor="licenseNumber">License Number</Label>
-                    <Input id="licenseNumber" placeholder="Fetch from driver ID" value={selectedDriver.LicenseNumber} disabled />
+                    <Input id="licenseNumber" placeholder="Fetch from driver ID" value={selectedDriver.LicenseNumber} disabled className='border-0 shadow-none bg-transparent'/>
                 </div>
             
             </div>
