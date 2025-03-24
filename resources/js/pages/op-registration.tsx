@@ -14,7 +14,7 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function VrRegistration({ companies }) {
+export default function VrRegistration({ operators }) {
     const [activeTab, setActiveTab] = useState('tempoAccountTab');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -26,11 +26,11 @@ export default function VrRegistration({ companies }) {
             </div>
             <Separator className="my-2" />
             {value === 'tempoAccountTab' ? (
-                <TemporaryAccountTabContent setIsDialogOpen={setIsDialogOpen} />
+                <TemporaryAccountTabContent type="operator" setIsDialogOpen={setIsDialogOpen} />
             ) : (
                 <ApplicationStatusTabContent
-                    companies={[companies]}
-                    dataType="companies"
+                    operators={[operators]}
+                    dataType="operators"
                     onSelectCompany={function (companyId: number): void {
                         throw new Error('Function not implemented.');
                     }}

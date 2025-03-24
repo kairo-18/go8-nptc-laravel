@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Operator;
 use App\Models\VRCompany;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
 use Spatie\Permission\Models\Role;
@@ -53,12 +54,19 @@ class OperatorAdminController extends Controller
 
         $user->assignRole('Operator');
 
+
         // Create the Operator record linked to the User
         $operator = $user->operator()->create([
             'vr_company_id' => $validatedData['vr_company_id'],
             'user_id' => $user->id,
-            'Status' => $validatedData['Status'],
+            'Status' => Auth::user()->hasRole('NPTC Super Admin') ? 'Approved' : 'Pending',
         ]);
+
+        if(Auth::user()->hasRole('Temp User Operator')){
+            //logout the user
+            Auth::logout();
+            return Redirect::route('login');
+        }
 
         return redirect()->route('create-operator.admin')->with('success', 'Operator created successfully!');
     }
@@ -76,7 +84,7 @@ class OperatorAdminController extends Controller
      */
     public function update(Request $request, Operator $operator)
 {
-    
+
     $validatedData = $request->validate([
         'username' => 'sometimes|string|unique:users,username,' . $operator->user->id,
         'email' => 'sometimes|email|unique:users,email,' . $operator->user->id,

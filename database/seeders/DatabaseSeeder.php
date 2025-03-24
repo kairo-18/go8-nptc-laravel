@@ -27,6 +27,7 @@ class DatabaseSeeder extends Seeder
         Role::create(['name' => 'Operator']);
         Role::create(['name' => 'Driver']);
         Role::create(['name' => 'Temp User']);
+        Role::create(['name' => 'Temp User Operator']);
 
         $user = User::factory()->create(
             [
@@ -61,7 +62,7 @@ class DatabaseSeeder extends Seeder
 
 
         $user2->assignRole("NPTC Admin");
-        
+
 
         VRCompany::factory()->create(
             [
@@ -123,8 +124,8 @@ class DatabaseSeeder extends Seeder
         $user4->assignRole("Driver");
 
         $user4->driver()->create([
-            'operator_id' => 1, 
-            'vr_company_id' => 1, 
+            'operator_id' => 1,
+            'vr_company_id' => 1,
             'License' => 'path/to/license',
             'LicenseNumber' => '1234567890',
             'Photo' => 'path/to/photo',
@@ -134,7 +135,7 @@ class DatabaseSeeder extends Seeder
         ]);
 
         Vehicle::create([
-            'operator_id' => 1, 
+            'operator_id' => 1,
             'driver_id' => 1,
             'PlateNumber' => 'ABC1234',
             'Model' => 'Toyota Corolla',
@@ -154,10 +155,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
 
-         
-        
-            
-       
+
+
+
+
 
 
     }

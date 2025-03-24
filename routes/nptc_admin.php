@@ -28,9 +28,10 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin'])->gro
         ]);
     })->name('vr-registration');
 
+
 });
 
-Route::group(['middleware' => ['role:Temp User|NPTC Admin|NPTC Super Admin|Operator|VR Admin|']], function () {
+Route::group(['middleware' => ['role:NPTC Admin|NPTC Super Admin|Operator|VR Admin|']], function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
@@ -66,6 +67,12 @@ Route::group(['middleware' => ['role:Temp User|NPTC Admin|NPTC Super Admin|Opera
                 }),
             ]);
         })->name('vr-owner');
+
+    Route::get('op-registration', function () {
+        return Inertia::render('op-registration', [
+            'operators' => \App\Models\Operator::where("Status", "Pending")->with('user')->get()->makeHidden(['created_at', 'updated_at', "owner", "operators"]),
+        ]);
+    })->name('op-registration');
 });
 
 Route::group(['middleware' => ['role:Temp User|NPTC Admin|NPTC Super Admin']], function () {
