@@ -1,13 +1,21 @@
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { format } from "date-fns"; // Helps with date formatting
+import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export default function OperatorInformation({ operator, handleChange, handleOperatorUpdate }) {
+export default function OperatorInformation({ operator, handleChange, handleOperatorUpdate, handleFileChange }) {
+    const [files, setFiles] = useState({
+        photo: null,
+        valid_id_front: null,
+        valid_id_back: null,
+    });
+
+
     return (
         <Card>
             <CardHeader>
@@ -29,7 +37,7 @@ export default function OperatorInformation({ operator, handleChange, handleOper
                         <Input id="first-name" name="FirstName" value={operator?.user?.FirstName || ''} onChange={handleChange} />
                     </div>
 
-                    {/* ✅ Updated Birth Date Picker using ShadCN Calendar */}
+                    {/* Birth Date Picker */}
                     <div className="md:col-span-2">
                         <Label className="mb-2 block">Birth Date</Label>
                         <Popover>
@@ -57,7 +65,7 @@ export default function OperatorInformation({ operator, handleChange, handleOper
                         </Popover>
                     </div>
 
-                    {/* Status Dropdown with current status displayed */}
+                    {/* Status Dropdown */}
                     <div className="space-y-2">
                         <Label htmlFor="Status">Status</Label>
                         <Select
@@ -65,10 +73,7 @@ export default function OperatorInformation({ operator, handleChange, handleOper
                             name="Status"
                             value={operator?.Status || ''}
                             onValueChange={(value) => handleChange({
-                                target: {
-                                    name: 'Status',
-                                    value: value
-                                }
+                                target: { name: 'Status', value }
                             })}
                         >
                             <SelectTrigger>
@@ -95,11 +100,25 @@ export default function OperatorInformation({ operator, handleChange, handleOper
                         <Label htmlFor="address">Address</Label>
                         <Input id="address" name="Address" value={operator?.user?.Address || ''} onChange={handleChange} />
                     </div>
+
+                    {/* File Uploads */}
+                    <div className="space-y-2">
+                        <Label htmlFor="photo">Photo</Label>
+                        <Input id="photo" type="file" name="photo" onChange={handleFileChange} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="valid_id_front">Valid ID (Front)</Label>
+                        <Input id="valid_id_front" type="file" name="valid_id_front" onChange={handleFileChange} />
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="valid_id_back">Valid ID (Back)</Label>
+                        <Input id="valid_id_back" type="file" name="valid_id_back" onChange={handleFileChange} />
+                    </div>
                 </div>
 
-                <Button onClick={handleOperatorUpdate} className="mt-4">
-                    Update Operator
-                </Button>
+                <div className="flex gap-4 mt-4">
+                    <Button onClick={handleOperatorUpdate}>Update Operator</Button>
+                </div>
             </CardContent>
         </Card>
     );

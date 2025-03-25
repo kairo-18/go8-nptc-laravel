@@ -12,6 +12,7 @@ use Illuminate\Auth\Events\Registered;
 use Spatie\Permission\Models\Role;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Redirect;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class OperatorAdminController extends Controller
 {
@@ -37,6 +38,10 @@ class OperatorAdminController extends Controller
             'password' => 'required|string|min:6',
             'vr_company_id' => 'required|exists:vr_companies,id',
             'Status' => 'nullable|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected,For Payment',
+            
+            'photo' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'valid_id_front' => 'nullable|file|mimes:jpg,png|max:1024',
+            'valid_id_back' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
         ]);
 
         // Create the user
@@ -62,6 +67,18 @@ class OperatorAdminController extends Controller
             'Status' => Auth::user()->hasRole('NPTC Super Admin') ? 'Approved' : 'Pending',
         ]);
 
+        if ($request->hasFile('photo')) {
+            $media = $operator->addMediaFromRequest('photo')->toMediaCollection('photo', 'private');
+            $operator->update(['photo' => $media->getPath()]); // Store file path in the "License" column
+        }
+        if ($request->hasFile('valid_id_front')) {
+            $media = $operator->addMediaFromRequest('valid_id_front')->toMediaCollection('valid_id_front', 'private');
+            $operator->update(['valid_id_front' => $media->getPath()]);
+        }
+        if ($request->hasFile('valid_id_back')) {
+            $media = $operator->addMediaFromRequest('valid_id_back')->toMediaCollection('valid_id_back', 'private');
+            $operator->update(['valid_id_back' => $media->getPath()]);
+        }
         if(Auth::user()->hasRole('Temp User Operator')){
             //logout the user
             Auth::logout();
@@ -70,7 +87,7 @@ class OperatorAdminController extends Controller
 
         return redirect()->route('create-operator.admin')->with('success', 'Operator created successfully!');
     }
-
+    
     /**
      * Display a specific operator.
      */
@@ -125,6 +142,63 @@ class OperatorAdminController extends Controller
     ]);
 }
 
+public function updateOperatorMedia(Request $request, Operator $operator){
+
+    // Validate request
+    $request->validate([
+
+        'photo' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+        'valid_id_front' => 'nullable|file|mimes:jpg,png|max:2048',
+        'valid_id_back' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+    ]);
+
+    // File collections mapping
+    $files = [
+        'photo' => 'photo',
+        'valid_id_front' => 'valid_id_front',
+        'valid_id_back' => 'valid_id_back',
+
+    ];
+
+    foreach ($files as $fileKey => $collection) {
+        if ($request->hasFile($fileKey)) {
+            \Log::info("Uploading new file for: {$fileKey}");
+
+            // Clear existing media for this collection
+            $operator->clearMediaCollection($collection);
+
+            // Upload new file to the private media collection
+            $mediaItem = $operator->addMediaFromRequest($fileKey)->toMediaCollection($collection, 'private');
+
+            \Log::info("Uploaded file for {$fileKey}: {$mediaItem->file_name}");
+        }
+    }
+
+}
+
+public function downloadMedia($mediaId)
+    {
+        $media = Media::findOrFail($mediaId);
+        return response()->download($media->getPath(), $media->file_name);
+    }
+
+    /**
+     * Preview a media file in the browser.
+     */
+    public function previewMedia($mediaId)
+    {
+        $media = Media::findOrFail($mediaId);
+        $filePath = $media->getPath();
+        $mimeType = $media->mime_type;
+
+        if (!file_exists($filePath)) {
+            abort(404, 'File not found');
+        }
+
+        return response()->file($filePath, ['Content-Type' => $mimeType]);
+    }
+    
+
 
     /**
      * Remove an operator.
@@ -161,16 +235,30 @@ class OperatorAdminController extends Controller
     public function editView($id)
     {
         $operator = Operator::with('user')->find($id);
-
-        if (!$operator  ) {
-            return abort(404, 'Company not found');
+    
+        if (!$operator) {
+            return abort(404, 'Operator not found');
         }
-
+    
+        // Media collections for operator
+        $mediaCollections = ['photo', 'valid_id_front', 'valid_id_back'];
+    
+        // Process media files
+        $mediaFiles = collect($mediaCollections)->flatMap(function ($collection) use ($operator) {
+            return $operator->getMedia($collection)->map(fn($media) => [
+                'id' => $media->id,
+                'name' => $media->file_name,
+                'collection_name' => $media->collection_name,
+                'mime_type' => $media->mime_type,
+                'url' => route('preview-operator-media', ['mediaId' => $media->id]),
+            ]);
+        })->values();
+    
         return Inertia::render('edit-operator', [
             'operator' => $operator,
+            'mediaFiles' => $mediaFiles,
             'companies' => VRCompany::all(),
         ]);
     }
-
 
 }
