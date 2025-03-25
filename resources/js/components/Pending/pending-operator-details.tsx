@@ -93,7 +93,7 @@ export default function PendingOperatorDetails({ item }: PendingOperatorDetailsP
 
   return (
     <>
-      <Card className="relative p-6 rounded-md shadow-md border border-gray-300">
+      <div className="relative p-6">
         <div className="absolute right-4 flex gap-2">
           <Button
             className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
@@ -195,7 +195,7 @@ export default function PendingOperatorDetails({ item }: PendingOperatorDetailsP
             </div>
           </div>
         </div>
-      </Card>
+      </div>
 
       {/* Rejection Modal */}
       {isModalOpen && (
