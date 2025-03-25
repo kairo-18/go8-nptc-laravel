@@ -25,7 +25,26 @@ class Driver extends Model implements HasMedia
         'NBI_clearance',
         'Police_clearance',
         'BIR_clearance',
+        'NPTC_ID'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($driver) {
+            if (!$driver->NPTC_ID) {
+                $driver->NPTC_ID = static::generateNPTCId('DR');
+            }
+        });
+    }
+
+    public static function generateNPTCId($prefix)
+    {
+        $latestDriver = static::where('NPTC_ID', 'LIKE', "$prefix-%")->latest('id')->first();
+        $nextNumber = $latestDriver ? ((int)substr($latestDriver->NPTC_ID, 3)) + 1 : 1;
+        return $prefix . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+    }
 
 
     public function user()

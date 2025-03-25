@@ -13,8 +13,8 @@ export default function Bookings({ bookings }) {
     const [formattedTripData, setFormattedTripData] = useState(null);
     const columns = [
         {
-            accessorKey: 'id',
-            header: 'ID',
+            accessorKey: 'NPTC_ID',
+            header: 'NPTC_ID',
         },
         {
             accessorKey: 'status',
@@ -71,6 +71,7 @@ export default function Bookings({ bookings }) {
 
 function transformData(response) {
     return response.map((item) => ({
+        NPTC_ID: item.NPTC_ID,
         id: item.id,
         status: item.status,
         company_name: item.driver?.operator?.vr_company?.CompanyName || null,

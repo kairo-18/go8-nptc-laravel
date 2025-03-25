@@ -15,6 +15,7 @@ import PendingDriverDetails from "@/components/Pending/pending-driver-details";
 
 // Interfaces for different application types
 interface Operator {
+  NPTC_ID: string;
   id: number;
   Status: string;
   vrCompany: string;
@@ -31,6 +32,7 @@ interface Operator {
 }
 
 interface Driver {
+  NPTC_ID: string;
   id: number;
   operator_id: number;
   Status: string;
@@ -51,6 +53,7 @@ interface Driver {
 }
 
 interface Vehicle {
+  NPTC_ID: string;
   id: number;
   driver_id: number;
   Status: string;
@@ -72,6 +75,7 @@ interface Vehicle {
 }
 
 interface VRCompany {
+  NPTC_ID: string;
   id: number;
   Status: string;
   CompanyName: string;
@@ -155,7 +159,7 @@ export default function Pending() {
       ),
     },
     {
-      accessorKey: "id",
+      accessorKey: "NPTC_ID",
       header: "ID",
     },
     {

@@ -62,7 +62,7 @@ export default function PendingOperatorDetails({ item }: PendingOperatorDetailsP
     }
   };
 
-  const handleApproval = async (note: string, entityId: string, entityType: string) => {
+  const handleApproval = async (entityType: string) => {
     try {
       const response = await fetch('/api/approval', {
         method: 'POST',
@@ -72,8 +72,7 @@ export default function PendingOperatorDetails({ item }: PendingOperatorDetailsP
         body: JSON.stringify({
           id: item.id,
           type: entityType,
-          note,
-          user_id: item.user.id, // Make sure to pass the appropriate user ID
+          user_id: item.user.id, 
         }),
       });
   
@@ -103,7 +102,7 @@ export default function PendingOperatorDetails({ item }: PendingOperatorDetailsP
             Reject and add notes
           </Button>
           <Button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-            onClick={() => handleApproval( operatorId, "operator")}
+            onClick={() => handleApproval("operator")}
           >
             Approve and generate documents
           </Button>

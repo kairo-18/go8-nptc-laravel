@@ -8,19 +8,29 @@ use App\Models\VehicleRentalOwner;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-
 class VRCompany extends Model implements HasMedia
 {
-    use HasFactory,InteractsWithMedia;
+    use HasFactory, InteractsWithMedia;
 
-    protected $table =  "vr_companies";
+    protected $table = "vr_companies";
     protected $fillable = [
         'CompanyName',
         'BusinessPermitNumber',
-        'Status'
+        'Status',
+        'NPTC_ID' // Add this field if it's not already in the migration
     ];
-    //
-    //
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($company) {
+            $latestCompany = VRCompany::latest('id')->first();
+            $nextNumber = $latestCompany ? ((int)substr($latestCompany->NPTC_ID, 3)) + 1 : 1;
+            $company->NPTC_ID = 'VC-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        });
+    }
+
     public function owner()
     {
         return $this->hasOne(VehicleRentalOwner::class, 'vr_company_id');
@@ -52,5 +62,4 @@ class VRCompany extends Model implements HasMedia
             ];
         });
     }
-
 }

@@ -72,8 +72,8 @@ export default function Operator({ operators, onNextTab, onSelectOperator }: Ope
         Operator: `${operator.Status ? `${operator.Status} ` : ''}${operator.user.FirstName} ${operator.user.LastName}`,
     }));
 
-    const primaryColumns = ['id', 'Operator'];
-    const otherColumns = operatorHeaders.map((header) => header.key).filter((key) => !primaryColumns.includes(key) && key !== 'Status');
+    const primaryColumns = ['NPTC_ID', 'Operator'];
+    const otherColumns = operatorHeaders.map((header) => header.key).filter((key) => !primaryColumns.includes(key) && key !== 'Status' && key !== 'id');
     const orderedHeaders = [...primaryColumns, ...otherColumns];
 
     const columns = generateColumns(

@@ -3,21 +3,27 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
 use App\Models\VRCompany;
-use App\Models\VrContacts;
 use App\Models\Vehicle;
-use Database\Factories\VrCompanyFactory;
-
+use App\Models\Operator;
+use App\Models\Driver;  
 
 class DatabaseSeeder extends Seeder
 {
     /**
+     * Generate a unique NPTC_ID based on the prefix and latest entry.
+     */
+    private function generateNPTCId(string $prefix, string $modelClass): string
+    {
+        $latest = $modelClass::latest('id')->first();
+        $nextNumber = $latest ? ((int)substr($latest->NPTC_ID, 3)) + 1 : 1;
+        return $prefix . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+    }
+
+    /**
      * Seed the application's database.
-     *
-     * @return void
      */
     public function run(): void
     {
@@ -29,8 +35,7 @@ class DatabaseSeeder extends Seeder
         Role::create(['name' => 'Temp User']);
         Role::create(['name' => 'Temp User Operator']);
 
-        $user = User::factory()->create(
-            [
+        $user = User::factory()->create([
             'username' => 'Test User',
             'email' => 'test@example.com',
             'FirstName' => 'Test',
@@ -39,15 +44,11 @@ class DatabaseSeeder extends Seeder
             'Address' => 'Test Address',
             'BirthDate' => '2000-01-01',
             'ContactNumber' => '09123456789',
-            ]
-        );
-
+            'NPTC_ID' => $this->generateNPTCId('AD', User::class),
+        ]);
         $user->assignRole('NPTC Super Admin');
 
-
-
-        $user2 = User::factory()->create(
-            [
+        $user2 = User::factory()->create([
             'username' => 'Alex',
             'email' => 'alez@example.com',
             'FirstName' => 'Alexander',
@@ -56,40 +57,32 @@ class DatabaseSeeder extends Seeder
             'Address' => 'Test Address',
             'BirthDate' => '2000-01-01',
             'ContactNumber' => '09123456789',
-            ]
-        );
-
-
-
+            'NPTC_ID' => $this->generateNPTCId('AD', User::class),
+        ]);
         $user2->assignRole("NPTC Admin");
 
-
-        VRCompany::factory()->create(
-            [
+        VRCompany::factory()->create([
             'CompanyName' => 'Example VR Company',
             'BusinessPermitNumber' => 123456,
-            'Status' => 'Approved'
-            ]
-        );
+            'Status' => 'Approved',
+            'NPTC_ID' => $this->generateNPTCId('VC', VRCompany::class),
+        ]);
 
-        VRCompany::factory()->create(
-            [
+        VRCompany::factory()->create([
             'CompanyName' => 'Company3',
             'BusinessPermitNumber' => 1231231,
-            'Status' => 'Pending'
-            ]
-        );
+            'Status' => 'Pending',
+            'NPTC_ID' => $this->generateNPTCId('VC', VRCompany::class),
+        ]);
 
-        VRCompany::factory()->create(
-            [
+        VRCompany::factory()->create([
             'CompanyName' => 'Company2',
             'BusinessPermitNumber' => 123123,
-            'Status' => 'Pending'
-            ]
-        );
+            'Status' => 'Pending',
+            'NPTC_ID' => $this->generateNPTCId('VC', VRCompany::class),
+        ]);
 
-        $user3 = User::factory()->create(
-            [
+        $user3 = User::factory()->create([
             'username' => 'Alexis',
             'email' => 'alex@example.com',
             'FirstName' => 'Alexander',
@@ -98,18 +91,15 @@ class DatabaseSeeder extends Seeder
             'Address' => 'Test Address',
             'BirthDate' => '2000-01-01',
             'ContactNumber' => '09123456789',
-            ]
-        );
-
+        ]);
         $user3->assignRole("Operator");
 
-        $user3->operator()->create(
-            [
+        $user3->operator()->create([
             'user_id' => $user3->id,
             'vr_company_id' => 1,
-            'Status' => 'Approved'
-            ]
-        );
+            'Status' => 'Approved',
+            'NPTC_ID' => $this->generateNPTCId('OP', Operator::class),
+        ]);
 
         $user4 = User::factory()->create([
             'username' => 'Driver1',
@@ -132,6 +122,7 @@ class DatabaseSeeder extends Seeder
             'NBI_clearance' => 'path/to/nbi',
             'Police_clearance' => 'path/to/police',
             'BIR_clearance' => 'path/to/bir',
+            'NPTC_ID' => $this->generateNPTCId('DR', Driver::class),
         ]);
 
         Vehicle::create([
@@ -141,7 +132,8 @@ class DatabaseSeeder extends Seeder
             'Model' => 'Toyota Corolla',
             'Brand' => 'Toyota',
             'SeatNumber' => 4,
-            'Status' => 'Approved'
+            'Status' => 'Approved',
+            'NPTC_ID' => $this->generateNPTCId('UN', Vehicle::class),
         ]);
 
         Vehicle::create([
@@ -151,16 +143,8 @@ class DatabaseSeeder extends Seeder
             'Model' => 'Honda Civic',
             'Brand' => 'Honda',
             'SeatNumber' => 5,
-            'Status' => 'Pending'
+            'Status' => 'Pending',
+            'NPTC_ID' => $this->generateNPTCId('UN', Vehicle::class),
         ]);
-
-
-
-
-
-
-
-
     }
-
 }

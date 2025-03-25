@@ -102,7 +102,7 @@ export default function NptcAdmins({ users }: NptcAdminsProps) {
                     <TableBody>
                         {users.map((user) => (
                             <TableRow key={user.id}>
-                                <TableCell className="font-medium">{user.id}</TableCell>
+                                <TableCell className="font-medium">{user.NPTC_ID}</TableCell>
                                 <TableCell>{user.FirstName}</TableCell>
                                 <TableCell>{user.LastName}</TableCell>
                                 <TableCell>{user.username}</TableCell>

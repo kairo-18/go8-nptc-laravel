@@ -14,8 +14,27 @@ class Trip extends Model
         'pickupDate',
         'dropoffDate',
         'tripType',
-        'status'
+        'status',
+        'NPTC_ID' 
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($trip) {
+            if (!$trip->NPTC_ID) {
+                $trip->NPTC_ID = static::generateNPTCId('TX');
+            }
+        });
+    }
+
+    public static function generateNPTCId($prefix)
+    {
+        $latestTrip = static::where('NPTC_ID', 'LIKE', "$prefix-%")->latest('id')->first();
+        $nextNumber = $latestTrip ? ((int)substr($latestTrip->nptc_ID, 3)) + 1 : 1;
+        return $prefix . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+    }
 
     public function driver()
     {

@@ -28,7 +28,35 @@ class User extends Authenticatable
         'Address',
         'BirthDate',
         'ContactNumber',
+        'NPTC_ID'
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($user) {
+            if ($user->hasRole('NPTC Admin')) {
+                $user->NPTC_ID = User::generateNPTCId('NPTC Admin');
+            } elseif ($user->hasRole('VR Admin')) {
+                $user->NPTC_ID = User::generateNPTCId('VR Admin');
+            }
+        });
+    }
+
+    public static function generateNPTCId($role)
+    {
+        $prefix = match ($role) {
+            'NPTC Admin' => 'AD',
+            'VR Admin' => 'VA',
+            default => null,
+        };
+
+        if (!$prefix) return null;
+
+        $count = self::where('NPTC_ID', 'LIKE', "$prefix-%")->count() + 1;
+        return sprintf("%s-%04d", $prefix, $count);
+    }
 
     /**
      * The attributes that should be hidden for serialization.
