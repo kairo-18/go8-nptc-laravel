@@ -24,4 +24,6 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin'])->gro
 
     Route::patch('vr-company/updateStatus/{id}', [VRCompanyController::class, 'updateStatus'])->name('vr-company.updateStatus');
 
+    Route::delete('/vr-company/delete-media/{media}', [VRCompanyController::class, 'deleteMedia']);
+
 });

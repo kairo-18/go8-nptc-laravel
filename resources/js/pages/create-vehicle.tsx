@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MainLayout from '@/pages/mainLayout';
 import { useForm } from '@inertiajs/react';
+import { useState } from 'react';
 
 export default function CreateVehicle({ operators, onNextTab }) {
     const { data, setData, post, errors, processing } = useForm({
@@ -26,6 +27,8 @@ export default function CreateVehicle({ operators, onNextTab }) {
         inspection_certificate_image: null,
     });
 
+    const [fileKeys, setFileKeys] = useState({});
+
     const handleSubmit = (e) => {
         e.preventDefault();
         post(route('vehicles.store'), {
@@ -36,7 +39,12 @@ export default function CreateVehicle({ operators, onNextTab }) {
         });
     };
 
-    return (            
+    const handleFileRemove = (field) => {
+        setData(field, null);
+        setFileKeys((prevKeys) => ({ ...prevKeys, [field]: Date.now() }));
+    };
+
+    return (
             <div className="mx-auto mt-6 w-full max-w-6xl">
                 <h1 className="text-2xl font-semibold">Register Vehicle</h1>
                 <p className="text-gray-500">Enter the vehicle's details.</p>
@@ -97,7 +105,15 @@ export default function CreateVehicle({ operators, onNextTab }) {
                                 {['front_image', 'back_image', 'left_side_image', 'right_side_image', 'or_image', 'cr_image', 'id_card_image', 'gps_certificate_image', 'inspection_certificate_image'].map((field) => (
                                     <div key={field}>
                                         <Label htmlFor={field}>{field.replace('_', ' ').toUpperCase()}</Label>
-                                        <Input id={field} type="file" onChange={(e) => setData(field, e.target.files?.[0] || null)} />
+                                        <Input key={fileKeys[field]} id={field} type="file" onChange={(e) => setData(field, e.target.files?.[0] || null)} />
+                                        {data[field] && (
+                                            <div className="mt-1 flex items-center justify-between gap-2">
+                                                <p className="text-sm text-gray-500">{data[field].name}</p>
+                                                <button type="button" onClick={() => handleFileRemove(field)} className="text-red-500 hover:text-red-700" aria-label={`Remove ${field}`}>
+                                                    x
+                                                </button>
+                                            </div>
+                                        )}
                                         {errors[field] && <p className="text-sm text-red-500">{errors[field]}</p>}
                                     </div>
                                 ))}

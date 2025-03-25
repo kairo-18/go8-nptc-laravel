@@ -4,7 +4,7 @@ use App\Models\Vehicle;
 use App\Models\VRCompany;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
-use App\Models\Driver;  
+use App\Models\Driver;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
@@ -28,12 +28,5 @@ Route::post('/drivers/{driver}/upload-files', [DriverController::class, 'updateD
 Route::delete('/driver/{driver}', [DriverController::class, 'destroy'])
 ->name('delete-driver');
 
-
-
-
-
-
-
-
-
-
+Route::delete('/drivers/{driver}/media', [DriverController::class, 'deleteMedia'])
+    ->name('drivers.delete-media');

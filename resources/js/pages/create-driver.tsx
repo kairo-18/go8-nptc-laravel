@@ -38,6 +38,7 @@ export default function CreateDriver({ companies,latestVehicle,operator,company,
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
     const [operators, setOperators] = useState([]);
+    const [fileKeys, setFileKeys] = useState({});
 
     const handleSubmit = async (e: React.FormEvent, createAnother = false) => {
         e.preventDefault();
@@ -69,7 +70,11 @@ export default function CreateDriver({ companies,latestVehicle,operator,company,
         }
     };
 
-    
+    const handleFileRemove = (field) => {
+        setData(field, null);
+        setFileKeys((prevKeys) => ({ ...prevKeys, [field]: Date.now() }));
+    };
+
     return (
             <div className="mx-auto mt-6 w-full max-w-6xl">
                 <h1 className="text-2xl font-semibold">Register Driver</h1>
@@ -82,7 +87,7 @@ export default function CreateDriver({ companies,latestVehicle,operator,company,
                     <CardContent>
                         <form onSubmit={handleSubmit} className="space-y-6">
                            {/* Plate Number */}
-                                            
+
                             <div>
                             <Label>Vehicle Plate Number</Label>
                             {!latestVehicle?.PlateNumber && <p className="text-red-500 mb-1">Create Vehicle First</p>}
@@ -182,8 +187,20 @@ export default function CreateDriver({ companies,latestVehicle,operator,company,
                             </div>
 
                             {/* File Uploads */}
-                            <div className="grid grid-cols-2 gap-4"> {['License', 'Photo', 'NBI_clearance', 'Police_clearance', 'BIR_clearance'].map((field) => ( <div key={field}> <Label htmlFor={field}>{field.replace('_', ' ')}</Label> <Input id={field} type="file" onChange={(e) => setData(field, e.target.files?.[0] || null)} /> {errors[field] && <p className="text-sm text-red-500">{errors[field]}</p>}
-                                    </div>
+                            <div className="grid grid-cols-2 gap-4"> {['License', 'Photo', 'NBI_clearance', 'Police_clearance', 'BIR_clearance'].map((field) => (
+                                <div key={field}>
+                                    <Label htmlFor={field}>{field.replace('_', ' ')}</Label>
+                                    <Input key={fileKeys[field]} id={field} type="file" onChange={(e) => setData(field, e.target.files?.[0] || null)} />
+                                    {data[field] && (
+                                        <div className="mt-1 flex items-center justify-between gap-2">
+                                            <p className="text-sm text-gray-500">{data[field].name}</p>
+                                            <button type="button" onClick={() => handleFileRemove(field)} className="text-red-500 hover:text-red-700" aria-label={`Remove ${field}`}>
+                                                x
+                                            </button>
+                                        </div>
+                                    )}
+                                    {errors[field] && <p className="text-sm text-red-500">{errors[field]}</p>}
+                                </div>
                                 ))}
                             </div>
 

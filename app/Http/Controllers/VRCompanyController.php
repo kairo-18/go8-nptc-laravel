@@ -244,4 +244,19 @@ class VRCompanyController extends Controller
 
         return response()->json(['message' => 'Status updated successfully'], 200);
     }
+
+    public function deleteMedia($mediaId)
+    {
+        $media = Media::findOrFail($mediaId);
+
+        // Verify the media belongs to a VR Company
+        $vrCompany = VRCompany::find($media->model_id);
+        if (!$vrCompany) {
+            return response()->json(['error' => 'Company not found'], 404);
+        }
+
+        $media->delete();
+    }
+
+
 }
