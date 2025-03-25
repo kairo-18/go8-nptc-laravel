@@ -18,7 +18,10 @@ export default function CreateOperator({ companies }) {
         Address: '',
         BirthDate: '',
         password: '',
-        Status: 'For Payment'
+        Status: 'For Payment',
+        photo: null,
+        valid_id_front: null,
+        valid_id_back: null,
     });
     const { flash } = usePage().props;
 
@@ -30,6 +33,9 @@ export default function CreateOperator({ companies }) {
             onSuccess: () => {
                 alert('Operator created successfully!');
                 reset();
+
+            const fileInputs = document.querySelectorAll<HTMLInputElement>('input[type="file"]');
+            fileInputs.forEach(input => input.value = '');
             }
         });
     };
@@ -181,6 +187,39 @@ export default function CreateOperator({ companies }) {
                                 {errors["user.password"] && (
                                     <p className="text-sm text-red-500">{errors["user.password"]}</p>
                                 )}
+                            </div>
+
+                            <div className="grid grid-cols-3 gap-4">
+                                <div>
+                                    <Label htmlFor="photo">1x1 Photo</Label>
+                                    <Input
+                                        id="photo"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => setData('photo', e.target.files[0])}
+                                    />
+                                    {errors.photo && <p className="text-sm text-red-500">{errors.photo}</p>}
+                                </div>
+                                <div>
+                                    <Label htmlFor="valid_id_front">Valid ID (Front)</Label>
+                                    <Input
+                                        id="valid_id_front"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => setData('valid_id_front', e.target.files[0])}
+                                    />
+                                    {errors.valid_id_front && <p className="text-sm text-red-500">{errors.valid_id_front}</p>}
+                                </div>
+                                <div>
+                                    <Label htmlFor="valid_id_back">Valid ID (Back)</Label>
+                                    <Input
+                                        id="valid_id_back"
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={(e) => setData('valid_id_back', e.target.files[0])}
+                                    />
+                                    {errors.valid_id_back && <p className="text-sm text-red-500">{errors.valid_id_back}</p>}
+                                </div>
                             </div>
 
                             {/* Submit Button */}

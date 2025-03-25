@@ -41,6 +41,14 @@ Route::get('/operator/edit/{id}', [OperatorAdminController::class, 'editView'])-
 //route for edit function in the controller vrcompany
 Route::patch('operator/update/{operator}', [OperatorAdminController::class, 'update'])->name('operator.update');
 
+Route::get('download-operator-media/{mediaId}', [OperatorAdminController::class, 'downloadMedia'])
+->name('download-operator-media');
+
+Route::get('preview-operator-media/{mediaId}', [OperatorAdminController::class, 'previewMedia'])
+->name('preview-operator-media');
+
+Route::post('/operators/{operator}/upload-files', [OperatorAdminController::class, 'updateOperatorMedia'])->name('operator.upload-files');
+
 
 Route::patch('operator/updateStatus/{id}', [OperatorAdminController::class, 'updateStatus'])->name('operator.updateStatus');
 

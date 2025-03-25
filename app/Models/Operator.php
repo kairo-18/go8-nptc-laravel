@@ -3,8 +3,14 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-class Operator extends Model
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+
+class Operator extends Model implements HasMedia
 {
+    use HasFactory,InteractsWithMedia;
+
     protected $fillable = [
         'vr_company_id',
         'user_id',
@@ -45,5 +51,17 @@ class Operator extends Model
     public function drivers()
     {
         return $this->hasMany(Driver::class);
+    }
+
+    public function getMediaUrlsAttribute()
+    {
+        return $this->media->map(function ($media) {
+            return [
+                'id' => $media->id,
+                'name' => $media->name,
+                'mime_type' => $media->mime_type,
+                'url' => $media->getUrl(),
+            ];
+        });
     }
 }
