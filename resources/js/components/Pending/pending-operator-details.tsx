@@ -56,7 +56,7 @@ export default function PendingOperatorDetails({ item }: PendingOperatorDetailsP
       }
   
       const data = await response.json();
-      console.log("Rejection noted:", data);
+      location.reload();
     } catch (error) {
       console.error("Error submitting rejection:", error);
     }
@@ -83,7 +83,7 @@ export default function PendingOperatorDetails({ item }: PendingOperatorDetailsP
   
       const data = await response.json();
       alert('Approval successful! Official documents will be sent to the mail of the operator.');
-      window.location.href;
+      location.reload();
     } catch (error) {
       console.error("Error submitting rejection:", error);
     }

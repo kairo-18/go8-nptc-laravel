@@ -40,7 +40,7 @@ export default function PendingVehicleDetails({ item }) {
       if (data.message === 'Entity rejected and note created successfully') {
         setIsRejectionModalOpen(false); // Close the rejection modal after successful rejection
         alert('Rejection successful!'); // Show success message
-        window.location.href;
+        location.reload();
       }
     } catch (error) {
       console.error("Error submitting rejection:", error);
@@ -70,7 +70,7 @@ export default function PendingVehicleDetails({ item }) {
       const data = await response.json();
       if (data.message === 'Entity approved and note created successfully') {
         alert('Approval successful! Official documents will be sent to the mail of the operator.');
-        window.location.href;
+        location.reload();
       }
     } catch (error) {
       console.error("Error submitting rejection:", error);
