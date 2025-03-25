@@ -3,28 +3,47 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
 class Operator extends Model
 {
     protected $fillable = [
         'vr_company_id',
         'user_id',
-        'Status'
+        'Status',
+        'NPTC_ID', // Make it fillable
     ];
-    //
-    public function user(){
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($operator) {
+            $operator->NPTC_ID = Operator::generateNPTCId();
+        });
+    }
+
+    public static function generateNPTCId()
+    {
+        $count = self::where('NPTC_ID', 'LIKE', 'OP-%')->count() + 1;
+        return sprintf("OP-%04d", $count);
+    }
+
+    public function user()
+    {
         return $this->belongsTo(User::class);
     }
 
-    public function vrCompany(){
+    public function vrCompany()
+    {
         return $this->belongsTo(VRCompany::class, 'vr_company_id');
     }
 
-    public function vehicles(){
+    public function vehicles()
+    {
         return $this->hasMany(Vehicle::class);
     }
 
-    public function drivers(){
+    public function drivers()
+    {
         return $this->hasMany(Driver::class);
     }
 }

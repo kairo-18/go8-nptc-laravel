@@ -49,7 +49,7 @@ Route::group(['middleware' => ['role:NPTC Admin|NPTC Super Admin|Operator|VR Adm
                 ->makeHidden(['created_at', 'updated_at', 'owner', 'operators']),
                 'drivers' => \App\Models\User::role('Driver')
                     ->join('drivers', 'users.id', '=', 'drivers.user_id')
-                    ->get(['drivers.id', 'users.FirstName','users.MiddleName', 'users.LastName', 'Status', 'drivers.operator_id'])
+                    ->get(['drivers.id', 'drivers.NPTC_ID', 'users.FirstName','users.MiddleName', 'users.LastName', 'Status', 'drivers.operator_id'])
                     ->makeHidden(['created_at', 'updated_at', 'email_verified_at']),
                 'vehicles' => \App\Models\Vehicle::all()
                     ->makeHidden(['created_at', 'updated_at', 'operator','front_image','back_image','left_side_image','right_side_image','or_image','cr_image','id_card_image','gps_certificate_image','inspection_certificate_image'])

@@ -44,8 +44,8 @@ export default function Company({ companies, companiesWithMedia, onSelectCompany
     const companyHeaders = companies.length > 0 ? Object.keys(companies[0]) : [];
 
     // Define primary, secondary, and other columns
-    const primaryColumns = ['id', 'CompanyName'];
-    const otherColumns = companyHeaders.filter((key) => !primaryColumns.includes(key) && key !== 'Status');
+    const primaryColumns = ['NPTC_ID', 'CompanyName'];
+    const otherColumns = companyHeaders.filter((key) => !primaryColumns.includes(key) && key !== 'Status' && key !== 'id');
 
     // Arrange columns with hierarchy
     const orderedHeaders = [...primaryColumns, ...otherColumns];

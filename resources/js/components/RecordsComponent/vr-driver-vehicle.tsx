@@ -55,24 +55,39 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
                   label: formatHeader(key),
               }))
             : [];
+            const primaryColumns = ['NPTC_ID', 'Driver'];
 
-    const primaryColumns = ['id', 'Driver'];
-    const driverOtherColumns = driverHeaders.map(header => header.key).filter((key) => key !== 'Status' && key !== 'id');
-    const orderedDriverHeaders = [...primaryColumns, ...driverOtherColumns];
+            const driverOtherColumns = driverHeaders
+                .map(header => header.key)
+                .filter(key => !primaryColumns.includes(key) && key !== 'Status' && key !== 'id'); 
+            
+            const orderedDriverHeaders = [...primaryColumns, ...driverOtherColumns];
+            
+            const driverColumns = generateColumns(
+                orderedDriverHeaders.map(key => ({ key, label: formatHeader(key) })),
+                {
+                    entityType: 'drivers',
+                    statusColumns: ['Status'],
+                }
+            );
+            
 
-    const driverColumns = generateColumns(orderedDriverHeaders.map(key => ({ key, label: formatHeader(key) })), {
-        entityType: 'drivers',
-        statusColumns: ['Status'],
-    });
+            const primaryVehicleColumns = ['NPTC_ID', 'Vehicle'];
 
-    const primaryVehicleColumns = ['id', 'Vehicle'];
-    const vehicleOtherColumns = vehicleHeaders.map(header => header.key).filter((key) => key !== 'Status' && key !== 'Model' && key !== 'id');
-    const orderedVehicleHeaders = [...primaryVehicleColumns, ...vehicleOtherColumns];
-
-    const vehicleColumns = generateColumns(orderedVehicleHeaders.map(key => ({ key, label: formatHeader(key) })), {
-        entityType: 'vehicles',
-        statusColumns: ['Status'],
-    });
+            const vehicleOtherColumns = vehicleHeaders
+                .map(header => header.key)
+                .filter(key => !primaryVehicleColumns.includes(key) && key !== 'Status' && key !== 'Model' && key !== 'id'); 
+            
+            const orderedVehicleHeaders = [...primaryVehicleColumns, ...vehicleOtherColumns];
+            
+            const vehicleColumns = generateColumns(
+                orderedVehicleHeaders.map(key => ({ key, label: formatHeader(key) })),
+                {
+                    entityType: 'vehicles',
+                    statusColumns: ['Status'],
+                }
+            );
+            
 
     return (
         <div>

@@ -42,6 +42,7 @@ class DriverController extends Controller
                 })->values();
     
                 return [
+                    'NPTC_ID'=>$driver->NPTC_ID,
                     'id' => $driver->id,
                     'FirstName' => $driver->user->FirstName,
                     'MiddleName' => $driver->user->MiddleName,

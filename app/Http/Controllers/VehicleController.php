@@ -34,6 +34,7 @@ class VehicleController extends Controller
             })->values();
 
             return [
+                'NPTC_ID'=>$vehicle->NPTC_ID,
                 'id' => $vehicle->id,
                 'PlateNumber' => $vehicle->PlateNumber,
                 'Model' => $vehicle->Model,
