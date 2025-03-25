@@ -72,15 +72,11 @@ export default function CreateVrContacts({
             console.log(response.data.contacts);
             onNextTab();
 
-           
+
         } catch (error) {
             setErrors(error.response?.data?.errors || {});
         } finally {
             setProcessing(false);
-            setTimeout(() => {
-                window.location.href = window.location.href; // This reloads the current page
-            }, 500);
-            
         }
     };
 
