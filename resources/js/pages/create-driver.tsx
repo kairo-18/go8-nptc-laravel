@@ -14,7 +14,7 @@ export default function CreateDriver({ companies,latestVehicle,operator,company,
           setData('operator_id', operator.id);
         }
       }, [operator]);
-    const { data, setData, post, progress } = useForm({
+    const { data, setData, post, progress, reset } = useForm({
         username: '',
         email: '',
         FirstName: '',
@@ -39,31 +39,36 @@ export default function CreateDriver({ companies,latestVehicle,operator,company,
     const [processing, setProcessing] = useState(false);
     const [operators, setOperators] = useState([]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent, createAnother = false) => {
         e.preventDefault();
         setProcessing(true);
-    
+
         const formData = new FormData();
         Object.entries(data).forEach(([key, value]) => {
             if (value !== null && value !== undefined) {
                 formData.append(key, value);
             }
         });
-    
+
         try {
-            const response = await axios.post(route('driver.store'), formData, {
+            await axios.post(route('driver.store'), formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             alert('Driver registered successfully!');
             setProcessing(false);
-            window.location.href = '/vr-owner';
-        
+
+            if (createAnother) {
+                reset(); // Reset form for another entry
+            } else {
+                window.location.href = '/vr-owner'; // Redirect after creation
+            }
         } catch (error) {
             console.error("Error submitting form:", error.response?.data);
             setErrors(error.response?.data || {});
             setProcessing(false);
         }
     };
+
     
     return (
             <div className="mx-auto mt-6 w-full max-w-6xl">
@@ -184,7 +189,8 @@ export default function CreateDriver({ companies,latestVehicle,operator,company,
 
                             {/* Submit Button */}
                             <div className="flex justify-end">
-                                <Button type="submit" disabled={processing}>Submit</Button>
+                                <Button type="submit" disabled={processing}>Create and Proceed</Button>
+                                <Button type="button" variant="outline" disabled={processing} onClick={(e) => handleSubmit(e, true)}>Create and Create Another</Button>
                             </div>
                         </form>
                     </CardContent>
