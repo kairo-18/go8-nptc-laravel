@@ -85,6 +85,7 @@ Route::post('/rejection', [PendingController::class, 'rejection']);
 
 Route::post('/approval', [PendingController::class, 'approval']);
 
+
 // Catch-all for unhandled API routes
 Route::fallback(function () {
     return response()->json(['error' => 'Route not found'], 404);

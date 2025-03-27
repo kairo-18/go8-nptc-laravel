@@ -82,17 +82,24 @@ export function AppSidebar() {
     const { props } = usePage();
     const userRole = props.auth.user?.roles?.[0]?.name;
 
-    let filteredNavItems = mainNavItems;
+    // Clone mainNavItems and modify "Dashboard" for Driver role
+    let updatedNavItems = mainNavItems.map(item => 
+        item.title === 'Dashboard' && userRole === 'Driver' 
+            ? { ...item, title: 'Driver Dashboard', url: '/driver-dashboard' } 
+            : item
+    );
+
+    let filteredNavItems = updatedNavItems;
 
     if (userRole === 'Temp User') {
-        filteredNavItems = mainNavItems
+        filteredNavItems = updatedNavItems
             .filter((item) => item.title === 'Registration')
             .map((item) => ({
                 ...item,
                 children: item.children?.filter((child) => child.title === 'VR Registration'),
             }));
     } else if (userRole === 'Temp User Operator') {
-        filteredNavItems = mainNavItems
+        filteredNavItems = updatedNavItems
             .filter((item) => item.title === 'Registration')
             .map((item) => ({
                 ...item,
@@ -100,7 +107,7 @@ export function AppSidebar() {
             }));
     } else if (userRole === 'VR Admin') {
         const allowedItems = [
-            'Dashboard',
+            'Driver Dashboard', // Ensuring renamed Dashboard stays accessible
             'Pending',
             'Operator Temp Account Registration',
             'Records',
@@ -109,7 +116,15 @@ export function AppSidebar() {
             'Mail',
             'Notifications',
         ];
-        filteredNavItems = mainNavItems.filter((item) => allowedItems.includes(item.title));
+        filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
+    } else if (userRole === 'Driver') {
+        const allowedItems = [
+            'Driver Dashboard',
+            'Records',
+            'Bookings',
+            'Mail',
+        ];
+        filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
     }
 
     return (
@@ -118,7 +133,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem className="text-white">
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href="/dashboard" prefetch>
+                        <Link href={userRole === 'Driver' ? '/driver-dashboard' : '/dashboard'} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>

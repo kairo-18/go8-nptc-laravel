@@ -28,5 +28,15 @@ Route::post('/drivers/{driver}/upload-files', [DriverController::class, 'updateD
 Route::delete('/driver/{driver}', [DriverController::class, 'destroy'])
 ->name('delete-driver');
 
+Route::middleware(['auth'])->get('/driver/trips', [DriverController::class, 'getDriverTrips'])->name('driver.trips');
+
+
+Route::get('/driver-dashboard', function () {
+    return Inertia::render('driver-dashboard');
+})->name('driver.dashboard');
+
+
+
+
 Route::delete('/drivers/{driver}/media', [DriverController::class, 'deleteMedia'])
     ->name('drivers.delete-media');

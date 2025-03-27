@@ -40,6 +40,9 @@ class AuthenticatedSessionController extends Controller
         } else if ($user->hasRole('Temp User Operator')){
             $request->session()->regenerate();
              return redirect()->route('create-operator.admin')->withInput(['Registration' => 'Please input your operator details']);
+        } elseif ($user->hasRole('Driver')) { 
+            $request->session()->regenerate();
+            return redirect()->route('driver.dashboard');
         }
 
         $request->session()->regenerate();

@@ -31,7 +31,7 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin'])->gro
 
 });
 
-Route::group(['middleware' => ['role:NPTC Admin|NPTC Super Admin|Operator|VR Admin|']], function () {
+Route::group(['middleware' => ['role:NPTC Admin|NPTC Super Admin|Operator|VR Admin|Driver']], function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');

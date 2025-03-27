@@ -7,6 +7,7 @@ use App\Http\Controllers\VRCompanyController;
 use App\Http\Controllers\NptcAdminController;
 use App\Http\Controllers\VRAdminController;
 use App\Http\Controllers\VrContactsController;
+use App\Http\Controllers\TripController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Middleware\NPTCAdminMiddleware;
@@ -40,9 +41,13 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin|Operato
 
     Route::get('/bookings', function () {
         return Inertia::render('bookings', [
-            'bookings' => App\Models\Trip::with(['driver.user', 'vehicle', 'driver.operator.vrCompany', 'passengers'])->get(),
+            'bookings' => App\Models\Trip::with(['driver.user', 'vehicle.driver', 'driver.operator.vrCompany', 'passengers'])->get(),
         ]);
     })->name('bookings');
+
+    Route::post('/driver/trips/{tripId}/start', [TripController::class, 'startTrip']);
+    Route::post('/driver/trips/{tripId}/end', [TripController::class, 'endTrip']);
+
 });
 
 Route::get(

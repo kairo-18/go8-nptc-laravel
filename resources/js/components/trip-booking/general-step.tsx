@@ -72,26 +72,40 @@ export function GeneralStep({
             [field]: value,
         });
     };
-
+    
+    const [noDataFound, setNoDataFound] = useState(false);
+    
     const handlePlateNumberChange = (value: string) => {
         setPlateNumber(value);
         const vehicle = vehiclesData.find((v) => v.PlateNumber === value);
+    
         if (vehicle) {
-            const driver = driversData.find((d) => d.UnitId === vehicle?.UnitId);
+            const driver = driversData.find((d) => d.id === vehicle.driver_id); 
             const operator = operatorsData.find((o) => o.OperatorId === driver?.OperatorId);
             const company = companiesData.find((c) => c.VRCompanyId === operator?.VRCompanyId);
-
+    
             setSelectedCompany(company || {});
             setSelectedOperator(operator || {});
             setSelectedVehicle(vehicle || {});
             setSelectedDriver(driver || {});
+    
             updateFormData('general', {
                 ...formData.general,
                 unitId: vehicle.id,
-                driverId: driver.id,
+                driverId: vehicle?.driver_id || '',
             });
+    
+            setNoDataFound(false); // Data found, so reset noDataFound state
+        } else {
+            // No matching vehicle found
+            setNoDataFound(true);
+            setSelectedCompany({});
+            setSelectedOperator({});
+            setSelectedVehicle({});
+            setSelectedDriver({});
         }
     };
+    
 
     const handleDateChange = (dateType: 'pickup' | 'dropoff', part: 'day' | 'month' | 'year', value: string) => {
         updateFormData('general', {
@@ -162,72 +176,81 @@ export function GeneralStep({
                 !plateNumber
                     ? 'opacity-0 pointer-events-none h-0'
                     : 'opacity-100 pointer-events-auto h-full'
-            }`}>
-                <div className="space-y-2">
-                    <Label htmlFor="vrCompanyId">VR Company ID</Label>
-                    <Input id="vrCompanyId" placeholder="Search from active VR companies" value={selectedCompany.id} disabled className='border-0 shadow-none bg-transparent'/>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="vrCompanyName">VR Company Name</Label>
-                    <Input id="vrCompanyName" placeholder="Fetch from entered VR ID" value={selectedCompany.CompanyName} disabled className='border-0 shadow-none bg-transparent'/>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="operatorId">Operator ID</Label>
-                    <Input id="operatorId" placeholder="Search from active operators" value={selectedOperator.id} disabled className='border-0 shadow-none bg-transparent'/>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="operatorName">Operator Name</Label>
-                    <Input
-                        id="operatorName"
-                        placeholder="Fetch from entered operator ID"
-                        value={`${selectedOperator.user?.FirstName || ''} ${selectedOperator.user?.LastName || ''}`}
-                        disabled
-                        className='border-0 shadow-none bg-transparent'
-                    />
-                </div>
-            
-                <div className="space-y-2">
-                    <Label htmlFor="unitId">Unit ID (Vehicle)</Label>
-                    <Input id="unitId" placeholder="Search from active operators" value={selectedVehicle.id} disabled className='border-0 shadow-none bg-transparent'/>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="unitModel">Unit Model</Label>
-                    <Input id="unitModel" placeholder="Fetch from Unit ID" value={selectedVehicle.Model} disabled className='border-0 shadow-none bg-transparent'/>
-                </div>
+                }`}>
+                {noDataFound ? (
+                    <div className="flex items-center justify-center p-6 text-gray-500">
+                        <p>Nothing found.</p>
+                    </div>
+                ) : (
+                    <>
+                    <div className="space-y-2">
+                        <Label htmlFor="vrCompanyId">VR Company ID</Label>
+                        <Input id="vrCompanyId" placeholder="Search from active VR companies" value={selectedCompany.id || 'No Data Found'} disabled className='border-0 shadow-none bg-transparent'/>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="vrCompanyName">VR Company Name</Label>
+                        <Input id="vrCompanyName" placeholder="Fetch from entered VR ID" value={selectedCompany.CompanyName || 'No Data Found'} disabled className='border-0 shadow-none bg-transparent'/>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="operatorId">Operator ID</Label>
+                        <Input id="operatorId" placeholder="Search from active operators" value={selectedOperator.id || 'No Data Found'} disabled className='border-0 shadow-none bg-transparent'/>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="operatorName">Operator Name</Label>
+                        <Input
+                            id="operatorName"
+                            placeholder="Fetch from entered operator ID"
+                            value={`${selectedOperator.user?.FirstName || ''} ${selectedOperator.user?.LastName || ''}` || 'No Data Found'}
+                            disabled
+                            className='border-0 shadow-none bg-transparent'
+                        />
+                    </div>
                 
-                <div className="space-y-2">
-                    <Label htmlFor="numberOfSeats">Number of Seats</Label>
-                    <Input id="numberOfSeats" placeholder="Fetch from Unit ID" value={selectedVehicle.SeatNumber} disabled className='border-0 shadow-none bg-transparent'/>
-                </div>
-            
+                    <div className="space-y-2">
+                        <Label htmlFor="unitId">Unit ID (Vehicle)</Label>
+                        <Input id="unitId" placeholder="Search from active operators" value={selectedVehicle.id || 'No Data Found'} disabled className='border-0 shadow-none bg-transparent'/>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="unitModel">Unit Model</Label>
+                        <Input id="unitModel" placeholder="Fetch from Unit ID" value={selectedVehicle.Model || 'No Data Found'} disabled className='border-0 shadow-none bg-transparent'/>
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <Label htmlFor="numberOfSeats">Number of Seats</Label>
+                        <Input id="numberOfSeats" placeholder="Fetch from Unit ID" value={selectedVehicle.SeatNumber || 'No Data Found'} disabled className='border-0 shadow-none bg-transparent'/>
+                    </div>
+                
 
-            
-                <div className="space-y-2">
-                    <Label htmlFor="driverId">Driver ID</Label>
-                    <Input
-                        id="driverId"
-                        placeholder="Search from active operators"
-                        value={selectedDriver.id}
-                        onChange={(e) => handleInputChange('driverId', e.target.value)}
-                        disabled
-                        className='border-0 shadow-none bg-transparent'/>
-                </div>
-                <div className="space-y-2">
-                    <Label htmlFor="driverName">Driver Name</Label>
-                    <Input
-                        id="driverName"
-                        placeholder="Fetch from driver ID"
-                        value={`${selectedDriver.user?.FirstName || ''} ${selectedDriver.user?.LastName || ''}`}
-                        disabled
-                        className='border-0 shadow-none bg-transparent'/>
-                </div>
-            
+                
+                    <div className="space-y-2">
+                        <Label htmlFor="driverId">Driver ID</Label>
+                        <Input
+                            id="driverId"
+                            placeholder="Search from active operators"
+                            value={selectedVehicle.driver_id || 'No Data Found'}
+                            onChange={(e) => handleInputChange('driverId', e.target.value)}
+                            disabled
+                            className='border-0 shadow-none bg-transparent'/>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="driverName">Driver Name</Label>
+                        <Input
+                            id="driverName"
+                            placeholder="Fetch from driver ID"
+                            value={`${selectedDriver.user?.FirstName || ''} ${selectedDriver.user?.LastName || 'No Data Found'}`}
+                            disabled
+                            className='border-0 shadow-none bg-transparent'/>
+                    </div>
+                
 
-            
-                <div className="space-y-2">
-                    <Label htmlFor="licenseNumber">License Number</Label>
-                    <Input id="licenseNumber" placeholder="Fetch from driver ID" value={selectedDriver.LicenseNumber} disabled className='border-0 shadow-none bg-transparent'/>
-                </div>
+                
+                    <div className="space-y-2">
+                        <Label htmlFor="licenseNumber">License Number</Label>
+                        <Input id="licenseNumber" placeholder="Fetch from driver ID" value={selectedDriver.LicenseNumber || 'No Data Found' } disabled className='border-0 shadow-none bg-transparent'/>
+                    </div>
+                    </>
+                )
+                }
             
             </div>
 
