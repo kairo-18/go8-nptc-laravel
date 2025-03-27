@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "bc0488eb926263fb19d088abf4d1a3a2",
+    "content-hash": "3017e246d0d9e74a08167b57f2c37667",
     "packages": [
         {
             "name": "brick/math",
@@ -4580,6 +4580,74 @@
                 }
             ],
             "time": "2024-06-11T12:45:25+00:00"
+        },
+        {
+            "name": "spatie/browsershot",
+            "version": "5.0.8",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/browsershot.git",
+                "reference": "0102971ae974022ec4a7a149e8924ea355b52cc3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/browsershot/zipball/0102971ae974022ec4a7a149e8924ea355b52cc3",
+                "reference": "0102971ae974022ec4a7a149e8924ea355b52cc3",
+                "shasum": ""
+            },
+            "require": {
+                "ext-fileinfo": "*",
+                "ext-json": "*",
+                "php": "^8.2",
+                "spatie/temporary-directory": "^2.0",
+                "symfony/process": "^6.0|^7.0"
+            },
+            "require-dev": {
+                "pestphp/pest": "^3.0",
+                "spatie/image": "^3.6",
+                "spatie/pdf-to-text": "^1.52",
+                "spatie/phpunit-snapshot-assertions": "^4.2.3|^5.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\Browsershot\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Freek Van der Herten",
+                    "email": "freek@spatie.be",
+                    "homepage": "https://github.com/freekmurze",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Convert a webpage to an image or pdf using headless Chrome",
+            "homepage": "https://github.com/spatie/browsershot",
+            "keywords": [
+                "chrome",
+                "convert",
+                "headless",
+                "image",
+                "pdf",
+                "puppeteer",
+                "screenshot",
+                "webpage"
+            ],
+            "support": {
+                "source": "https://github.com/spatie/browsershot/tree/5.0.8"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/spatie",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-02-17T09:56:12+00:00"
         },
         {
             "name": "spatie/image",

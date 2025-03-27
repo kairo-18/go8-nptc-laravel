@@ -79,7 +79,7 @@ Route::get('mails/thread/{thread}', function (Thread $thread) {
     return response()->json(['thread' => $thread]);
 });
 
-Route::get('preview-media/{mediaId}', [MailController::class, 'previewMedia'])
+Route::get('preview-media/{mediaId}', [VRCompanyController::class, 'previewMedia'])
     ->middleware('auth'); // Add authentication middleware if needed
 
 Route::put('mails/mark-read/{thread}', function (Thread $thread) {
@@ -95,7 +95,7 @@ Route::post('mails/new-mail', function (Request $request) {
         'content' => 'sometimes|string',
         'is_read' => 'sometimes|boolean',
         'attachments' => 'nullable|array', // Allow multiple file uploads
-        'attachments.*' => 'file|mimes:jpeg,png,gif|max:2048', // Validate file types and size
+        'attachments.*' => 'file|mimes:jpeg,png,gif,pdf|max:20480', // Validate file types and size
     ]);
 
     // Find the receiver by email

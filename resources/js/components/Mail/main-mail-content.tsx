@@ -1,11 +1,11 @@
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import axios from 'axios';
-import { useState, useRef, useEffect } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Paperclip } from 'lucide-react';
+import { FileText, Paperclip } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function MainMailContent({ selectedThread, auth }) {
     const [newMail, setNewMail] = useState({ subject: '', content: '' });
@@ -67,49 +67,70 @@ export default function MainMailContent({ selectedThread, auth }) {
     }, [selectedThread?.mails]);
 
     return (
-        <DialogContent className="sm:max-w-[1200px] !m-0 !p-0">
-            <DialogTitle className="bg-gray-200 border-b border-gray-500 !px-5 !py-4 text-lg md:text-xl lg:text-2xl font-semibold rounded-t-lg">
+        <DialogContent className="!m-0 !p-0 sm:max-w-[1200px]">
+            <DialogTitle className="rounded-t-lg border-b border-gray-500 bg-gray-200 !px-5 !py-4 text-lg font-semibold md:text-xl lg:text-2xl">
                 {selectedThread.mails[0]?.subject || 'No Subject'}
             </DialogTitle>
             {selectedThread ? (
-                <div className="flex flex-col h-[70vh] !pt-0 !mt-0">
-                    <div className="!overflow-y-scroll bg-white !scrollbar-thin !scrollbar-thumb-gray-300 !scrollbar-track-gray-100">
+                <div className="!mt-0 flex h-[70vh] flex-col !pt-0">
+                    <div className="!scrollbar-thin !scrollbar-thumb-gray-300 !scrollbar-track-gray-100 !overflow-y-scroll bg-white">
                         {selectedThread.mails.map((mail) => {
                             const sender = mail.sender_id === selectedThread.sender.id ? selectedThread.sender : selectedThread.receiver;
                             return (
-                                <Card key={mail.id} className="!shadow-none !rounded-none bg-white py-6 !border-0 border-gray-200 !border-y !px-0">
+                                <Card key={mail.id} className="!rounded-none !border-0 !border-y border-gray-200 bg-white !px-0 py-6 !shadow-none">
                                     <CardContent>
-                                        <div className="flex justify-between items-center">
+                                        <div className="flex items-center justify-between">
                                             <div className="flex items-center space-x-4">
                                                 <Avatar className="h-10 w-10 bg-black">
                                                     <AvatarFallback className="text-lg">
-                                                        {sender.FirstName[0]}{sender.LastName[0]}
+                                                        {sender.FirstName[0]}
+                                                        {sender.LastName[0]}
                                                     </AvatarFallback>
                                                 </Avatar>
                                                 <div>
-                                                    <h3 className="text-base md:text-lg font-semibold text-gray-900">{sender.FirstName} {sender.LastName}</h3>
+                                                    <h3 className="text-base font-semibold text-gray-900 md:text-lg">
+                                                        {sender.FirstName} {sender.LastName}
+                                                    </h3>
                                                     <p className="text-sm text-gray-500">{sender.email}</p>
                                                 </div>
                                             </div>
                                             <p className="text-sm text-gray-500 italic">{new Date(mail.created_at).toLocaleString()}</p>
                                         </div>
                                         <div className="mt-4 py-3">
-                                            <p className="text-base md:text-lg font-medium text-gray-800">{mail.subject}</p>
-                                            <p className="mt-2 text-sm md:text-base text-gray-700">{mail.content}</p>
+                                            <p className="text-base font-medium text-gray-800 md:text-lg">{mail.subject}</p>
+                                            <p className="mt-2 text-sm text-gray-700 md:text-base">{mail.content}</p>
 
                                             {/* Display attachments */}
                                             {mail.media && mail.media.length > 0 && (
                                                 <div className="mt-4">
                                                     <h4 className="text-sm font-semibold text-gray-900">Attachments</h4>
-                                                    <div className="flex flex-wrap gap-2 mt-2">
+                                                    <div className="mt-2 flex flex-wrap gap-2">
                                                         {mail.media.map((media) => {
+                                                            // Check if the media is a PDF
+                                                            const isPDF = media.mime_type === 'application/pdf' || media.file_name?.endsWith('.pdf');
+
                                                             return (
-                                                                <img
-                                                                    key={media.id}
-                                                                    src={route('preview-media', media.id)}
-                                                                    alt="Attachment"
-                                                                    className="w-24 h-24 object-cover rounded-lg"
-                                                                />
+                                                                <div key={media.id} className="relative">
+                                                                    {isPDF ? (
+                                                                        <a
+                                                                            href={route('preview-media', media.id)}
+                                                                            target="_blank"
+                                                                            rel="noopener noreferrer"
+                                                                            className="flex h-24 w-24 flex-col items-center justify-center rounded-lg border border-gray-300 p-2 transition-colors hover:bg-gray-50"
+                                                                        >
+                                                                            <FileText className="h-10 w-10 text-red-500" />
+                                                                            <span className="mt-1 w-full truncate text-center text-xs">
+                                                                                {media.file_name || 'document.pdf'}
+                                                                            </span>
+                                                                        </a>
+                                                                    ) : (
+                                                                        <img
+                                                                            src={route('preview-media', media.id)}
+                                                                            alt="Attachment"
+                                                                            className="h-24 w-24 rounded-lg object-cover"
+                                                                        />
+                                                                    )}
+                                                                </div>
                                                             );
                                                         })}
                                                     </div>
@@ -123,24 +144,24 @@ export default function MainMailContent({ selectedThread, auth }) {
                         <div ref={messagesEndRef} />
                     </div>
 
-                    <div className="border-t bg-white p-5 rounded-b-lg">
+                    <div className="rounded-b-lg border-t bg-white p-5">
                         <Textarea
                             value={newMail.content}
                             onChange={(e) => setNewMail({ ...newMail, content: e.target.value })}
                             placeholder="Reply to this thread..."
-                            className="w-full rounded-lg border border-gray-300 p-4 focus:ring focus:ring-blue-300 shadow-sm bg-gray-50 text-base md:text-lg"
+                            className="w-full rounded-lg border border-gray-300 bg-gray-50 p-4 text-base shadow-sm focus:ring focus:ring-blue-300 md:text-lg"
                         />
 
                         {attachments.length > 0 && (
                             <div className="mt-3 w-full">
                                 {attachments.map((file, index) => (
                                     <div key={index} className="mb-2 flex items-center justify-between">
-                                        <div className="flex items-center gap-2 w-full">
-                                            <span className="truncate max-w-[70%] text-sm text-gray-700">{file.name}</span>
+                                        <div className="flex w-full items-center gap-2">
+                                            <span className="max-w-[70%] truncate text-sm text-gray-700">{file.name}</span>
                                         </div>
                                         <button
                                             onClick={() => handleRemoveFile(index)}
-                                            className="text-red-500 hover:text-red-700 text-sm font-medium ml-2"
+                                            className="ml-2 text-sm font-medium text-red-500 hover:text-red-700"
                                         >
                                             ✖
                                         </button>
@@ -149,20 +170,19 @@ export default function MainMailContent({ selectedThread, auth }) {
                             </div>
                         )}
 
-                        <div className="mt-3 flex items-center jusitfy">
+                        <div className="jusitfy mt-3 flex items-center">
                             <Button
                                 onClick={handleSend}
                                 disabled={loading}
-                                className={`rounded-full px-6 py-3 text-white text-sm md:text-lg font-medium transition
-                                ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 focus:ring focus:ring-blue-300'}`}
+                                className={`rounded-full px-6 py-3 text-sm font-medium text-white transition md:text-lg ${loading ? 'cursor-not-allowed bg-gray-400' : 'bg-blue-600 hover:bg-blue-700 focus:ring focus:ring-blue-300'}`}
                             >
-                                {loading ? "Sending..." : "Send"}
+                                {loading ? 'Sending...' : 'Send'}
                             </Button>
 
                             {/* File input for attachments */}
-                            <div className="px-5 flex items-center">
+                            <div className="flex items-center px-5">
                                 <label className="cursor-pointer">
-                                    <Paperclip className="w-6 h-6 text-gray-500 hover:text-gray-700" />
+                                    <Paperclip className="h-6 w-6 text-gray-500 hover:text-gray-700" />
                                     <input
                                         type="file"
                                         multiple // Allow multiple files
@@ -175,7 +195,7 @@ export default function MainMailContent({ selectedThread, auth }) {
                     </div>
                 </div>
             ) : (
-                <p className="mt-4 text-gray-500 text-lg">Select a thread to view the conversation.</p>
+                <p className="mt-4 text-lg text-gray-500">Select a thread to view the conversation.</p>
             )}
         </DialogContent>
     );
