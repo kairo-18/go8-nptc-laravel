@@ -9,6 +9,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import AuthLayout from '@/layouts/auth-layout';
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 interface LoginForm {
     email: string;
@@ -21,7 +23,7 @@ interface LoginProps {
     canResetPassword: boolean;
 }
 
-export default function Login({ status, canResetPassword }: LoginProps) {
+export default function Login({ status, canResetPassword  }: LoginProps) {
     const { data, setData, post, processing, errors, reset } = useForm<LoginForm>({
         email: '',
         password: '',
@@ -34,6 +36,7 @@ export default function Login({ status, canResetPassword }: LoginProps) {
             onFinish: () => reset('password'),
         });
     };
+    const [showPassword, setShowPassword] = useState(false);
 
     return (
         <div className='flex flex-col md:flex-row h-full w-full bg-white overflow-hidden'>
@@ -68,18 +71,25 @@ export default function Login({ status, canResetPassword }: LoginProps) {
                                 <InputError message={errors.email} />
                             </div>
 
-                            <div className="grid gap-2">
+                            <div className="relative">
                                 <Input
                                     id="password"
-                                    type="password"
+                                    type={showPassword ? "text" : "password"}
                                     required
                                     tabIndex={2}
                                     autoComplete="current-password"
                                     value={data.password}
-                                    onChange={(e) => setData('password', e.target.value)}
+                                    onChange={(e) => setData("password", e.target.value)}
                                     placeholder="Password"
-                                    className="border-gray-300"
+                                    className="border-gray-300 pr-10"
                                 />
+                                <button
+                                    type="button"
+                                    className="absolute inset-y-0 right-3 flex items-center justify-center text-gray-500 hover:text-gray-700"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                >
+                                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                </button>
                                 <InputError message={errors.password} />
                             </div>
                             <div className='flex flex-col md:flex-row items-start md:items-center justify-between'>
