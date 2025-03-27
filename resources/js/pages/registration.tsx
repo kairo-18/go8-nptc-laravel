@@ -7,10 +7,11 @@ import Summary from './summary';
 
 export default function Registration({ companies }: { companies: { id: number; BusinessPermitNumber: string }[] }) {
     const [activeTab, setActiveTab] = useState('company');
-    const [companyData, setCompanyData] = useState(null);
+    const [companyData, setCompanyData] = useState<any>({});
     const [adminData, setAdminData] = useState(null);
     const [contactsData, setContactsData] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
+    
 
     const goToNextTab = () => {
         if (activeTab === 'company') setActiveTab('owner');
