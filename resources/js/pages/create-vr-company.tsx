@@ -41,6 +41,20 @@ export default function CreateVrCompany({
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
+    const handlePrevious = () => {
+        setData(companyData); // Restore previous data
+    };
+    
+
+    useEffect(() => {
+        if (isEditing && companyData) {
+            setData((prevData) => ({
+                ...prevData,
+                ...companyData,
+            }));
+        }
+    }, [isEditing, companyData]);
+
     useEffect(() => {
         if (isEditing && companyData) {
             setData((prevData) => ({
@@ -56,18 +70,20 @@ export default function CreateVrCompany({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);
-
+    
+        setCompanyData(data); // Store the latest data before submission
+    
         const fileFields = ['BusinessPermit', 'BIR_2303', 'DTI_Permit', 'BrandLogo', 'SalesInvoice'];
         const fileData = new FormData();
         let hasFiles = false;
-
+    
         fileFields.forEach((field) => {
             if (data[field]) {
                 fileData.append(field, data[field]);
                 hasFiles = true;
             }
         });
-
+    
         try {
             if (isEditing) {
                 if (hasFiles) {
@@ -82,18 +98,19 @@ export default function CreateVrCompany({
                         },
                     });
                 }
-
+    
                 const updatedData = {
                     oldCompanyName: companyData.CompanyName,
                     CompanyName: data.CompanyName,
                     BusinessPermitNumber: data.BusinessPermitNumber,
                 };
-
+    
                 console.log(updatedData);
-
-                await patch(route('vr-company.update', updatedData), {
+    
+                await patch(route('vr-company.update', { id: companyData.id }), {
+                    data: updatedData,
                     onSuccess: () => {
-                        setCompanyData([]);
+                        setCompanyData(updatedData); // Retain updated data
                         setProcessing(false);
                     },
                     onError: (errors) => {
@@ -105,9 +122,9 @@ export default function CreateVrCompany({
                 await post(route('vr-company.store'), {
                     data,
                     onSuccess: () => {
+                        setCompanyData(data); // Retain data after submission
+                        onNextTab(); // Move to next step without losing data
                         setProcessing(false);
-                        setCompanyData(data);
-                        onNextTab();
                     },
                     onError: (errors) => {
                         setErrors(errors);
@@ -117,9 +134,11 @@ export default function CreateVrCompany({
             }
         } catch (error) {
             console.error('Error submitting form:', error);
+        } finally {
             setProcessing(false);
         }
     };
+    
 
     useEffect(() => {
         if (setCompanyData) {
@@ -232,13 +251,19 @@ export default function CreateVrCompany({
                         <div className="grid grid-cols-2 gap-4">
                             {renderFileInput('SalesInvoice', 'Sales Invoice')}
                         </div>
-                        {isButtonDisabled === false ? (
-                            <div className="flex justify-end">
-                                <Button type="submit" disabled={processing} className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700">
-                                    {processing ? 'Submitting...' : 'Submit'}
-                                </Button>
-                            </div>
-                        ) : null}
+
+                        <div className='flex justify-between'>
+                            <Button onClick={handlePrevious} className="bg-gray-500 text-white">
+                                Previous
+                            </Button>
+                            {isButtonDisabled === false ? (
+                                <div className="flex justify-end">
+                                    <Button type="submit" disabled={processing} className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700">
+                                        {processing ? 'Submitting...' : 'Submit'}
+                                    </Button>
+                                </div>
+                            ) : null}
+                        </div>
                     </form>
                     {progress && <p className="text-sm text-gray-500">Uploading: {progress.percentage}%</p>}
                 </CardContent>
