@@ -1,15 +1,14 @@
 import ComposeMail from '@/components/Mail/compose-mail';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import MainLayout from './mainLayout';
-import echo from '@/echo'; // Import the Echo instance
-import { usePage } from '@inertiajs/react';
 import MainMailContent from '@/components/Mail/main-mail-content'; // Import the modal component
-import { Dialog, DialogContent } from '@/components/ui/dialog'; // Import Dialog and DialogContent
+import { Button } from '@/components/ui/button';
+import { Dialog } from '@/components/ui/dialog'; // Import Dialog and DialogContent
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Input } from '@/components/ui/input';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { usePage } from '@inertiajs/react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import MainLayout from './mainLayout';
 
 export default function Mails() {
     const [selectedThreads, setSelectedThreads] = useState(new Set());
@@ -33,7 +32,7 @@ export default function Mails() {
             setSelectedThreads(new Set());
         } else {
             // Otherwise, select all
-            const allThreadIds = new Set(filteredThreads.map(thread => thread.id));
+            const allThreadIds = new Set(filteredThreads.map((thread) => thread.id));
             setSelectedThreads(allThreadIds);
         }
     };
@@ -61,8 +60,8 @@ export default function Mails() {
                               ...thread,
                               mails: thread.mails.map((mail) => ({ ...mail, is_read: true })), // Mark all mails as read
                           }
-                        : thread
-                )
+                        : thread,
+                ),
             );
         } catch (error) {
             console.error('Error marking thread as read:', error);
@@ -70,39 +69,46 @@ export default function Mails() {
     };
 
     const handleRowClick = (thread) => {
-        if (auth.user.id === thread.receiver.id && !thread.mails.every(mail => mail.is_read)) {
+        if (auth.user.id === thread.receiver.id && !thread.mails.every((mail) => mail.is_read)) {
             markThreadAsRead(thread.id); // Mark the thread as read
         }
         setSelectedThread(thread); // Open the modal
     };
 
     useEffect(() => {
-        axios.get('mails/threads').then((response) => {
-            setThreads(response.data.threads);
-            setFilteredThreads(response.data.threads);
-            console.log(response.data.threads);
-        })
-        .catch((error) => {
-            console.error('Error fetching mail threads:', error);
-        });
+        axios
+            .get('mails/threads')
+            .then((response) => {
+                setThreads(response.data.threads);
+                setFilteredThreads(response.data.threads);
+                console.log(response.data.threads);
+            })
+            .catch((error) => {
+                console.error('Error fetching mail threads:', error);
+            });
     }, []);
 
     useEffect(() => {
         let filtered = threads;
         if (searchQuery) {
-            filtered = filtered.filter(thread =>
-                thread.receiver.FirstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                thread.mails.some(mail => mail.subject.toLowerCase().includes(searchQuery.toLowerCase()))
+            filtered = filtered.filter(
+                (thread) =>
+                    thread.receiver.FirstName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    thread.mails.some((mail) => mail.subject.toLowerCase().includes(searchQuery.toLowerCase())),
             );
         }
         if (filter === 'Read') {
-            filtered = filtered.filter(thread => thread.mails.every(mail => mail.is_read));
+            filtered = filtered.filter((thread) => thread.mails.every((mail) => mail.is_read));
         } else if (filter === 'Unread') {
-            filtered = filtered.filter(thread => !thread.mails.every(mail => mail.is_read));
+            filtered = filtered.filter((thread) => !thread.mails.every((mail) => mail.is_read));
         } else if (filter === 'Date (Latest)') {
-            filtered = [...filtered].sort((a, b) => new Date(b.mails[b.mails.length - 1].created_at) - new Date(a.mails[a.mails.length - 1].created_at));
+            filtered = [...filtered].sort(
+                (a, b) => new Date(b.mails[b.mails.length - 1].created_at) - new Date(a.mails[a.mails.length - 1].created_at),
+            );
         } else if (filter === 'Date (Oldest)') {
-            filtered = [...filtered].sort((a, b) => new Date(a.mails[a.mails.length - 1].created_at) - new Date(b.mails[b.mails.length - 1].created_at));
+            filtered = [...filtered].sort(
+                (a, b) => new Date(a.mails[a.mails.length - 1].created_at) - new Date(b.mails[b.mails.length - 1].created_at),
+            );
         }
         setFilteredThreads(filtered);
     }, [searchQuery, filter, threads]);
@@ -110,7 +116,7 @@ export default function Mails() {
     useEffect(() => {
         console.log(`user.${auth.user.id}`);
         window.Echo.private(`user.${auth.user.id}`).listen('NewThreadCreated', (event) => {
-            console.log('New thread received:', event, auth.user.id);
+            console.log('New thread received:', event);
             setThreads((prevThreads) => [...prevThreads, event.thread]);
         });
 
@@ -122,12 +128,10 @@ export default function Mails() {
                     thread.id === event.threadId
                         ? {
                               ...thread,
-                              mails: thread.mails.map((mail) =>
-                                  mail.id === event.mailId ? { ...mail, is_read: true } : mail
-                              ),
+                              mails: thread.mails.map((mail) => (mail.id === event.mailId ? { ...mail, is_read: true } : mail)),
                           }
-                        : thread
-                )
+                        : thread,
+                ),
             );
         });
 
@@ -138,39 +142,34 @@ export default function Mails() {
 
     useEffect(() => {
         if (threads.length === 0) return;
-        // ✅ Listen for real-time updates
-        const threadIds = threads.map((thread) => thread.id);
-        threadIds.forEach((threadId) => {
-            console.log('Trying to listen to ' + 'thread' + threadId);
-            window.Echo.private(`thread.${threadId}`).listen('MailReceive', (event) => {
-                console.log('New mail received:', event);
 
-                // Update state with the new message
-                setThreads((prevThreads) =>
-                    prevThreads.map((thread) => (thread.id === event.id ? { ...thread, mails: [...thread.mails, event.last_mail] } : thread)),
-                );
+        // Listen for MailReceive events on user's private channel
+        window.Echo.private(`user.${auth.user.id}`).listen('MailReceive', (event) => {
+            console.log('New mail received:', event);
 
-                // If currently viewing the thread, update messages
-                if (selectedThread?.id === event.id) {
-                    setSelectedThread((prevThread) => ({
-                        ...prevThread,
-                        mails: [...prevThread.mails, event.last_mail],
-                    }));
-                }
-            });
+            // Update threads state
+            setThreads((prevThreads) =>
+                prevThreads.map((thread) => (thread.id === event.id ? { ...thread, mails: [...thread.mails, event.last_mail] } : thread)),
+            );
+
+            // Update selected thread if it's the current one
+            if (selectedThread?.id === event.id) {
+                setSelectedThread((prev) => ({
+                    ...prev,
+                    mails: [...prev.mails, event.last_mail],
+                }));
+            }
         });
 
         return () => {
-            threadIds.forEach((threadId) => {
-                echo.leave(`thread.${threadId}`);
-            });
+            window.Echo.leave(`user.${auth.user.id}`);
         };
-    },[threads]);
+    }, [threads, selectedThread, auth.user.id]);
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            <div className="p-6 bg-white rounded-lg shadow">
-                <div className="flex justify-between items-center mb-4">
+            <div className="rounded-lg bg-white p-6 shadow">
+                <div className="mb-4 flex items-center justify-between">
                     <Input
                         className="w-1/3"
                         placeholder="Search mails by keyword"
@@ -180,10 +179,12 @@ export default function Mails() {
                     <div className="flex gap-2">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className='text-white'>Filter</Button>
+                                <Button variant="outline" className="text-white">
+                                    Filter
+                                </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
-                                {['Read', 'Unread', 'Date (Latest)', 'Date (Oldest)'].map(option => (
+                                {['Read', 'Unread', 'Date (Latest)', 'Date (Oldest)'].map((option) => (
                                     <DropdownMenuItem key={option} onClick={() => setFilter(option)}>
                                         {option}
                                     </DropdownMenuItem>
@@ -221,7 +222,7 @@ export default function Mails() {
                                 key={thread.id}
                                 onClick={() => handleRowClick(thread)}
                                 className={`cursor-pointer ${
-                                    thread.mails.every(mail => mail.is_read) ? 'bg-gray-100' : 'bg-white'
+                                    thread.mails.every((mail) => mail.is_read) ? 'bg-gray-100' : 'bg-white'
                                 } hover:bg-gray-200`}
                             >
                                 <TableCell>
@@ -232,14 +233,18 @@ export default function Mails() {
                                         onClick={(e) => e.stopPropagation()} // Prevent row click event
                                     />
                                 </TableCell>
-                                <TableCell>{thread.receiver.FirstName} {thread.receiver.LastName}</TableCell>
+                                <TableCell>
+                                    {thread.receiver.FirstName} {thread.receiver.LastName}
+                                </TableCell>
                                 <TableCell className="font-medium">{thread.mails[thread.mails.length - 1]?.subject}</TableCell>
-                                <TableCell className={thread.mails.every(mail => mail.is_read) ? 'text-green-600' : 'text-red-600'}>
-                                    {thread.mails.every(mail => mail.is_read) ? 'Read' : 'Unread'}
+                                <TableCell className={thread.mails.every((mail) => mail.is_read) ? 'text-green-600' : 'text-red-600'}>
+                                    {thread.mails.every((mail) => mail.is_read) ? 'Read' : 'Unread'}
                                 </TableCell>
                                 <TableCell>
                                     {new Date(thread.mails[thread.mails.length - 1]?.created_at).toLocaleDateString('en-US', {
-                                        year: 'numeric', month: 'short', day: 'numeric'
+                                        year: 'numeric',
+                                        month: 'short',
+                                        day: 'numeric',
                                     })}
                                 </TableCell>
                                 <TableCell>
@@ -260,13 +265,7 @@ export default function Mails() {
 
                 {/* Render the Modal */}
                 <Dialog open={!!selectedThread} onOpenChange={(open) => !open && setSelectedThread(null)}>
-                    {selectedThread && (
-                        <MainMailContent
-                            selectedThread={selectedThread}
-                            auth={auth}
-                            onClose={() => setSelectedThread(null)}
-                        />
-                    )}
+                    {selectedThread && <MainMailContent selectedThread={selectedThread} auth={auth} onClose={() => setSelectedThread(null)} />}
                 </Dialog>
             </div>
         </MainLayout>

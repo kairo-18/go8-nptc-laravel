@@ -16,7 +16,7 @@ class Mail extends Model implements HasMedia
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('attachments')
-             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/gif']); // Allow only images
+             ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/gif', 'application/pdf']); // Allow only images
     }
 
     public function thread()

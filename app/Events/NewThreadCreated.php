@@ -25,7 +25,19 @@ class NewThreadCreated implements ShouldBroadcast
      */
     public function __construct(Thread $thread, int $recipientId)
     {
-        $this->thread = $thread->load(['mails', 'receiver', 'sender']);
+        $this->thread = $thread->load([
+            'mails.media', // Load media with mails
+            'receiver',
+            'sender'
+        ]);
+
+        // Add preview URLs to each media item
+        $this->thread->mails->each(function ($mail) {
+            $mail->media->each(function ($media) {
+                $media->preview_url = url('/preview-media/' . $media->id);
+            });
+        });
+
         $this->recipientId = $recipientId;
     }
 
@@ -37,9 +49,20 @@ class NewThreadCreated implements ShouldBroadcast
     public function broadcastOn()
     {
         return [
-               new PrivateChannel("user.{$this->thread->sender_id}"),
-               new PrivateChannel("user.{$this->recipientId}"),
-           ];
+            new PrivateChannel("user.{$this->thread->sender_id}"),
+            new PrivateChannel("user.{$this->recipientId}"),
+        ];
     }
 
+    /**
+     * Get the data to broadcast.
+     *
+     * @return array
+     */
+    public function broadcastWith()
+    {
+        return [
+            'thread' => $this->thread,
+        ];
+    }
 }
