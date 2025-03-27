@@ -13,6 +13,7 @@ import PendingOperatorDetails from "@/components/Pending/pending-operator-detail
 import PendingVehicleDetails from "@/components/Pending/pending-vehicle-details";
 import PendingDriverDetails from "@/components/Pending/pending-driver-details";
 
+
 // Interfaces for different application types
 interface Operator {
   NPTC_ID: string;
@@ -96,6 +97,8 @@ export default function Pending() {
 
   const breadcrumbs: BreadcrumbItem[] = [{ title: "Pending" }];
 
+  
+
   useEffect(() => {
     axios
       .get("/api/pending-data")
@@ -147,6 +150,12 @@ export default function Pending() {
   const handleRowClick = (item: ApplicationData) => {
     setSelectedItem(item);
   };
+  const updatedData = data.map((row) => ({
+    ...row,
+    Filter: `${row.Status ? `${row.Status} ` : ""}${row.NPTC_ID || ""}`, // ✅ Add combined value here
+  }));
+  
+  
 
   const columns: ColumnDef<ApplicationData>[] = [
     {
@@ -201,6 +210,7 @@ export default function Pending() {
         return "-";
       },
     },
+    
     {
       accessorKey: "Status",
       header: "Status",
@@ -211,6 +221,8 @@ export default function Pending() {
         </div>
       ),
     },
+    
+    
     {
       accessorKey: "created_at",
       header: "Date of Application",
@@ -219,6 +231,19 @@ export default function Pending() {
         return date ? new Date(date).toLocaleDateString() : "-";
       },
     },
+
+    {
+      accessorKey: "Filter",
+      header: () => <div className="hidden">Filter</div>,
+      cell: ({ row }) => (
+        <div className="hidden">
+          `${row.original.Status ? `${row.original.Status} ` : ""}${row.original.NPTC_ID || ""}`
+        </div>
+      ),
+      enableHiding: false, // Prevents it from being toggled off
+      meta: { className: "hidden" }, // Applies a hidden class
+    },
+    
     {
       id: "actions",
       cell: ({ row }) => (
@@ -227,6 +252,7 @@ export default function Pending() {
         </Button>
       ),
     },
+    
   ];
 
   return (
@@ -253,7 +279,8 @@ export default function Pending() {
                 ) : null}
             </div>
             )}
-          <DataTable columns={columns} data={data} enableRowSelection onRowClick={handleRowClick} ColumnFilterName="name" />
+          <DataTable columns={columns} data={updatedData} onRowClick={handleRowClick} ColumnFilterName="Filter" />
+
         </div>
       </div>
     </MainLayout>
