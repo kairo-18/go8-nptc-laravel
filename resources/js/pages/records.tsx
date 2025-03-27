@@ -24,7 +24,7 @@ export default function Records({
 
     console.log("vrcompanyid", vrCompanyId);
 
-    const [activeTab, setActiveTab] = useState(userRole === 'VR Admin' ? 'operator' : 'vr-company');
+    const [activeTab, setActiveTab] = useState(userRole === 'VR Admin' ? 'operator' : userRole === 'Driver' ? 'driver' : 'vr-company');
     const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
     const [selectedOperatorId, setSelectedOperatorId] = useState<number | null>(null);
 

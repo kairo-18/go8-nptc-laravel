@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Driver;
+use App\Models\Vehicle;
+use App\Models\Trip;
+use App\Models\Passenger;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\Registered;
 use Spatie\Permission\Models\Role;
@@ -123,6 +126,10 @@ class DriverController extends Controller
             'Status' => 'Pending',
         ]);
     
+        if (!empty($validatedData['vehicle_id'])) {
+            Vehicle::where('id', $validatedData['vehicle_id'])->update(['driver_id' => $driver->id]);
+        }
+
         // File uploads and storing the path under "license"
         if ($request->hasFile('License')) {
             $media = $driver->addMediaFromRequest('License')->toMediaCollection('license', 'private');
@@ -296,5 +303,37 @@ class DriverController extends Controller
 
         return response()->json(['message' => 'Driver deleted successfully']);
     }
-
+    public function getDriverTrips()
+    {
+        $user = auth()->user();
+    
+        if ($user->hasRole('Driver')) {
+            // Find the driver record for the authenticated user
+            $driver = Driver::where('user_id', $user->id)->first();
+    
+            if (!$driver) {
+                return response()->json(['error' => 'Driver record not found'], 404);
+            }
+    
+            // Fetch the latest trip for the driver
+            $latestTrip = Trip::where('driver_id', $driver->id)->latest()->first();
+    
+            if (!$latestTrip) {
+                return response()->json(['error' => 'No trips found'], 404);
+            }
+    
+            // Fetch all passengers for the latest trip
+            $passengers = Passenger::where('trip_id', $latestTrip->id)->get();
+    
+            return response()->json([
+                'trip' => $latestTrip,
+                'passengers' => $passengers
+            ]);
+        }
+    
+        return response()->json(['error' => 'Unauthorized'], 403);
+    }
+    
+    
+    
 }

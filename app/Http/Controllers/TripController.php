@@ -107,4 +107,40 @@ class TripController extends Controller
         return response()->json($response->json());
     }
 
+    public function startTrip($tripId)
+    {
+        try {
+            $trip = Trip::findOrFail($tripId);
+    
+            if ($trip->status === 'Ongoing') {
+                return response()->json(['message' => 'Trip is already ongoing'], 400);
+            }
+    
+            $trip->status = 'Ongoing';
+            $trip->save();
+    
+            return response()->json(['message' => 'Trip started successfully', 'trip' => $trip], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to start trip', 'details' => $e->getMessage()], 500);
+        }
+    }
+
+    public function endTrip($tripId)
+    {
+        try {
+            $trip = Trip::findOrFail($tripId);
+    
+            if ($trip->status === 'Done') {
+                return response()->json(['message' => 'Trip is already done'], 400);
+            }
+    
+            $trip->status = 'Done';
+            $trip->save();
+    
+            return response()->json(['message' => 'Trip ended successfully', 'trip' => $trip], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to end trip', 'details' => $e->getMessage()], 500);
+        }
+    }
+    
 }
