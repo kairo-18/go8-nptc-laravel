@@ -165,12 +165,27 @@ export default function Pending() {
     {
       accessorKey: "type",
       header: "Type",
-      cell: ({ row }) => (
-        <span className="px-2 py-1 text-sm font-medium border border-black text-black rounded-md">
-          {row.getValue("type")}
-        </span>
-      ),
+      cell: ({ row }) => {
+        const type = row.getValue("type");
+    
+        // Map data types to colors
+        const typeColors: Record<string, string> = {
+          "VR Company": "bg-red-500 text-white",
+          "Operator": "bg-yellow-500 text-White",
+          "Driver": "bg-green-500 text-white",
+          "Vehicle": "bg-blue-500 text-white",
+        };
+    
+        return (
+          <span
+            className={`px-2 py-1 text-sm font-medium rounded-md ${typeColors[type] || "bg-gray-200 text-black"}`}
+          >
+            {type}
+          </span>
+        );
+      },
     },
+    
     {
       accessorKey: "name",
       header: "Name",
@@ -217,7 +232,7 @@ export default function Pending() {
   return (
     <MainLayout breadcrumbs={breadcrumbs}>
       <Head title="Pending" />
-      <div className="rounded-md border border-gray-300 p-5">
+      <div className="p-10">
         <div className="space-y-6">
           <h2 className="text-2xl font-semibold">Pending</h2>
           <p className="text-gray-600">Final approval of applications</p>
@@ -238,7 +253,7 @@ export default function Pending() {
                 ) : null}
             </div>
             )}
-          <DataTable columns={columns} data={data} enableRowSelection onRowClick={handleRowClick} />
+          <DataTable columns={columns} data={data} enableRowSelection onRowClick={handleRowClick} ColumnFilterName="name" />
         </div>
       </div>
     </MainLayout>
