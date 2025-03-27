@@ -1,9 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
+import { Input, InputWithRemoveButton } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/react';
 import { useCallback, useEffect, useState } from 'react';
+import { X } from 'lucide-react'; // Import the X icon
 
 interface CreateVrCompanyProps {
     companies: { id: number; BusinessPermitNumber: string }[];
@@ -13,7 +14,7 @@ interface CreateVrCompanyProps {
     setCompanyData: (data: any) => void;
     companyData: any;
     isEditing: boolean;
-    onSubmitRef?: (submitFn: () => void) => void; // Add this prop
+    onSubmitRef?: (submitFn: () => void) => void;
 }
 
 export default function CreateVrCompany({
@@ -45,7 +46,7 @@ export default function CreateVrCompany({
             setData((prevData) => ({
                 ...data,
                 ...prevData,
-                oldCompanyName: companyData.CompanyName, // Ensure this holds the old company name
+                oldCompanyName: companyData.CompanyName,
                 CompanyName: companyData.CompanyName,
                 BusinessPermitNumber: companyData.BusinessPermitNumber,
             }));
@@ -56,7 +57,6 @@ export default function CreateVrCompany({
         e.preventDefault();
         setProcessing(true);
 
-        // Separate file data from text fields
         const fileFields = ['BusinessPermit', 'BIR_2303', 'DTI_Permit', 'BrandLogo', 'SalesInvoice'];
         const fileData = new FormData();
         let hasFiles = false;
@@ -70,19 +70,19 @@ export default function CreateVrCompany({
 
         try {
             if (isEditing) {
-                // Step 1: Upload files first if any exist
                 if (hasFiles) {
+                    console.log(data);
                     await post(route('vr-company.upload-files', { id: companyData.id }), {
                         data: fileData,
                         onSuccess: () => console.log('Files uploaded successfully'),
                         onError: (errors) => {
+                            console.error('Upload failed:', errors);
                             setErrors(errors);
                             setProcessing(false);
                         },
                     });
                 }
 
-                // Step 2: Patch request for company updates
                 const updatedData = {
                     oldCompanyName: companyData.CompanyName,
                     CompanyName: data.CompanyName,
@@ -102,7 +102,6 @@ export default function CreateVrCompany({
                     },
                 });
             } else {
-                // Normal create request for new entries
                 await post(route('vr-company.store'), {
                     data,
                     onSuccess: () => {
@@ -122,23 +121,67 @@ export default function CreateVrCompany({
         }
     };
 
-    // Notify parent when form data changes
     useEffect(() => {
         if (setCompanyData) {
             setCompanyData(data);
         }
     }, [data]);
 
-    // Memoized submit function
     const handleSubmitCallback = useCallback(() => {
         handleSubmit({ preventDefault: () => {} } as React.FormEvent);
     }, [handleSubmit]);
+
+    const [fileKeys, setFileKeys] = useState({
+        BusinessPermit: Date.now(),
+        BIR_2303: Date.now(),
+        DTI_Permit: Date.now(),
+        BrandLogo: Date.now(),
+        SalesInvoice: Date.now(),
+    });
+
+    const handleFileRemove = (field: string) => {
+        setData(field, null);
+
+        // Force re-render by updating the key
+        setFileKeys((prevKeys) => ({
+            ...prevKeys,
+            [field]: Date.now(),
+        }));
+    };
 
     useEffect(() => {
         if (onSubmitRef) {
             onSubmitRef(handleSubmitCallback);
         }
     }, [handleSubmitCallback]);
+
+    // Helper function to render file input with remove button
+    const renderFileInput = (field: string, label: string) => (
+        <div>
+            <Label htmlFor={field}>{label}</Label>
+            <Input
+                key={fileKeys[field]} // Force re-render when key changes
+                id={field}
+                type="file"
+                onChange={(e) => setData(field, e.target.files[0])}
+            />
+            {data[field] && (
+                <div className="mt-1 flex items-center justify-between gap-2">
+                    <p className="text-sm text-gray-500">{data[field].name}</p>
+                    <button
+                        type="button"
+                        onClick={() => handleFileRemove(field)}
+                        className="text-red-500 hover:text-red-700"
+                        aria-label={`Remove ${label}`}
+                    >
+                        x
+                    </button>
+                </div>
+            )}
+            {errors[field] && <p className="text-sm text-red-500">{errors[field]}</p>}
+        </div>
+    );
+
 
     return (
         <div className="mx-auto mt-6 w-full max-w-6xl">
@@ -156,12 +199,7 @@ export default function CreateVrCompany({
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <Label htmlFor="BusinessPermit">Business Permit</Label>
-                                <Input id="BusinessPermit" type="file" onChange={(e) => setData('BusinessPermit', e.target.files[0])} />
-                                {data.BusinessPermit && <p className="text-sm text-gray-500">{data.BusinessPermit.name}</p>}
-                                {errors.BusinessPermit && <p className="text-sm text-red-500">{errors.BusinessPermit}</p>}
-                            </div>
+                            {renderFileInput('BusinessPermit', 'Business Permit')}
                             <div>
                                 <Label htmlFor="CompanyName">Company Name</Label>
                                 <Input
@@ -185,34 +223,14 @@ export default function CreateVrCompany({
                                 />
                                 {errors.BusinessPermitNumber && <p className="text-sm text-red-500">{errors.BusinessPermitNumber}</p>}
                             </div>
-                            <div>
-                                <Label htmlFor="BIR_2303">BIR 2303</Label>
-                                <Input id="BIR_2303" type="file" onChange={(e) => setData('BIR_2303', e.target.files[0])} />
-                                {data.BIR_2303 && <p className="text-sm text-gray-500">{data.BIR_2303.name}</p>}
-                                {errors.BIR_2303 && <p className="text-sm text-red-500">{errors.BIR_2303}</p>}
-                            </div>
+                            {renderFileInput('BIR_2303', 'BIR 2303')}
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <Label htmlFor="DTI_Permit">DTI Permit</Label>
-                                <Input id="DTI_Permit" type="file" onChange={(e) => setData('DTI_Permit', e.target.files[0])} />
-                                {data.DTI_Permit && <p className="text-sm text-gray-500">{data.DTI_Permit.name}</p>}
-                                {errors.DTI_Permit && <p className="text-sm text-red-500">{errors.DTI_Permit}</p>}
-                            </div>
-                            <div>
-                                <Label htmlFor="BrandLogo">Brand Logo</Label>
-                                <Input id="BrandLogo" type="file" onChange={(e) => setData('BrandLogo', e.target.files[0])} />
-                                {data.BrandLogo && <p className="text-sm text-gray-500">{data.BrandLogo.name}</p>}
-                                {errors.BrandLogo && <p className="text-sm text-red-500">{errors.BrandLogo}</p>}
-                            </div>
+                            {renderFileInput('DTI_Permit', 'DTI Permit')}
+                            {renderFileInput('BrandLogo', 'Brand Logo')}
                         </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <Label htmlFor="SalesInvoice">Sales Invoice</Label>
-                                <Input id="SalesInvoice" type="file" onChange={(e) => setData('SalesInvoice', e.target.files[0])} />
-                                {data.SalesInvoice && <p className="text-sm text-gray-500">{data.SalesInvoice.name}</p>}
-                                {errors.SalesInvoice && <p className="text-sm text-red-500">{errors.SalesInvoice}</p>}
-                            </div>
+                            {renderFileInput('SalesInvoice', 'Sales Invoice')}
                         </div>
                         {isButtonDisabled === false ? (
                             <div className="flex justify-end">

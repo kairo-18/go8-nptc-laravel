@@ -19,17 +19,17 @@ class DriverController extends Controller
     public function index(Request $request): Response
     {
         $driversQuery = Driver::with(['user', 'operator.user', 'vrCompany']);
-        
+
         // If an ID is provided in the query, filter by that ID
         if ($request->has('id')) {
             $driversQuery->where('id', $request->input('id'));
         }
-    
+
         // Get the drivers
         $drivers = $driversQuery->get()
             ->map(function ($driver) {
                 $mediaCollections = ['license', 'photo', 'nbi_clearance', 'police_clearance', 'bir_clearance'];
-    
+
                 // Flatten media collections into a single array
                 $mediaFiles = collect($mediaCollections)->flatMap(function ($collection) use ($driver) {
                     return $driver->getMedia($collection)->map(fn($media) => [
@@ -40,7 +40,7 @@ class DriverController extends Controller
                         'url' => route('preview-driver-media', ['mediaId' => $media->id]),
                     ]);
                 })->values();
-    
+
                 return [
                     'NPTC_ID'=>$driver->NPTC_ID,
                     'id' => $driver->id,
@@ -52,7 +52,7 @@ class DriverController extends Controller
                     'BirthDate' => $driver->user->BirthDate,
                     'email' => $driver->user->email,
                     'ContactNumber' => $driver->user->ContactNumber,
-                    'password' => $driver->user->password, 
+                    'password' => $driver->user->password,
                     'LicenseNumber' => $driver->LicenseNumber,
                     'Status' => $driver->Status,
                     'operator' => $driver->operator ? [
@@ -67,12 +67,12 @@ class DriverController extends Controller
                     'media_files' => $mediaFiles,
                 ];
             });
-    
+
         return Inertia::render('drivers', [
             'drivers' => $drivers,
         ]);
     }
-    
+
 
     public function store(Request $request)
     {
@@ -87,19 +87,19 @@ class DriverController extends Controller
             'BirthDate' => 'required|date',
             'ContactNumber' => 'required|string',
             'password' => 'required|string|min:6',
-    
+
             'operator_id' => 'required|exists:operators,id',
             'vr_company_id' => 'required|exists:vr_companies,id',
             'vehicle_id' => 'nullable|exists:vehicles,id',
             'LicenseNumber' => 'nullable|string|unique:drivers,LicenseNumber',
-    
+
             'License' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
             'Photo' => 'nullable|file|mimes:jpg,png|max:1024',
             'NBI_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
             'Police_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
             'BIR_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
         ]);
-    
+
         // Create the user
         $user = User::create([
             'username' => $validatedData['username'],
@@ -112,9 +112,9 @@ class DriverController extends Controller
             'ContactNumber' => $validatedData['ContactNumber'],
             'password' => Hash::make($validatedData['password']),
         ]);
-    
+
         $user->assignRole('Driver');
-    
+
         $driver = $user->driver()->create([
             'operator_id' => $validatedData['operator_id'],
             'vr_company_id' => $validatedData['vr_company_id'],
@@ -122,7 +122,7 @@ class DriverController extends Controller
             'LicenseNumber' => $validatedData['LicenseNumber'] ?? null,
             'Status' => 'Pending',
         ]);
-    
+
         // File uploads and storing the path under "license"
         if ($request->hasFile('License')) {
             $media = $driver->addMediaFromRequest('License')->toMediaCollection('license', 'private');
@@ -144,14 +144,14 @@ class DriverController extends Controller
             $media = $driver->addMediaFromRequest('BIR_clearance')->toMediaCollection('bir_clearance', 'private');
             $driver->update(['BIR_clearance' => $media->getPath()]);
         }
-    
+
         return response()->json([
             'message' => 'Driver created successfully',
             'user' => $user,
             'driver' => $driver
         ], 201);
     }
-    
+
     public function updateDriverMedia(Request $request, Driver $driver){
 
         // Validate request
@@ -163,7 +163,7 @@ class DriverController extends Controller
             'Police_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
             'BIR_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
         ]);
-    
+
         // File collections mapping
         $files = [
             'License' => 'license',
@@ -171,25 +171,25 @@ class DriverController extends Controller
             'NBI_clearance' => 'nbi_clearance',
             'Police_clearance' => 'police_clearance',
             'BIR_clearance' => 'bir_clearance',
-    
+
         ];
-    
+
         foreach ($files as $fileKey => $collection) {
             if ($request->hasFile($fileKey)) {
                 \Log::info("Uploading new file for: {$fileKey}");
-    
+
                 // Clear existing media for this collection
                 $driver->clearMediaCollection($collection);
-    
+
                 // Upload new file to the private media collection
                 $mediaItem = $driver->addMediaFromRequest($fileKey)->toMediaCollection($collection, 'private');
-    
+
                 \Log::info("Uploaded file for {$fileKey}: {$mediaItem->file_name}");
             }
         }
-    
+
     }
-    
+
 
     public function downloadMedia($mediaId)
     {
@@ -212,7 +212,7 @@ class DriverController extends Controller
 
         return response()->file($filePath, ['Content-Type' => $mimeType]);
     }
-    
+
 
     public function show(Driver $driver)
     {
@@ -234,7 +234,7 @@ class DriverController extends Controller
 
         'operator_id' => 'sometimes|exists:operators,id',
         'vr_company_id' => 'sometimes|exists:vr_companies,id',
-        'Status' => 'sometimes|in:Pending,Approved,Rejected',   
+        'Status' => 'sometimes|in:Pending,Approved,Rejected',
         'LicenseNumber' => 'sometimes|string|unique:drivers,LicenseNumber,' . $driver->id,
 
         'License' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
@@ -254,8 +254,8 @@ class DriverController extends Controller
         'Address' => $validatedData['Address'] ?? $driver->user->Address,
         'BirthDate' => $validatedData['BirthDate'] ?? $driver->user->BirthDate,
         'ContactNumber' => $validatedData['ContactNumber'] ?? $driver->user->ContactNumber,
-        'password' => isset($validatedData['password']) 
-            ? Hash::make($validatedData['password']) 
+        'password' => isset($validatedData['password'])
+            ? Hash::make($validatedData['password'])
             : $driver->user->password,
     ]);
 
@@ -284,7 +284,7 @@ class DriverController extends Controller
         $driver->addMediaFromRequest('BIR_clearance')->toMediaCollection('bir_clearance', 'private');
     }
 
-    
+
 }
 
 
@@ -295,6 +295,22 @@ class DriverController extends Controller
         $driver->user()->delete();
 
         return response()->json(['message' => 'Driver deleted successfully']);
+    }
+
+    public function deleteMedia(Request $request, Driver $driver)
+    {
+        $request->validate([
+            'media_id' => 'required|exists:media,id',
+        ]);
+
+        $media = Media::findOrFail($request->media_id);
+
+        // Verify the media belongs to this vehicle
+        if ($media->model_id != $driver->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $media->delete();
     }
 
 }
