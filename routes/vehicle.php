@@ -26,3 +26,6 @@ Route::get('preview-vehicle-media/{mediaId}', [VehicleController::class, 'previe
 ->name('preview-vehicle-media');
 
 Route::post('/vehicles/{vehicle}/upload-files', [VehicleController::class, 'updateVehicleMedia'])->name('vehicle.upload-files');
+
+Route::delete('/vehicles/{vehicle}/media', [VehicleController::class, 'deleteMedia'])
+    ->name('vehicles.delete-media');

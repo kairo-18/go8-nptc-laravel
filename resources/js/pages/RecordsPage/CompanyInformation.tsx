@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
-export default function CompanyInformation({ companyData, handleChange, handleFileUpload, handlePreview }) {
+export default function CompanyInformation({ companyData, handleChange, handleFileUpload, handlePreview, handleDeleteFile }) {
     const documentTypes = [
         { label: 'DTI or SEC Permit', key: 'dti_permit', key2: 'DTI_Permit' },
         { label: 'BIR 2303', key: 'bir_2303', key2: 'BIR_2303' },
@@ -39,6 +39,9 @@ export default function CompanyInformation({ companyData, handleChange, handleFi
                                     <Input type="file" id={key} onChange={(e) => handleFileUpload(e, key2)} />
                                     <Button type="button" variant="outline" onClick={() => handlePreview(key)} className="min-w-20 cursor-pointer text-white">
                                         Preview
+                                    </Button>
+                                    <Button type="button" variant="outline" onClick={() => handleDeleteFile(key)} className="min-w-20 cursor-pointer text-white">
+                                        Delete
                                     </Button>
                                 </div>
                             </div>

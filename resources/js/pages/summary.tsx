@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import CreateVrAdmin from './create-vr-admin';
 import CreateVrCompany from './create-vr-company';
 import CreateVrContacts from './create-vr-contacts';
+import { navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
 
 interface CreateSummaryProps {
     companies: { id: number; BusinessPermitNumber: string }[];
@@ -56,14 +57,25 @@ export default function Summary({
         setProcessing(true);
 
         try {
-            // Call the handleSubmit functions of the modals
-            if (companySubmitRef.current) {
+            // Call only the submit functions for sections that have valid data
+            if (companyData &&
+                Object.keys(companyData).length > 0 &&
+                Object.values(companyData).some(value => value !== null && value !== '') &&
+                companySubmitRef.current) {
                 await companySubmitRef.current();
             }
-            if (adminSubmitRef.current) {
+
+            if (adminData &&
+                Object.keys(adminData).length > 0 &&
+                Object.values(adminData).some(value => value !== null && value !== '') &&
+                adminSubmitRef.current) {
                 await adminSubmitRef.current();
             }
-            if (contactsSubmitRef.current) {
+
+            if (contactsData &&
+                Object.keys(contactsData).length > 0 &&
+                Object.values(contactsData).some(value => value !== null && value !== '') &&
+                contactsSubmitRef.current) {
                 await contactsSubmitRef.current();
             }
 
@@ -72,8 +84,11 @@ export default function Summary({
             initialAdminData.current = adminFormData.current;
             initialContactsData.current = contactsFormData.current;
 
-            setHasChanges(false); // No changes after saving
+            setHasChanges(false);
             setProcessing(false);
+
+            // Refresh the page
+            window.location.reload();
         } catch (error) {
             console.error('Error saving changes:', error);
             setProcessing(false);

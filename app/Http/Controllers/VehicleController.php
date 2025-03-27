@@ -11,7 +11,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class VehicleController extends Controller
 {
-    
+
     public function index(Request $request): Response
     {
         $vehiclesQuery = Vehicle::with(['operator.user', 'driver.user']);
@@ -61,7 +61,7 @@ class VehicleController extends Controller
         ]);
     }
     public function store(Request $request)
-    {   
+    {
         $validatedData = $request->validate([
             'operator_id' => 'required|exists:operators,id',
             'driver_id' => 'nullable|exists:drivers,id',
@@ -85,7 +85,7 @@ class VehicleController extends Controller
 
         $this->handleFileUpload($request, $vehicle);
 
-        
+
     }
 
     public function update(Request $request, Vehicle $vehicle)
@@ -96,14 +96,14 @@ class VehicleController extends Controller
             'PlateNumber' => 'sometimes|string|unique:vehicles,PlateNumber,' . $vehicle->id,
             'Model' => 'sometimes|string',
             'Brand' => 'sometimes|string',
-            'SeatNumber' => 'sometimes|integer',    
+            'SeatNumber' => 'sometimes|integer',
             'Status' => 'sometimes|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected',
-          
+
         ]);
-    
+
         $vehicle->update($validatedData);
         $this->handleFileUpload($request, $vehicle);
-    
+
         return response()->json(['message' => 'Vehicle updated successfully', 'vehicle' => $vehicle]);
     }
     public function updateVehicleMedia(Request $request, Vehicle $vehicle)
@@ -170,25 +170,41 @@ public function previewMedia($mediaId)
     }
 
     private function handleFileUpload(Request $request, Vehicle $vehicle)
-{
-    $imageFields = [
-        'front_image' => 'front_image',
-        'back_image' => 'back_image',
-        'left_side_image' => 'left_side_image',
-        'right_side_image' => 'right_side_image',
-        'or_image' => 'or_image',
-        'cr_image' => 'cr_image',
-        'id_card_image' => 'id_card_image',
-        'gps_certificate_image' => 'gps_certificate_image',
-        'inspection_certificate_image' => 'inspection_certificate_image',
-    ];
+    {
+        $imageFields = [
+            'front_image' => 'front_image',
+            'back_image' => 'back_image',
+            'left_side_image' => 'left_side_image',
+            'right_side_image' => 'right_side_image',
+            'or_image' => 'or_image',
+            'cr_image' => 'cr_image',
+            'id_card_image' => 'id_card_image',
+            'gps_certificate_image' => 'gps_certificate_image',
+            'inspection_certificate_image' => 'inspection_certificate_image',
+        ];
 
-    foreach ($imageFields as $field => $collection) {
-        if ($request->hasFile($field)) {
-            $vehicle->addMediaFromRequest($field)->toMediaCollection($collection, 'private');
+        foreach ($imageFields as $field => $collection) {
+            if ($request->hasFile($field)) {
+                $vehicle->addMediaFromRequest($field)->toMediaCollection($collection, 'private');
+            }
         }
     }
-}
+
+    public function deleteMedia(Request $request, Vehicle $vehicle)
+    {
+        $request->validate([
+            'media_id' => 'required|exists:media,id',
+        ]);
+
+        $media = Media::findOrFail($request->media_id);
+
+        // Verify the media belongs to this vehicle
+        if ($media->model_id != $vehicle->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $media->delete();
+    }
 
 
 }

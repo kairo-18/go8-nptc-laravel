@@ -145,7 +145,7 @@ export function AppSidebar() {
                 <NavMain items={filteredNavItems} />
             </SidebarContent>
 
-            <SidebarFooter className="text-white">
+            <SidebarFooter className="text-white border border-white hover:border-red-700 hover:bg-white hover:text-blue-900 rounded-2xl">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>

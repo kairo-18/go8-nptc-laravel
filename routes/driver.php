@@ -4,7 +4,7 @@ use App\Models\Vehicle;
 use App\Models\VRCompany;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
-use App\Models\Driver;  
+use App\Models\Driver;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
@@ -38,9 +38,5 @@ Route::get('/driver-dashboard', function () {
 
 
 
-
-
-
-
-
-
+Route::delete('/drivers/{driver}/media', [DriverController::class, 'deleteMedia'])
+    ->name('drivers.delete-media');

@@ -35,14 +35,26 @@ class MailReceive implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('thread.' . $this->mail->thread->id),
+            new PrivateChannel('thread.' . $this->mail->thread_id),
+            new PrivateChannel('user.' . $this->mail->sender_id), // Add sender's channel
+            new PrivateChannel('user.' . $this->mail->thread->receiver_id),
         ];
     }
     public function broadcastWith(): array
     {
+        $lastMail = $this->mail->thread->mails()
+            ->latest()
+            ->with(['media'])
+            ->first();
+
+        // Add preview URLs to each media item
+        $lastMail->media->each(function ($media) {
+            $media->preview_url = url('/preview-media/' . $media->id);
+        });
+
         return [
             'id' => $this->mail->thread->id,
-            'last_mail' => $this->mail->thread->mails()->latest()->first(), // ✅ Send latest mail details
+            'last_mail' => $lastMail,
             'created_at' => $this->mail->thread->created_at,
         ];
     }

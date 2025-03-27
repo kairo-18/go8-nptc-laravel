@@ -7,6 +7,7 @@ import ContactInformation from '../pages/RecordsPage/ContactInformation';
 import FilePreviewDialog from '../pages/RecordsPage/FilePreviewDialog';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { router } from '@inertiajs/react';
 
 export default function RecordsPage({ companies, companyMedia, company, admin, contacts }) {
     const breadcrumbs = [{ title: 'Company Edit', href: `/vr-company/edit/${company?.id}` }];
@@ -131,6 +132,25 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
         }
     };
 
+    const handleDeleteFile = async (mediaName) => {
+        const file = companyMediaState.find((media) => media.collection_name === mediaName)
+
+        if (!file) {
+            alert('No file found');
+            return;
+        }
+
+        await router.delete(`/vr-company/delete-media/${file.id}`, {
+            preserveScroll: true,
+            onSuccess: () => {
+                alert('File deleted successfully');
+            },
+            onError: () => {
+                alert('Failed to delete file.');
+            }
+        });
+    };
+
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
             <div className="border-border mx-auto w-[75vw] rounded-lg border bg-white p-6 shadow-sm">
@@ -158,6 +178,7 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
                         handleChange={handleChange}
                         handleFileUpload={handleFileUpload}
                         handlePreview={handlePreview}
+                        handleDeleteFile={handleDeleteFile}
                     />
                     <OwnerInformation
                         adminData={adminData}
