@@ -318,13 +318,13 @@ class DriverController extends Controller
                 return response()->json(['error' => 'Driver record not found'], 404);
             }
     
-            $now = now(); 
+            $now = now();
     
             $earliestTrip = Trip::where('driver_id', $driver->id)
-                ->where('pickupDate', '>=', $now) 
-                ->where('status', '!=', 'Done') 
-                ->orderBy('pickupDate', 'asc') 
-                ->orderBy('created_at', 'asc') 
+                ->where('pickupDate', '>=', $now)
+                ->where('status', '!=', 'Done')
+                ->orderBy('pickupDate', 'asc')
+                ->orderBy('created_at', 'asc')
                 ->first();
     
             if (!$earliestTrip) {
@@ -334,14 +334,22 @@ class DriverController extends Controller
             // Fetch all passengers for the selected trip
             $passengers = Passenger::where('trip_id', $earliestTrip->id)->get();
     
+            // Fetch vehicle details
+            $vehicle = Vehicle::where('id', $earliestTrip->vehicle_id)->first();
+    
             return response()->json([
                 'trip' => $earliestTrip,
+                'vehicle' => $vehicle ? [
+                    'Model' => $vehicle->Model,
+                    'PlateNumber' => $vehicle->PlateNumber
+                ] : null,
                 'passengers' => $passengers
             ]);
         }
     
         return response()->json(['error' => 'Unauthorized'], 403);
     }
+    
     
     
 
