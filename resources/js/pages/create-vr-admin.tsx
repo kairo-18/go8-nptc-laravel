@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 interface CreateVrAdminProps {
     companies: { id: number; BusinessPermitNumber: string }[];
     onNextTab: () => void;
+    onPreviousTab: () => void;
     isTitleDisabled: boolean;
     isButtonDisabled: boolean;
     setAdminData: (data: any) => void;
@@ -21,6 +22,7 @@ interface CreateVrAdminProps {
 export default function CreateVrAdmin({
     companies,
     onNextTab,
+    onPreviousTab,
     isTitleDisabled,
     isButtonDisabled,
     setAdminData,
@@ -52,49 +54,49 @@ export default function CreateVrAdmin({
         }
     }, [isEditing, adminData]);
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);
 
-        if (isEditing) {
-            // Log the data being sent in the request
-            console.log('Submitting Admin data:', data);
-
-            patch(route('vr-admins.update', adminData.id), {
-                onSuccess: () => {
-                    console.log('Update Success:', data);
-                    setAdminData([]);
-                    setProcessing(false);
-                },
-                onError: (errors) => {
-                    console.log('Update Failed:', errors);
-                    setErrors(errors);
-                    setProcessing(false);
-                },
-            });
-        } else {
-            post(route('vr-admins.store'), {
-                onSuccess: () => {
-                    if (!isEditing2) {
+        try {
+            if (isEditing) {
+                console.log('Updating Admin:', data);
+                await patch(route('vr-admins.update', adminData.id), {
+                    onSuccess: () => {
+                        console.log('Update Success:', data);
                         setAdminData(data);
-                        onNextTab();
-                    }
-
-                    console.log(data);
-                },
-                onError: (errors) => {
-                    setErrors(errors);
-                    setProcessing(false);
-                },
-            });
+                        setProcessing(false);
+                    },
+                    onError: (errors) => {
+                        console.log('Update Failed:', errors);
+                        setErrors(errors);
+                        setProcessing(false);
+                    },
+                });
+            } else {
+                console.log('Creating Admin:', data);
+                await post(route('vr-admins.store'), {
+                    onSuccess: () => {
+                        setAdminData(data);
+                        if (!isEditing2) {
+                            onNextTab();
+                        }
+                    },
+                    onError: (errors) => {
+                        setErrors(errors);
+                        setProcessing(false);
+                    },
+                });
+            }
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            setProcessing(false);
         }
     };
 
     // Notify parent when form data changes
     useEffect(() => {
-        if (setAdminData) {
-            setAdminData(data);
-        }
+        setAdminData(data);
     }, [data]);
 
     useEffect(() => {
@@ -105,12 +107,12 @@ export default function CreateVrAdmin({
 
     return (
         <div className="mx-auto mt-6 w-full max-w-6xl">
-            {isTitleDisabled === false ? (
+            {!isTitleDisabled && (
                 <>
                     <h1 className="text-2xl font-semibold">Create Vehicle Rental Admin</h1>
                     <p className="text-gray-500">Assign an admin to a vehicle rental company.</p>
                 </>
-            ) : null}
+            )}
             <Card className="mt-6 shadow-md">
                 <CardHeader>
                     <CardTitle className="text-lg">Owner Information</CardTitle>
@@ -185,13 +187,12 @@ export default function CreateVrAdmin({
                             </div>
                         </div>
 
-                        {isButtonDisabled === false ? (
-                            <div className="flex justify-end">
-                                <Button type="submit" disabled={processing} className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700">
-                                    {processing ? 'Submitting...' : 'Submit'}
-                                </Button>
-                            </div>
-                        ) : null}
+                        {/* Buttons */}
+                        <div className="flex justify-between">
+                            <Button type="submit" disabled={processing} className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700">
+                                {processing ? 'Submitting...' : 'Submit'}
+                            </Button>
+                        </div>
                     </form>
                 </CardContent>
             </Card>
