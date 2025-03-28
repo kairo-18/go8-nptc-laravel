@@ -307,36 +307,41 @@ class DriverController extends Controller
     }
 
     public function getDriverTrips()
-    {
-        $user = auth()->user();
-    
-        if ($user->hasRole('Driver')) {
-            // Find the driver record for the authenticated user
-            $driver = Driver::where('user_id', $user->id)->first();
-    
-            if (!$driver) {
-                return response()->json(['error' => 'Driver record not found'], 404);
-            }
-    
-            // Fetch the latest trip for the driver
-            $latestTrip = Trip::where('driver_id', $driver->id)->latest()->first();
-    
-            if (!$latestTrip) {
-                return response()->json(['error' => 'No trips found'], 404);
-            }
-    
-            // Fetch all passengers for the latest trip
-            $passengers = Passenger::where('trip_id', $latestTrip->id)->get();
-    
-            return response()->json([
-                'trip' => $latestTrip,
-                'passengers' => $passengers
-            ]);
+{
+    $user = auth()->user();
+
+    if ($user->hasRole('Driver')) {
+        // Find the driver record for the authenticated user
+        $driver = Driver::where('user_id', $user->id)->first();
+
+        if (!$driver) {
+            return response()->json(['error' => 'Driver record not found'], 404);
         }
-    
-        return response()->json(['error' => 'Unauthorized'], 403);
+
+        $now = now(); 
+
+        $earliestTrip = Trip::where('driver_id', $driver->id)
+            ->where('pickupDate', '>=', $now) 
+            ->orderBy('pickupDate', 'asc') 
+            ->orderBy('created_at', 'asc') 
+            ->first();
+
+        if (!$earliestTrip) {
+            return response()->json(['error' => 'No upcoming trips found'], 404);
+        }
+
+        // Fetch all passengers for the selected trip
+        $passengers = Passenger::where('trip_id', $earliestTrip->id)->get();
+
+        return response()->json([
+            'trip' => $earliestTrip,
+            'passengers' => $passengers
+        ]);
     }
-    
+
+    return response()->json(['error' => 'Unauthorized'], 403);
+}
+
     
 
 

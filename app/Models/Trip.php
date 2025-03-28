@@ -31,10 +31,21 @@ class Trip extends Model
 
     public static function generateNPTCId($prefix)
     {
-        $latestTrip = static::where('NPTC_ID', 'LIKE', "$prefix-%")->latest('id')->first();
-        $nextNumber = $latestTrip ? ((int)substr($latestTrip->nptc_ID, 3)) + 1 : 1;
+        $latestTrip = static::whereRaw("LOWER(\"NPTC_ID\") LIKE LOWER(?)", ["$prefix-%"])
+                            ->orderByDesc('id') 
+                            ->first();
+    
+        if ($latestTrip) {
+            // Extract numeric part dynamically
+            preg_match('/\d+$/', $latestTrip->NPTC_ID, $matches);
+            $nextNumber = isset($matches[0]) ? ((int)$matches[0]) + 1 : 1;
+        } else {
+            $nextNumber = 1;
+        }
+    
         return $prefix . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
+    
 
     public function driver()
     {
