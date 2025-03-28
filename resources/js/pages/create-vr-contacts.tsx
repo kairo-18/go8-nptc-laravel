@@ -46,6 +46,10 @@ export default function CreateVrContacts({
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
+    const handlePrevious = () => {
+        setData(contactsData); // Restore previous data
+    };
+
     useEffect(() => {
         if (isEditing && contactsData) {
             setData({
@@ -114,6 +118,10 @@ export default function CreateVrContacts({
         ));
     };
 
+    function onPreviousTab(event: MouseEvent<HTMLButtonElement, MouseEvent>): void {
+        throw new Error('Function not implemented.');
+    }
+
     return (
         <div className="mx-auto mt-6 w-full max-w-6xl">
             {isTitleDisabled === false ? (
@@ -124,8 +132,16 @@ export default function CreateVrContacts({
             ) : null}
             <Card className="mt-6 shadow-md">
                 <CardHeader>
-                    <CardTitle className="text-lg">Contact Information</CardTitle>
-                    <p className="text-sm text-gray-500">Details of the Vehicle Rental Contacts</p>
+                    <div className='flex justify-between'>
+                        <div>
+                            <CardTitle className="text-lg">Contact Information</CardTitle>
+                            <p className="text-sm text-gray-500">Details of the Vehicle Rental Contacts</p>
+                        </div>
+                        <Button type="button" onClick={addContact} className="bg-green-600 px-6 py-2 text-white hover:bg-green-700">
+                            Add Another Contact
+                        </Button>
+                    </div>
+
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -231,11 +247,9 @@ export default function CreateVrContacts({
                             </div>
                         ))}
                         <div className="flex justify-between">
-                            <Button type="button" onClick={addContact} className="bg-green-600 px-6 py-2 text-white hover:bg-green-700">
-                                Add Another Contact
-                            </Button>
                             {isButtonDisabled === false ? (
                                 <div className="flex justify-end">
+
                                     <Button type="submit" disabled={processing} className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700">
                                         {processing ? 'Submitting...' : 'Submit'}
                                     </Button>

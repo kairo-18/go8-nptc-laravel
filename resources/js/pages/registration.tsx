@@ -6,45 +6,41 @@ import MainLayout from './mainLayout';
 import Summary from './summary';
 
 export default function Registration({ companies }: { companies: { id: number; BusinessPermitNumber: string }[] }) {
+    const tabs = ['company', 'owner', 'contacts', 'summary'];
     const [activeTab, setActiveTab] = useState('company');
     const [companyData, setCompanyData] = useState<any>({});
     const [adminData, setAdminData] = useState(null);
     const [contactsData, setContactsData] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-    
 
     const goToNextTab = () => {
-        if (activeTab === 'company') setActiveTab('owner');
-        else if (activeTab === 'owner') setActiveTab('contacts');
-        else if (activeTab === 'contacts') setActiveTab('summary');
+        const currentIndex = tabs.indexOf(activeTab);
+        if (currentIndex < tabs.length - 1) {
+            setActiveTab(tabs[currentIndex + 1]);
+        }
     };
 
-    const checkDisable = () => {
-        if (activeTab === 'company' || activeTab === 'owner' || activeTab === 'contacts') return false;
-        else if (activeTab === 'summary') return true;
-        else return false;
+    const goToPreviousTab = () => {
+        const currentIndex = tabs.indexOf(activeTab);
+        if (currentIndex > 0) {
+            setActiveTab(tabs[currentIndex - 1]);
+        }
     };
 
     return (
         <MainLayout breadcrumbs={[{ title: 'Registration', href: '/registration' }]}>
-            <h1></h1>
             <div className="mx-auto mt-6 w-full max-w-6xl">
-                {/* Tabs Navigation in the format "Company / Owner Info / Contacts / Summary" */}
+                {/* Tabs Navigation */}
                 <div className="flex space-x-2 text-gray-500">
-                    {[
-                        { key: 'company', label: 'Company' },
-                        { key: 'owner', label: 'Owner Info' },
-                        { key: 'contacts', label: 'Contacts' },
-                        { key: 'summary', label: 'Summary' },
-                    ].map((tab, index, array) => (
-                        <span key={tab.key} className="flex items-center">
+                    {tabs.map((tab, index) => (
+                        <span key={tab} className="flex items-center">
                             <button
-                                onClick={() => setActiveTab(tab.key)}
-                                className={`text-sm font-medium ${activeTab === tab.key ? 'font-semibold text-black' : 'hover:text-black'}`}
+                                onClick={() => setActiveTab(tab)}
+                                className={`text-sm font-medium ${activeTab === tab ? 'font-semibold text-black' : 'hover:text-black'}`}
                             >
-                                {tab.label}
+                                {tab.charAt(0).toUpperCase() + tab.slice(1)}
                             </button>
-                            {index < array.length - 1 && <span className="mx-1">/</span>}
+                            {index < tabs.length - 1 && <span className="mx-1">/</span>}
                         </span>
                     ))}
                 </div>
@@ -54,8 +50,6 @@ export default function Registration({ companies }: { companies: { id: number; B
                     <CreateVrCompany
                         companies={companies}
                         onNextTab={goToNextTab}
-                        isTitleDisabled={checkDisable()}
-                        isButtonDisabled={checkDisable()}
                         setCompanyData={setCompanyData}
                         companyData={companyData}
                         isEditing={false}
@@ -65,8 +59,6 @@ export default function Registration({ companies }: { companies: { id: number; B
                     <CreateVrAdmin
                         companies={companies}
                         onNextTab={goToNextTab}
-                        isTitleDisabled={checkDisable()}
-                        isButtonDisabled={checkDisable()}
                         setAdminData={setAdminData}
                         adminData={adminData}
                         isEditing={false}
@@ -76,8 +68,6 @@ export default function Registration({ companies }: { companies: { id: number; B
                     <CreateVrContacts
                         companies={companies}
                         onNextTab={goToNextTab}
-                        isTitleDisabled={checkDisable()}
-                        isButtonDisabled={checkDisable()}
                         setContactsData={setContactsData}
                         contactsData={contactsData}
                         isEditing={false}
@@ -89,11 +79,27 @@ export default function Registration({ companies }: { companies: { id: number; B
                         companyData={companyData}
                         adminData={adminData}
                         contactsData={contactsData}
-                        isTitleDisabled={checkDisable()}
-                        isButtonDisabled={checkDisable()}
                         setIsEditing={setIsEditing}
                     />
                 )}
+
+                {/* Navigation Buttons */}
+                <div className="mt-4 flex justify-between">
+                    <button
+                        onClick={goToPreviousTab}
+                        disabled={activeTab === 'company'}
+                        className={`px-4 py-2 rounded ${activeTab === 'company' ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-700'}`}
+                    >
+                        Previous
+                    </button>
+                    <button
+                        onClick={goToNextTab}
+                        disabled={activeTab === 'summary'}
+                        className={`px-4 py-2 rounded ${activeTab === 'summary' ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-700'}`}
+                    >
+                        Next
+                    </button>
+                </div>
             </div>
         </MainLayout>
     );

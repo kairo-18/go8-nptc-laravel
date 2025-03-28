@@ -254,7 +254,7 @@ export default function CreateVrCompany({
 
                         <div className='flex justify-between'>
                             <Button onClick={handlePrevious} className="bg-gray-500 text-white">
-                                Previous
+                                Submit
                             </Button>
                             {isButtonDisabled === false ? (
                                 <div className="flex justify-end">

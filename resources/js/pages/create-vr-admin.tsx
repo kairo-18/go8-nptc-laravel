@@ -189,9 +189,6 @@ export default function CreateVrAdmin({
 
                         {/* Buttons */}
                         <div className="flex justify-between">
-                            <Button type="button" onClick={onPreviousTab} className="bg-gray-400 px-6 py-2 text-white hover:bg-gray-500">
-                                Previous
-                            </Button>
                             <Button type="submit" disabled={processing} className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700">
                                 {processing ? 'Submitting...' : 'Submit'}
                             </Button>
