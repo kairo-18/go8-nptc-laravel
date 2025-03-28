@@ -9,7 +9,7 @@ export default function Registration({ companies }: { companies: { id: number; B
     const tabs = ['company', 'owner', 'contacts', 'summary'];
     const [activeTab, setActiveTab] = useState('company');
     const [companyData, setCompanyData] = useState<any>({});
-    const [adminData, setAdminData] = useState(null);
+    const [adminData, setAdminData] = useState({});
     const [contactsData, setContactsData] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
 
@@ -88,14 +88,14 @@ export default function Registration({ companies }: { companies: { id: number; B
                     <button
                         onClick={goToPreviousTab}
                         disabled={activeTab === 'company'}
-                        className={`px-4 py-2 rounded ${activeTab === 'company' ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-700'}`}
+                        className={`rounded px-4 py-2 ${activeTab === 'company' ? 'cursor-not-allowed bg-gray-300' : 'bg-blue-500 text-white hover:bg-blue-700'}`}
                     >
                         Previous
                     </button>
                     <button
                         onClick={goToNextTab}
                         disabled={activeTab === 'summary'}
-                        className={`px-4 py-2 rounded ${activeTab === 'summary' ? 'bg-gray-300 cursor-not-allowed' : 'bg-blue-500 text-white hover:bg-blue-700'}`}
+                        className={`rounded px-4 py-2 ${activeTab === 'summary' ? 'cursor-not-allowed bg-gray-300' : 'bg-blue-500 text-white hover:bg-blue-700'}`}
                     >
                         Next
                     </button>

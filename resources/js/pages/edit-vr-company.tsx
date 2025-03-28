@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import MainLayout from './mainLayout';
-import CompanyInformation from '../pages/RecordsPage/CompanyInformation';
-import OwnerInformation from '../pages/RecordsPage/OwnerInformation';
-import ContactInformation from '../pages/RecordsPage/ContactInformation';
-import FilePreviewDialog from '../pages/RecordsPage/FilePreviewDialog';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { router } from '@inertiajs/react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import CompanyInformation from '../pages/RecordsPage/CompanyInformation';
+import ContactInformation from '../pages/RecordsPage/ContactInformation';
+import FilePreviewDialog from '../pages/RecordsPage/FilePreviewDialog';
+import OwnerInformation from '../pages/RecordsPage/OwnerInformation';
+import MainLayout from './mainLayout';
 
 export default function RecordsPage({ companies, companyMedia, company, admin, contacts }) {
     const breadcrumbs = [{ title: 'Company Edit', href: `/vr-company/edit/${company?.id}` }];
@@ -124,7 +124,7 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
                 setTimeout(() => {
                     window.location.href = window.location.href; // This reloads the current page
                 }, 500);
-                }
+            }
             setSelectedPreview(file);
         } catch (error) {
             console.error('Error uploading file:', error);
@@ -133,7 +133,7 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
     };
 
     const handleDeleteFile = async (mediaName) => {
-        const file = companyMediaState.find((media) => media.collection_name === mediaName)
+        const file = companyMediaState.find((media) => media.collection_name === mediaName);
 
         if (!file) {
             alert('No file found');
@@ -147,7 +147,7 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
             },
             onError: () => {
                 alert('Failed to delete file.');
-            }
+            },
         });
     };
 
@@ -179,6 +179,7 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
                         handleFileUpload={handleFileUpload}
                         handlePreview={handlePreview}
                         handleDeleteFile={handleDeleteFile}
+                        handleSubmit={handleSubmit}
                     />
                     <OwnerInformation
                         adminData={adminData}

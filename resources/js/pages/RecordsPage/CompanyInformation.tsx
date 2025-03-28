@@ -1,9 +1,9 @@
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 
-export default function CompanyInformation({ companyData, handleChange, handleFileUpload, handlePreview, handleDeleteFile }) {
+export default function CompanyInformation({ companyData, handleChange, handleFileUpload, handlePreview, handleDeleteFile, handleSubmit }) {
     const documentTypes = [
         { label: 'DTI or SEC Permit', key: 'dti_permit', key2: 'DTI_Permit' },
         { label: 'BIR 2303', key: 'bir_2303', key2: 'BIR_2303' },
@@ -27,7 +27,12 @@ export default function CompanyInformation({ companyData, handleChange, handleFi
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="BusinessPermitNumber">Business Permit Number</Label>
-                            <Input id="BusinessPermitNumber" name="BusinessPermitNumber" value={companyData?.BusinessPermitNumber || ''} onChange={handleChange} />
+                            <Input
+                                id="BusinessPermitNumber"
+                                name="BusinessPermitNumber"
+                                value={companyData?.BusinessPermitNumber || ''}
+                                onChange={handleChange}
+                            />
                         </div>
                     </div>
                     <div className="mt-6 space-y-4">
@@ -37,17 +42,27 @@ export default function CompanyInformation({ companyData, handleChange, handleFi
                                 <Label htmlFor={key}>{label}</Label>
                                 <div className="flex items-center gap-2">
                                     <Input type="file" id={key} onChange={(e) => handleFileUpload(e, key2)} />
-                                    <Button type="button" variant="outline" onClick={() => handlePreview(key)} className="min-w-20 cursor-pointer text-white">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => handlePreview(key)}
+                                        className="min-w-20 cursor-pointer text-white"
+                                    >
                                         Preview
                                     </Button>
-                                    <Button type="button" variant="outline" onClick={() => handleDeleteFile(key)} className="min-w-20 cursor-pointer text-white">
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => handleDeleteFile(key)}
+                                        className="min-w-20 cursor-pointer text-white"
+                                    >
                                         Delete
                                     </Button>
                                 </div>
                             </div>
                         ))}
                     </div>
-                    <Button type="submit" className="mt-6">
+                    <Button type="submit" className="mt-6" onClick={handleSubmit}>
                         Update Company
                     </Button>
                 </form>
