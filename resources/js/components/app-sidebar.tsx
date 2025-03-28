@@ -58,7 +58,7 @@ const mainNavItems: NavItem[] = [
     },
     {
         title: 'Billings',
-        url: '',
+        url: '/billings',
         icon: Receipt,
     },
     {
@@ -82,10 +82,9 @@ export function AppSidebar() {
     const { props, url } = usePage();
     const userRole = props.auth.user?.roles?.[0]?.name;
 
-    let updatedNavItems = mainNavItems.map(item => 
-        item.title === 'Dashboard' && userRole === 'Driver' 
-            ? { ...item, title: 'Driver Dashboard', url: '/driver-dashboard' } 
-            : item
+    // Clone mainNavItems and modify "Dashboard" for Driver role
+    let updatedNavItems = mainNavItems.map((item) =>
+        item.title === 'Dashboard' && userRole === 'Driver' ? { ...item, title: 'Driver Dashboard', url: '/driver-dashboard' } : item,
     );
 
     let filteredNavItems = updatedNavItems;
@@ -96,9 +95,7 @@ export function AppSidebar() {
             .map((item) => ({
                 ...item,
                 url: item.title === 'Registration' ? '' : item.url, // Make Registration non-clickable
-                children: item.title === 'Registration' 
-                    ? item.children?.filter((child) => child.title === 'VR Registration') 
-                    : item.children,
+                children: item.title === 'Registration' ? item.children?.filter((child) => child.title === 'VR Registration') : item.children,
             }));
     } else if (userRole === 'Temp User Operator') {
         filteredNavItems = updatedNavItems
@@ -106,9 +103,7 @@ export function AppSidebar() {
             .map((item) => ({
                 ...item,
                 url: item.title === 'Registration' ? '' : item.url, // Make Registration non-clickable
-                children: item.title === 'Registration' 
-                    ? item.children?.filter((child) => child.title === 'Operator Registration') 
-                    : item.children,
+                children: item.title === 'Registration' ? item.children?.filter((child) => child.title === 'Operator Registration') : item.children,
             }));
     } else if (userRole === 'VR Admin') {
         const allowedItems = [
@@ -122,35 +117,22 @@ export function AppSidebar() {
             'Notifications',
         ];
         filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
-    }else if (userRole === 'Operator') {
-        const allowedItems = [
-            'Dashboard', 
-            'Registration',
-            'Records',
-            'Billings',
-            'Bookings',
-            'Mail',
-            'Notifications',
-        ];
-    
+    } else if (userRole === 'Operator') {
+        const allowedItems = ['Dashboard', 'Registration', 'Records', 'Billings', 'Bookings', 'Mail', 'Notifications'];
+
         filteredNavItems = updatedNavItems
             .filter((item) => allowedItems.includes(item.title))
             .map((item) => {
                 if (item.title === 'Registration' && item.children) {
                     return {
                         ...item,
-                        children: item.children.filter(child => child.title === 'Unit Registration'),
+                        children: item.children.filter((child) => child.title === 'Unit Registration'),
                     };
                 }
                 return item;
             });
-    }else if (userRole === 'Driver') {
-        const allowedItems = [
-            'Driver Dashboard',
-            'Records',
-            'Bookings',
-            'Mail',
-        ];
+    } else if (userRole === 'Driver') {
+        const allowedItems = ['Driver Dashboard', 'Records', 'Bookings', 'Mail'];
         filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
     }
 
@@ -160,7 +142,7 @@ export function AppSidebar() {
                 <SidebarMenu>
                     <SidebarMenuItem className="text-white">
                         <SidebarMenuButton size="lg" asChild>
-                        <Link href={userRole === 'Driver' ? '/driver-dashboard' : '/dashboard'} prefetch>
+                            <Link href={userRole === 'Driver' ? '/driver-dashboard' : '/dashboard'} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
@@ -172,7 +154,7 @@ export function AppSidebar() {
                 <NavMain items={filteredNavItems} currentPath={url} />
             </SidebarContent>
 
-            <SidebarFooter className="text-white border border-white hover:border-red-700 hover:bg-white hover:text-blue-900 rounded-2xl">
+            <SidebarFooter className="rounded-2xl border border-white text-white hover:border-red-700 hover:bg-white hover:text-blue-900">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
