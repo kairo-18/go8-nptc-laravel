@@ -38,8 +38,7 @@ Route::get('/driver-dashboard', function () {
     return Inertia::render('driver-dashboard');
 })->name('driver.dashboard');
 
-
-
+Route::patch('driver/updateStatus/{id}', [DriverController::class, 'updateStatus'])->name('driver.updateStatus');
 
 Route::delete('/drivers/{driver}/media', [DriverController::class, 'deleteMedia'])
     ->name('drivers.delete-media');

@@ -126,7 +126,7 @@ class DriverController extends Controller
             'Status' => 'Pending',
         ]);
 
-    
+
         if (!empty($validatedData['vehicle_id'])) {
             Vehicle::where('id', $validatedData['vehicle_id'])->update(['driver_id' => $driver->id]);
         }
@@ -309,41 +309,41 @@ class DriverController extends Controller
     public function getDriverTrips()
     {
         $user = auth()->user();
-    
+
         if ($user->hasRole('Driver')) {
             // Find the driver record for the authenticated user
             $driver = Driver::where('user_id', $user->id)->first();
-    
+
             if (!$driver) {
                 return response()->json(['error' => 'Driver record not found'], 404);
             }
-    
-            $now = now(); 
-    
+
+            $now = now();
+
             $earliestTrip = Trip::where('driver_id', $driver->id)
-                ->where('pickupDate', '>=', $now) 
-                ->where('status', '!=', 'Done') 
-                ->orderBy('pickupDate', 'asc') 
-                ->orderBy('created_at', 'asc') 
+                ->where('pickupDate', '>=', $now)
+                ->where('status', '!=', 'Done')
+                ->orderBy('pickupDate', 'asc')
+                ->orderBy('created_at', 'asc')
                 ->first();
-    
+
             if (!$earliestTrip) {
                 return response()->json(['error' => 'No upcoming trips found'], 404);
             }
-    
+
             // Fetch all passengers for the selected trip
             $passengers = Passenger::where('trip_id', $earliestTrip->id)->get();
-    
+
             return response()->json([
                 'trip' => $earliestTrip,
                 'passengers' => $passengers
             ]);
         }
-    
+
         return response()->json(['error' => 'Unauthorized'], 403);
     }
-    
-    
+
+
 
 
     public function deleteMedia(Request $request, Driver $driver)
@@ -362,5 +362,22 @@ class DriverController extends Controller
         $media->delete();
     }
 
+    public function updateStatus(Request $request, $id)
+    {
+
+        $driver = Driver::findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|string|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected,For Payment',
+        ]);
+
+        $driver->Status = $request->status;
+        $driver->save();
+
+
+        \Log::info('Operator status updated', ['id' => $driver->id, 'status' => $driver->Status]);
+
+        return response()->json(['message' => 'Status updated successfully'], 200);
+    }
 
 }
