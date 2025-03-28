@@ -59,8 +59,8 @@ class OperatorAdminController extends Controller
         $user->assignRole('Operator');
 
         $statusValue = [];
-        if (Auth::user()->hasRole('NPTC Super Admin')) {
-            $statusValue = ['Status' => 'Approved'];
+        if (Auth::user()->hasRole(['NPTC Super Admin', 'NPTC Admin'])) {
+            $statusValue = ['Status' => 'For Payment'];
         } elseif (Auth::user()->hasRole('Temp User Operator')) {
             $statusValue = ['Status' => 'For VR Approval'];
         } else {
