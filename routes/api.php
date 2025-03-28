@@ -8,10 +8,6 @@ use App\Http\Controllers\PendingController;
 use App\Http\Controllers\TripController;
 use App\Http\Controllers\VRAdminController;
 use App\Http\Controllers\VRCompanyController;
-use App\Http\Controllers\DriverController;
-use App\Http\Controllers\PendingController;
-use App\Http\Controllers\ManualPaymentController;
-use Illuminate\Http\Request;
 use App\Http\Controllers\VrContactsController;
 use Illuminate\Support\Facades\Route;
 
