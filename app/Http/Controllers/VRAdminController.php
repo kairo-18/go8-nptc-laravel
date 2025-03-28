@@ -4,11 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\VehicleRentalOwner;
+use App\Models\VRCompany;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Auth\Events\Registered;
-use Spatie\Permission\Models\Role;
-use App\Models\VRCompany;
 
 class VRAdminController extends Controller
 {
@@ -28,8 +27,8 @@ class VRAdminController extends Controller
         // For example January 1 2005 = 01012005
         $formattedBirthDate = date('mdY', strtotime($request->BirthDate));
 
-        //Add Last Name
-        $generatedPassword = $request->LastName . $formattedBirthDate;
+        // Add Last Name
+        $generatedPassword = $request->LastName.$formattedBirthDate;
 
         // Create the VR Admin user
         $user = User::create([
@@ -45,7 +44,6 @@ class VRAdminController extends Controller
         ]);
 
         $user->assignRole('VR Admin');
-
 
         $vehicleRentalOwner = VehicleRentalOwner::create([
             'user_id' => $user->id,
@@ -63,13 +61,13 @@ class VRAdminController extends Controller
 
         // Validate the `vr_company_id` before using it
         $vrCompanyId = $request->input('vr_company_id');
-        if (!$vrCompanyId || !is_numeric($vrCompanyId)) {
+        if (! $vrCompanyId || ! is_numeric($vrCompanyId)) {
             return response()->json(['error' => 'Invalid or missing vr_company_id.'], 400);
         }
 
         // Find the VR company
         $vrCompany = VRCompany::find((int) $vrCompanyId);
-        if (!$vrCompany || !$vrCompany->owner || !$vrCompany->owner->user) {
+        if (! $vrCompany || ! $vrCompany->owner || ! $vrCompany->owner->user) {
             return response()->json(['error' => 'VR Admin user not found for the specified company.'], 404);
         }
 
@@ -79,8 +77,8 @@ class VRAdminController extends Controller
         // Validate the request data (now using `$targetUser->id` for unique validation)
         $validated = $request->validate([
             'vr_company_id' => 'sometimes|integer|exists:vr_companies,id',
-            'username' => 'sometimes|string|max:255|unique:users,username,' . $targetUser->id,
-            'email' => 'sometimes|string|lowercase|email|max:255|unique:users,email,' . $targetUser->id,
+            'username' => 'sometimes|string|max:255|unique:users,username,'.$targetUser->id,
+            'email' => 'sometimes|string|lowercase|email|max:255|unique:users,email,'.$targetUser->id,
             'FirstName' => 'sometimes|string',
             'LastName' => 'sometimes|string',
             'Address' => 'nullable|string|max:255',
@@ -94,5 +92,4 @@ class VRAdminController extends Controller
 
         \Log::info('Update Complete');
     }
-
 }

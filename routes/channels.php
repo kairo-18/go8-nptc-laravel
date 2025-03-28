@@ -15,7 +15,7 @@ Broadcast::channel('thread.{threadId}', function ($user, $threadId) {
     return \App\Models\Thread::where('id', $threadId)
         ->where(function ($query) use ($user) {
             $query->where('sender_id', $user->id)
-                  ->orWhere('receiver_id', $user->id);
+                ->orWhere('receiver_id', $user->id);
         })
         ->exists();
 });

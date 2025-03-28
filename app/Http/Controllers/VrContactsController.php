@@ -2,18 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\VRCompany;
+use App\Models\VrContacts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
-use App\Models\VRCompany;
-use App\Models\VrContacts;
 
 class VrContactsController extends Controller
 {
     //
-    public function index() {
+    public function index()
+    {
         return Inertia::render('create-vr-contacts', [
-           "companies" => VRCompany::all(),
+            'companies' => VRCompany::all(),
         ]);
     }
 
@@ -42,7 +43,7 @@ class VrContactsController extends Controller
             }
         }
 
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             return response()->json(['errors' => $errors], 422);
         }
 
@@ -72,7 +73,7 @@ class VrContactsController extends Controller
             'Position' => $request->Position,
         ]);
 
-        if(Auth::user()->hasRole(['Temp User'])){
+        if (Auth::user()->hasRole(['Temp User'])) {
             Auth::logout();
         }
     }
@@ -82,7 +83,7 @@ class VrContactsController extends Controller
         $request->validate([
             'id' => 'required|integer|exists:vr_contacts,id',
             'vr_company_id' => 'required|integer|exists:vr_companies,id',
-            'email' => 'required|email|unique:vr_contacts,email,' . $request->id,
+            'email' => 'required|email|unique:vr_contacts,email,'.$request->id,
             'ContactNumber' => 'required|string',
             'LastName' => 'required|string',
             'FirstName' => 'required|string',
@@ -104,7 +105,8 @@ class VrContactsController extends Controller
         return redirect()->route('vr-contacts.index')->with('success', 'VR Contact updated successfully.');
     }
 
-    public function updateMultiple(Request $request){
+    public function updateMultiple(Request $request)
+    {
         $contacts = $request->contacts;
         $errors = [];
         $updatedContacts = [];
@@ -123,7 +125,7 @@ class VrContactsController extends Controller
             ];
 
             // Add 'id' validation only if the contact is being updated
-            if (!empty($contactData['id'])) {
+            if (! empty($contactData['id'])) {
                 $rules['id'] = 'required|integer|exists:vr_contacts,id';
             }
 
@@ -132,7 +134,7 @@ class VrContactsController extends Controller
             if ($validator->fails()) {
                 $errors["contacts.$index"] = $validator->errors()->toArray();
             } else {
-                if (!empty($contactData['id'])) {
+                if (! empty($contactData['id'])) {
                     // Update existing contact
                     $vrContact = VrContacts::findOrFail($contactData['id']);
                     $vrContact->update($contactData);
@@ -145,7 +147,7 @@ class VrContactsController extends Controller
             }
         }
 
-        if (!empty($errors)) {
+        if (! empty($errors)) {
             return response()->json(['errors' => $errors], 422);
         }
 
@@ -153,10 +155,10 @@ class VrContactsController extends Controller
 
         return response()->json(['contacts' => $updatedContacts]);
 
-        if(Auth::user()->hasRole(['Temp User'])){
+        if (Auth::user()->hasRole(['Temp User'])) {
             Auth::logout();
+
             return redirect()->route('login');
         }
     }
-
 }

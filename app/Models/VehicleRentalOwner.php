@@ -4,19 +4,17 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\User;
-use App\Models\VRCompany;
 
 class VehicleRentalOwner extends Model
 {
     //
     use HasFactory;
+
     protected $fillable = [
         'user_id',
         'vr_company_id',
-        'Status'
+        'Status',
     ];
-
 
     public function user()
     {
@@ -27,5 +25,4 @@ class VehicleRentalOwner extends Model
     {
         return $this->belongsTo(VRCompany::class, 'vr_company_id');
     }
-
 }

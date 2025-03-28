@@ -1,10 +1,8 @@
 <?php
 
 use App\Http\Controllers\VehicleController;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
-use App\Models\Vehicle;
-
+use Inertia\Inertia;
 
 Route::get('/unit-registration', function () {
     $latestVehicle = \App\Models\Vehicle::latest()->with('operator.user', 'operator.vrCompany')->first();
@@ -23,7 +21,7 @@ Route::get('/unit-registration', function () {
 Route::resource('vehicles', VehicleController::class);
 
 Route::get('preview-vehicle-media/{mediaId}', [VehicleController::class, 'previewMedia'])
-->name('preview-vehicle-media');
+    ->name('preview-vehicle-media');
 
 Route::post('/vehicles/{vehicle}/upload-files', [VehicleController::class, 'updateVehicleMedia'])->name('vehicle.upload-files');
 

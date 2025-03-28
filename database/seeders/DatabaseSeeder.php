@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
+use App\Models\Driver;
+use App\Models\Operator;
 use App\Models\User;
+use App\Models\Vehicle;
+use App\Models\VRCompany;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
-use App\Models\VRCompany;
-use App\Models\Vehicle;
-use App\Models\Operator;
-use App\Models\Driver;  
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,8 +18,9 @@ class DatabaseSeeder extends Seeder
     private function generateNPTCId(string $prefix, string $modelClass): string
     {
         $latest = $modelClass::latest('id')->first();
-        $nextNumber = $latest ? ((int)substr($latest->NPTC_ID, 3)) + 1 : 1;
-        return $prefix . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+        $nextNumber = $latest ? ((int) substr($latest->NPTC_ID, 3)) + 1 : 1;
+
+        return $prefix.'-'.str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
     }
 
     /**
@@ -59,7 +60,7 @@ class DatabaseSeeder extends Seeder
             'ContactNumber' => '09123456789',
             'NPTC_ID' => $this->generateNPTCId('AD', User::class),
         ]);
-        $user2->assignRole("NPTC Admin");
+        $user2->assignRole('NPTC Admin');
 
         VRCompany::factory()->create([
             'CompanyName' => 'Example VR Company',
@@ -92,7 +93,7 @@ class DatabaseSeeder extends Seeder
             'BirthDate' => '2000-01-01',
             'ContactNumber' => '09123456789',
         ]);
-        $user3->assignRole("Operator");
+        $user3->assignRole('Operator');
 
         $user3->operator()->create([
             'user_id' => $user3->id,
@@ -111,7 +112,7 @@ class DatabaseSeeder extends Seeder
             'BirthDate' => '2000-01-01',
             'ContactNumber' => '09123456789',
         ]);
-        $user4->assignRole("Driver");
+        $user4->assignRole('Driver');
 
         $user4->driver()->create([
             'operator_id' => 1,
