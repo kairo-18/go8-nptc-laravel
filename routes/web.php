@@ -8,6 +8,7 @@ use App\Http\Controllers\NptcAdminController;
 use App\Http\Controllers\VRAdminController;
 use App\Http\Controllers\VrContactsController;
 use App\Http\Controllers\TripController;
+use App\Http\Controllers\ManualPaymentController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Http\Middleware\NPTCAdminMiddleware;
@@ -93,6 +94,10 @@ Route::put('mails/mark-read/{thread}', function (Thread $thread) {
     return response()->json(['thread' => $thread]);
 });
 
+//Manual Direct Payment
+    Route::get('/manual-payment/operator/{operatorId}', [ManualPaymentController::class, 'show'])->name('manual-payment.show');
+    Route::post('/manual-payments/store', [ManualPaymentController::class, 'store'])->name('manual-payments.store');
+    
 Route::post('mails/new-mail', function (Request $request) {
     $request->validate([
         'email' => 'required|email|exists:users,email',

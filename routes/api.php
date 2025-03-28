@@ -7,6 +7,7 @@ use App\Http\Controllers\VrContactsController;
 use App\Http\Controllers\VRCompanyController;
 use App\Http\Controllers\DriverController;
 use App\Http\Controllers\PendingController;
+use App\Http\Controllers\ManualPaymentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\User;
@@ -84,6 +85,9 @@ Route::get('/pending-data', [PendingController::class, 'index']);
 Route::post('/rejection', [PendingController::class, 'rejection']);
 
 Route::post('/approval', [PendingController::class, 'approval']);
+
+//manual payment
+
 
 
 // Catch-all for unhandled API routes
