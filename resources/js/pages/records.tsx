@@ -18,26 +18,24 @@ export default function Records({
     vehicles: { id: number; name: string; driver_id:number; status: string; operator_id: number }[];
     companiesWithMedia: { id: number; media: any[] }[];
 }) {
-    const { props } = usePage<{ auth: { user?: { id: number; roles?: { name: string }[] } } }>();
+    const { props } = usePage<{ auth: { user?: { id: number; roles?: { name: string }[] }, vr_company_id?: number } }>();
     const userRole = props.auth.user?.roles?.[0]?.name;
     const vrCompanyId = props.auth.vr_company_id;
 
-    console.log(vehicles);
-
-    const [activeTab, setActiveTab] = useState(userRole === 'VR Admin' ? 'operator' : userRole === 'Driver' ? 'driver' : 'vr-company');
+    const [activeTab, setActiveTab] = useState(userRole === 'Operator' ? 'operator' : userRole === 'Driver' ? 'driver' : 'vr-company');
     const [selectedCompanyId, setSelectedCompanyId] = useState<number | null>(null);
     const [selectedOperatorId, setSelectedOperatorId] = useState<number | null>(null);
 
     // Filter operators based on selectedCompanyId
     const filteredOperators = selectedCompanyId
         ? operators.filter((op) => op.vr_company_id === selectedCompanyId)
-        : userRole === 'VR Admin'
-        ? operators.filter((op) => op.vr_company_id === vrCompanyId)
+        : userRole === 'Operator'
+        ? operators.filter((op) => op.user_id === props.auth.user?.id)
         : operators;
 
     const filteredDrivers = selectedOperatorId
         ? drivers.filter((driver) => driver.operator_id === selectedOperatorId)
-        : userRole === 'VR Admin'
+        : userRole === 'Operator'
         ? drivers.filter((driver) => filteredOperators.some((op) => op.id === driver.operator_id))
         : userRole === 'Driver'
         ? drivers.filter((driver) => driver.user_id === props.auth.user?.id)
@@ -45,13 +43,14 @@ export default function Records({
 
     const filteredVehicles = selectedOperatorId
         ? vehicles.filter((vehicle) => vehicle.operator_id === selectedOperatorId)
-        : userRole === 'VR Admin'
+        : userRole === 'Operator'
         ? vehicles.filter((vehicle) => filteredOperators.some((op) => op.id === vehicle.operator_id))
         : userRole === 'Driver'
         ? vehicles.filter((vehicle) => filteredDrivers.some((driver) => driver.id === vehicle.driver_id))
         : vehicles;
 
     console.log(filteredOperators);
+    console.log(drivers)
 
     // Breadcrumbs with onClick navigation
     const breadcrumbs = [
@@ -71,7 +70,7 @@ export default function Records({
                 {/* Tabs Navigation */}
                 <div className="flex space-x-2 text-gray-500">
                     {[
-                        ...(userRole !== 'VR Admin' && userRole !== 'Driver' ? [{ key: 'vr-company', label: 'VR Company' }] : []),
+                        ...(userRole !== 'Operator' && userRole !== 'Driver' ? [{ key: 'vr-company', label: 'VR Company' }] : []),
                         ...(userRole !== 'Driver' ? [{ key: 'operator', label: 'Operator' }] : []),
                         { key: 'driver', label: 'Driver and Vehicle' },
                     ].map((tab, index) => (
@@ -82,7 +81,7 @@ export default function Records({
                             >
                                 {tab.label}
                             </button>
-                            {index < [...(userRole !== 'VR Admin' && userRole !== 'Driver' ? [{ key: 'vr-company', label: 'VR Company' }] : []), ...(userRole !== 'Driver' ? [{ key: 'operator', label: 'Operator' }] : []), { key: 'driver', label: 'Driver and Vehicle' }].length - 1 && (
+                            {index < [...(userRole !== 'Operator' && userRole !== 'Driver' ? [{ key: 'vr-company', label: 'VR Company' }] : []), ...(userRole !== 'Driver' ? [{ key: 'operator', label: 'Operator' }] : []), { key: 'driver', label: 'Driver and Vehicle' }].length - 1 && (
                                 <span className="mx-1">/</span>
                             )}
                         </span>
