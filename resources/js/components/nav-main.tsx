@@ -14,75 +14,91 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { Link, usePage } from "@inertiajs/react";
+import { Link } from "@inertiajs/react";
 
 export function NavMain({
-  items,
+  items, currentPath
 }: {
   items: {
     title: string;
     url: string;
     icon?: LucideIcon;
-    isActive?: boolean;
     children?: {
       title: string;
       url: string;
       icon?: LucideIcon;
     }[];
   }[];
+  currentPath: string;
 }) {
-  const page = usePage();
-  const currentUrl = page.url;
-
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
-          const isActive =
-            item.url === currentUrl || item.children?.some((child) => child.url === currentUrl);
+          const isAnyChildActive = item.children?.some((child) => child.url === currentPath);
+          const isMainActive = !item.children && item.url === currentPath; // Highlight main only if no children
 
           return (
             <Collapsible
               key={item.title}
               asChild
-              defaultOpen={isActive}
+              defaultOpen={isAnyChildActive} // Open if a child is active
               className="group/collapsible"
             >
-              <SidebarMenuItem>
-
+              <SidebarMenuItem className={isMainActive ? "bg-white text-blue-500" : ""}>
                 <SidebarMenuButton asChild tooltip={item.title}>
-                  <div>
-                <Link href={item.url} prefetch className="flex items-center space-x-2 w-full">
-                  {item.icon && <item.icon className="shrink-0" />}
-                  <span className="truncate">{item.title}</span>
-                  </Link>
-                  {item.children && (
-                    <CollapsibleTrigger asChild>
-                      <button className="ml-auto p-2">
-                    <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
-                    </button>
-                    </CollapsibleTrigger>
-                  )}
+                  <div className="flex items-center w-full">
+                    <Link
+                      href={item.url}
+                      prefetch
+                      className={`flex items-center space-x-2 w-full ${
+                        isMainActive ? "text-blue-500" : ""
+                      }`}
+                    >
+                      {item.icon && <item.icon className="shrink-0" />}
+                      <span className="truncate">{item.title}</span>
+                    </Link>
+                    {item.children && (
+                      <CollapsibleTrigger asChild>
+                        <button className="ml-auto p-2">
+                          <ChevronRight
+                            className={`ml-auto transition-transform duration-200 ${
+                              isAnyChildActive ? "rotate-90" : ""
+                            }`}
+                          />
+                        </button>
+                      </CollapsibleTrigger>
+                    )}
                   </div>
-           
-              </SidebarMenuButton>
-                
-                
+                </SidebarMenuButton>
+
                 {/* Collapsible Dropdown Content */}
                 {item.children && (
                   <CollapsibleContent>
                     <SidebarMenuSub>
-                      {item.children.map((subItem) => (
-                        <SidebarMenuSubItem key={subItem.title}>
-                          <SidebarMenuSubButton asChild>
-                            <Link href={subItem.url} prefetch className="flex items-center space-x-2">
-                              {subItem.icon && <subItem.icon className="w-4 h-4 opacity-75" />}
-                              <span>{subItem.title}</span>
-                            </Link>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
+                      {item.children.map((subItem) => {
+                        const isSubActive = subItem.url === currentPath;
+                        return (
+                          <SidebarMenuSubItem
+                            key={subItem.title}
+                            className={isSubActive ? "bg-white text-blue-500" : ""}
+                          >
+                            <SidebarMenuSubButton asChild>
+                              <Link
+                                href={subItem.url}
+                                prefetch
+                                className={`flex items-center space-x-2 ${
+                                  isSubActive ? "text-blue-500" : ""
+                                }`}
+                              >
+                                {subItem.icon && <subItem.icon className="w-4 h-4 opacity-75" />}
+                                <span>{subItem.title}</span>
+                              </Link>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        );
+                      })}
                     </SidebarMenuSub>
                   </CollapsibleContent>
                 )}
