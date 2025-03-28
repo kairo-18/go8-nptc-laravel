@@ -120,7 +120,7 @@ class DriverController extends Controller
             $status = 'For VR Approval';
         } elseif ($user1->hasRole('VR Admin')) {
             $status = 'For NPTC Approval';
-        } elseif ($user1->hasRole('NPTC Admin')) {
+        } elseif ($user1->hasRole(['NPTC Admin', 'NPTC Super Admin'])) {
             $status = 'For Payment';
         } else {
             return response()->json(['error' => 'Invalid Role'], 403);
