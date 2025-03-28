@@ -94,11 +94,6 @@ export default function CreateVrAdmin({
         }
     };
 
-    // Notify parent when form data changes
-    useEffect(() => {
-        setAdminData(data);
-    }, [data]);
-
     useEffect(() => {
         if (onSubmitRef) {
             onSubmitRef(() => handleSubmit({ preventDefault: () => {} } as React.FormEvent));
