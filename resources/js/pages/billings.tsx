@@ -137,12 +137,12 @@ const dataReceipts = [
 ];
 
 export default function Billings() {
-    const [activeTab, setActiveTab] = useState('recordsTab');
+    const [activeTab, setActiveTab] = useState('approvalTab');
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
             <Head title="Billings" />
             <div className="rounded border border-gray-300 bg-white p-4">
-                <Tabs defaultValue="recordsTab" className="w-full" onValueChange={(value) => setActiveTab(value)}>
+                <Tabs defaultValue="approvalTab" className="w-full" onValueChange={(value) => setActiveTab(value)}>
                     <div className="flex items-center justify-between">
                         <div>
                             <h1 className="text-xl font-bold">{activeTab === 'approvalTab' ? 'Approval' : 'Records'}</h1>
