@@ -11,8 +11,9 @@ class Passenger extends Model
         'FirstName',
         'LastName',
         'ContactNumber',
-        'Address'
+        'Address',
     ];
+
     public function trip()
     {
         return $this->belongsTo(Trip::class);

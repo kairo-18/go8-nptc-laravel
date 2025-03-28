@@ -2,15 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
+use App\Events\RegisteredVrCompany;
 use App\Models\VRCompany;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Inertia\Response;
-use App\Events\RegisteredVrCompany;
-
-use function Laravel\Prompts\warning;
+use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class VRCompanyController extends Controller
 {
@@ -21,24 +19,23 @@ class VRCompanyController extends Controller
         // Validate input fields and file uploads
         $request->validate(
             [
-            'CompanyName' => 'required|string',
-            'BusinessPermitNumber' => 'required|integer',
-            'BusinessPermit' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'BIR_2303' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'DTI_Permit' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'BrandLogo' => 'nullable|file|mimes:jpg,png|max:1024',
-            'SalesInvoice' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+                'CompanyName' => 'required|string',
+                'BusinessPermitNumber' => 'required|integer',
+                'BusinessPermit' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+                'BIR_2303' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+                'DTI_Permit' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+                'BrandLogo' => 'nullable|file|mimes:jpg,png|max:1024',
+                'SalesInvoice' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
             ]
         );
-
 
         $userRoles = Auth::user()->getRoleNames();
 
         $vrCompany = VRCompany::create(
             [
-            'BusinessPermitNumber' => $request->BusinessPermitNumber,
-            "CompanyName" => $request->CompanyName,
-            "Status" => $userRoles->contains('NPTC Super Admin') || $userRoles->contains('NPTC Admin') ? 'Approved' : 'Pending',
+                'BusinessPermitNumber' => $request->BusinessPermitNumber,
+                'CompanyName' => $request->CompanyName,
+                'Status' => $userRoles->contains('NPTC Super Admin') || $userRoles->contains('NPTC Admin') ? 'Approved' : 'Pending',
             ]
         );
 
@@ -63,13 +60,14 @@ class VRCompanyController extends Controller
             $vrCompany->addMedia($request->file('SalesInvoice'))->toMediaCollection('sales_invoice', 'private');
         }
 
-        //Dispatch RegistedVrCompany Event
+        // Dispatch RegistedVrCompany Event
         RegisteredVrCompany::dispatch($vrCompany);
     }
 
     public function downloadMedia($mediaId)
     {
         $media = Media::findOrFail($mediaId);
+
         return response()->download($media->getPath());
     }
 
@@ -79,7 +77,7 @@ class VRCompanyController extends Controller
         $filePath = $media->getPath();
         $mimeType = $media->mime_type;
 
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             abort(404, 'File not found');
         }
 
@@ -93,7 +91,7 @@ class VRCompanyController extends Controller
         return Inertia::render(
             'registration',
             [
-            'companies' => $companies
+                'companies' => $companies,
             ]
         );
     }
@@ -133,7 +131,7 @@ class VRCompanyController extends Controller
         // Search VRCompany by oldCompanyName
         $vrCompany = VRCompany::where('CompanyName', $request->oldCompanyName)->first();
 
-        if (!$vrCompany) {
+        if (! $vrCompany) {
             return response()->json(['error' => 'Company not found for User Update'], 404);
         }
 
@@ -175,7 +173,7 @@ class VRCompanyController extends Controller
             ? VRCompany::find($request->vr_company_id)
             : VRCompany::where('CompanyName', $request->oldCompanyName)->first();
 
-        if (!$vrCompany) {
+        if (! $vrCompany) {
             return response()->json(['error' => 'Company not found for File Uploads'], 404);
         }
 
@@ -187,7 +185,7 @@ class VRCompanyController extends Controller
             'BIR_2303' => 'bir_2303',
             'DTI_Permit' => 'dti_permit',
             'BrandLogo' => 'brand_logo',
-            'SalesInvoice' => 'sales_invoice'
+            'SalesInvoice' => 'sales_invoice',
         ];
 
         foreach ($files as $fileKey => $collection) {
@@ -211,11 +209,11 @@ class VRCompanyController extends Controller
     {
         $company = VRCompany::with('owner.user', 'contacts')->find($id);
 
-        if (!$company) {
+        if (! $company) {
             return abort(404, 'Company not found');
         }
 
-        $companyMedia = $company->getMedia("*");
+        $companyMedia = $company->getMedia('*');
 
         return Inertia::render('edit-vr-company', [
             'company' => $company,
@@ -239,7 +237,6 @@ class VRCompanyController extends Controller
         $company->Status = $request->status;
         $company->save();
 
-
         \Log::info('Company status updated', ['id' => $company->id, 'status' => $company->status]);
 
         return response()->json(['message' => 'Status updated successfully'], 200);
@@ -251,12 +248,10 @@ class VRCompanyController extends Controller
 
         // Verify the media belongs to a VR Company
         $vrCompany = VRCompany::find($media->model_id);
-        if (!$vrCompany) {
+        if (! $vrCompany) {
             return response()->json(['error' => 'Company not found'], 404);
         }
 
         $media->delete();
     }
-
-
 }

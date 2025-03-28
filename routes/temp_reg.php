@@ -1,10 +1,10 @@
 <?php
 
-use App\Http\Controllers\VRAdminController;
-use App\Http\Controllers\VrContactsController;
-use App\Http\Controllers\VRCompanyController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\VRAdminController;
+use App\Http\Controllers\VRCompanyController;
+use App\Http\Controllers\VrContactsController;
+use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::post('temp-registration', [RegisteredUserController::class, 'storeTempAcc'])
@@ -16,7 +16,7 @@ Route::group(
             'registration', function () {
                 return Inertia::render(
                     'registration', [
-                    'companies' => \App\Models\VRCompany::all(),
+                        'companies' => \App\Models\VRCompany::all(),
                     ]
                 );
             }
@@ -38,4 +38,3 @@ Route::group(
         Route::patch('vr-contacts.update-multiple', [VrContactsController::class, 'updateMultiple'])->name('vr-contacts.update-multiple');
     }
 );
-

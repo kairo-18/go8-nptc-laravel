@@ -31,45 +31,44 @@ class RegisteredUserController extends Controller
     {
         $request->validate(
             [
-            'FirstName' => 'required|string|max:255',
-            'LastName' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users',
-            'Address' => 'nullable|string|max:255',
-            'BirthDate' => 'nullable|date',
-            'ContactNumber' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:users',
+                'FirstName' => 'required|string|max:255',
+                'LastName' => 'required|string|max:255',
+                'username' => 'required|string|max:255|unique:users',
+                'Address' => 'nullable|string|max:255',
+                'BirthDate' => 'nullable|date',
+                'ContactNumber' => 'required|string|max:255',
+                'email' => 'required|string|lowercase|email|max:255|unique:users',
             ]
         );
 
-        $birthYear = "1234";
+        $birthYear = '1234';
         if ($request->BirthDate) {
             $birthYear = date('Y', strtotime($request->BirthDate));
         }
         // Add Last Name
-        $generatedPassword = $request->LastName . $birthYear;
+        $generatedPassword = $request->LastName.$birthYear;
         \Log::info($generatedPassword);
 
         $user = User::create(
             [
-            'FirstName' => $request->FirstName,
-            'LastName' => $request->LastName,
-            'username' => $request->username,
-            'Address' => $request->Address,
-            'BirthDate' => $request->Birthdate,
-            'ContactNumber' => $request->ContactNumber,
-            'email' => $request->email,
-            'password' => Hash::make($generatedPassword),
+                'FirstName' => $request->FirstName,
+                'LastName' => $request->LastName,
+                'username' => $request->username,
+                'Address' => $request->Address,
+                'BirthDate' => $request->Birthdate,
+                'ContactNumber' => $request->ContactNumber,
+                'email' => $request->email,
+                'password' => Hash::make($generatedPassword),
             ]
         );
 
-        if($request->Type == 'operator'){
+        if ($request->Type == 'operator') {
             $user->assignRole('Temp User Operator');
-        }else{
+        } else {
             $user->assignRole('Temp User');
         }
 
         event(new Registered($user));
-
 
     }
 
@@ -77,27 +76,27 @@ class RegisteredUserController extends Controller
     {
         $request->validate(
             [
-            'FirstName' => 'required|string|max:255',
-            'LastName' => 'required|string|max:255',
-            'username' => 'required|string|max:255|unique:users',
-            'Address' => 'nullable|string|max:255',
-            'Birthdate' => 'nullable|date',
-            'ContactNumber' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:users',
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+                'FirstName' => 'required|string|max:255',
+                'LastName' => 'required|string|max:255',
+                'username' => 'required|string|max:255|unique:users',
+                'Address' => 'nullable|string|max:255',
+                'Birthdate' => 'nullable|date',
+                'ContactNumber' => 'required|string|max:255',
+                'email' => 'required|string|lowercase|email|max:255|unique:users',
+                'password' => ['required', 'confirmed', Rules\Password::defaults()],
             ]
         );
 
         $user = User::create(
             [
-            'FirstName' => $request->FirstName,
-            'LastName' => $request->LastName,
-            'username' => $request->username,
-            'Address' => $request->Address,
-            'Birthdate' => $request->Birthdate,
-            'ContactNumber' => $request->ContactNumber,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+                'FirstName' => $request->FirstName,
+                'LastName' => $request->LastName,
+                'username' => $request->username,
+                'Address' => $request->Address,
+                'Birthdate' => $request->Birthdate,
+                'ContactNumber' => $request->ContactNumber,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
             ]
         );
 

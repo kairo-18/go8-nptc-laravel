@@ -1,24 +1,21 @@
 <?php
 
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\DriverController;
 use App\Http\Controllers\NptcAdminController;
 use App\Http\Controllers\OperatorAdminController;
-use App\Http\Controllers\VRAdminController;
-use App\Http\Controllers\VrContactsController;
-use App\Http\Controllers\VRCompanyController;
-use App\Http\Controllers\DriverController;
 use App\Http\Controllers\PendingController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use App\Models\User;
-use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\TripController;
-use function Pest\Laravel\json;
+use App\Http\Controllers\VRAdminController;
+use App\Http\Controllers\VRCompanyController;
+use App\Http\Controllers\VrContactsController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function () {
-    return response()->json("HELLO WORLD");
+    return response()->json('HELLO WORLD');
 });
 
-//Route For Temporary registration page
+// Route For Temporary registration page
 Route::post('temp-registration', [RegisteredUserController::class, 'storeTempAcc'])
     ->name('temp-registaration');
 
@@ -63,11 +60,10 @@ Route::post('vr-admins', [VRAdminController::class, 'store'])
 
 Route::apiResource('operators', OperatorAdminController::class);
 
-Route::apiResource('drivers',DriverController::class);
+Route::apiResource('drivers', DriverController::class);
 
 Route::post('/create-booking', [TripController::class, 'store'])
     ->name('create-booking');
-
 
 Route::post('/add-passengers', [TripController::class, 'addPassengers'])
     ->name('add-passengers');
@@ -78,16 +74,13 @@ Route::post('/generate-payment-link', [TripController::class, 'generatePaymentLi
 Route::get('/check-payment-status/{id}', [TripController::class, 'checkStatus'])
     ->name('check-status');
 
-//pending
-Route::get('/pending-data', [PendingController::class, 'index']);
-
 Route::post('/rejection', [PendingController::class, 'rejection']);
 
 Route::post('/approval', [PendingController::class, 'approval']);
 
+Route::post('/approve-with-docu', [PendingController::class, 'approveAndSendDocuments']);
 
 // Catch-all for unhandled API routes
 Route::fallback(function () {
     return response()->json(['error' => 'Route not found'], 404);
 });
-

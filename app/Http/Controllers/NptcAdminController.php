@@ -2,28 +2,18 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use App\Http\Requests\Settings\ProfileUpdateRequest;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules\Password;
-use Inertia\Inertia;
-use Inertia\Response;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class NptcAdminController extends Controller
 {
     /**
      * Update the NPTC Admin.
-     *
-     * @param Request $request
-     * @return void
      */
-    //update nptc admin
+    // update nptc admin
 
     public function updateNPTCAdmin(Request $request): void
     {
@@ -33,11 +23,11 @@ class NptcAdminController extends Controller
         $validated = $request->validate([
             'FirstName' => 'sometimes|string|max:255',
             'LastName' => 'sometimes|string|max:255',
-            'username' => 'sometimes|string|max:255|unique:users,username,' . $request->id,
+            'username' => 'sometimes|string|max:255|unique:users,username,'.$request->id,
             'Address' => 'nullable|string|max:255',
             'BirthDate' => 'nullable|date',
             'ContactNumber' => 'sometimes|string|max:255',
-            'email' => 'sometimes|string|lowercase|email|max:255|unique:users,email,' . $request->id,
+            'email' => 'sometimes|string|lowercase|email|max:255|unique:users,email,'.$request->id,
             'password' => 'nullable|confirmed|min:8',
         ]);
 
@@ -50,7 +40,7 @@ class NptcAdminController extends Controller
         }
 
         // Hash the password if it is provided
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $user->password = Hash::make($validated['password']);
         }
 
@@ -96,7 +86,6 @@ class NptcAdminController extends Controller
 
         $user = User::findOrFail($request->id);
         $user->delete();
-
 
     }
 }

@@ -19,12 +19,12 @@ return new class extends Migration
             $table->foreignId('vehicle_id')->nullable();
             $table->string('License')->nullable(); // Path to uploaded license file
             $table->string('LicenseNumber')->nullable()->unique();
-            $table->string('Photo')->nullable(); // Path to 1x1 photo file  
+            $table->string('Photo')->nullable(); // Path to 1x1 photo file
             $table->string('NBI_clearance')->nullable(); // Path to NBI clearance file
             $table->string('Police_clearance')->nullable(); // Path to Police clearance file
             $table->string('BIR_clearance')->nullable(); // Path to BIR clearance file
-            $table->enum('Status', ['Active', 'Inactive', 'Suspended', 'Banned', 'Pending', 'Approved', 'Rejected', 'For Payment'])
-                  ->default('Pending');
+            $table->enum('Status', ['Active', 'Inactive', 'Suspended', 'Banned', 'Pending', 'Approved', 'Rejected', 'For Payment', 'For NPTC Approval', 'For VR Approval'])
+                ->default('Pending');
             $table->timestamps();
         });
     }
