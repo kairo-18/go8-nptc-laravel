@@ -42,6 +42,10 @@ export default function Summary({
     const adminSubmitRef = useRef<() => void>();
     const contactsSubmitRef = useRef<() => void>();
 
+    const handlePrevious = () => {
+        setData(adminData); // Restore previous data
+    };
+
     // Track changes in the modals
     useEffect(() => {
         const companyChanged = JSON.stringify(companyFormData.current) !== JSON.stringify(initialCompanyData.current);
@@ -95,6 +99,10 @@ export default function Summary({
         }
     };
 
+    function onPreviousTab(event: MouseEvent<HTMLButtonElement, MouseEvent>): void {
+        throw new Error('Function not implemented.');
+    }
+
     return (
         <div className="mx-auto mt-6 w-full max-w-6xl">
             <h1 className="text-2xl font-semibold">Vehicle Rental Company Summary</h1>
@@ -142,7 +150,7 @@ export default function Summary({
                 }}
             />
 
-            <div className="mt-6 flex justify-end">
+            <div className="mt-6 flex justify-between">
                 <Button
                     type="submit"
                     onClick={handleSaveChanges}
