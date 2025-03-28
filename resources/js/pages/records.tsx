@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Company from '../components/RecordsComponent/vr-company';
 import DriverVehicle from '../components/RecordsComponent/vr-driver-vehicle';
 import Operator from '../components/RecordsComponent/vr-operator';
 import MainLayout from './mainLayout';
 import { usePage } from '@inertiajs/react';
+import { router } from '@inertiajs/react';
 
 export default function Records({
     companies,
@@ -63,6 +64,13 @@ export default function Records({
         setSelectedCompanyId(null);
         setSelectedOperatorId(null);
     };
+
+    useEffect(() => {
+        router.reload({
+            only: ['companies', 'operators', 'drivers', 'vehicles', 'companiesWithMedia'],
+            preserveUrl: true,
+        });
+    }, [companies, operators, drivers, vehicles, companiesWithMedia]);
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>

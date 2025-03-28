@@ -206,5 +206,23 @@ public function previewMedia($mediaId)
         $media->delete();
     }
 
+    public function updateStatus(Request $request, $id)
+    {
+
+        $vehicle = Vehicle::findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|string|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected,For Payment',
+        ]);
+
+        $vehicle->Status = $request->status;
+        $vehicle->save();
+
+
+        \Log::info('Operator status updated', ['id' => $vehicle->id, 'status' => $vehicle->Status]);
+
+        return response()->json(['message' => 'Status updated successfully'], 200);
+    }
+
 
 }

@@ -92,7 +92,9 @@ export const generateColumns = (
             enableHiding: false,
             cell: ({ row }) => {
                 const data = row.original;
-                const operatorData = row.original;               
+                const operatorData = row.original;
+                const driverData = row.original;
+                const vehicleData = row.original;
 
                 return (
                     <DropdownMenu>
@@ -131,7 +133,7 @@ export const generateColumns = (
                                     <DropdownMenuItem onClick={() => router.visit(`/drivers?id=${data.id}`)}>
                                     Edit Driver
                                     </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Set Status</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(driverData); }} className="cursor-pointer">Set Status</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('email'); }} className="cursor-pointer">Send Email</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('suspend'); }} className="cursor-pointer">Suspend</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleContainer?.('ban'); }} className="cursor-pointer">Ban</DropdownMenuItem>
@@ -142,7 +144,7 @@ export const generateColumns = (
                                     <DropdownMenuSeparator />
                                     <DropdownMenuItem onClick={() => router.visit(`/vehicles?id=${data.id}`)}>
                                     Edit Vehicle</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Set Status</DropdownMenuItem>
+                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(vehicleData); }} className="cursor-pointer">Set Status</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Suspend</DropdownMenuItem>
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Ban</DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => router.delete(`/vehicles/${data.id}`)} className="cursor-pointer hover-bg-red-500 t">

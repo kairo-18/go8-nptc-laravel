@@ -29,3 +29,5 @@ Route::post('/vehicles/{vehicle}/upload-files', [VehicleController::class, 'upda
 
 Route::delete('/vehicles/{vehicle}/media', [VehicleController::class, 'deleteMedia'])
     ->name('vehicles.delete-media');
+
+Route::patch('vehicle/updateStatus/{id}', [VehicleController::class, 'updateStatus'])->name('vehicle.updateStatus');
