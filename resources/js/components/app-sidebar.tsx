@@ -82,7 +82,6 @@ export function AppSidebar() {
     const { props, url } = usePage();
     const userRole = props.auth.user?.roles?.[0]?.name;
 
-    // Clone mainNavItems and modify "Dashboard" for Driver role
     let updatedNavItems = mainNavItems.map(item => 
         item.title === 'Dashboard' && userRole === 'Driver' 
             ? { ...item, title: 'Driver Dashboard', url: '/driver-dashboard' } 
@@ -113,7 +112,7 @@ export function AppSidebar() {
             }));
     } else if (userRole === 'VR Admin') {
         const allowedItems = [
-            'Driver Dashboard', // Ensuring renamed Dashboard stays accessible
+            'Dashboard', // Ensuring renamed Dashboard stays accessible
             'Pending',
             'Operator Temp Account Registration',
             'Records',
@@ -123,7 +122,29 @@ export function AppSidebar() {
             'Notifications',
         ];
         filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
-    } else if (userRole === 'Driver') {
+    }else if (userRole === 'Operator') {
+        const allowedItems = [
+            'Dashboard', 
+            'Registration',
+            'Records',
+            'Billings',
+            'Bookings',
+            'Mail',
+            'Notifications',
+        ];
+    
+        filteredNavItems = updatedNavItems
+            .filter((item) => allowedItems.includes(item.title))
+            .map((item) => {
+                if (item.title === 'Registration' && item.children) {
+                    return {
+                        ...item,
+                        children: item.children.filter(child => child.title === 'Unit Registration'),
+                    };
+                }
+                return item;
+            });
+    }else if (userRole === 'Driver') {
         const allowedItems = [
             'Driver Dashboard',
             'Records',

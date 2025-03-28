@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Vehicle;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class VehicleController extends Controller
 {
-
     public function index(Request $request): Response
     {
         $vehiclesQuery = Vehicle::with(['operator.user', 'driver.user']);
@@ -24,7 +22,7 @@ class VehicleController extends Controller
             $mediaCollections = ['front_image', 'back_image', 'left_side_image', 'right_side_image', 'or_image', 'cr_image', 'id_card_image', 'gps_certificate_image', 'inspection_certificate_image'];
 
             $mediaFiles = collect($mediaCollections)->flatMap(function ($collection) use ($vehicle) {
-                return $vehicle->getMedia($collection)->map(fn($media) => [
+                return $vehicle->getMedia($collection)->map(fn ($media) => [
                     'id' => $media->id,
                     'name' => $media->file_name,
                     'collection_name' => $media->collection_name,
@@ -34,7 +32,7 @@ class VehicleController extends Controller
             })->values();
 
             return [
-                'NPTC_ID'=>$vehicle->NPTC_ID,
+                'NPTC_ID' => $vehicle->NPTC_ID,
                 'id' => $vehicle->id,
                 'PlateNumber' => $vehicle->PlateNumber,
                 'Model' => $vehicle->Model,
@@ -50,7 +48,7 @@ class VehicleController extends Controller
                     'id' => $vehicle->driver->id,
                     'FirstName' => $vehicle->driver->user->FirstName ?? 'N/A',
                     'LastName' => $vehicle->driver->user->LastName ?? 'N/A',
-                    'LicenseNumber'=>$vehicle->driver->LicenseNumber?? 'N/A',
+                    'LicenseNumber' => $vehicle->driver->LicenseNumber ?? 'N/A',
                 ] : null,
                 'media_files' => $mediaFiles,
             ];
@@ -60,6 +58,7 @@ class VehicleController extends Controller
             'vehicles' => $vehicles,
         ]);
     }
+
     public function store(Request $request)
     {
         $validatedData = $request->validate([
@@ -69,7 +68,7 @@ class VehicleController extends Controller
             'Model' => 'required|string',
             'Brand' => 'required|string',
             'SeatNumber' => 'required|integer',
-            'Status' => 'required|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected',
+            'Status' => 'sometimes|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected,For VR Approval, For NPTC Approval',
             'front_image' => 'nullable|file|mimes:jpg,png|max:2048',
             'back_image' => 'nullable|file|mimes:jpg,png|max:2048',
             'left_side_image' => 'nullable|file|mimes:jpg,png|max:2048',
@@ -81,10 +80,12 @@ class VehicleController extends Controller
             'inspection_certificate_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
         ]);
 
+        if (! $request->has('Status') || $request->Status == '') {
+            $validatedData['Status'] = 'For VR Approval';
+        }
         $vehicle = Vehicle::create($validatedData);
 
         $this->handleFileUpload($request, $vehicle);
-
 
     }
 
@@ -93,7 +94,7 @@ class VehicleController extends Controller
         $validatedData = $request->validate([
             'operator_id' => 'sometimes|exists:operators,id',
             'driver_id' => 'sometimes|exists:drivers,id',
-            'PlateNumber' => 'sometimes|string|unique:vehicles,PlateNumber,' . $vehicle->id,
+            'PlateNumber' => 'sometimes|string|unique:vehicles,PlateNumber,'.$vehicle->id,
             'Model' => 'sometimes|string',
             'Brand' => 'sometimes|string',
             'SeatNumber' => 'sometimes|integer',
@@ -106,66 +107,67 @@ class VehicleController extends Controller
 
         return response()->json(['message' => 'Vehicle updated successfully', 'vehicle' => $vehicle]);
     }
+
     public function updateVehicleMedia(Request $request, Vehicle $vehicle)
-{
+    {
 
-    // Validate request
-    $request->validate([
-        'front_image' => 'nullable|file|mimes:jpg,png|max:2048',
-        'back_image' => 'nullable|file|mimes:jpg,png|max:2048',
-        'left_side_image' => 'nullable|file|mimes:jpg,png|max:2048',
-        'right_side_image' => 'nullable|file|mimes:jpg,png|max:2048',
-        'or_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-        'cr_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-        'id_card_image' => 'nullable|file|mimes:jpg,png|max:2048',
-        'gps_certificate_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-        'inspection_certificate_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-    ]);
+        // Validate request
+        $request->validate([
+            'front_image' => 'nullable|file|mimes:jpg,png|max:2048',
+            'back_image' => 'nullable|file|mimes:jpg,png|max:2048',
+            'left_side_image' => 'nullable|file|mimes:jpg,png|max:2048',
+            'right_side_image' => 'nullable|file|mimes:jpg,png|max:2048',
+            'or_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
+            'cr_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
+            'id_card_image' => 'nullable|file|mimes:jpg,png|max:2048',
+            'gps_certificate_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
+            'inspection_certificate_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
+        ]);
 
-    // File collections mapping
-    $files = [
-        'front_image' => 'front_image',
-        'back_image' => 'back_image',
-        'left_side_image' => 'left_side_image',
-        'right_side_image' => 'right_side_image',
-        'or_image' => 'or_image',
-        'cr_image' => 'cr_image',
-        'id_card_image' => 'id_card_image',
-        'gps_certificate_image' => 'gps_certificate_image',
-        'inspection_certificate_image' => 'inspection_certificate_image',
-    ];
+        // File collections mapping
+        $files = [
+            'front_image' => 'front_image',
+            'back_image' => 'back_image',
+            'left_side_image' => 'left_side_image',
+            'right_side_image' => 'right_side_image',
+            'or_image' => 'or_image',
+            'cr_image' => 'cr_image',
+            'id_card_image' => 'id_card_image',
+            'gps_certificate_image' => 'gps_certificate_image',
+            'inspection_certificate_image' => 'inspection_certificate_image',
+        ];
 
-    foreach ($files as $fileKey => $collection) {
-        if ($request->hasFile($fileKey)) {
+        foreach ($files as $fileKey => $collection) {
+            if ($request->hasFile($fileKey)) {
 
-            // Clear existing media for this collection
-            $vehicle->clearMediaCollection($collection);
+                // Clear existing media for this collection
+                $vehicle->clearMediaCollection($collection);
 
-            // Upload new file to the private media collection
-            $mediaItem = $vehicle->addMediaFromRequest($fileKey)->toMediaCollection($collection, 'private');
+                // Upload new file to the private media collection
+                $mediaItem = $vehicle->addMediaFromRequest($fileKey)->toMediaCollection($collection, 'private');
 
+            }
         }
+
     }
 
-}
+    public function previewMedia($mediaId)
+    {
+        $media = Media::findOrFail($mediaId);
+        $filePath = $media->getPath();
+        $mimeType = $media->mime_type;
 
-public function previewMedia($mediaId)
-{
-    $media = Media::findOrFail($mediaId);
-    $filePath = $media->getPath();
-    $mimeType = $media->mime_type;
+        if (! file_exists($filePath)) {
+            abort(404, 'File not found');
+        }
 
-    if (!file_exists($filePath)) {
-        abort(404, 'File not found');
+        return response()->file($filePath, ['Content-Type' => $mimeType]);
     }
-
-    return response()->file($filePath, ['Content-Type' => $mimeType]);
-}
-
 
     public function destroy(Vehicle $vehicle)
     {
         $vehicle->delete();
+
         return response()->json(['message' => 'Vehicle deleted successfully']);
     }
 
@@ -206,5 +208,20 @@ public function previewMedia($mediaId)
         $media->delete();
     }
 
+    public function updateStatus(Request $request, $id)
+    {
 
+        $vehicle = Vehicle::findOrFail($id);
+
+        $request->validate([
+            'status' => 'required|string|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected,For Payment',
+        ]);
+
+        $vehicle->Status = $request->status;
+        $vehicle->save();
+
+        \Log::info('Operator status updated', ['id' => $vehicle->id, 'status' => $vehicle->Status]);
+
+        return response()->json(['message' => 'Status updated successfully'], 200);
+    }
 }

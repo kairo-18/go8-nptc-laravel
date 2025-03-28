@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -30,7 +30,8 @@ class Operator extends Model implements HasMedia
     public static function generateNPTCId()
     {
         $count = self::where('NPTC_ID', 'LIKE', 'OP-%')->count() + 1;
-        return sprintf("OP-%04d", $count);
+
+        return sprintf('OP-%04d', $count);
     }
 
     public function user()

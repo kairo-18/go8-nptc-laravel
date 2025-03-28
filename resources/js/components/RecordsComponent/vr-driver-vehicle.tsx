@@ -2,6 +2,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { generateColumns } from './columns';
 import { DataTable } from './data-table';
 import { useState, useEffect } from 'react';
+import SetStatus from './set-status';
+import axios from 'axios';
 
 
 interface DriverProps {
@@ -13,7 +15,11 @@ interface DriverProps {
 
 export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverProps) {
     const [driverData, setDriverData] = useState(drivers);
+    const [selectedDriver, setSelectedDriver] = useState<any>(null);
     const [vehicleData, setVehicleData] = useState(vehicles);
+    const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
+    const [openStatusModal, setOpenStatusModal] = useState(false);
+    const [selectedStatus, setSelectedStatus] = useState('');
 
     useEffect(() => {
         setDriverData(drivers);
@@ -23,7 +29,41 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
         setVehicleData(vehicles);
     }, [vehicles]);
 
-    
+    const handleDriverSetStatus = (statusData: any) => {
+        setSelectedDriver(statusData);
+        setOpenStatusModal(true);
+    };
+
+    const handleVehicleSetStatus = (statusData: any) => {
+        setSelectedVehicle(statusData);
+        setOpenStatusModal(true);
+    };
+
+    const handleSubmitToDriver = async () => {
+        if (!selectedDriver) {
+            alert('No driver selected');
+            return;
+        }
+
+        await axios.patch(`driver/updateStatus/${selectedDriver.id}`, {
+            status: selectedStatus,
+        });
+        setOpenStatusModal(false);
+    };
+
+    const handleSubmitToVehicle = async () => {
+        if (!selectedVehicle) {
+            alert('No vehicle selected');
+            return;
+        }
+
+        await axios.patch(`vehicle/updateStatus/${selectedVehicle.id}`, {
+            status: selectedStatus,
+        });
+        setOpenStatusModal(false);
+    };
+
+
     const transformDriverData = driverData.map((driver) => ({
         ...driver,
         Driver: `${driver.Status ? `${driver.Status} ` : ''}${driver.FirstName}  ${driver.LastName}`,
@@ -33,7 +73,7 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
         ...vehicle,
         Vehicle: `${vehicle.Status ? `${vehicle.Status} ` : ''}${vehicle.PlateNumber}`,
     }));
-    
+
     const formatHeader = (key: string) =>
         key.replace(/_count$/, '')
             .replace(/^vr_/, 'VR ')
@@ -59,35 +99,37 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
 
             const driverOtherColumns = driverHeaders
                 .map(header => header.key)
-                .filter(key => !primaryColumns.includes(key) && key !== 'Status' && key !== 'id'); 
-            
+                .filter(key => !primaryColumns.includes(key) && key !== 'Status' && key !== 'id');
+
             const orderedDriverHeaders = [...primaryColumns, ...driverOtherColumns];
-            
+
             const driverColumns = generateColumns(
                 orderedDriverHeaders.map(key => ({ key, label: formatHeader(key) })),
                 {
                     entityType: 'drivers',
                     statusColumns: ['Status'],
+                    updateStatus: handleDriverSetStatus
                 }
             );
-            
+
 
             const primaryVehicleColumns = ['NPTC_ID', 'Vehicle'];
 
             const vehicleOtherColumns = vehicleHeaders
                 .map(header => header.key)
-                .filter(key => !primaryVehicleColumns.includes(key) && key !== 'Status' && key !== 'Model' && key !== 'id'); 
-            
+                .filter(key => !primaryVehicleColumns.includes(key) && key !== 'Status' && key !== 'Model' && key !== 'id');
+
             const orderedVehicleHeaders = [...primaryVehicleColumns, ...vehicleOtherColumns];
-            
+
             const vehicleColumns = generateColumns(
                 orderedVehicleHeaders.map(key => ({ key, label: formatHeader(key) })),
                 {
                     entityType: 'vehicles',
                     statusColumns: ['Status'],
+                    updateStatus: handleVehicleSetStatus
                 }
             );
-            
+
 
     return (
         <div>
@@ -105,11 +147,12 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
 
                 <TabsContent value="drivers">
                     <DataTable data={transformDriverData} ColumnFilterName="FirstName" columns={driverColumns} />
-
+                    <SetStatus selectedData={selectedDriver} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={handleDriverSetStatus} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToDriver} />
                 </TabsContent>
 
                 <TabsContent value="vehicles">
                     <DataTable data={transformVehicleData} ColumnFilterName="PlateNumber" columns={vehicleColumns} />
+                    <SetStatus selectedData={selectedVehicle} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={handleVehicleSetStatus} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToVehicle} />
                 </TabsContent>
             </Tabs>
         </div>

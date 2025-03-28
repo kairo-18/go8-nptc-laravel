@@ -107,7 +107,9 @@ export default function DriverDashboard() {
             <p><strong>Drop-off Address:</strong> {trip.trip.dropOffAddress}</p>
             <p><strong>Trip Type:</strong> {trip.trip.tripType}</p>
             <p><strong>Status:</strong> {trip.trip.status}</p>
-            <p><strong>NPTC ID:</strong> {trip.trip.NPTC_ID}</p>
+            <p><strong>Trip ID:</strong> {trip.trip.NPTC_ID}</p>
+            <p><strong>Unit:</strong> {trip.vehicle.Model}</p>
+            <p><strong>Plate:</strong> {trip.vehicle.PlateNumber}</p>
           </div>
       
           {/* Passengers Section */}

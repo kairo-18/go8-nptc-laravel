@@ -15,12 +15,15 @@ class VrContacts extends Model
         'MiddleName',
         'Position',
     ];
+
     //
-    public function vehicleRentalCompany(){
+    public function vehicleRentalCompany()
+    {
         $this->belongsTo(VRCompany::class, 'vehicle_rental_owner_id', 'id');
     }
 
-    public function vrCompany() {
+    public function vrCompany()
+    {
         $this->belongsTo(VRCompany::class, 'vr_company_id', 'id');
     }
 }
