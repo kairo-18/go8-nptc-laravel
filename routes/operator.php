@@ -52,3 +52,4 @@ Route::post('/operators/{operator}/upload-files', [OperatorAdminController::clas
 
 Route::patch('operator/updateStatus/{id}', [OperatorAdminController::class, 'updateStatus'])->name('operator.updateStatus');
 
+Route::delete('/operators/{operator}/media', [OperatorAdminController::class, 'deleteMedia'])->name('delete-operator-media');

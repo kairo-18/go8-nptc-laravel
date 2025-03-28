@@ -38,7 +38,7 @@ class OperatorAdminController extends Controller
             'password' => 'required|string|min:6',
             'vr_company_id' => 'required|exists:vr_companies,id',
             'Status' => 'nullable|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected,For Payment',
-            
+
             'photo' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
             'valid_id_front' => 'nullable|file|mimes:jpg,png|max:1024',
             'valid_id_back' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
@@ -87,7 +87,7 @@ class OperatorAdminController extends Controller
 
         return redirect()->route('create-operator.admin')->with('success', 'Operator created successfully!');
     }
-    
+
     /**
      * Display a specific operator.
      */
@@ -197,7 +197,7 @@ public function downloadMedia($mediaId)
 
         return response()->file($filePath, ['Content-Type' => $mimeType]);
     }
-    
+
 
 
     /**
@@ -235,14 +235,14 @@ public function downloadMedia($mediaId)
     public function editView($id)
     {
         $operator = Operator::with('user')->find($id);
-    
+
         if (!$operator) {
             return abort(404, 'Operator not found');
         }
-    
+
         // Media collections for operator
         $mediaCollections = ['photo', 'valid_id_front', 'valid_id_back'];
-    
+
         // Process media files
         $mediaFiles = collect($mediaCollections)->flatMap(function ($collection) use ($operator) {
             return $operator->getMedia($collection)->map(fn($media) => [
@@ -259,6 +259,22 @@ public function downloadMedia($mediaId)
             'mediaFiles' => $mediaFiles,
             'companies' => VRCompany::all(),
         ]);
+    }
+
+    public function deleteMedia(Request $request, Operator $operator)
+    {
+        $request->validate([
+            'media_id' => 'required|exists:media,id',
+        ]);
+
+        $media = Media::findOrFail($request->media_id);
+
+        // Verify the media belongs to this vehicle
+        if ($media->model_id != $operator->id) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $media->delete();
     }
 
 }
