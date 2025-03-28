@@ -13,7 +13,10 @@ use Illuminate\Support\Facades\DB;
 
 Route::post('/drivers', [DriverController::class, 'store'])->name('driver.store');
 
-Route::get('/drivers', [DriverController::class, 'index'])->name('drivers.index');
+Route::middleware(['auth', 'role:NPTC Admin|NPTC Super Admin|VR Admin|Operator'])->group(function () {
+    Route::get('/drivers', [DriverController::class, 'index'])->name('drivers.index');
+});
+
 
 Route::patch('/drivers/{driver}', [DriverController::class, 'update'])->name('drivers.update');
 

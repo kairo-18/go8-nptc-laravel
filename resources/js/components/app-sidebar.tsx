@@ -79,7 +79,7 @@ const mainNavItems: NavItem[] = [
 ];
 
 export function AppSidebar() {
-    const { props } = usePage();
+    const { props, url } = usePage();
     const userRole = props.auth.user?.roles?.[0]?.name;
 
     // Clone mainNavItems and modify "Dashboard" for Driver role
@@ -93,17 +93,23 @@ export function AppSidebar() {
 
     if (userRole === 'Temp User') {
         filteredNavItems = updatedNavItems
-            .filter((item) => item.title === 'Registration')
+            .filter((item) => item.title === 'Registration' || item.title === 'Mail')
             .map((item) => ({
                 ...item,
-                children: item.children?.filter((child) => child.title === 'VR Registration'),
+                url: item.title === 'Registration' ? '' : item.url, // Make Registration non-clickable
+                children: item.title === 'Registration' 
+                    ? item.children?.filter((child) => child.title === 'VR Registration') 
+                    : item.children,
             }));
     } else if (userRole === 'Temp User Operator') {
         filteredNavItems = updatedNavItems
-            .filter((item) => item.title === 'Registration')
+            .filter((item) => item.title === 'Registration' || item.title === 'Mail')
             .map((item) => ({
                 ...item,
-                children: item.children?.filter((child) => child.title === 'Operator Registration'),
+                url: item.title === 'Registration' ? '' : item.url, // Make Registration non-clickable
+                children: item.title === 'Registration' 
+                    ? item.children?.filter((child) => child.title === 'Operator Registration') 
+                    : item.children,
             }));
     } else if (userRole === 'VR Admin') {
         const allowedItems = [
@@ -142,7 +148,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent className="text-white">
-                <NavMain items={filteredNavItems} />
+                <NavMain items={filteredNavItems} currentPath={url} />
             </SidebarContent>
 
             <SidebarFooter className="text-white border border-white hover:border-red-700 hover:bg-white hover:text-blue-900 rounded-2xl">

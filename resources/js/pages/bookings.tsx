@@ -3,14 +3,26 @@ import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 import { DataTable } from '../components/RecordsComponent/data-table';
 import MainLayout from './mainLayout';
+import { usePage } from '@inertiajs/react';
 
 export default function Bookings({ bookings }) {
-    let transformedData = transformData(bookings);
-    console.log(transformedData);
+    const { props } = usePage();
+
+    const userRole = props.auth.user?.roles?.[0]?.name;
+    const userId = props.auth.user?.id;
+    
+    let filteredBookings = bookings;
+    if (userRole === 'Driver') {
+        filteredBookings = bookings.filter(trip => trip.driver.user_id === userId);
+    }
+
+    console.log('Filtered Bookings:', filteredBookings);
+
+    let transformedData = transformData(filteredBookings);
 
     const [open, setOpen] = useState(false);
     const [selectedTrip, setSelectedTrip] = useState(null);
-    const [formattedTripData, setFormattedTripData] = useState(null);
+
     const columns = [
         {
             accessorKey: 'NPTC_ID',
