@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,14 +6,53 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { X } from 'lucide-react';
 
-export default function OperatorInformation({ operator, handleChange, handleOperatorUpdate, handleFileChange }) {
-    const [files, setFiles] = useState({
-        photo: null,
-        valid_id_front: null,
-        valid_id_back: null,
-    });
+interface OperatorInformationProps {
+    operator: any;
+    mediaFiles: any[];
+    handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    handleFileRemove: (field: string) => void;
+    fileKeys: Record<string, number>;
+    files: Record<string, File | null>;
+    handleOperatorUpdate: () => void;
+}
 
+export default function OperatorInformation({
+    operator,
+    handleChange,
+    handleOperatorUpdate,
+    handleFileChange,
+    handleFileRemove,
+    fileKeys,
+    files
+}: OperatorInformationProps) {
+    const renderFileInput = (field: string, label: string) => (
+        <div className="space-y-2">
+            <Label htmlFor={field}>{label}</Label>
+            <Input
+                key={fileKeys[field]}
+                id={field}
+                type="file"
+                name={field}
+                onChange={handleFileChange}
+            />
+            {files[field] && (
+                <div className="mt-1 flex items-center justify-between gap-2">
+                    <p className="text-sm text-gray-500">{files[field]?.name}</p>
+                    <button
+                        type="button"
+                        onClick={() => handleFileRemove(field)}
+                        className="text-red-500 hover:text-red-700"
+                        aria-label={`Remove ${label}`}
+                    >
+                        <X className="h-4 w-4" />
+                    </button>
+                </div>
+            )}
+        </div>
+    );
 
     return (
         <Card>
@@ -102,18 +140,9 @@ export default function OperatorInformation({ operator, handleChange, handleOper
                     </div>
 
                     {/* File Uploads */}
-                    <div className="space-y-2">
-                        <Label htmlFor="photo">Photo</Label>
-                        <Input id="photo" type="file" name="photo" onChange={handleFileChange} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="valid_id_front">Valid ID (Front)</Label>
-                        <Input id="valid_id_front" type="file" name="valid_id_front" onChange={handleFileChange} />
-                    </div>
-                    <div className="space-y-2">
-                        <Label htmlFor="valid_id_back">Valid ID (Back)</Label>
-                        <Input id="valid_id_back" type="file" name="valid_id_back" onChange={handleFileChange} />
-                    </div>
+                    {renderFileInput('photo', 'Photo')}
+                    {renderFileInput('valid_id_front', 'Valid ID (Front)')}
+                    {renderFileInput('valid_id_back', 'Valid ID (Back)')}
                 </div>
 
                 <div className="flex gap-4 mt-4">

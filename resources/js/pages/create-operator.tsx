@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import MainLayout from './mainLayout';
+import { useState, useCallback, useEffect } from 'react';
 
 export default function CreateOperator({ companies }) {
     // Initialize form state using Inertia.js useForm
@@ -25,17 +26,68 @@ export default function CreateOperator({ companies }) {
     });
     const { flash } = usePage().props;
 
+    const [fileKeys, setFileKeys] = useState({
+        photo: Date.now(),
+        valid_id_front: Date.now(),
+        valid_id_back: Date.now(),
+    });
+
+    const handleFileRemove = (field: string) => {
+        setData(field, null);
+
+        // Force re-render by updating the key
+        setFileKeys((prevKeys) => ({
+            ...prevKeys,
+            [field]: Date.now(),
+        }));
+    };
+
+    // Helper function to render file input with remove button
+    const renderFileInput = (field: string, label: string) => (
+        <div>
+            <Label htmlFor={field}>{label}</Label>
+            <Input
+                key={fileKeys[field]} // Force re-render when key changes
+                id={field}
+                type="file"
+                accept="image/*"
+                onChange={(e) => setData(field, e.target.files[0])}
+            />
+            {data[field] && (
+                <div className="mt-1 flex items-center justify-between gap-2">
+                    <p className="text-sm text-gray-500">{data[field].name}</p>
+                    <button
+                        type="button"
+                        onClick={() => handleFileRemove(field)}
+                        className="text-red-500 hover:text-red-700"
+                        aria-label={`Remove ${label}`}
+                    >
+                        x
+                    </button>
+                </div>
+            )}
+            {errors[field] && <p className="text-sm text-red-500">{errors[field]}</p>}
+        </div>
+    );
+
     // Handle form submission
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-    
+
         post(route("operators.store"), {
             onSuccess: () => {
                 alert('Operator created successfully!');
                 reset();
 
-            const fileInputs = document.querySelectorAll<HTMLInputElement>('input[type="file"]');
-            fileInputs.forEach(input => input.value = '');
+                const fileInputs = document.querySelectorAll<HTMLInputElement>('input[type="file"]');
+                fileInputs.forEach(input => input.value = '');
+
+                // Reset file keys to force re-render of file inputs
+                setFileKeys({
+                    photo: Date.now(),
+                    valid_id_front: Date.now(),
+                    valid_id_back: Date.now(),
+                });
             }
         });
     };
@@ -48,7 +100,7 @@ export default function CreateOperator({ companies }) {
 
                 {flash?.success && (
                     <div className="mb-4 rounded-lg bg-green-100 p-3 text-green-700">
-                        {flash.success} 
+                        {flash.success}
                     </div>
                 )}
 
@@ -190,36 +242,9 @@ export default function CreateOperator({ companies }) {
                             </div>
 
                             <div className="grid grid-cols-3 gap-4">
-                                <div>
-                                    <Label htmlFor="photo">1x1 Photo</Label>
-                                    <Input
-                                        id="photo"
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => setData('photo', e.target.files[0])}
-                                    />
-                                    {errors.photo && <p className="text-sm text-red-500">{errors.photo}</p>}
-                                </div>
-                                <div>
-                                    <Label htmlFor="valid_id_front">Valid ID (Front)</Label>
-                                    <Input
-                                        id="valid_id_front"
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => setData('valid_id_front', e.target.files[0])}
-                                    />
-                                    {errors.valid_id_front && <p className="text-sm text-red-500">{errors.valid_id_front}</p>}
-                                </div>
-                                <div>
-                                    <Label htmlFor="valid_id_back">Valid ID (Back)</Label>
-                                    <Input
-                                        id="valid_id_back"
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={(e) => setData('valid_id_back', e.target.files[0])}
-                                    />
-                                    {errors.valid_id_back && <p className="text-sm text-red-500">{errors.valid_id_back}</p>}
-                                </div>
+                                {renderFileInput('photo', '1x1 Photo')}
+                                {renderFileInput('valid_id_front', 'Valid ID (Front)')}
+                                {renderFileInput('valid_id_back', 'Valid ID (Back)')}
                             </div>
 
                             {/* Submit Button */}
