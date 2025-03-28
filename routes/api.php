@@ -5,7 +5,6 @@ use App\Http\Controllers\DriverController;
 use App\Http\Controllers\NptcAdminController;
 use App\Http\Controllers\OperatorAdminController;
 use App\Http\Controllers\PendingController;
-use App\Http\Controllers\PendingController;
 use App\Http\Controllers\TripController;
 use App\Http\Controllers\VRAdminController;
 use App\Http\Controllers\VRCompanyController;
