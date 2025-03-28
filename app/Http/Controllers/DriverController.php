@@ -336,6 +336,10 @@ class DriverController extends Controller
 
             return response()->json([
                 'trip' => $earliestTrip,
+                'vehicle' => $vehicle ? [
+                    'Model' => $vehicle->Model,
+                    'PlateNumber' => $vehicle->PlateNumber
+                ] : null,
                 'passengers' => $passengers
             ]);
         }
