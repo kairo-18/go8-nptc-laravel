@@ -83,7 +83,7 @@ interface VRCompany {
 }
 
 // Unified type for the data table
-type ApplicationData = (Operator | Driver | Vehicle | VRCompany) & { type: string };
+type ApplicationData = (Operator  | Vehicle | VRCompany) & { type: string };
 
 export default function Pending() {
     const [data, setData] = useState<ApplicationData[]>([]);
@@ -117,10 +117,6 @@ export default function Pending() {
                     ...filteredOperators.map((operator: Operator) => ({
                         ...operator,
                         type: 'Operator',
-                    })),
-                    ...filteredDrivers.map((driver: Driver) => ({
-                        ...driver,
-                        type: 'Driver',
                     })),
                     ...vrCompanies.map((company: VRCompany) => ({
                         ...company,
