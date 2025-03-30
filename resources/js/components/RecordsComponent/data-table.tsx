@@ -66,11 +66,11 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
     });
 
     const handleStatusFilter = (status: string) => {
-        // Get the column safely
-        const statusColumn = selectedColumnFilter ? table.getColumn(selectedColumnFilter) : null;
+        // Get the Status column
+        const statusColumn = table.getColumn("Status");
     
         if (!statusColumn) {
-            console.error("Column 'status' not found!"); // Debugging message
+            console.error("Status column not found!");
             return;
         }
     
@@ -105,12 +105,19 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         {statusHierarchy.map((status) => (
-                            <DropdownMenuRadioItem key={status} value={status} onClick={() => handleStatusFilter(status)}>
-                            {status}
+                            <DropdownMenuRadioItem 
+                                key={status} 
+                                value={status} 
+                                onClick={() => handleStatusFilter(status)}
+                            >
+                                {status}
                             </DropdownMenuRadioItem>
                         ))}
                         <DropdownMenuSeparator />
-                        <DropdownMenuRadioItem value="All Status" onClick={() => handleStatusFilter("All Status")}>
+                        <DropdownMenuRadioItem 
+                            value="All Status" 
+                            onClick={() => handleStatusFilter("All Status")}
+                        >
                             All Status
                         </DropdownMenuRadioItem>
                     </DropdownMenuContent>
@@ -199,12 +206,12 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                     <label className="text-sm">Rows per page:</label>
                     <Select
                         value={`${pageSize}`}
-                            onValueChange={(value) => {
-                                const newSize = Number(value);
-                                setPageSize(newSize);
-                                table.setPageSize(newSize);
-                            }}
-                        >
+                        onValueChange={(value) => {
+                            const newSize = Number(value);
+                            setPageSize(newSize);
+                            table.setPageSize(newSize);
+                        }}
+                    >
                         <SelectTrigger className="h-8 w-[70px]">
                             <SelectValue placeholder={`${pageSize}`} />
                         </SelectTrigger>

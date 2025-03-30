@@ -143,6 +143,7 @@ export default function Pending() {
         Filter: `${row.Status ? `${row.Status} ` : ''}${row.NPTC_ID || ''}`, // ✅ Add combined value here
     }));
 
+<<<<<<< Updated upstream
     const columns: ColumnDef<ApplicationData>[] = [
         {
             id: 'select',
@@ -158,6 +159,93 @@ export default function Pending() {
             header: 'Type',
             cell: ({ row }) => {
                 const type = row.getValue('type');
+=======
+  const columns: ColumnDef<ApplicationData>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <input type="checkbox" onChange={(e) => table.toggleAllPageRowsSelected(e.target.checked)} />
+      ),
+      cell: ({ row }) => (
+        <input type="checkbox" checked={row.getIsSelected()} onChange={row.getToggleSelectedHandler()} />
+      ),
+    },
+    {
+      accessorKey: "NPTC_ID",
+      header: "ID",
+    },
+    {
+      accessorKey: "type",
+      header: "Type",
+      cell: ({ row }) => {
+        const type = row.getValue("type") as string;
+    
+        // Map data types to colors
+        const typeColors: Record<string, string> = {
+          "VR Company": "bg-red-500 text-white",
+          "Operator": "bg-yellow-500 text-White",
+          "Driver": "bg-green-500 text-white",
+          "Vehicle": "bg-blue-500 text-white",
+        };
+    
+        return (
+          <span
+            className={`px-2 py-1 text-sm font-medium rounded-md ${typeColors[type] || "bg-gray-200 text-black"}`}
+          >
+            {type}
+          </span>
+        );
+      },
+    },
+    {
+      accessorKey: "name",
+      header: "Name",
+      cell: ({ row }) => {
+        const item = row.original;
+        if (item.type === "Operator") {
+          const operator = item as Operator;
+          return `${operator.FirstName} ${operator.LastName}`;
+        } else if (item.type === "Driver") {
+          const driver = item as Driver;
+          return `${driver.FirstName} ${driver.LastName}`;
+        } else if (item.type === "VR Company") {
+          const company = item as VRCompany;
+          return company.CompanyName;
+        } else if (item.type === "Vehicle") {
+          const vehicle = item as Vehicle;
+          return vehicle.PlateNumber;
+        }
+        return "-";
+      },
+    },
+    {
+      accessorKey: "Status",
+      header: "Status",
+      cell: ({ row }) => (
+        <div className="flex items-center">
+          <TimerIcon className="w-4 h-4 text-gray-600 mr-2" />
+          <span>{row.getValue("Status")}</span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: "created_at",
+      header: "Date of Application",
+      cell: ({ row }) => {
+        const date = row.original.created_at;
+        return date ? new Date(date).toLocaleDateString() : "-";
+      },
+    },
+    {
+      id: "actions",
+      cell: ({ row }) => (
+        <Button variant="ghost" onClick={() => handleRowClick(row.original)}>
+          <Ellipsis className="h-4 w-4" />
+        </Button>
+      ),
+    },
+  ];
+>>>>>>> Stashed changes
 
                 // Map data types to colors
                 const typeColors: Record<string, string> = {
@@ -256,6 +344,15 @@ export default function Pending() {
                     <DataTable columns={columns} data={updatedData} onRowClick={handleRowClick} ColumnFilterName="Filter" />
                 </div>
             </div>
+<<<<<<< Updated upstream
         </MainLayout>
     );
+=======
+            )}
+          <DataTable columns={columns} data={data} onRowClick={handleRowClick} ColumnFilterName="NPTC_ID" />
+        </div>
+      </div>
+    </MainLayout>
+  );
+>>>>>>> Stashed changes
 }
