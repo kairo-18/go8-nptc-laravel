@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
+import PendingDriverDetails from './pending-driver-details';
 
 export default function PendingVehicleDetails({ item }) {
     const [previewFile, setPreviewFile] = useState(null);
@@ -141,6 +142,14 @@ export default function PendingVehicleDetails({ item }) {
                     )}
                 </CardContent>
             </Card>
+            <h3 className="mt-6 text-lg font-semibold">Assigned Drivers</h3>
+<div className="space-y-4">
+    {item?.driver ? (
+        <PendingDriverDetails key={item.driver.id} assignedDriver={item.driver} />
+    ) : (
+        <p className="text-gray-500">No drivers assigned to this vehicle.</p>
+    )}
+</div>
 
             {/* Rejection Note Modal */}
             {isRejectionModalOpen && (
