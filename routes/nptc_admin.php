@@ -82,3 +82,13 @@ Route::group(['middleware' => ['role:Temp User|NPTC Admin|NPTC Super Admin']], f
         ]);
     })->name('registration');
 });
+
+//Billings | TODO: Glad or Shaiza fix if needed tnx!
+Route::get('billings', function () {
+    return Inertia::render('billings', [
+        'companies' => \App\Models\VRCompany::all(),
+        'drivers' => \App\Models\Driver::with(['media', 'user'])->get(),
+        'vehicles' => \App\Models\Vehicle::with(['operator.vrCompany'])->get(),
+        'operators' => \App\Models\Operator::with(['user'])->get(),
+    ]);
+})->name('billings');
