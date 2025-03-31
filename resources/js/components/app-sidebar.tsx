@@ -82,7 +82,6 @@ export function AppSidebar() {
     const { props, url } = usePage();
     const userRole = props.auth.user?.roles?.[0]?.name;
 
-    // Clone mainNavItems and modify "Dashboard" for Driver role
     let updatedNavItems = mainNavItems.map((item) =>
         item.title === 'Dashboard' && userRole === 'Driver' ? { ...item, title: 'Driver Dashboard', url: '/driver-dashboard' } : item,
     );
@@ -94,7 +93,7 @@ export function AppSidebar() {
             .filter((item) => item.title === 'Registration' || item.title === 'Mail')
             .map((item) => ({
                 ...item,
-                url: item.title === 'Registration' ? '' : item.url, // Make Registration non-clickable
+                url: item.title === 'Registration' ? '' : item.url,
                 children: item.title === 'Registration' ? item.children?.filter((child) => child.title === 'VR Registration') : item.children,
             }));
     } else if (userRole === 'Temp User Operator') {
@@ -102,12 +101,12 @@ export function AppSidebar() {
             .filter((item) => item.title === 'Registration' || item.title === 'Mail')
             .map((item) => ({
                 ...item,
-                url: item.title === 'Registration' ? '' : item.url, // Make Registration non-clickable
+                url: item.title === 'Registration' ? '' : item.url,
                 children: item.title === 'Registration' ? item.children?.filter((child) => child.title === 'Operator Registration') : item.children,
             }));
     } else if (userRole === 'VR Admin') {
         const allowedItems = [
-            'Dashboard', // Ensuring renamed Dashboard stays accessible
+            'Dashboard',
             'Pending',
             'Operator Temp Account Registration',
             'Records',
@@ -137,7 +136,7 @@ export function AppSidebar() {
     }
 
     return (
-        <Sidebar collapsible="icon" variant="inset">
+        <Sidebar collapsible="icon" variant="inset" className={userRole === 'VR Admin' ? 'bg-[#A41316]' : ''}>
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem className="text-white">
@@ -151,7 +150,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent className="text-white">
-                <NavMain items={filteredNavItems} currentPath={url} />
+                <NavMain items={filteredNavItems} currentPath={url} userRole={userRole} />
             </SidebarContent>
 
             <SidebarFooter className="rounded-2xl border border-white text-white hover:border-red-700 hover:bg-white hover:text-blue-900">
