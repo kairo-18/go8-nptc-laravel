@@ -10,7 +10,7 @@ interface BillingRecord {
     id: number;
     billingsID: string;
     company: string;
-    driver: string;
+    driver: string[];
     vehicle: string;
     date: string;
     amount: number;
@@ -22,7 +22,7 @@ interface BillingRecord {
     referenceNumber: string;
     requestingDocument: string | string[];
     notes: string;
-    status: 'Paid' | 'Unpaid';
+    status: 'Pending' | 'Rejected';
     dueDate: string;
 }
 
@@ -86,8 +86,12 @@ export default function BillingsTab2({ dataReceipts }: BillingsTab2Props) {
         {
             accessorKey: 'driver',
             header: 'Name',
-            cell: ({ row }) => row.getValue('driver'),
+            cell: ({ row }) => {
+                const drivers = row.getValue('driver');
+                return Array.isArray(drivers) ? drivers.join(', ') : drivers;
+            },
         },
+        
         {
             accessorKey: 'amount',
             header: 'Amount',
@@ -137,7 +141,7 @@ export default function BillingsTab2({ dataReceipts }: BillingsTab2Props) {
                             {/* Reduced gaps */}
                             <div className="space-y-1">
                                 <DetailItem label="Company" value={selectedItem.company} className="text-xs" />
-                                <DetailItem label="Driver" value={selectedItem.driver} className="text-xs" />
+                                <DetailItem label="Driver" value={Array.isArray(selectedItem.driver) ? selectedItem.driver.join(',  ') : selectedItem.driver} className="text-xs" />
                                 <DetailItem label="Vehicle" value={selectedItem.vehicle} className="text-xs" />
                                 <DetailItem label="Date" value={selectedItem.date} className="text-xs" />
                                 <DetailItem label="Time" value={selectedItem.time} className="text-xs" />

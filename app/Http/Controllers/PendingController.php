@@ -28,14 +28,14 @@ class PendingController extends Controller
         } elseif (Auth::user()->hasRole('VR Admin')) {
             $statusValues = ['For VR Approval'];
         }
-
+    
         // Fetch drivers with media
         $drivers = Driver::with('user')
             ->whereIn('Status', $statusValues)
             ->get()
             ->map(function ($driver) {
                 $mediaCollections = ['license', 'photo', 'nbi_clearance', 'police_clearance', 'bir_clearance'];
-
+    
                 // Collect media files
                 $mediaFiles = collect($mediaCollections)->flatMap(function ($collection) use ($driver) {
                     return $driver->getMedia($collection)->map(fn ($media) => [
@@ -46,18 +46,18 @@ class PendingController extends Controller
                         'url' => route('preview-driver-media', ['mediaId' => $media->id]),
                     ]);
                 })->values();
-
+    
                 return array_merge($driver->toArray(), ['media_files' => $mediaFiles]);
             });
-
+    
         $vrCompanies = VRCompany::whereIn('Status', ['Pending'])
             ->get()
             ->map(function ($company) {
                 $owner = VehicleRentalOwner::where('vr_company_id', $company->id)->with('user')->first();
                 $user = $owner ? $owner->user : null;
-
+    
                 $vrContact = VrContacts::where('vr_company_id', $company->id)->first();
-
+    
                 $mediaFiles = $company->media->map(fn ($media) => [
                     'id' => $media->id,
                     'name' => $media->file_name,
@@ -65,7 +65,7 @@ class PendingController extends Controller
                     'mime_type' => $media->mime_type,
                     'url' => route('preview-media', ['mediaId' => $media->id]),
                 ])->values();
-
+    
                 return array_merge($company->toArray(), [
                     'media_files' => $mediaFiles,
                     'owner_details' => $user ? [
@@ -79,13 +79,13 @@ class PendingController extends Controller
                     'contact_details' => $vrContact ? $vrContact->toArray() : null,
                 ]);
             });
-
-        $vehicles = Vehicle::whereIn('Status', $statusValues)
-            ->with(['operator.vrCompany', 'operator.user', 'driver.user']) // Include driver
+    
+            $vehicles = Vehicle::whereIn('Status', $statusValues)
+            ->with(['operator.vrCompany', 'operator.user']) // Keep existing relations
             ->get()
             ->map(function ($vehicle) {
                 $mediaCollections = ['front_image', 'back_image', 'left_side_image', 'right_side_image', 'or_image', 'cr_image', 'id_card_image', 'gps_certificate_image', 'inspection_certificate_image'];
-
+        
                 $mediaFiles = collect($mediaCollections)->flatMap(function ($collection) use ($vehicle) {
                     return $vehicle->getMedia($collection)->map(fn ($media) => [
                         'id' => $media->id,
@@ -95,23 +95,41 @@ class PendingController extends Controller
                         'url' => route('preview-vehicle-media', ['mediaId' => $media->id]),
                     ]);
                 })->values();
-
+        
+                // Fetch drivers manually (WITHOUT modifying relationships)
+                $drivers = Driver::where('vehicle_id', $vehicle->id)->with('user')->get();
+        
                 return array_merge($vehicle->toArray(), [
                     'media_files' => $mediaFiles,
-                    'driver' => $vehicle->driver ? array_merge(
-                        $vehicle->driver->toArray(),
-                        ['user_details' => $vehicle->driver->user ? [
-                            'id' => $vehicle->driver->user->id,
-                            'FirstName' => $vehicle->driver->user->FirstName,
-                            'LastName' => $vehicle->driver->user->LastName,
-                            'MiddleName' => $vehicle->driver->user->MiddleName,
-                            'Email' => $vehicle->driver->user->email,
-                            'ContactNumber' => $vehicle->driver->user->ContactNumber,
-                        ] : null]
-                    ) : null,
+                    'drivers' => $drivers->map(function ($driver) {
+                        // Media collections for drivers
+                        $driverMediaCollections = ['license', 'photo', 'nbi_clearance', 'police_clearance', 'bir_clearance'];
+        
+                        $driverMediaFiles = collect($driverMediaCollections)->flatMap(function ($collection) use ($driver) {
+                            return $driver->getMedia($collection)->map(fn ($media) => [
+                                'id' => $media->id,
+                                'name' => $media->file_name,
+                                'collection_name' => $media->collection_name,
+                                'mime_type' => $media->mime_type,
+                                'url' => route('preview-driver-media', ['mediaId' => $media->id]),
+                            ]);
+                        })->values();
+        
+                        return array_merge($driver->toArray(), [
+                            'user_details' => $driver->user ? [
+                                'id' => $driver->user->id,
+                                'FirstName' => $driver->user->FirstName,
+                                'LastName' => $driver->user->LastName,
+                                'MiddleName' => $driver->user->MiddleName,
+                                'Email' => $driver->user->email,
+                                'ContactNumber' => $driver->user->ContactNumber,
+                            ] : null,
+                            'media_files' => $driverMediaFiles, // Add media files to the driver
+                        ]);
+                    }),
                 ]);
-            });
-
+            });        
+    
         $operators = Operator::with(['user', 'vrCompany'])
             ->whereIn('Status', $statusValues)
             ->get()
@@ -120,7 +138,7 @@ class PendingController extends Controller
                     'company_name' => $operator->company->CompanyName ?? null,
                 ]);
             });
-
+    
         return response()->json([
             'drivers' => $drivers,
             'vrCompanies' => $vrCompanies,
@@ -128,6 +146,7 @@ class PendingController extends Controller
             'operators' => $operators,
         ]);
     }
+    
 
     public function rejection(Request $request)
     {
@@ -213,30 +232,31 @@ class PendingController extends Controller
                     $recipientUser = $entity->user;
                 }
                 break;
-
-            case 'vehicle':
-                $entity = Vehicle::with(['operator.vrCompany', 'operator.user'])->find($entityId);
-                if ($entity) {
-                    $payload = [
-                        'PlateNumber' => $entity->PlateNumber,
-                        'company' => $entity->operator->vrCompany->CompanyName,
-                        'date' => now()->format('F d, Y'),
-                    ];
-                    $recipientUser = $entity->operator->user;
-
-                    if ($entity->driver) {
-                        $driverStatus = $entity->driver->Status;
-
-                        if ($driverStatus === 'For VR Approval') {
-                            $entity->driver->Status = 'For NPTC Approval';
-                        } else {
-                            $entity->driver->Status = 'For Payment';
+                case 'vehicle':
+                    $entity = Vehicle::with(['operator.vrCompany', 'operator.user'])->find($entityId);
+                    if ($entity) {
+                        $payload = [
+                            'PlateNumber' => $entity->PlateNumber,
+                            'company' => $entity->operator->vrCompany->CompanyName,
+                            'date' => now()->format('F d, Y'),
+                        ];
+                        $recipientUser = $entity->operator->user;
+                
+                        // Fetch all drivers separately since the relation was incorrect
+                        $drivers = Driver::where('vehicle_id', $entity->id)->get();
+                
+                        if ($drivers->isNotEmpty()) {
+                            foreach ($drivers as $driver) {
+                                if ($driver->Status === 'For VR Approval') {
+                                    $driver->Status = 'For NPTC Approval';
+                                } else {
+                                    $driver->Status = 'For Payment';
+                                }
+                                $driver->save(); // Save each driver individually
+                            }
                         }
-
-                        $entity->driver->save();
                     }
-                }
-                break;
+                    break;                            
 
             case 'vr_company':
                 $entity = VRCompany::with(['owner.user'])->find($entityId);

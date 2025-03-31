@@ -18,7 +18,7 @@ const modePayments = ['G-cash', 'Maya', 'Bank Transfer'];
 
 export default function ManualPayment({ operatorId, totalAmount }) {
     const { data, setData, post, processing } = useForm({
-        operator_id: 1,
+        operator_id: operatorId,
 
         AccountName: '',
 

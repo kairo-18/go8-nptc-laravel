@@ -11,7 +11,7 @@ export default function PendingVehicleDetails({ item }) {
     const [isRejectionModalOpen, setIsRejectionModalOpen] = useState(false); // Rejection modal state
     const [isFilePreviewModalOpen, setIsFilePreviewModalOpen] = useState(false); // File preview modal state
     const [rejectionNote, setRejectionNote] = useState(''); // State for rejection note
-    const [isLoading, setIsLoading] = useState(false); // Loading state for rejection
+    const [isLoading, setIsLoading] = useState(false); // Loading state for rejection\
 
     // Handle rejection button click
     const handleRejection = async () => {
@@ -144,12 +144,15 @@ export default function PendingVehicleDetails({ item }) {
             </Card>
             <h3 className="mt-6 text-lg font-semibold">Assigned Drivers</h3>
 <div className="space-y-4">
-    {item?.driver ? (
-        <PendingDriverDetails key={item.driver.id} assignedDriver={item.driver} />
+    {item?.drivers && item.drivers.length > 0 ? (
+        item.drivers.map((driver) => (
+            <PendingDriverDetails key={driver.id} assignedDriver={driver} />
+        ))
     ) : (
         <p className="text-gray-500">No drivers assigned to this vehicle.</p>
     )}
 </div>
+
 
             {/* Rejection Note Modal */}
             {isRejectionModalOpen && (
