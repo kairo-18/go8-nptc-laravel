@@ -15,6 +15,7 @@ interface CreateVrCompanyProps {
     companyData: any;
     isEditing: boolean;
     onSubmitRef?: (submitFn: () => void) => void;
+    handleTabSwitch: (tab: string) => void;
 }
 
 export default function CreateVrCompany({
@@ -26,25 +27,21 @@ export default function CreateVrCompany({
     companyData,
     isEditing,
     onSubmitRef,
+    handleTabSwitch
 }: CreateVrCompanyProps) {
     const { data, setData, post, put, patch, progress, transform } = useForm({
         oldCompanyName: '',
-        CompanyName: '',
-        BusinessPermit: null,
-        BusinessPermitNumber: '',
-        BIR_2303: null,
-        DTI_Permit: null,
-        BrandLogo: null,
-        SalesInvoice: null,
+        CompanyName: companyData?.CompanyName || '',
+        BusinessPermit: companyData?.BusinessPermit || null,
+        BusinessPermitNumber: companyData?.BusinessPermitNumber || '',
+        BIR_2303: companyData?.BIR_2303 || null,
+        DTI_Permit:companyData?.DTI_Permit || null,
+        BrandLogo: companyData?.BrandLogo || null,
+        SalesInvoice: companyData?.SalesInvoice || null,
     });
 
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
-
-    const handlePrevious = () => {
-        setData(companyData); // Restore previous data
-    };
-    
 
     useEffect(() => {
         if (isEditing && companyData) {
@@ -70,56 +67,22 @@ export default function CreateVrCompany({
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);
-    
+
         setCompanyData(data); // Store the latest data before submission
-    
+
         const fileFields = ['BusinessPermit', 'BIR_2303', 'DTI_Permit', 'BrandLogo', 'SalesInvoice'];
         const fileData = new FormData();
         let hasFiles = false;
-    
+
         fileFields.forEach((field) => {
             if (data[field]) {
                 fileData.append(field, data[field]);
                 hasFiles = true;
             }
         });
-    
+
         try {
-            if (isEditing) {
-                if (hasFiles) {
-                    console.log(data);
-                    await post(route('vr-company.upload-files', { id: companyData.id }), {
-                        data: fileData,
-                        onSuccess: () => console.log('Files uploaded successfully'),
-                        onError: (errors) => {
-                            console.error('Upload failed:', errors);
-                            setErrors(errors);
-                            setProcessing(false);
-                        },
-                    });
-                }
-    
-                const updatedData = {
-                    oldCompanyName: companyData.CompanyName,
-                    CompanyName: data.CompanyName,
-                    BusinessPermitNumber: data.BusinessPermitNumber,
-                };
-    
-                console.log(updatedData);
-    
-                await patch(route('vr-company.update', { id: companyData.id }), {
-                    data: updatedData,
-                    onSuccess: () => {
-                        setCompanyData(updatedData); // Retain updated data
-                        setProcessing(false);
-                    },
-                    onError: (errors) => {
-                        setErrors(errors);
-                        setProcessing(false);
-                    },
-                });
-            } else {
-                await post(route('vr-company.store'), {
+            await post(route('vr-company.store'), {
                     data,
                     onSuccess: () => {
                         setCompanyData(data); // Retain data after submission
@@ -131,14 +94,13 @@ export default function CreateVrCompany({
                         setProcessing(false);
                     },
                 });
-            }
         } catch (error) {
             console.error('Error submitting form:', error);
         } finally {
             setProcessing(false);
         }
     };
-    
+
 
     useEffect(() => {
         if (setCompanyData) {
@@ -201,7 +163,6 @@ export default function CreateVrCompany({
         </div>
     );
 
-
     return (
         <div className="mx-auto mt-6 w-full max-w-6xl">
             {isTitleDisabled == false ? (
@@ -252,16 +213,16 @@ export default function CreateVrCompany({
                             {renderFileInput('SalesInvoice', 'Sales Invoice')}
                         </div>
 
-                        <div className='flex justify-between'>
-                            <Button onClick={handlePrevious} className="bg-gray-500 text-white">
-                                Submit
-                            </Button>
+                        <div className='flex justify-end gap-2'>
                             {isButtonDisabled === false ? (
-                                <div className="flex justify-end">
-                                    <Button type="submit" disabled={processing} className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700">
-                                        {processing ? 'Submitting...' : 'Submit'}
+                                <>
+                                    <Button
+                                        onClick={() => handleTabSwitch('next')}
+                                        className={`px-4 py-2 rounded  'bg-blue-500 text-white hover:bg-blue-700'}`}
+                                    >
+                                        Next
                                     </Button>
-                                </div>
+                                </>
                             ) : null}
                         </div>
                     </form>

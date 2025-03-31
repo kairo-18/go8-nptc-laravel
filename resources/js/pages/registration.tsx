@@ -12,6 +12,7 @@ export default function Registration({ companies }: { companies: { id: number; B
     const [adminData, setAdminData] = useState({});
     const [contactsData, setContactsData] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
+    const [tabSwitch, setTabSwitch] = useState('');
 
     const goToNextTab = () => {
         const currentIndex = tabs.indexOf(activeTab);
@@ -24,6 +25,16 @@ export default function Registration({ companies }: { companies: { id: number; B
         const currentIndex = tabs.indexOf(activeTab);
         if (currentIndex > 0) {
             setActiveTab(tabs[currentIndex - 1]);
+        }
+    };
+
+    const handleTabSwitch = (tabSwitch: any) => {
+        if (tabSwitch === 'next') {
+            goToNextTab();
+        } else if (tabSwitch === 'previous') {
+            goToPreviousTab();
+        } else {
+            alert('Error switching tabs');
         }
     };
 
@@ -53,6 +64,8 @@ export default function Registration({ companies }: { companies: { id: number; B
                         setCompanyData={setCompanyData}
                         companyData={companyData}
                         isEditing={false}
+                        isButtonDisabled={false}
+                        handleTabSwitch={handleTabSwitch}
                     />
                 )}
                 {activeTab === 'owner' && (
@@ -61,7 +74,10 @@ export default function Registration({ companies }: { companies: { id: number; B
                         onNextTab={goToNextTab}
                         setAdminData={setAdminData}
                         adminData={adminData}
+                        companyData={companyData}
                         isEditing={false}
+                        isButtonDisabled={false}
+                        handleTabSwitch={handleTabSwitch}
                     />
                 )}
                 {activeTab === 'contacts' && (
@@ -70,7 +86,10 @@ export default function Registration({ companies }: { companies: { id: number; B
                         onNextTab={goToNextTab}
                         setContactsData={setContactsData}
                         contactsData={contactsData}
+                        companyData={companyData}
+                        isButtonDisabled={false}
                         isEditing={false}
+                        handleTabSwitch={handleTabSwitch}
                     />
                 )}
                 {activeTab === 'summary' && (
@@ -80,26 +99,9 @@ export default function Registration({ companies }: { companies: { id: number; B
                         adminData={adminData}
                         contactsData={contactsData}
                         setIsEditing={setIsEditing}
+                        handleTabSwitch={handleTabSwitch}
                     />
                 )}
-
-                {/* Navigation Buttons */}
-                <div className="mt-4 flex justify-between">
-                    <button
-                        onClick={goToPreviousTab}
-                        disabled={activeTab === 'company'}
-                        className={`rounded px-4 py-2 ${activeTab === 'company' ? 'cursor-not-allowed bg-gray-300' : 'bg-blue-500 text-white hover:bg-blue-700'}`}
-                    >
-                        Previous
-                    </button>
-                    <button
-                        onClick={goToNextTab}
-                        disabled={activeTab === 'summary'}
-                        className={`rounded px-4 py-2 ${activeTab === 'summary' ? 'cursor-not-allowed bg-gray-300' : 'bg-blue-500 text-white hover:bg-blue-700'}`}
-                    >
-                        Next
-                    </button>
-                </div>
             </div>
         </MainLayout>
     );

@@ -7,8 +7,8 @@ import { router } from "@inertiajs/react";
 import { useEffect } from 'react';
 
 export default function ContactInformation({ contactsData, handleContactChange, handleContactsUpdate, companies }) {
-    
-    if (contactsData.length === 0) return <CreateVrContacts companies={companies} isButtonDisabled={false} />;
+
+    if (contactsData.length === 0) return <CreateVrContacts companies={companies} isButtonDisabled={false} isEditing2={true} />;
 
     return (
         <Card>

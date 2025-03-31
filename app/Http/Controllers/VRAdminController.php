@@ -59,24 +59,71 @@ class VRAdminController extends Controller
         // Log the incoming request data for debugging
         \Log::info('Update Request Data:', $request->all());
 
-        // Validate the `vr_company_id` before using it
         $vrCompanyId = $request->input('vr_company_id');
+
+        // If vr_company_id is missing but BusinessPermitNumber is provided, find the vr_company_id
+        if (!$vrCompanyId && $request->has('BusinessPermitNumber')) {
+            $vrCompany = VRCompany::where('BusinessPermitNumber', $request->input('BusinessPermitNumber'))->first();
+            \Log::info('VR Company Found:', ['vrCompany' => $vrCompany]);
+
+            if ($vrCompany) {
+                $vrCompanyId = (int) $vrCompany->id;
+            } else {
+                return response()->json(['error' => 'VR Company not found for the provided Business Permit Number.'], 404);
+            }
+        }
+
+        // Validate the vr_company_id
         if (! $vrCompanyId || ! is_numeric($vrCompanyId)) {
             return response()->json(['error' => 'Invalid or missing vr_company_id.'], 400);
         }
 
         // Find the VR company
-        $vrCompany = VRCompany::find((int) $vrCompanyId);
-        if (! $vrCompany || ! $vrCompany->owner || ! $vrCompany->owner->user) {
-            return response()->json(['error' => 'VR Admin user not found for the specified company.'], 404);
+        $vrCompany = VRCompany::find($vrCompanyId);
+        if (!$vrCompany) {
+            return response()->json(['error' => 'VR Company not found.'], 404);
         }
 
-        // Retrieve the target user
-        $targetUser = $vrCompany->owner->user;
+        // Check if the company has an admin
+        $targetUser = $vrCompany->owner->user ?? null;
 
-        // Validate the request data (now using `$targetUser->id` for unique validation)
+        // If no admin exists, create a new admin based on the provided data
+        if (!$targetUser) {
+            \Log::info('No VR Admin found, creating new admin.');
+
+            $validatedAdminData = $request->validate([
+                'username' => 'required|string|max:255|unique:users,username',
+                'email' => 'required|string|lowercase|email|max:255|unique:users,email',
+                'FirstName' => 'required|string',
+                'LastName' => 'required|string',
+                'Address' => 'nullable|string|max:255',
+                'BirthDate' => 'nullable|date',
+                'ContactNumber' => 'nullable|string|max:255',
+            ]);
+
+            // Create new user (admin)
+            $newAdmin = User::create([
+                'username' => $validatedAdminData['username'],
+                'email' => $validatedAdminData['email'],
+                'password' => Hash::make('password'),
+                'FirstName' => $validatedAdminData['FirstName'],
+                'LastName' => $validatedAdminData['LastName'],
+                'Address' => $validatedAdminData['Address'] ?? null,
+                'BirthDate' => $validatedAdminData['BirthDate'] ?? null,
+                'ContactNumber' => $validatedAdminData['ContactNumber'] ?? null,
+                'role' => 'admin', // Assuming role is stored as a column
+            ]);
+
+            // Assign the new admin to the VR company
+            $vrCompany->owner()->updateOrCreate([], ['user_id' => $newAdmin->id]);
+
+            \Log::info('New admin created:', ['admin' => $newAdmin]);
+
+            return response()->json(['message' => 'New VR Admin created successfully', 'admin' => $newAdmin]);
+        }
+
+        // Validate and update the existing admin
         $validated = $request->validate([
-            'vr_company_id' => 'sometimes|integer|exists:vr_companies,id',
             'username' => 'sometimes|string|max:255|unique:users,username,'.$targetUser->id,
             'email' => 'sometimes|string|lowercase|email|max:255|unique:users,email,'.$targetUser->id,
             'FirstName' => 'sometimes|string',
@@ -86,10 +133,10 @@ class VRAdminController extends Controller
             'ContactNumber' => 'sometimes|string|max:255',
         ]);
 
-        // Update the target user's details
+        // Update the existing admin
         $targetUser->fill($validated);
-        $targetUser->save(); // Ensure changes are saved
+        $targetUser->save();
 
-        \Log::info('Update Complete');
+        \Log::info('Existing admin updated.');
     }
 }
