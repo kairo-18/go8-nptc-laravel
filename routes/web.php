@@ -13,6 +13,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Http\Controllers\PDFController;
+
 
 // Home route
 Route::get(
@@ -162,6 +164,37 @@ Route::post('mails/new-mail', function (Request $request) {
 
 // pending
 Route::get('/pending-data', [PendingController::class, 'index']);
+
+
+//certificates
+Route::get('/nptc-driver-certificate', function () {
+    return view('nptc-driver-certificate', ['payload' => samplePayload()]);
+});
+
+Route::get('/nptc-operator-certificate', function () {
+    return view('nptc-operator-certificate', ['payload' => samplePayload()]);
+});
+
+Route::get('/nptc-vehicle-certificate', function () {
+    return view('nptc-vehicle-certificate', ['payload' => samplePayload()]);
+});
+
+Route::get('/nptc-vr-company-certificate', function () {
+    return view('nptc-vr-company-certificate', ['payload' => samplePayload()]);
+});
+
+// Helper function to generate sample payload
+function samplePayload()
+{
+    return [
+        'name' => 'John Doe',
+        'company' => 'XYZ Logistics',
+        'date' => now()->format('F d, Y'),
+    ];
+}
+
+//HTML to PDF
+Route::get('/download-pdf', [PDFController::class, 'downloadPDF'])->name('download.pdf');
 
 // Include additional route files
 require __DIR__.'/settings.php';
