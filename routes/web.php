@@ -91,6 +91,7 @@ Route::put('mails/mark-read/{thread}', function (Thread $thread) {
 // Manual Direct Payment
 Route::get('/manual-payment/operator/{operatorId}', [ManualPaymentController::class, 'show'])->name('manual-payment.show');
 Route::post('/manual-payments/store', [ManualPaymentController::class, 'store'])->name('manual-payments.store');
+Route::post('/reject-billing/{driver}', [ManualPaymentController::class, 'rejectBilling'])->name('reject.billing');
 
 Route::post('mails/new-mail', function (Request $request) {
     $request->validate([

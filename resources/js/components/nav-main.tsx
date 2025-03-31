@@ -17,7 +17,7 @@ import {
 import { Link } from "@inertiajs/react";
 
 export function NavMain({
-  items, currentPath
+  items, currentPath, userRole
 }: {
   items: {
     title: string;
@@ -30,7 +30,10 @@ export function NavMain({
     }[];
   }[];
   currentPath: string;
+  userRole:string;
 }) {
+
+  const isVRAdmin = userRole === "VR Admin";
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
@@ -46,14 +49,14 @@ export function NavMain({
               defaultOpen={isAnyChildActive} // Open if a child is active
               className="group/collapsible"
             >
-              <SidebarMenuItem className={isMainActive ? "bg-white text-blue-500" : ""}>
+              <SidebarMenuItem className={isMainActive ? (isVRAdmin ? "bg-white text-red-500" : "bg-white text-blue-500") : ""}>
                 <SidebarMenuButton asChild tooltip={item.title}>
                   <div className="flex items-center w-full">
                     <Link
                       href={item.url}
                       prefetch
                       className={`flex items-center space-x-2 w-full ${
-                        isMainActive ? "text-blue-500" : ""
+                        isMainActive ? (isVRAdmin ? "text-red-500" : "text-blue-500") : ""
                       }`}
                     >
                       {item.icon && <item.icon className="shrink-0" />}
@@ -82,14 +85,14 @@ export function NavMain({
                         return (
                           <SidebarMenuSubItem
                             key={subItem.title}
-                            className={isSubActive ? "bg-white text-blue-500" : ""}
+                            className={isSubActive ? (isVRAdmin ? "bg-white text-red-500" : "bg-white text-blue-500") : ""}
                           >
                             <SidebarMenuSubButton asChild>
                               <Link
                                 href={subItem.url}
                                 prefetch
                                 className={`flex items-center space-x-2 ${
-                                  isSubActive ? "text-blue-500" : ""
+                                  isSubActive ? (isVRAdmin ? "text-white" : "text-blue-500") : ""
                                 }`}
                               >
                                 {subItem.icon && <subItem.icon className="w-4 h-4 opacity-75" />}

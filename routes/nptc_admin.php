@@ -85,16 +85,41 @@ Route::group(['middleware' => ['role:Temp User|NPTC Admin|NPTC Super Admin']], f
 
 // Billings | TODO: Glad or Shaiza fix if needed tnx!
 Route::get('billings', function () {
+    // Fetch "For Payment" vehicles
+    $vehicles = \App\Models\Vehicle::where('Status', 'For Payment')->get();
 
-    return Inertia::render(
-        'billings',
-        [
-            'billings' => \App\Models\ManualPayment::with(['operator.user', 'operator.vrCompany', 'media'])
-                ->whereHas('operator', function ($query) {
-                    $query->where('Status', 'For Payment');
-                })
-                ->get()
-                ->makeHidden(['updated_at', 'user_id', 'company_id']),
-        ]
-    );
+    // Fetch drivers belonging to those vehicles, including their user details
+    $drivers = \App\Models\Driver::whereIn('vehicle_id', $vehicles->pluck('id'))
+        ->with('user') // Include the related user details
+        ->get();
+
+    return Inertia::render('billings', [
+        'billings' => \App\Models\ManualPayment::with([
+            'operator.user',
+            'operator.vrCompany',
+            'media'
+        ])
+            ->where('Status', 'Pending') // Fetch only pending manual payments
+            ->get()
+            ->map(function ($payment) use ($vehicles, $drivers) {
+                if (!$payment->operator) {
+                    return $payment->toArray() + ['drivers' => [], 'vehicles' => []];
+                }
+
+                // Get vehicles that belong to this operator
+                $operatorVehicles = $vehicles->whereIn('id', 
+                    $payment->operator->drivers->pluck('vehicle_id')->unique()
+                )->values();
+
+                // Get drivers that belong to those vehicles, including user details
+                $operatorDrivers = $drivers->whereIn('vehicle_id', $operatorVehicles->pluck('id'))->values();
+
+                return $payment->toArray() + [
+                    'drivers' => $operatorDrivers,
+                    'vehicles' => $operatorVehicles,
+                ];
+            }),
+    ]);
 })->name('billings');
+
+

@@ -67,10 +67,11 @@ interface FormattedBillingReceipt {
     amount: number;
     requestingDocument: string[];
     notes: string;
-    status: 'Paid' | 'Unpaid';
+    status: 'Pending' | 'Approved' | 'Rejected';
     dueDate: string;
     media: Media[]; // Include media in formatted receipt
     receiptUrl?: string;
+    driverIds: string[];
 }
 
 export default function Billings({ billings }: { billings: Billing[] }) {
@@ -107,19 +108,20 @@ export default function Billings({ billings }: { billings: Billing[] }) {
                 month: 'long',
                 day: 'numeric',
             });
+            console.log(billing)
 
             return {
                 id: billing.id,
                 company: billing.operator.vr_company.CompanyName,
-                driver: `${billing.operator.user.FirstName} ${billing.operator.user.LastName}`,
-                vehicle: 'N/A',
-                date: fullDateTime, // Now includes both date and time
+                vehicle: billing.vehicles.map(vehicle => vehicle.NPTC_ID),
+                driver: billing.drivers.map(driver=>driver.NPTC_ID),
+                date: fullDateTime,
                 billingsID: billing.id.toString().padStart(4, '0'),
                 modeOfPayment: billing.ModePayment,
                 accountName: billing.AccountName,
                 accountNumber: billing.AccountNumber,
                 purpose: 'Registration',
-                time: formattedTime, // Keep separate time if needed
+                time: formattedTime,
                 referenceNumber: billing.ReferenceNumber,
                 amount: parseFloat(billing.Amount),
                 requestingDocument: [billing.operator.NPTC_ID],
@@ -128,7 +130,9 @@ export default function Billings({ billings }: { billings: Billing[] }) {
                 dueDate: formattedDueDate,
                 media: billing.media,
                 receiptUrl: billing.media[0]?.original_url || billing.Receipt,
+                driverIds: billing.drivers.map(driver => driver.id), // Store driver ids
             };
+            
         });
     };
 

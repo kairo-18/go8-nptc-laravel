@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { usePage } from '@inertiajs/react';
+import { useForm, usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { Check, ChevronsUpDown, Search } from 'lucide-react';
 import { useState } from 'react';
@@ -54,17 +54,12 @@ interface DataReceipt {
         // other media properties you might need
     }[];
     Receipt?: string; // Keep this if you still need it
+    driverIds:string[];
 }
 
 interface BillingsTab1Props {
     dataReceipts: DataReceipt[];
 }
-
-const handleReject = () => {
-    console.log('Rejected receipt:', selectedReceipt?.id, 'with notes:', rejectNotes);
-    setRejectNotes('');
-    setSelectedReceipt(null);
-};
 
 export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
     const [open, setOpen] = useState(false);
@@ -106,6 +101,53 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
             console.error('Approval failed:', error);
         }
     };
+
+    const { post , data} = useForm({
+
+ });
+
+ const handleReject = () => {
+    // Log the notes before the API call
+    console.log("Notes: " + rejectNotes); // This will log the rejection notes
+
+    if (!selectedReceipt?.driver) {
+        console.error('Driver information is missing');
+        return;
+    }
+
+    // Assuming you have a driver ID for the selected driver, modify this part
+    const driverId = selectedReceipt.driverIds[0]; // Or however you access the driver's ID
+
+    if (!driverId) {
+        console.error('Driver ID is missing');
+        return;
+    }
+
+    // Log the data you're sending in the post request
+    console.log("Sending data:", {
+        driverId: driverId,
+        note: rejectNotes,
+    });
+
+    post(route('reject.billing', { driver: driverId }), {
+        data: {
+            note: rejectNotes,
+        },
+        headers: {
+            'Content-Type': 'application/json', // Make sure the content type is set to JSON
+        },
+        onSuccess: () => {
+            setRejectNotes('');
+            setSelectedReceipt(null);
+        },
+        onError: (error) => {
+            console.error('Rejection failed:', error);
+        },
+    });
+};
+
+    
+
 
     return (
         <div className="mt-4 flex h-full flex-col">
@@ -186,9 +228,9 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
                             >
                                 <CardHeader className="flex flex-row items-center justify-between">
                                     <div>
-                                        <CardTitle>{receipt.driver}</CardTitle>
+                                        <CardTitle>{receipt.vehicle}</CardTitle>
                                         <CardDescription className="text-muted-foreground mt-1 text-sm">
-                                            {receipt.company} • {receipt.vehicle}
+                                            {receipt.company} • {receipt.driver && `${receipt.driver},`}
                                         </CardDescription>
                                     </div>
                                     <div className="text-muted-foreground text-sm">{formatDate(receipt.date)}</div>
