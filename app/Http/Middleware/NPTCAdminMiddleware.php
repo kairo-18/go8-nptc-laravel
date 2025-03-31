@@ -15,8 +15,8 @@ class NPTCAdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(!auth()->check() || !auth()->user()->hasRole(['NPTC Admin', 'NPTC Super Admin'])) {
-            abort(403, "Unauthorized");
+        if (! auth()->check() || ! auth()->user()->hasRole(['NPTC Admin', 'NPTC Super Admin'])) {
+            abort(403, 'Unauthorized');
         }
 
         return $next($request);

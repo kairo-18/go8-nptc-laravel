@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import axios from 'axios';
+import DOMPurify from 'dompurify';
 import { FileText, Paperclip } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 
@@ -98,7 +99,9 @@ export default function MainMailContent({ selectedThread, auth }) {
                                         </div>
                                         <div className="mt-4 py-3">
                                             <p className="text-base font-medium text-gray-800 md:text-lg">{mail.subject}</p>
-                                            <p className="mt-2 text-sm text-gray-700 md:text-base">{mail.content}</p>
+                                            <p className="mt-2 text-sm text-gray-700 md:text-base">
+                                                <SafeHTML html={mail.content} />
+                                            </p>
 
                                             {/* Display attachments */}
                                             {mail.media && mail.media.length > 0 && (
@@ -200,3 +203,12 @@ export default function MainMailContent({ selectedThread, auth }) {
         </DialogContent>
     );
 }
+
+const SafeHTML = ({ html, className }: { html: string; className?: string }) => {
+    const clean = DOMPurify.sanitize(html, {
+        ALLOWED_TAGS: ['a', 'p', 'br', 'strong', 'em', 'u', 'ol', 'ul', 'li', 'h1', 'h2', 'h3', 'h4'],
+        ALLOWED_ATTR: ['href', 'target', 'rel', 'class', 'style'],
+    });
+
+    return <div className={className} dangerouslySetInnerHTML={{ __html: clean }} />;
+};

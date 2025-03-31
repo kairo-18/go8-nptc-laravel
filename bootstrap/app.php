@@ -4,8 +4,9 @@
  * Bootstrap the application.
  *
  * @category Bootstrap
- * @package  Application
+ *
  * @license  MIT License
+ *
  * @link     http://example.com
  */
 

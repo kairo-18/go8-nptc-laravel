@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('vr_contacts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('vr_company_id')->constrained("vr_companies")->cascadeOnDelete();
+            $table->foreignId('vr_company_id')->constrained('vr_companies')->cascadeOnDelete();
             $table->string('email');
             $table->string('ContactNumber');
             $table->string('LastName');

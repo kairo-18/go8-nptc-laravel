@@ -5,12 +5,10 @@ namespace App\Events;
 use App\Models\Mail;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Thread;
 
 class MailReceive implements ShouldBroadcast
 {
@@ -19,6 +17,7 @@ class MailReceive implements ShouldBroadcast
     use SerializesModels;
 
     public Mail $mail;
+
     /**
      * Create a new event instance.
      */
@@ -35,11 +34,12 @@ class MailReceive implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('thread.' . $this->mail->thread_id),
-            new PrivateChannel('user.' . $this->mail->sender_id), // Add sender's channel
-            new PrivateChannel('user.' . $this->mail->thread->receiver_id),
+            new PrivateChannel('thread.'.$this->mail->thread_id),
+            new PrivateChannel('user.'.$this->mail->sender_id), // Add sender's channel
+            new PrivateChannel('user.'.$this->mail->thread->receiver_id),
         ];
     }
+
     public function broadcastWith(): array
     {
         $lastMail = $this->mail->thread->mails()
@@ -49,7 +49,7 @@ class MailReceive implements ShouldBroadcast
 
         // Add preview URLs to each media item
         $lastMail->media->each(function ($media) {
-            $media->preview_url = url('/preview-media/' . $media->id);
+            $media->preview_url = url('/preview-media/'.$media->id);
         });
 
         return [

@@ -27,23 +27,31 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
         $user = Auth::user();
 
-        //check if user has a role or has the role NPTC Admin
-         if ($user->hasRole(['Temp User'])) {
+        // check if user has a role or has the role NPTC Admin
+        if ($user->hasRole(['Temp User'])) {
             $request->session()->regenerate();
-             return redirect()->route('registration')->withInput(['Registration' => 'Please input your company details']);
-        } else if ($user->hasRole('Temp User Operator')){
+
+            return redirect()->route('registration')->withInput(['Registration' => 'Please input your company details']);
+        } elseif ($user->hasRole('Temp User Operator')) {
             $request->session()->regenerate();
-             return redirect()->route('create-operator.admin')->withInput(['Registration' => 'Please input your operator details']);
-        } elseif ($user->hasRole('Driver')) { 
-            $request->session()->regenerate();
-            return redirect()->route('driver.dashboard');
+
+            return redirect()->route('create-operator.admin')->withInput(['Registration' => 'Please input your operator details']);
         }
+        // elseif ($user->hasRole('Driver')) {
+        //     if ($user->driver->Status != 'Approved') {
+        //         Auth::guard('web')->logout();
+        //
+        //         return redirect()->route('login');
+        //     }
+        //     $request->session()->regenerate();
+        //
+        //     return redirect()->route('driver.dashboard');
+        // }
 
         $request->session()->regenerate();
 

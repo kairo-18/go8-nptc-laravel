@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use App\Models\User;
 use App\Models\Operator;
+use App\Models\User;
 use App\Models\VRCompany;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Auth\Events\Registered;
-use Spatie\Permission\Models\Role;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Redirect;
+use Inertia\Inertia;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
 
 class OperatorAdminController extends Controller
@@ -19,6 +17,7 @@ class OperatorAdminController extends Controller
     public function index()
     {
         $operators = Operator::with('user', 'vrCompany')->get();
+
         return response()->json($operators);
     }
 
@@ -59,12 +58,20 @@ class OperatorAdminController extends Controller
 
         $user->assignRole('Operator');
 
+        $statusValue = [];
+        if (Auth::user()->hasRole(['NPTC Super Admin', 'NPTC Admin'])) {
+            $statusValue = ['Status' => 'For Payment'];
+        } elseif (Auth::user()->hasRole('Temp User Operator')) {
+            $statusValue = ['Status' => 'For VR Approval'];
+        } else {
+            return response()->json(['message' => 'Invalid Role'], 401);
+        }
 
         // Create the Operator record linked to the User
         $operator = $user->operator()->create([
             'vr_company_id' => $validatedData['vr_company_id'],
             'user_id' => $user->id,
-            'Status' => Auth::user()->hasRole('NPTC Super Admin') ? 'Approved' : 'Pending',
+            'Status' => $statusValue['Status'],
         ]);
 
         if ($request->hasFile('photo')) {
@@ -79,9 +86,10 @@ class OperatorAdminController extends Controller
             $media = $operator->addMediaFromRequest('valid_id_back')->toMediaCollection('valid_id_back', 'private');
             $operator->update(['valid_id_back' => $media->getPath()]);
         }
-        if(Auth::user()->hasRole('Temp User Operator')){
-            //logout the user
+        if (Auth::user()->hasRole('Temp User Operator')) {
+            // logout the user
             Auth::logout();
+
             return Redirect::route('login');
         }
 
@@ -100,85 +108,85 @@ class OperatorAdminController extends Controller
      * Update an operator.
      */
     public function update(Request $request, Operator $operator)
-{
+    {
 
-    $validatedData = $request->validate([
-        'username' => 'sometimes|string|unique:users,username,' . $operator->user->id,
-        'email' => 'sometimes|email|unique:users,email,' . $operator->user->id,
-        'FirstName' => 'sometimes|string',
-        'LastName' => 'sometimes|string',
-        'Address' => 'sometimes|string',
-        'BirthDate' => 'sometimes|date',
-        'ContactNumber' => 'sometimes|string',
-        'password' => 'sometimes|string|min:6',
+        $validatedData = $request->validate([
+            'username' => 'sometimes|string|unique:users,username,'.$operator->user->id,
+            'email' => 'sometimes|email|unique:users,email,'.$operator->user->id,
+            'FirstName' => 'sometimes|string',
+            'LastName' => 'sometimes|string',
+            'Address' => 'sometimes|string',
+            'BirthDate' => 'sometimes|date',
+            'ContactNumber' => 'sometimes|string',
+            'password' => 'sometimes|string|min:6',
 
-        'vr_company_id' => 'sometimes|exists:vr_companies,id',
-        'Status' => 'sometimes|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected',
-    ]);
+            'vr_company_id' => 'sometimes|exists:vr_companies,id',
+            'Status' => 'sometimes|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected',
+        ]);
 
+        // Update User Details
+        $userData = array_intersect_key($validatedData, array_flip([
+            'username', 'email', 'FirstName', 'LastName', 'Address', 'BirthDate', 'ContactNumber', 'password',
+        ]));
 
-
-    // Update User Details
-    $userData = array_intersect_key($validatedData, array_flip([
-        'username', 'email', 'FirstName', 'LastName', 'Address', 'BirthDate', 'ContactNumber', 'password'
-    ]));
-
-    if (isset($userData['password'])) {
-        $userData['password'] = Hash::make($userData['password']); // Hash password if provided
-    }
-
-    $operator->user()->update($userData);
-
-    // Update Operator Details
-    $operatorData = array_intersect_key($validatedData, array_flip([
-        'vr_company_id', 'Status'
-    ]));
-
-    $operator->update($operatorData);
-
-    return response()->json([
-        'message' => 'Operator updated successfully',
-        'operator' => $operator->load('user', 'vrCompany'), // Ensure latest data is returned
-    ]);
-}
-
-public function updateOperatorMedia(Request $request, Operator $operator){
-
-    // Validate request
-    $request->validate([
-
-        'photo' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-        'valid_id_front' => 'nullable|file|mimes:jpg,png|max:2048',
-        'valid_id_back' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-    ]);
-
-    // File collections mapping
-    $files = [
-        'photo' => 'photo',
-        'valid_id_front' => 'valid_id_front',
-        'valid_id_back' => 'valid_id_back',
-
-    ];
-
-    foreach ($files as $fileKey => $collection) {
-        if ($request->hasFile($fileKey)) {
-            \Log::info("Uploading new file for: {$fileKey}");
-
-            // Clear existing media for this collection
-            $operator->clearMediaCollection($collection);
-
-            // Upload new file to the private media collection
-            $mediaItem = $operator->addMediaFromRequest($fileKey)->toMediaCollection($collection, 'private');
-
-            \Log::info("Uploaded file for {$fileKey}: {$mediaItem->file_name}");
+        if (isset($userData['password'])) {
+            $userData['password'] = Hash::make($userData['password']); // Hash password if provided
         }
+
+        $operator->user()->update($userData);
+
+        // Update Operator Details
+        $operatorData = array_intersect_key($validatedData, array_flip([
+            'vr_company_id', 'Status',
+        ]));
+
+        $operator->update($operatorData);
+
+        return response()->json([
+            'message' => 'Operator updated successfully',
+            'operator' => $operator->load('user', 'vrCompany'), // Ensure latest data is returned
+        ]);
     }
 
-}
+    public function updateOperatorMedia(Request $request, Operator $operator)
+    {
 
-public function downloadMedia($mediaId)
+        // Validate request
+        $request->validate([
+
+            'photo' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'valid_id_front' => 'nullable|file|mimes:jpg,png|max:2048',
+            'valid_id_back' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+        ]);
+
+        // File collections mapping
+        $files = [
+            'photo' => 'photo',
+            'valid_id_front' => 'valid_id_front',
+            'valid_id_back' => 'valid_id_back',
+
+        ];
+
+        foreach ($files as $fileKey => $collection) {
+            if ($request->hasFile($fileKey)) {
+                \Log::info("Uploading new file for: {$fileKey}");
+
+                // Clear existing media for this collection
+                $operator->clearMediaCollection($collection);
+
+                // Upload new file to the private media collection
+                $mediaItem = $operator->addMediaFromRequest($fileKey)->toMediaCollection($collection, 'private');
+
+                \Log::info("Uploaded file for {$fileKey}: {$mediaItem->file_name}");
+            }
+        }
+
+    }
+
+    public function downloadMedia($mediaId)
     {
         $media = Media::findOrFail($mediaId);
+
         return response()->download($media->getPath(), $media->file_name);
     }
 
@@ -191,28 +199,26 @@ public function downloadMedia($mediaId)
         $filePath = $media->getPath();
         $mimeType = $media->mime_type;
 
-        if (!file_exists($filePath)) {
+        if (! file_exists($filePath)) {
             abort(404, 'File not found');
         }
 
         return response()->file($filePath, ['Content-Type' => $mimeType]);
     }
 
-
-
     /**
      * Remove an operator.
      */
     public function destroy(Operator $operator)
-{
-    if ($operator->user) {
-        $operator->user->delete();
+    {
+        if ($operator->user) {
+            $operator->user->delete();
+        }
+
+        $operator->delete();
+
+        return response()->json(['message' => 'Operator and associated user deleted successfully']);
     }
-
-    $operator->delete();
-
-    return response()->json(['message' => 'Operator and associated user deleted successfully']);
-}
 
     public function updateStatus(Request $request, $id)
     {
@@ -226,7 +232,6 @@ public function downloadMedia($mediaId)
         $operator->Status = $request->status;
         $operator->save();
 
-
         \Log::info('Operator status updated', ['id' => $operator->id, 'status' => $operator->Status]);
 
         return response()->json(['message' => 'Status updated successfully'], 200);
@@ -236,7 +241,7 @@ public function downloadMedia($mediaId)
     {
         $operator = Operator::with('user')->find($id);
 
-        if (!$operator) {
+        if (! $operator) {
             return abort(404, 'Operator not found');
         }
 
@@ -245,7 +250,7 @@ public function downloadMedia($mediaId)
 
         // Process media files
         $mediaFiles = collect($mediaCollections)->flatMap(function ($collection) use ($operator) {
-            return $operator->getMedia($collection)->map(fn($media) => [
+            return $operator->getMedia($collection)->map(fn ($media) => [
                 'id' => $media->id,
                 'name' => $media->file_name,
                 'collection_name' => $media->collection_name,
@@ -253,7 +258,7 @@ public function downloadMedia($mediaId)
                 'url' => route('preview-operator-media', ['mediaId' => $media->id]),
             ]);
         })->values();
-    
+
         return Inertia::render('edit-operator', [
             'operator' => $operator,
             'mediaFiles' => $mediaFiles,
@@ -276,5 +281,4 @@ public function downloadMedia($mediaId)
 
         $media->delete();
     }
-
 }

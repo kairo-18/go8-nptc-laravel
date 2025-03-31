@@ -2,14 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Spatie\MediaLibrary\HasMedia;
-use Spatie\MediaLibrary\InteractsWithMedia;
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -34,7 +30,7 @@ class Vehicle extends Model implements HasMedia
         'id_card_image',
         'gps_certificate_image',
         'inspection_certificate_image',
-        'NPTC_ID' 
+        'NPTC_ID',
     ];
 
     protected static function boot()
@@ -42,7 +38,7 @@ class Vehicle extends Model implements HasMedia
         parent::boot();
 
         static::creating(function ($vehicle) {
-            if (!$vehicle->NPTC_ID) {
+            if (! $vehicle->NPTC_ID) {
                 $vehicle->NPTC_ID = static::generateUniqueNPTCId('UN');
             }
         });
@@ -53,7 +49,7 @@ class Vehicle extends Model implements HasMedia
         $nextNumber = 1;
 
         do {
-            $nptcId = $prefix . '-' . str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
+            $nptcId = $prefix.'-'.str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
             $exists = static::where('NPTC_ID', $nptcId)->exists();
             $nextNumber++;
         } while ($exists);

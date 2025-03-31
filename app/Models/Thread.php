@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Thread extends Model
 {
     protected $fillable = ['original_sender_id', 'sender_id', 'receiver_id'];
+
     //
     public function mails()
     {
