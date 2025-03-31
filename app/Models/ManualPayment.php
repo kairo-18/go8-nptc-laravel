@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
@@ -12,14 +12,14 @@ class ManualPayment extends Model implements HasMedia
     use HasFactory, InteractsWithMedia;
 
     protected $fillable = [
-        "operator_id",
-        "AccountName",
-        "ModePayment",
-        "Receipt",
-        "ReferenceNumber",
-        "AccountNumber",
-        "Notes",
-        "Amount"
+        'operator_id',
+        'AccountName',
+        'ModePayment',
+        'Receipt',
+        'ReferenceNumber',
+        'AccountNumber',
+        'Notes',
+        'Amount',
     ];
 
     public function getMediaUrlsAttribute()
@@ -36,8 +36,16 @@ class ManualPayment extends Model implements HasMedia
 
     public function operator()
     {
-        return $this->hasMany(Operator::class);
+        return $this->belongsTo(Operator::class);
     }
 
+    public function driver()
+    {
+        return $this->belongsTo(Driver::class);
+    }
 
+    public function vehicle()
+    {
+        return $this->belongsTo(Vehicle::class);
+    }
 }

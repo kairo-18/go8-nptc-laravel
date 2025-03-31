@@ -82,4 +82,9 @@ class Driver extends Model implements HasMedia
     {
         return $this->hasMany(Trip::class);
     }
+
+    public function manualPayments()
+    {
+        return $this->hasMany(ManualPayment::class);
+    }
 }

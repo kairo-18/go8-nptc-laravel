@@ -17,6 +17,8 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+import { usePage } from '@inertiajs/react';
+import axios from 'axios';
 import { Check, ChevronsUpDown, Search } from 'lucide-react';
 import { useState } from 'react';
 
@@ -45,6 +47,13 @@ interface DataReceipt {
     notes: string;
     status: string;
     dueDate: string;
+    media?: {
+        id: number;
+        original_url: string;
+        file_name: string;
+        // other media properties you might need
+    }[];
+    Receipt?: string; // Keep this if you still need it
 }
 
 interface BillingsTab1Props {
@@ -63,6 +72,7 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedReceipt, setSelectedReceipt] = useState<DataReceipt | null>(null);
     const [rejectNotes, setRejectNotes] = useState('');
+    const { auth } = usePage<SharedData>().props;
 
     const formatDate = (dateString: string) => {
         const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -82,6 +92,20 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
             if (sortValue === 'company_desc') return b.company.localeCompare(a.company);
             return 0;
         });
+
+    const handleApprove = async (selectedReceipt) => {
+        try {
+            await axios.post('/api/approve-with-docu', {
+                id: selectedReceipt.id,
+                type: 'operator',
+                user_id: auth.user.id,
+            });
+            setSelectedReceipt(null);
+            window.location.reload();
+        } catch (error) {
+            console.error('Approval failed:', error);
+        }
+    };
 
     return (
         <div className="mt-4 flex h-full flex-col">
@@ -240,6 +264,7 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
                                         <Button
                                             variant="outline"
                                             className="border-green-500 bg-transparent text-green-500 hover:bg-green-50 hover:text-green-700"
+                                            onClick={() => handleApprove(selectedReceipt)}
                                         >
                                             Approve and generate documents
                                         </Button>
@@ -260,7 +285,8 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
                             {/* Basic Information */}
                             <div>
                                 <Avatar className="mb-1 h-[220px] w-full rounded-none">
-                                    <AvatarImage src="https://us1.discourse-cdn.com/flex019/uploads/manager1/optimized/2X/7/71bfea85ebeba2ed4409a76cb38b8f3336847440_2_690x299.png" />
+                                    {console.log(selectedReceipt?.media)}
+                                    <AvatarImage src={route('preview-media', selectedReceipt.media[0].id)} />
                                     <AvatarFallback>Receipt</AvatarFallback>
                                 </Avatar>
 
