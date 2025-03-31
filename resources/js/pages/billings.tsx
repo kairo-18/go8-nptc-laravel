@@ -13,125 +13,127 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-const dataReceipts = [
-    {
-        id: 1,
-        company: 'Go8 Technology',
-        driver: 'John Doe',
-        vehicle: 'ABC123',
-        date: '03-28-2025',
-        billingsID: '1234',
-        modeOfPayment: 'Cash',
-        accountName: 'John Doe',
-        accountNumber: '12345678',
-        purpose: 'Registration',
-        time: '3:43 PM',
-        referenceNumber: '123456789012',
-        amount: 10000,
-        requestingDocument: ['DR-7812', 'DR-1234'],
-        notes: 'This is a note for the transaction.',
-        status: 'Paid',
-        dueDate: '04-28-2025',
-    },
-    {
-        id: 2,
-        company: 'Go8 Technology',
-        driver: 'Jane Smith',
-        vehicle: 'XYZ789',
-        date: '03-29-2025',
-        billingsID: '5678',
-        modeOfPayment: 'Credit Card',
-        accountName: 'Jane Smith',
-        accountNumber: '87654321',
-        purpose: 'Registration',
-        time: '3:43 PM',
-        referenceNumber: '987654321098',
-        amount: 20000,
-        requestingDocument: 'DR-1234',
-        notes: 'This is a note for the transaction.',
-        status: 'Paid',
-        dueDate: '04-28-2025',
-    },
-    {
-        id: 3,
-        company: 'Quantum Metal Inc.',
-        driver: 'Bob Johnson',
-        vehicle: 'DEF456',
-        date: '03-30-2025',
-        billingsID: '9012',
-        modeOfPayment: 'Debit Card',
-        accountName: 'Bob Johnson',
-        accountNumber: '23456789',
-        purpose: 'Registration',
-        time: '3:43 PM',
-        referenceNumber: '234567890123',
-        amount: 5000,
-        requestingDocument: 'DR-3456',
-        notes: 'None',
-        status: 'Paid',
-        dueDate: '04-28-2025',
-    },
-    {
-        id: 4,
-        company: 'Quantum Metal Inc.',
-        driver: 'Alice Brown',
-        vehicle: 'GHI789',
-        date: '03-31-2025',
-        billingsID: '3456',
-        modeOfPayment: 'Bank Transfer - Unionbank',
-        accountName: 'John Doe',
-        accountNumber: '12345678',
-        purpose: 'Registration',
-        time: '3:43 PM',
-        referenceNumber: '123456789012',
-        amount: 10000,
-        requestingDocument: ['DR-7812', 'DR-1234'],
-        notes: 'This is a note for the transaction.',
-        status: 'Unpaid',
-        dueDate: '04-28-2025',
-    },
-    {
-        id: 5,
-        company: 'Nokarin Travel Agency',
-        driver: 'Charlie Davis',
-        vehicle: 'JKL012',
-        date: '04-01-2025',
-        billingsID: '7890',
-        modeOfPayment: 'Bank Transfer - BPI',
-        accountName: 'Jane Smith',
-        accountNumber: '87654321',
-        purpose: 'Registration',
-        time: '3:43 PM',
-        referenceNumber: '987654321098',
-        amount: 20000,
-        requestingDocument: 'DR-1234',
-        notes: 'This is a note for the transaction.',
-        status: 'Unpaid',
-        dueDate: '04-28-2025',
-    },
-    {
-        id: 6,
-        company: 'Nokarin Travel Agency',
-        driver: 'Emily Wilson',
-        vehicle: 'MNO345',
-        date: '04-02-2025',
-        amount: 1400,
-        billingsID: '1234',
-        modeOfPayment: 'Cash',
-        accountName: 'Emily Wilson',
-        accountNumber: '23456789',
-        purpose: 'Registration',
-        time: '3:43 PM',
-        referenceNumber: '234567890123',
-        requestingDocument: 'DR-3456',
-        notes: 'None',
-        status: 'Unpaid',
-        dueDate: '04-28-2025',
-    },
-];
+interface Media {
+    id: number;
+    original_url: string;
+    file_name: string;
+    // Add other media properties as needed
+}
 
-export default function Billings() {
+interface Billing {
+    id: number;
+    operator_id: number;
+    AccountName: string;
+    ModePayment: string;
+    Receipt: string;
+    ReferenceNumber: string;
+    AccountNumber: string;
+    Notes: string;
+    Amount: string;
+    operator: {
+        id: number;
+        vr_company_id: number;
+        user_id: number;
+        Status: string;
+        NPTC_ID: string;
+        user: {
+            id: number;
+            FirstName: string;
+            MiddleName: string | null;
+            LastName: string;
+        };
+        vr_company: {
+            id: number;
+            CompanyName: string;
+        };
+    };
+    media: Media[];
+    created_at: string;
+}
+
+interface FormattedBillingReceipt {
+    id: number;
+    company: string;
+    driver: string;
+    vehicle: string;
+    date: string;
+    billingsID: string;
+    modeOfPayment: string;
+    accountName: string;
+    accountNumber: string;
+    purpose: string;
+    time: string;
+    referenceNumber: string;
+    amount: number;
+    requestingDocument: string[];
+    notes: string;
+    status: 'Paid' | 'Unpaid';
+    dueDate: string;
+    media: Media[]; // Include media in formatted receipt
+    receiptUrl?: string;
+}
+
+export default function Billings({ billings }: { billings: Billing[] }) {
     const [activeTab, setActiveTab] = useState('approvalTab');
+    console.log('Billings data:', billings);
+
+    // Format the billing data from the backend to match the expected structure
+    const formatBillingData = (billingData: Billing[]): FormattedBillingReceipt[] => {
+        return billingData.map((billing) => {
+            // Parse the created_at date
+            const createdAt = new Date(billing.created_at);
+
+            // Format date as "Month Day, Year"
+            const formattedDate = createdAt.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            });
+
+            // Format time as "3:43 PM"
+            const formattedTime = createdAt.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+
+            // Combine date and time
+            const fullDateTime = `${formattedDate} ${formattedTime}`;
+
+            // Calculate due date (30 days from creation)
+            const dueDate = new Date(createdAt);
+            dueDate.setDate(dueDate.getDate() + 30);
+            const formattedDueDate = dueDate.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+            });
+
+            return {
+                id: billing.id,
+                company: billing.operator.vr_company.CompanyName,
+                driver: `${billing.operator.user.FirstName} ${billing.operator.user.LastName}`,
+                vehicle: 'N/A',
+                date: fullDateTime, // Now includes both date and time
+                billingsID: billing.id.toString().padStart(4, '0'),
+                modeOfPayment: billing.ModePayment,
+                accountName: billing.AccountName,
+                accountNumber: billing.AccountNumber,
+                purpose: 'Registration',
+                time: formattedTime, // Keep separate time if needed
+                referenceNumber: billing.ReferenceNumber,
+                amount: parseFloat(billing.Amount),
+                requestingDocument: [billing.operator.NPTC_ID],
+                notes: billing.Notes,
+                status: billing.operator.Status === 'Approved' ? 'Paid' : 'Unpaid',
+                dueDate: formattedDueDate,
+                media: billing.media,
+                receiptUrl: billing.media[0]?.original_url || billing.Receipt,
+            };
+        });
+    };
+
+    const dataReceipts = formatBillingData(billings);
+
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
             <Head title="Billings" />

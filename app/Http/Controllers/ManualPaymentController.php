@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
-
-use Illuminate\Http\Request;
+use App\Models\Driver;
 use App\Models\ManualPayment;
 use App\Models\Operator;
-use App\Models\Driver;
 use App\Models\Vehicle;
-use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class ManualPaymentController extends Controller
@@ -24,7 +22,7 @@ class ManualPaymentController extends Controller
 
         return Inertia::render('Manual-Payment', [
             'operatorId' => $operatorId,
-            'totalAmount' => $totalAmount
+            'totalAmount' => $totalAmount,
         ]);
     }
 
@@ -38,17 +36,16 @@ class ManualPaymentController extends Controller
             'ReferenceNumber' => 'nullable|string',
             'AccountNumber' => 'nullable|string',
             'Notes' => 'nullable|string',
-            "Amount"=>'nullable|string',
+            'Amount' => 'nullable|string',
         ]);
-    
+
         $manualPayment = ManualPayment::create($validatedData);
-    
-     
+
         if ($request->hasFile('Receipt')) {
-            $media = $manualPayment->addMediaFromRequest('Receipt')->toMediaCollection('receipt','private');
+            $media = $manualPayment->addMediaFromRequest('Receipt')->toMediaCollection('receipt', 'private');
             $manualPayment->update(['Receipt' => $media->getPath()]);
         }
-    
+
         return response()->json([
             'message' => 'Payment recorded successfully',
             'manual_payment' => $manualPayment,

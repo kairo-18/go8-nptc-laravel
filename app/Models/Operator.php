@@ -65,4 +65,9 @@ class Operator extends Model implements HasMedia
             ];
         });
     }
+
+    public function manualPayments()
+    {
+        return $this->hasMany(ManualPayment::class);
+    }
 }
