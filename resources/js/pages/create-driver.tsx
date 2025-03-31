@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 
@@ -37,10 +38,11 @@ export default function CreateDriver({ companies, latestVehicle, operator, compa
     const [processing, setProcessing] = useState(false);
     const [operators, setOperators] = useState([]);
     const [fileKeys, setFileKeys] = useState({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent, createAnother = false) => {
         e.preventDefault();
-        setProcessing(true);
+        setIsModalOpen(true);
 
         const formData = new FormData();
         Object.entries(data).forEach(([key, value]) => {
@@ -53,18 +55,11 @@ export default function CreateDriver({ companies, latestVehicle, operator, compa
             await axios.post(route('driver.store'), formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
-            alert('Driver registered successfully!');
             setProcessing(false);
 
-            if (createAnother) {
-                reset(); // Reset form for another entry
-            } else {
-                window.location.href = '/vr-owner'; // Redirect after creation
-            }
         } catch (error) {
             console.error('Error submitting form:', error.response?.data);
             setErrors(error.response?.data || {});
-            setProcessing(false);
         }
     };
 
@@ -210,18 +205,45 @@ export default function CreateDriver({ companies, latestVehicle, operator, compa
                             ))}
                         </div>
 
-                        {/* Submit Button */}
-                        <div className="flex justify-end">
-                            <Button type="submit" disabled={processing}>
-                                Create and Proceed
-                            </Button>
-                            <Button type="button" variant="outline" disabled={processing} onClick={(e) => handleSubmit(e, true)}>
-                                Create and Create Another
+                        {/* Form Fields Here */}
+                        <div className="flex justify-end gap-2">
+                            <Button type="submit" className="bg-[#2A2A92]" disabled={processing}>
+                                Confirm
                             </Button>
                         </div>
                     </form>
                 </CardContent>
             </Card>
+
+            {/* Modal Dialog */}
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Do want to create another or proceed</DialogTitle>
+                    </DialogHeader>
+                    <p>What would you like to do next?</p>
+
+                    <div className="flex justify-end gap-4 mt-4">
+                        <Button className='bg-green-500 text-white'
+                            variant="outline"
+                            onClick={() => {
+                                reset(); // Reset form
+                                setIsModalOpen(false); // Close modal
+                            }}
+                        >
+                            Create Another
+                        </Button>
+                        <Button
+                            className="bg-[#2A2A92] text-white hover:bg-gray-100 hover:text-black"
+                            onClick={() => {
+                                window.location.href = '/vr-owner'; // Redirect
+                            }}
+                        >
+                            Done
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

@@ -5,6 +5,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm, usePage } from '@inertiajs/react';
 import { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CircleCheckBig } from 'lucide-react';
 
 export default function CreateVehicle({ operators, onNextTab }) {
     const { auth } = usePage<SharedData>().props;
@@ -31,6 +33,7 @@ export default function CreateVehicle({ operators, onNextTab }) {
     });
 
     const [fileKeys, setFileKeys] = useState({});
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -39,8 +42,9 @@ export default function CreateVehicle({ operators, onNextTab }) {
         post(route('vehicles.store'), {
             data: formData,
             onSuccess: () => {
-                alert('Vehicle registered successfully.');
-                onNextTab();
+                console.log("Submission successful, opening modal...");
+                setIsModalOpen(true);
+                
             },
         });
     };
@@ -151,13 +155,27 @@ export default function CreateVehicle({ operators, onNextTab }) {
 
                         {/* Submit Button */}
                         <div className="flex justify-end">
-                            <Button type="submit" disabled={processing}>
+                            <Button type="submit" className='bg-[#2A2A92]' disabled={processing}>
                                 Submit
                             </Button>
                         </div>
                     </form>
                 </CardContent>
             </Card>
+
+            <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+                <DialogContent>
+                    <DialogHeader className='flex flex-row items-center'>
+                        <CircleCheckBig />
+                        <DialogTitle>Success</DialogTitle>
+                        
+                    </DialogHeader>
+                    <p>Vehicle registered successfully.</p>
+                    <Button className='bg-[#2A2A92]' onClick={() => { setIsModalOpen(false); onNextTab(); }}>
+                        Proceed to Driver
+                    </Button>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
