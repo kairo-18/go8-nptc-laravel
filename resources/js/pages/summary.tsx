@@ -13,6 +13,7 @@ interface CreateSummaryProps {
     adminData: any;
     contactsData: any;
     setIsEditing: (isEditing: boolean) => void;
+    handleTabSwitch: (tab: string) => void;
 }
 
 export default function Summary({
@@ -23,6 +24,7 @@ export default function Summary({
     adminData,
     contactsData,
     setIsEditing,
+    handleTabSwitch,
 }: CreateSummaryProps) {
     const [processing, setProcessing] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
@@ -61,7 +63,6 @@ export default function Summary({
         setProcessing(true);
 
         try {
-            // Call only the submit functions for sections that have valid data
             if (companyData &&
                 Object.keys(companyData).length > 0 &&
                 Object.values(companyData).some(value => value !== null && value !== '') &&
@@ -78,7 +79,9 @@ export default function Summary({
 
             if (contactsData &&
                 Object.keys(contactsData).length > 0 &&
-                Object.values(contactsData).some(value => value !== null && value !== '') &&
+                contactsData?.contacts?.some(contact =>
+                    Object.values(contact).some(value => value !== null && value !== '')
+                ) &&
                 contactsSubmitRef.current) {
                 await contactsSubmitRef.current();
             }
@@ -92,74 +95,96 @@ export default function Summary({
             setProcessing(false);
 
             // Refresh the page
-            window.location.reload();
+            // window.location.reload();
         } catch (error) {
             console.error('Error saving changes:', error);
             setProcessing(false);
         }
     };
 
-    function onPreviousTab(event: MouseEvent<HTMLButtonElement, MouseEvent>): void {
-        throw new Error('Function not implemented.');
-    }
-
     return (
-        <div className="mx-auto mt-6 w-full max-w-6xl">
-            <h1 className="text-2xl font-semibold">Vehicle Rental Company Summary</h1>
-            <p className="text-gray-500">Contains all details of the Vehicle Rental Company.</p>
-            <CreateVrCompany
-                companies={companies}
-                setCompanyData={(data) => {
-                    companyFormData.current = data; // Update the current company form data
-                }}
-                onNextTab={() => {}}
-                isTitleDisabled={isTitleDisabled}
-                isButtonDisabled={isButtonDisabled}
-                companyData={companyData}
-                isEditing={true}
-                onSubmitRef={(submitFn) => {
-                    companySubmitRef.current = submitFn; // Store the handleSubmit function
-                }}
-            />
-            <CreateVrAdmin
-                companies={companies}
-                setAdminData={(data) => {
-                    adminFormData.current = data; // Update the current admin form data
-                }}
-                onNextTab={() => {}}
-                isTitleDisabled={isTitleDisabled}
-                isButtonDisabled={isButtonDisabled}
-                adminData={adminData}
-                isEditing={true}
-                onSubmitRef={(submitFn) => {
-                    adminSubmitRef.current = submitFn; // Store the handleSubmit function
-                }}
-            />
-            <CreateVrContacts
-                companies={companies}
-                setContactsData={(data) => {
-                    contactsFormData.current = data; // Update the current contacts form data
-                }}
-                onNextTab={() => {}}
-                isTitleDisabled={isTitleDisabled}
-                isButtonDisabled={isButtonDisabled}
-                contactsData={contactsData}
-                isEditing={true}
-                onSubmitRef={(submitFn) => {
-                    contactsSubmitRef.current = submitFn; // Store the handleSubmit function
-                }}
-            />
-
-            <div className="mt-6 flex justify-between">
-                <Button
-                    type="submit"
-                    onClick={handleSaveChanges}
-                    disabled={processing} // Disable if no changes or processing
-                    className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700"
-                >
-                    {processing ? 'Submitting...' : 'Save Changes'}
-                </Button>
+        <>
+            <div className="mx-auto mt-6 w-full max-w-6xl">
+                <h1 className="text-2xl font-semibold">Vehicle Rental Company Summary</h1>
+                <p className="text-gray-500">Contains all details of the Vehicle Rental Company.</p>
+                {companyData && Object.values(companyData).some(value => value !== null && value !== '') && (
+                    <CreateVrCompany
+                        companies={companies}
+                        setCompanyData={(data) => {
+                            companyFormData.current = data; // Update the current company form data
+                        }}
+                        onNextTab={() => {}}
+                        isTitleDisabled={isTitleDisabled}
+                        isButtonDisabled={true}
+                        companyData={companyData}
+                        isEditing={true}
+                        onSubmitRef={(submitFn) => {
+                            companySubmitRef.current = submitFn; // Store the handleSubmit function
+                        }}
+                    />
+                )}
+                {adminData && Object.values(adminData).some(value => value !== null && value !== '') && (
+                    <CreateVrAdmin
+                        companies={companies}
+                        setAdminData={(data) => {
+                            adminFormData.current = data; // Update the current admin form data
+                        }}
+                        onNextTab={() => {}}
+                        isTitleDisabled={isTitleDisabled}
+                        isButtonDisabled={true}
+                        adminData={adminData}
+                        companyData={companyData}
+                        isEditing={true}
+                        onSubmitRef={(submitFn) => {
+                            adminSubmitRef.current = submitFn; // Store the handleSubmit function
+                        }}
+                    />
+                )}
+                {contactsData && contactsData?.contacts?.some(contact =>
+                    Object.values(contact).some(value => value !== null && value !== '')
+                ) && (
+                    <CreateVrContacts
+                        companies={companies}
+                        setContactsData={(data) => {
+                            contactsFormData.current = data; // Update the current contacts form data
+                        }}
+                        onNextTab={() => {}}
+                        isTitleDisabled={isTitleDisabled}
+                        isButtonDisabled={true}
+                        contactsData={contactsData}
+                        companyData={companyData}
+                        isEditing={true}
+                        onSubmitRef={(submitFn) => {
+                            contactsSubmitRef.current = submitFn; // Store the handleSubmit function
+                        }}
+                    />
+                )}
+                {!Object.values(companyData).some(value => value !== null && value !== '') && !Object.values(adminData).some(value => value !== null && value !== '') && !contactsData?.contacts?.some(contact =>
+                    Object.values(contact).some(value => value !== null && value !== '')
+                ) && (
+                    <div className="text-center text-gray-500 text-lg font-semibold mt-6">
+                        No Changes Found
+                    </div>
+                )}
             </div>
-        </div>
+            <div className="sticky bottom-5 w-full bg-white shadow-md rounded-xl">
+                <div className="mt-6 flex justify-end gap-2 p-4">
+                    <Button
+                        onClick={() => handleTabSwitch('previous')}
+                        className="px-4 py-2 rounded bg-black text-white hover:bg-gray-500"
+                    >
+                        Previous
+                    </Button>
+                    <Button
+                        type="submit"
+                        onClick={handleSaveChanges}
+                        disabled={processing} // Disable if no changes or processing
+                        className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700"
+                    >
+                        {processing ? 'Submitting...' : 'Save Changes'}
+                    </Button>
+                </div>
+            </div>
+        </>
     );
 }

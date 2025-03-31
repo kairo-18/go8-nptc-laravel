@@ -183,12 +183,14 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
                     />
                     <OwnerInformation
                         adminData={adminData}
+                        companyData={companyData}
                         handleAdminChange={handleAdminChange}
                         handleAdminUpdate={handleAdminUpdate}
                         companies={companies}
                     />
                     <ContactInformation
                         contactsData={contactsData}
+                        companydata={companyData}
                         handleContactChange={handleContactChange}
                         handleContactsUpdate={handleContactsUpdate}
                         companies={companies}
