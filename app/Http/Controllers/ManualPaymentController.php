@@ -12,6 +12,8 @@ use App\Models\Operator;
 use App\Models\Thread;
 use App\Models\User;
 use App\Models\Vehicle;
+use app\Models\VehicleRentalOwner;
+use app\Models\VRCompany;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -72,58 +74,49 @@ class ManualPaymentController extends Controller
         ]);
     }
 
-    public function rejectBilling(Request $request, Driver $driver): void
-    {
-        // Validate the request to ensure the note is provided
-        $validated = $request->validate([
-            'note' => 'required|string', // Ensure the note is a string and not empty
-        ]);
+    public function rejectBilling(Request $request, $id): void
+{
+    // Validate the request to ensure the note is provided
+    $validated = $request->validate([
+        'note' => 'required|string',
+    ]);
 
-        // Load the operator for the driver
+    $admin = User::find(1); // replace with auth()->user() later
+
+    // First try to find a Driver
+    $driver = Driver::find($id);
+    
+    if ($driver) {
+        // Handle driver rejection
         $driver->load('operator');
-
-        // Ensure the driver has an associated operator
         $operator = $driver->operator;
-        if (! $operator) {
+
+        if (!$operator) {
             return;
         }
-        $admin = User::find(1);
 
-        // The payment link for the operator
         $paymentLink = env('APP_URL').'/manual-payment/operator/'.$operator->id;
 
-        // Find the manual payment entry for this operator
-        $manualPayment = ManualPayment::where('operator_id', $operator->id)
-            ->first();
-
-        // If a manual payment exists, update its status to 'Rejected'
+        // Update manual payment status if exists
+        $manualPayment = ManualPayment::where('operator_id', $operator->id)->first();
         if ($manualPayment) {
-            $manualPayment->Status = 'Rejected';  // Update the status to 'Rejected'
-            $manualPayment->save(); // Save the updated status
+            $manualPayment->Status = 'Rejected';
+            $manualPayment->save();
         }
 
-        // // Create the note for the operator (Note is related to operator's user_id)
-        // $note = new Notes([
-        //     'user_id' => $operator->user_id,  // Relating the note to the operator's user
-        //     'content' => $validated['note'],  // Note content from the request
-        // ]);
-        // $note->save(); // Save the note to the database
-
-        // Send rejection email notifications to all drivers with the same vehicle
+        // Notify all drivers with the same vehicle
         $drivers = Driver::where('vehicle_id', $driver->vehicle_id)->get();
         foreach ($drivers as $driver) {
             $recipientUser = $driver->user;
             $rejectionMessage = 'Your application has been rejected. Please contact the operator for further instructions.';
 
-            // Create a thread for the driver
             $driverThread = Thread::firstOrCreate([
-                'sender_id' => $admin->id,  // Assuming admin has ID 1
+                'sender_id' => $admin->id,
                 'receiver_id' => $recipientUser->id,
             ], [
                 'original_sender_id' => $admin->id,
             ]);
 
-            // Create a mail notification for the driver
             $driverMail = Mail::create([
                 'sender_id' => $admin->id,
                 'thread_id' => $driverThread->id,
@@ -132,39 +125,106 @@ class ManualPaymentController extends Controller
                 'is_read' => false,
             ]);
 
-            // Dispatch the email notification to the driver
             MailReceive::dispatch($driverMail);
 
-            // Dispatch the creation of a new thread if it was not recently created
-            if (! $driverThread->wasRecentlyCreated) {
+            if (!$driverThread->wasRecentlyCreated) {
                 NewThreadCreated::dispatch($driverThread, $recipientUser->id);
             }
         }
 
-        // Send email to the operator about the rejected application and payment link
+        // Notify operator
         $operatorUser = $operator->user;
         $operatorThread = Thread::firstOrCreate([
-            'sender_id' => $admin->id,  // Assuming admin has ID 1
+            'sender_id' => $admin->id,
             'receiver_id' => $operatorUser->id,
         ], [
             'original_sender_id' => $admin->id,
         ]);
 
-        // Include the note content in the email body
         $operatorMail = Mail::create([
             'sender_id' => $admin->id,
             'thread_id' => $operatorThread->id,
             'subject' => 'Driver Application Rejection',
-            'content' => "Hello, {$operatorUser->FirstName}. Your driver has had their application rejected. Please review and follow the necessary steps for further actions.<br><br>Note: ".($request->note ?? 'No additional notes provided.')." <br><br>Here is the payment link: <a href='{$paymentLink}' style='color: #2563eb; text-decoration: underline;'>Click here to proceed</a>.",
+            'content' => "Hello, {$operatorUser->FirstName}. Your driver has had their application rejected. Please review and follow the necessary steps for further actions.<br><br>Note: ".($validated['note'] ?? 'No additional notes provided.')." <br><br>Here is the payment link: <a href='{$paymentLink}' style='color: #2563eb; text-decoration: underline;'>Click here to proceed</a>.",
             'is_read' => false,
         ]);
 
-        // Dispatch the email notification to the operator
         MailReceive::dispatch($operatorMail);
 
-        // Dispatch the creation of a new thread if it was not recently created
-        if (! $operatorThread->wasRecentlyCreated) {
+        if (!$operatorThread->wasRecentlyCreated) {
             NewThreadCreated::dispatch($operatorThread, $operatorUser->id);
         }
+    } 
+    // If not a Driver, try to find an Operator
+    else {
+        $operator = Operator::find($id);
+        
+        if (!$operator) {
+            throw new \InvalidArgumentException('No Driver or Operator found with the given ID');
+        }
+
+        // OPERATOR REJECTION LOGIC
+        $paymentLink = env('APP_URL').'/manual-payment/operator/'.$operator->id;
+
+        // Update manual payment status if exists
+        $manualPayment = ManualPayment::where('operator_id', $operator->id)->first();
+        if ($manualPayment) {
+            $manualPayment->Status = 'Rejected';
+            $manualPayment->save();
+        }
+
+        // Notify operator
+        $operatorUser = $operator->user;
+        $operatorThread = Thread::firstOrCreate([
+            'sender_id' => $admin->id,
+            'receiver_id' => $operatorUser->id,
+        ], [
+            'original_sender_id' => $admin->id,
+        ]);
+
+        $operatorMail = Mail::create([
+            'sender_id' => $admin->id,
+            'thread_id' => $operatorThread->id,
+            'subject' => 'Operator Billing Rejection',
+            'content' => "Hello, {$operatorUser->FirstName}. Your operator billing has been rejected. Please review and follow the necessary steps for further actions.<br><br>Note: ".($validated['note'] ?? 'No additional notes provided.')." <br><br>Here is the payment link: <a href='{$paymentLink}' style='color: #2563eb; text-decoration: underline;'>Click here to proceed</a>.",
+            'is_read' => false,
+        ]);
+
+        MailReceive::dispatch($operatorMail);
+
+        if (!$operatorThread->wasRecentlyCreated) {
+            NewThreadCreated::dispatch($operatorThread, $operatorUser->id);
+        }
+
+        // NEW: Notify VRCompany if operator belongs to one (ONLY IN OPERATOR REJECTION CASE)
+        if ($operator->vr_company_id) {
+            $vrOwner = VehicleRentalOwner::where('vr_company_id', $operator->vr_company_id)
+                ->with('user')
+                ->first();
+            
+            if ($vrOwner && $vrOwner->user) {
+                $vrThread = Thread::firstOrCreate([
+                    'sender_id' => $admin->id,
+                    'receiver_id' => $vrOwner->user->id,
+                ], [
+                    'original_sender_id' => $admin->id,
+                ]);
+
+                $vrMail = Mail::create([
+                    'sender_id' => $admin->id,
+                    'thread_id' => $vrThread->id,
+                    'subject' => 'Operator Billing Rejection Notice',
+                    'content' => "Hello, {$vrOwner->user->FirstName}. An operator under your VRCompany has had their billing rejected.<br><br>Operator: {$operatorUser->FirstName} {$operatorUser->LastName}<br>Note: ".($validated['note'] ?? 'No additional notes provided.')." ",
+                    'is_read' => false,
+                ]);
+
+                MailReceive::dispatch($vrMail);
+
+                if (!$vrThread->wasRecentlyCreated) {
+                    NewThreadCreated::dispatch($vrThread, $vrOwner->user->id);
+         }
     }
+}
+ }
+}
 }

@@ -32,6 +32,63 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
         $user = Auth::user();
 
+
+        $statuses = [];
+
+        if ($user->driver) {
+            $statuses[] = $user->driver->Status;
+        }
+    
+        if ($user->operator()->exists()) {
+            $statuses = array_merge($statuses, $user->operator->pluck('Status')->toArray());
+        }
+    
+        if ($user->vrOwner) {
+            $statuses[] = $user->vrOwner->Status;
+        }
+    
+        // Prevent login if any related model has 'Banned' Status
+        if (in_array('Banned', $statuses)) {
+            Auth::guard('web')->logout();
+            return redirect()->route('login')->withErrors(['email' => 'Your account is banned.']);
+        }
+    
+        // Handle suspended status with a timer
+        if (in_array('Suspended', $statuses)) {
+            $suspensionEndTime = cache()->rememberForever('suspension_'.$user->id, function () {
+                return now()->addMinutes(5);
+            });
+        
+            $remainingTime = now()->diffInSeconds($suspensionEndTime, false); 
+        
+            if ($remainingTime > 0) { 
+                $formattedTime = gmdate("i:s", $remainingTime); 
+        
+                Auth::guard('web')->logout();
+                return redirect()->route('login')->withErrors([
+                    'email' => "Your account is suspended. Try again in $formattedTime minutes."
+                ]);
+            }
+        
+            if ($user->driver()->exists()) {
+                $user->driver->update(['Status' => 'Approved']);
+            }
+        
+            if ($user->operator()->exists()) {
+                foreach ($user->operator as $operator) {
+                    $operator->update(['Status' => 'Approved']);
+                }
+            }
+        
+            if ($user->vrOwner()->exists()) {
+                foreach ($user->vrOwner as $vrOwner) {
+                    $vrOwner->update(['Status' => 'Approved']);
+                }
+            }
+        
+            cache()->forget('suspension_'.$user->id); 
+        }
+
         // check if user has a role or has the role NPTC Admin
         if ($user->hasRole(['Temp User'])) {
             $request->session()->regenerate();
