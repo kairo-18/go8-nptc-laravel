@@ -108,13 +108,14 @@ export default function Billings({ billings }: { billings: Billing[] }) {
                 month: 'long',
                 day: 'numeric',
             });
-            console.log(billing)
+            console.log(billing);
 
             return {
                 id: billing.id,
+                operatorId: billing.operator_id,
                 company: billing.operator.vr_company.CompanyName,
-                vehicle: billing.vehicles.map(vehicle => vehicle.NPTC_ID),
-                driver: billing.drivers.map(driver=>driver.NPTC_ID),
+                vehicle: billing.vehicles.map((vehicle) => vehicle.NPTC_ID),
+                driver: billing.drivers.map((driver) => driver.NPTC_ID),
                 date: fullDateTime,
                 billingsID: billing.id.toString().padStart(4, '0'),
                 modeOfPayment: billing.ModePayment,
@@ -130,9 +131,8 @@ export default function Billings({ billings }: { billings: Billing[] }) {
                 dueDate: formattedDueDate,
                 media: billing.media,
                 receiptUrl: billing.media[0]?.original_url || billing.Receipt,
-                driverIds: billing.drivers.map(driver => driver.id), // Store driver ids
+                driverIds: billing.drivers.map((driver) => driver.id), // Store driver ids
             };
-            
         });
     };
 

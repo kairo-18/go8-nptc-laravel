@@ -97,17 +97,17 @@ Route::get('billings', function () {
         'billings' => \App\Models\ManualPayment::with([
             'operator.user',
             'operator.vrCompany',
-            'media'
+            'media',
         ])
             ->where('Status', 'Pending') // Fetch only pending manual payments
             ->get()
             ->map(function ($payment) use ($vehicles, $drivers) {
-                if (!$payment->operator) {
+                if (! $payment->operator) {
                     return $payment->toArray() + ['drivers' => [], 'vehicles' => []];
                 }
 
                 // Get vehicles that belong to this operator
-                $operatorVehicles = $vehicles->whereIn('id', 
+                $operatorVehicles = $vehicles->whereIn('id',
                     $payment->operator->drivers->pluck('vehicle_id')->unique()
                 )->values();
 
@@ -121,5 +121,3 @@ Route::get('billings', function () {
             }),
     ]);
 })->name('billings');
-
-
