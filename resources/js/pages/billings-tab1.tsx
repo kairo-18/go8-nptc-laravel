@@ -54,7 +54,7 @@ interface DataReceipt {
         // other media properties you might need
     }[];
     Receipt?: string; // Keep this if you still need it
-    driverIds:string[];
+    driverIds: string[];
 }
 
 interface BillingsTab1Props {
@@ -91,9 +91,10 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
     const handleApprove = async (selectedReceipt) => {
         try {
             await axios.post('/api/approve-with-docu', {
-                id: selectedReceipt.id,
+                id: selectedReceipt.operatorId,
                 type: 'operator',
                 user_id: auth.user.id,
+                paymentId: selectedReceipt.id,
             });
             setSelectedReceipt(null);
             window.location.reload();
@@ -102,52 +103,47 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
         }
     };
 
-    const { post , data} = useForm({
+    const { post, data } = useForm({});
 
- });
+    const handleReject = () => {
+        // Log the notes before the API call
+        console.log('Notes: ' + rejectNotes); // This will log the rejection notes
 
- const handleReject = () => {
-    // Log the notes before the API call
-    console.log("Notes: " + rejectNotes); // This will log the rejection notes
+        if (!selectedReceipt?.driver) {
+            console.error('Driver information is missing');
+            return;
+        }
 
-    if (!selectedReceipt?.driver) {
-        console.error('Driver information is missing');
-        return;
-    }
+        // Assuming you have a driver ID for the selected driver, modify this part
+        const driverId = selectedReceipt.driverIds[0]; // Or however you access the driver's ID
 
-    // Assuming you have a driver ID for the selected driver, modify this part
-    const driverId = selectedReceipt.driverIds[0]; // Or however you access the driver's ID
+        if (!driverId) {
+            console.error('Driver ID is missing');
+            return;
+        }
 
-    if (!driverId) {
-        console.error('Driver ID is missing');
-        return;
-    }
-
-    // Log the data you're sending in the post request
-    console.log("Sending data:", {
-        driverId: driverId,
-        note: rejectNotes,
-    });
-
-    post(route('reject.billing', { driver: driverId }), {
-        data: {
+        // Log the data you're sending in the post request
+        console.log('Sending data:', {
+            driverId: driverId,
             note: rejectNotes,
-        },
-        headers: {
-            'Content-Type': 'application/json', // Make sure the content type is set to JSON
-        },
-        onSuccess: () => {
-            setRejectNotes('');
-            setSelectedReceipt(null);
-        },
-        onError: (error) => {
-            console.error('Rejection failed:', error);
-        },
-    });
-};
+        });
 
-    
-
+        post(route('reject.billing', { driver: driverId }), {
+            data: {
+                note: rejectNotes,
+            },
+            headers: {
+                'Content-Type': 'application/json', // Make sure the content type is set to JSON
+            },
+            onSuccess: () => {
+                setRejectNotes('');
+                setSelectedReceipt(null);
+            },
+            onError: (error) => {
+                console.error('Rejection failed:', error);
+            },
+        });
+    };
 
     return (
         <div className="mt-4 flex h-full flex-col">

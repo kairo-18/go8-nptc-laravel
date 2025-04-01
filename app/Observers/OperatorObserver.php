@@ -42,7 +42,7 @@ class OperatorObserver
             // Check if this is a new thread
             $isNewThread = ! $thread->wasRecentlyCreated;
 
-            $paymentLink = env('APP_URL').'/manual-payment/operator/'.$recipientUser->id;
+            $paymentLink = env('APP_URL').'/manual-payment/operator/'.$operator->id;
             // Create the mail message
             $mail = Mail::create([
                 'sender_id' => $admin->id,
