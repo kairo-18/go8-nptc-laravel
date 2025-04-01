@@ -105,44 +105,62 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
 
     const { post, data } = useForm({});
 
-    const handleReject = () => {
-        // Log the notes before the API call
-        console.log('Notes: ' + rejectNotes); // This will log the rejection notes
+    const handleReject = async () => {
+        console.log('Notes: ' + rejectNotes);
 
         if (!selectedReceipt?.driver) {
             console.error('Driver information is missing');
             return;
         }
 
-        // Assuming you have a driver ID for the selected driver, modify this part
-        const driverId = selectedReceipt.driverIds[0]; // Or however you access the driver's ID
+        let driverId = selectedReceipt.driverIds[0];
 
         if (!driverId) {
             console.error('Driver ID is missing');
-            return;
+            console.log(rejectNotes);
+            driverId = selectedReceipt.operatorId;
         }
 
-        // Log the data you're sending in the post request
         console.log('Sending data:', {
             driverId: driverId,
             note: rejectNotes,
         });
 
-        post(route('reject.billing', { driver: driverId }), {
-            data: {
-                note: rejectNotes,
-            },
-            headers: {
-                'Content-Type': 'application/json', // Make sure the content type is set to JSON
-            },
-            onSuccess: () => {
-                setRejectNotes('');
-                setSelectedReceipt(null);
-            },
-            onError: (error) => {
-                console.error('Rejection failed:', error);
-            },
-        });
+        try {
+            const response = await axios.post(
+                route('reject.billing', { driver: driverId }),
+                {
+                    note: rejectNotes, // Send the note at root level
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                },
+            );
+
+            // Handle success
+            setRejectNotes('');
+            setSelectedReceipt(null);
+            window.location.reload();
+            console.log('Rejection successful', response.data);
+        } catch (error) {
+            console.error('Rejection failed:', error);
+            if (error.response) {
+                // The request was made and the server responded with a status code
+                console.error('Error data:', error.response.data);
+                console.error('Error status:', error.response.status);
+                console.error('Error headers:', error.response.headers);
+            } else if (error.request) {
+                // The request was made but no response was received
+                console.error('No response received:', error.request);
+            } else {
+                // Something happened in setting up the request
+                console.error('Error:', error.message);
+            }
+        }
     };
 
     return (
