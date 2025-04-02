@@ -75,16 +75,15 @@ export default function CreateVehicle({ operators, onNextTab }) {
             allowedChars: /^[A-Za-z0-9\s\-]*$/,
             onInput: (e) => e.target.value.slice(0, 15),
         },
-        SeatNumber: {
-            min: 1,
-            max: 10,
-            error: 'Must be between 1-10',
-            allowedChars: /^[0-9]*$/,
-            onInput: (e) => {
-                const value = e.target.value.replace(/\D/g, '');
-                return value === '' ? '' : Math.min(10, Math.max(1, parseInt(value))).toString();
-            },
-        },
+        seatNumber: [
+            { value: "4", label: "4 seater (Car)" },
+            { value: "6", label: "6 seater (SUV)" },
+            { value: "8", label: "8 seater (UV)" },
+            { value: "10", label: "10 seater (Van)" },
+            { value: "12", label: "12 seater (Van)" },
+            { value: "51", label: "51 seater (2x2 Bus)" },
+            { value: "61", label: "61 seater (3x2 Bus)" }
+        ],
     };
 
     // Handle input with restrictions
@@ -127,12 +126,6 @@ export default function CreateVehicle({ operators, onNextTab }) {
             } else if (field === 'Model' || field === 'Brand') {
                 if (value.length < rules.minLength) return rules.error;
                 if (value.length > rules.maxLength) return `Maximum ${rules.maxLength} characters`;
-                return '';
-            } else if (field === 'SeatNumber') {
-                const num = parseInt(value);
-                if (isNaN(num)) return 'Must be a number';
-                if (num < rules.min) return `Minimum ${rules.min} seats`;
-                if (num > rules.max) return `Maximum ${rules.max} seats`;
                 return '';
             }
             return '';
@@ -314,17 +307,18 @@ export default function CreateVehicle({ operators, onNextTab }) {
 
                             <div>
                                 <Label htmlFor="SeatNumber">Seat Capacity *</Label>
-                                <Input
-                                    id="SeatNumber"
-                                    type="number"
-                                    min={1}
-                                    max={10}
-                                    value={data.SeatNumber}
-                                    onChange={(e) => handleRestrictedInput('SeatNumber', e)}
-                                    className={validationErrors.SeatNumber ? 'border-red-500' : 'placeholder:text-gray-500/70'}
-                                    placeholder="e.g. 4"
-                                    pattern="[0-9]*"
-                                />
+                                <Select value={data.SeatNumber} onValueChange={(value) => handleInputChange('SeatNumber', value)}>
+                                    <SelectTrigger className={validationErrors.SeatNumber ? 'border-red-500' : ''}>
+                                        <SelectValue placeholder="Select Seat Capacity" className="text-gray-500" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {validationRules.seatNumber.map((number) => (
+                                            <SelectItem key={number.value} value={number.value}>
+                                                {number.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                                 {validationErrors.SeatNumber && <p className="text-sm text-red-500">{validationErrors.SeatNumber}</p>}
                             </div>
                         </div>
