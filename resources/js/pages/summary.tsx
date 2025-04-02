@@ -4,7 +4,7 @@ import CreateVrAdmin from './create-vr-admin';
 import CreateVrCompany from './create-vr-company';
 import CreateVrContacts from './create-vr-contacts';
 import { navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
-import { usePage } from '@inertiajs/react';
+import { usePage, router } from '@inertiajs/react';
 
 interface CreateSummaryProps {
     companies: { id: number; BusinessPermitNumber: string }[];
@@ -32,8 +32,6 @@ export default function Summary({
 
     const { props } = usePage<{ auth: { user?: { id: number; roles?: { name: string }[] }, vr_company_id?: number } }>();
     const userRole = props.auth.user?.roles?.[0]?.name;
-
-    console.log(userRole);
 
     // Refs to store the initial data for comparison
     const initialCompanyData = useRef(companyData);
@@ -98,7 +96,7 @@ export default function Summary({
 
             // Navigate to home/mails
             if (userRole === "Temp User") {
-                window.location.href = '/mails';
+                router.post(route('logout'));
             } else {
                 window.location.href = '/dashboard';
             }

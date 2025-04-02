@@ -106,17 +106,23 @@ export function AppSidebar() {
                 children: item.title === 'Registration' ? item.children?.filter((child) => child.title === 'Operator Registration') : item.children,
             }));
     } else if (userRole === 'VR Admin') {
-        const allowedItems = [
-            'Dashboard',
-            'Pending',
-            'Operator Temp Account Registration',
-            'Records',
-            'Billings',
-            'Bookings',
-            'Mail',
-            'Notifications',
-        ];
-        filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
+        const vrAdminStatus = props.auth.vrAdminStatus;
+
+        if (vrAdminStatus === 'Pending') {
+            filteredNavItems = updatedNavItems.filter((item) => item.title === 'Mail');
+        } else {
+            const allowedItems = [
+                'Dashboard',
+                'Pending',
+                'Operator Temp Account Registration',
+                'Records',
+                'Billings',
+                'Bookings',
+                'Mail',
+                'Notifications',
+            ];
+            filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
+        }
     } else if (userRole === 'Operator') {
         const allowedItems = ['Dashboard', 'Registration', 'Records', 'Billings', 'Bookings', 'Mail', 'Notifications'];
 

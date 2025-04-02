@@ -55,7 +55,7 @@ class RegisteredUserController extends Controller
                 'LastName' => $request->LastName,
                 'username' => $request->username,
                 'Address' => $request->Address,
-                'BirthDate' => $request->Birthdate,
+                'BirthDate' => $request->BirthDate,
                 'ContactNumber' => $request->ContactNumber,
                 'email' => $request->email,
                 'password' => Hash::make($generatedPassword),
