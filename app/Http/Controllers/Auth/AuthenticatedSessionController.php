@@ -28,92 +28,128 @@ class AuthenticatedSessionController extends Controller
      * Handle an incoming authentication request.
      */
     public function store(LoginRequest $request): RedirectResponse
-    {
-        $request->authenticate();
-        $user = Auth::user();
+{
+    $request->authenticate();
+    $user = Auth::user();
 
+    $statuses = [];
 
-        $statuses = [];
+    if ($user->driver) {
+        $statuses[] = $user->driver->Status;
+    }
 
-        if ($user->driver) {
-            $statuses[] = $user->driver->Status;
-        }
-    
-        if ($user->operator()->exists()) {
-            $statuses = array_merge($statuses, $user->operator->pluck('Status')->toArray());
-        }
-    
-        if ($user->vrOwner) {
-            $statuses[] = $user->vrOwner->Status;
-        }
-    
-        // Prevent login if any related model has 'Banned' Status
-        if (in_array('Banned', $statuses)) {
+    if ($user->operator()->exists()) {
+        $statuses = array_merge($statuses, $user->operator->pluck('Status')->toArray());
+    }
+
+    if ($user->vrOwner) {
+        $statuses[] = $user->vrOwner->Status;
+    }
+
+    // Prevent login if any related model has 'Banned' Status
+    if (in_array('Banned', $statuses)) {
+        Auth::guard('web')->logout();
+        
+        \DB::table('login_attempts')->insert([
+            'user_id' => $user->id,
+            'status' => 'Banned',
+            'attempted_at' => now(),
+        ]);
+
+        return redirect()->route('login')->withErrors(['email' => 'Your account is banned.']);
+    }
+
+    // Prevent login if the user is suspended
+    if (in_array('Suspended', $statuses)) {
+        // Get the last suspension attempt time
+        $lastSuspendedAttempt = \DB::table('login_attempts')
+            ->where('user_id', $user->id)
+            ->where('status', 'Suspended')
+            ->latest('attempted_at')
+            ->first();
+
+        $suspensionEndTime = $lastSuspendedAttempt 
+            ? \Carbon\Carbon::parse($lastSuspendedAttempt->attempted_at)->addMinutes(5) 
+            : now()->addMinutes(5);
+
+        $remainingTime = now()->diffInSeconds($suspensionEndTime, false);
+
+        if ($remainingTime > 0) {
+            $formattedTime = gmdate("i:s", $remainingTime);
+
+            // Log the failed suspended login attempt
+            \DB::table('login_attempts')->insert([
+                'user_id' => $user->id,
+                'status' => 'Suspended Attempt',
+                'attempted_at' => now(),
+            ]);
+
             Auth::guard('web')->logout();
-            return redirect()->route('login')->withErrors(['email' => 'Your account is banned.']);
-        }
-    
-        // Handle suspended status with a timer
-        if (in_array('Suspended', $statuses)) {
-            $suspensionEndTime = cache()->rememberForever('suspension_'.$user->id, function () {
-                return now()->addMinutes(5);
-            });
-        
-            $remainingTime = now()->diffInSeconds($suspensionEndTime, false); 
-        
-            if ($remainingTime > 0) { 
-                $formattedTime = gmdate("i:s", $remainingTime); 
-        
-                Auth::guard('web')->logout();
-                return redirect()->route('login')->withErrors([
-                    'email' => "Your account is suspended. Try again in $formattedTime minutes."
-                ]);
-            }
-        
-            if ($user->driver()->exists()) {
-                $user->driver->update(['Status' => 'Approved']);
-            }
-        
-            if ($user->operator()->exists()) {
-                foreach ($user->operator as $operator) {
-                    $operator->update(['Status' => 'Approved']);
-                }
-            }
-        
-            if ($user->vrOwner()->exists()) {
-                foreach ($user->vrOwner as $vrOwner) {
-                    $vrOwner->update(['Status' => 'Approved']);
-                }
-            }
-        
-            cache()->forget('suspension_'.$user->id); 
+
+            return redirect()->route('login')->withErrors([
+                'email' => "Your account is suspended. Try again in $formattedTime minutes."
+            ]);
         }
 
-        // check if user has a role or has the role NPTC Admin
-        if ($user->hasRole(['Temp User'])) {
-            $request->session()->regenerate();
-
-            return redirect()->route('registration')->withInput(['Registration' => 'Please input your company details']);
-        } elseif ($user->hasRole('Temp User Operator')) {
-            $request->session()->regenerate();
-
-            return redirect()->route('create-operator.admin')->withInput(['Registration' => 'Please input your operator details']);
+        // Once suspension expires, update status to Approved
+        if ($user->driver()->exists()) {
+            $user->driver->update(['Status' => 'Approved']);
         }
-        // elseif ($user->hasRole('Driver')) {
-        //     if ($user->driver->Status != 'Approved') {
-        //         Auth::guard('web')->logout();
-        //
-        //         return redirect()->route('login');
-        //     }
-        //     $request->session()->regenerate();
-        //
-        //     return redirect()->route('driver.dashboard');
-        // }
 
+        if ($user->operator()->exists()) {
+            foreach ($user->operator as $operator) {
+                $operator->update(['Status' => 'Approved']);
+            }
+        }
+
+        if ($user->vrOwner()->exists()) {
+            foreach ($user->vrOwner as $vrOwner) {
+                $vrOwner->update(['Status' => 'Approved']);
+            }
+        }
+    }
+
+    // Log the successful login
+    \DB::table('login_attempts')->insert([
+        'user_id' => $user->id,
+        'status' => 'Success',
+        'attempted_at' => now(),
+    ]);
+
+    //comment out nalang before tom
+    // if (!in_array('Approved', $statuses)) {
+    //     Auth::guard('web')->logout();
+    //     return redirect()->route('login')->withErrors([
+    //         'email' => 'Your account is not approved yet. Please contact support.'
+    //     ]);
+    // }
+
+    // check if user has a role or has the role NPTC Admin
+    if ($user->hasRole(['Temp User'])) {
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->route('registration')->withInput(['Registration' => 'Please input your company details']);
+    } elseif ($user->hasRole('Temp User Operator')) {
+        $request->session()->regenerate();
+
+        return redirect()->route('create-operator.admin')->withInput(['Registration' => 'Please input your operator details']);
     }
+    // elseif ($user->hasRole('Driver')) {
+    //     if ($user->driver->Status != 'Approved') {
+    //         Auth::guard('web')->logout();
+    //
+    //         return redirect()->route('login');
+    //     }
+    //     $request->session()->regenerate();
+    //
+    //     return redirect()->route('driver.dashboard');
+    // }
+
+    $request->session()->regenerate();
+
+    return redirect()->intended(route('dashboard', absolute: false));
+}
+
 
     /**
      * Destroy an authenticated session.
