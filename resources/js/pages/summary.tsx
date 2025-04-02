@@ -4,6 +4,7 @@ import CreateVrAdmin from './create-vr-admin';
 import CreateVrCompany from './create-vr-company';
 import CreateVrContacts from './create-vr-contacts';
 import { navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
+import { usePage } from '@inertiajs/react';
 
 interface CreateSummaryProps {
     companies: { id: number; BusinessPermitNumber: string }[];
@@ -29,6 +30,11 @@ export default function Summary({
     const [processing, setProcessing] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
 
+    const { props } = usePage<{ auth: { user?: { id: number; roles?: { name: string }[] }, vr_company_id?: number } }>();
+    const userRole = props.auth.user?.roles?.[0]?.name;
+
+    console.log(userRole);
+
     // Refs to store the initial data for comparison
     const initialCompanyData = useRef(companyData);
     const initialAdminData = useRef(adminData);
@@ -43,10 +49,6 @@ export default function Summary({
     const companySubmitRef = useRef<() => void>();
     const adminSubmitRef = useRef<() => void>();
     const contactsSubmitRef = useRef<() => void>();
-
-    const handlePrevious = () => {
-        setData(adminData); // Restore previous data
-    };
 
     // Track changes in the modals
     useEffect(() => {
@@ -94,8 +96,12 @@ export default function Summary({
             setHasChanges(false);
             setProcessing(false);
 
-            // Refresh the page
-            // window.location.reload();
+            // Navigate to home/mails
+            if (userRole === "Temp User") {
+                window.location.href = '/mails';
+            } else {
+                window.location.href = '/dashboard';
+            }
         } catch (error) {
             console.error('Error saving changes:', error);
             setProcessing(false);
