@@ -17,6 +17,7 @@ use App\Models\VRCompany;
 use App\Models\VrContacts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Spatie\Browsershot\Browsershot;
 
 class PendingController extends Controller
@@ -355,7 +356,7 @@ class PendingController extends Controller
                 break;
 
             case 'vr_company':
-                $entity = VRCompany::with(['owner.user'])->find($entityId);
+                $entity = VRCompany::with(['owner.user', 'owner'])->find($entityId);
                 if ($entity) {
                     $payload = [
                         'CompanyName' => $entity->CompanyName,
@@ -363,17 +364,93 @@ class PendingController extends Controller
                         'date' => now()->format('F d, Y'),
                     ];
                     $recipientUser = $entity->owner->user;
+
+                    $entity->owner->Status = 'Approved';
+                    $entity->owner->save();
                 }
                 break;
 
             case 'operator':
-                $entity = Operator::with(['user', 'vrCompany'])->find($entityId);
+                $entity = Operator::with(['user', 'vrCompany', 'drivers'])->find($entityId);
+                $admin = User::find(1);
                 if ($entity) {
-                    $payload = [
-                        'name' => $entity->user->FirstName.' '.$entity->user->LastName,
-                        'company' => $entity->vrCompany->CompanyName,
-                        'date' => now()->format('F d, Y'),
-                    ];
+                    if ($entity->Status === 'Approved') {
+                        // If operator is already approved, process the drivers
+                        $processedDrivers = [];
+
+                        if ($entity->drivers->isNotEmpty()) {
+                            foreach ($entity->drivers as $driver) {
+                                if ($driver->Status === 'For Payment') {
+                                    // Update driver status directly in DB
+                                    DB::table('drivers')
+                                        ->where('id', $driver->id)
+                                        ->update(['Status' => 'Approved']);
+
+                                    // Update vehicle status if exists
+                                    if ($driver->vehicle_id) {
+                                        DB::table('vehicles')
+                                            ->where('id', $driver->vehicle_id)
+                                            ->update(['Status' => 'Approved']);
+                                    }
+
+                                    // Reload the driver with relationships
+                                    $updatedDriver = Driver::with(['user', 'vrCompany', 'vehicle', 'operator'])->find($driver->id);
+                                    $vehicle = Vehicle::find($driver->vehicle_id);
+
+                                    $payload = [
+                                        'name' => $updatedDriver->user->FirstName.' '.$updatedDriver->user->LastName,
+                                        'company' => $entity->vrCompany->CompanyName,
+                                        'vehicle' => $vehicle->PlateNumber ?? '',
+                                        'model' => $vehicle->Model ?? '',
+                                        'date' => now()->format('F d, Y'),
+                                    ];
+
+                                    // Send certificate for each driver
+                                    $this->sendCertificateMail(
+                                        'driver',
+                                        $payload,
+                                        $admin,
+                                        $updatedDriver->user,
+                                        $updatedDriver->id
+                                    );
+
+                                    // send to operator
+                                    $this->sendCertificateMail(
+                                        'driver',
+                                        $payload,
+                                        $admin,
+                                        $updatedDriver->operator->user,
+                                        $entity->id
+                                    );
+
+                                    $processedDrivers[] = $updatedDriver->id;
+                                }
+                            }
+                        }
+
+                    } else {
+                        // Update operator status directly in DB
+                        DB::table('operators')
+                            ->where('id', $entity->id)
+                            ->update(['Status' => 'Approved']);
+
+                        $payload = [
+                            'name' => $entity->user->FirstName.' '.$entity->user->LastName,
+                            'company' => $entity->vrCompany->CompanyName,
+                            'date' => now()->format('F d, Y'),
+                        ];
+
+                        // Call the mail sending function for operator
+                        $result = $this->sendCertificateMail(
+                            'operator',
+                            $payload,
+                            $admin,
+                            $entity->user,
+                            $entity->id
+                        );
+
+                    }
+
                     $recipientUser = $entity->user;
                 }
                 break;
@@ -395,14 +472,18 @@ class PendingController extends Controller
         $entity->Status = 'Approved';
         $entity->save();
 
-        $manualPayment = ManualPayment::find($validated['paymentId']);
+        if (isset($validated['paymentId'])) {
 
-        if (! $manualPayment) {
-            return response()->json(['error' => 'Manual payment not found'], 404);
+            $manualPayment = ManualPayment::find($validated['paymentId']);
+
+            if (! $manualPayment) {
+                return response()->json(['error' => 'Manual payment not found'], 404);
+            }
+
+            $manualPayment->Status = 'Approved';
+            $manualPayment->save();
+
         }
-
-        $manualPayment->Status = 'Approved';
-        $manualPayment->save();
 
         // Send certificate mail
         try {
@@ -451,32 +532,60 @@ class PendingController extends Controller
         $template = null;
         $certificateName = null;
 
+        // Convert images to base64
+        $logoPath = public_path('NPTC_Logo.png');
+        $bgPath = public_path('bg-cert.png');
+
+        $logoImage = 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath));
+        $bgImage = 'data:image/png;base64,'.base64_encode(file_get_contents($bgPath));
+
         // Determine template and certificate name based on type
         switch ($type) {
             case 'operator':
-                $template = view('nptc-operator-certificate', ['payload' => $payload])->render();
+                $template = view('nptc-operator-certificate', [
+                    'payload' => $payload,
+                    'logoImage' => $logoImage,
+                    'bgImage' => $bgImage,
+                ])->render();
                 $certificateName = 'Operator_Certificate.pdf';
                 break;
             case 'vr_company':
-                $template = view('nptc-vr-company-certificate', ['payload' => $payload])->render();
+                $template = view('nptc-vr-company-certificate', [
+                    'payload' => $payload,
+                    'logoImage' => $logoImage,
+                    'bgImage' => $bgImage,
+                ])->render();
                 $certificateName = 'VR_Company_Certificate.pdf';
                 break;
             case 'driver':
-                $template = view('nptc-driver-certificate', ['payload' => $payload])->render();
+                $template = view('nptc-driver-certificate', [
+                    'payload' => $payload,
+                    'logoImage' => $logoImage,
+                    'bgImage' => $bgImage,
+                ])->render();
                 $certificateName = 'Driver_Certificate.pdf';
                 break;
             case 'vehicle':
-                $template = view('nptc-vehicle-certificate', ['payload' => $payload])->render();
+                $template = view('nptc-vehicle-certificate', [
+                    'payload' => $payload,
+                    'logoImage' => $logoImage,
+                    'bgImage' => $bgImage,
+                ])->render();
                 $certificateName = 'Vehicle_Certificate.pdf';
                 break;
         }
 
         // Generate PDF
         $pdfPath = storage_path('app/certificates/'.$entityId.'_certificate.pdf');
+
         Browsershot::html($template)
             ->noSandbox()
+            ->showBackground()
+            ->setOption('args', ['--no-sandbox', '--disable-setuid-sandbox'])
+            ->waitUntilNetworkIdle()
             ->save($pdfPath);
 
+        // Rest of your method remains the same...
         $subject = match ($type) {
             'driver' => 'Driver Certificate Approval',
             'vehicle' => 'Vehicle Certificate Approval',
@@ -485,7 +594,6 @@ class PendingController extends Controller
             default => 'Certificate Approval'
         };
 
-        // Create or find thread - using firstOrCreate to prevent duplicates
         $thread = Thread::firstOrCreate([
             'sender_id' => $admin->id,
             'receiver_id' => $recipientUser->id,
@@ -493,10 +601,8 @@ class PendingController extends Controller
             'original_sender_id' => $admin->id,
         ]);
 
-        // Check if this is a new thread
         $isNewThread = ! $thread->wasRecentlyCreated;
 
-        // Create the mail message
         $mail = Mail::create([
             'sender_id' => $admin->id,
             'thread_id' => $thread->id,
@@ -505,15 +611,12 @@ class PendingController extends Controller
             'is_read' => false,
         ]);
 
-        // Attach the PDF to the mail
         $mail->addMedia($pdfPath)
             ->usingFileName($certificateName)
             ->toMediaCollection('attachments');
 
-        // Dispatch events
         MailReceive::dispatch($mail);
 
-        // Only dispatch NewThreadCreated if this is a new thread
         if (! $isNewThread) {
             NewThreadCreated::dispatch($thread, $recipientUser->id);
         }

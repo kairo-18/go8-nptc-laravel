@@ -18,25 +18,38 @@ class TripController extends Controller
             'general.pickupDate.day' => 'required|digits_between:1,2',
             'general.pickupDate.month' => 'required|digits_between:1,2',
             'general.pickupDate.year' => 'required|digits:4',
+            'general.pickupDate.hours' => 'required|digits_between:1,2|between:0,23',  
+            'general.pickupDate.minutes' => 'required|digits_between:1,2|between:0,59', 
             'general.dropoffDate.day' => 'required|digits_between:1,2',
             'general.dropoffDate.month' => 'required|digits_between:1,2',
             'general.dropoffDate.year' => 'required|digits:4',
+            'general.dropoffDate.hours' => 'required|digits_between:1,2|between:0,23', 
+            'general.dropoffDate.minutes' => 'required|digits_between:1,2|between:0,59',
             'general.tripType' => 'required|string|in:Drop-off,Airport Pick-up,Wedding,City Tour,Vacation,Team Building,Home Transfer,Corporate,Government,Others',
         ]);
         $pickupDate = sprintf(
-            '%04d-%02d-%02d 00:00:00',
+            '%04d-%02d-%02d %02d:%02d:00',
             $request->input('general.pickupDate.year'),
             $request->input('general.pickupDate.month'),
-            $request->input('general.pickupDate.day')
+            $request->input('general.pickupDate.day'),
+            $request->input('general.pickupDate.hours'),
+            $request->input('general.pickupDate.minutes')
         );
 
         $dropOffDate = sprintf(
-            '%04d-%02d-%02d 00:00:00',
+            '%04d-%02d-%02d %02d:%02d:00',
             $request->input('general.dropoffDate.year'),
             $request->input('general.dropoffDate.month'),
-            $request->input('general.dropoffDate.day')
+            $request->input('general.dropoffDate.day'),
+            $request->input('general.dropoffDate.hours'),
+            $request->input('general.dropoffDate.minutes')
         );
 
+        if (strtotime($pickupDate) >= strtotime($dropOffDate)) {
+            return response()->json([
+                'error' => 'The pickup date must be before the drop-off date.'
+            ], 400);  // You can change the response code if needed
+        }
         $trip = new Trip;
         $trip->vehicle_id = $request->input('general.unitId');
         $trip->driver_id = $request->input('general.driverId');

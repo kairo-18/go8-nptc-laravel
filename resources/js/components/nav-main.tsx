@@ -56,7 +56,7 @@ export function NavMain({
                       href={item.url}
                       prefetch
                       className={`flex items-center space-x-2 w-full ${
-                        isMainActive ? (isVRAdmin ? "text-red-500" : "text-blue-500") : ""
+                        isMainActive ? (isVRAdmin ? "text-red-500" : "text-black") : ""
                       }`}
                     >
                       {item.icon && <item.icon className="shrink-0" />}

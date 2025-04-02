@@ -119,6 +119,8 @@ class VRAdminController extends Controller
             // Assign the new admin to the VR company
             $vrCompany->owner()->updateOrCreate([], ['user_id' => $newAdmin->id]);
 
+            $newAdmin->assignRole('VR Admin');
+
             \Log::info('New admin created:', ['admin' => $newAdmin]);
 
             return;

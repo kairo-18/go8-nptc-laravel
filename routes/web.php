@@ -95,7 +95,7 @@ Route::post('/reject-billing/{driver}', [ManualPaymentController::class, 'reject
 
 Route::post('mails/new-mail', function (Request $request) {
     $request->validate([
-        'email' => 'required|email|exists:users,email',
+        'email' => 'required|email',
         'subject' => 'required|string',
         'content' => 'sometimes|string',
         'is_read' => 'sometimes|boolean',
@@ -105,7 +105,10 @@ Route::post('mails/new-mail', function (Request $request) {
 
     // Find the receiver by email
     $sender = auth()->user();
-    $receiver = User::where('email', $request->email)->firstOrFail();
+   $receiver = User::where('email', $request->email)->first();
+    if (! $receiver) {
+        return response()->json(['errors' => ['email' => ['This email is not registered.']]], 422);
+    }
 
     // Check if a thread already exists between the sender and receiver with the same subject
     $thread = Thread::where(function ($query) use ($receiver, $request) {
@@ -132,6 +135,12 @@ Route::post('mails/new-mail', function (Request $request) {
             'receiver_id' => $receiver->id,
         ]);
         $isNewThread = true; // Mark that a new thread is created
+    } else {
+        // Swap sender and receiver for replies
+        $thread->update([
+            'sender_id' => $sender->id,
+            'receiver_id' => $receiver->id,
+        ]);
     }
 
     // Create the mail

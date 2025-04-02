@@ -45,6 +45,8 @@ export function GeneralStep({
     const [selectedOperator, setSelectedOperator] = useState<any>({});
     const [selectedVehicle, setSelectedVehicle] = useState<any>({});
     const [selectedDriver, setSelectedDriver] = useState<any>({});
+    const currentDate = new Date();
+    const currentDateString = currentDate.toISOString().slice(0, 16);
 
     const tripTypes = [
         'Drop-off',
@@ -75,47 +77,58 @@ export function GeneralStep({
     
     const [noDataFound, setNoDataFound] = useState(false);
     
-    const handlePlateNumberChange = (value: string) => {
-        setPlateNumber(value);
-        const vehicle = vehiclesData.find((v) => v.PlateNumber === value);
+  // Ensure plateNumber is updated both in the state and formData
+const handlePlateNumberChange = (value: string) => {
+    setPlateNumber(value);
     
-        if (vehicle) {
-            const driver = driversData.find((d) => d.id === vehicle.driver_id); 
-            const operator = operatorsData.find((o) => o.OperatorId === driver?.OperatorId);
-            const company = companiesData.find((c) => c.VRCompanyId === operator?.VRCompanyId);
-    
-            setSelectedCompany(company || {});
-            setSelectedOperator(operator || {});
-            setSelectedVehicle(vehicle || {});
-            setSelectedDriver(driver || {});
-    
-            updateFormData('general', {
-                ...formData.general,
-                unitId: vehicle.id,
-                driverId: vehicle?.driver_id || '',
-            });
-    
-            setNoDataFound(false); // Data found, so reset noDataFound state
-        } else {
-            // No matching vehicle found
-            setNoDataFound(true);
-            setSelectedCompany({});
-            setSelectedOperator({});
-            setSelectedVehicle({});
-            setSelectedDriver({});
-        }
-    };
+    const vehicle = vehiclesData.find((v) => v.PlateNumber === value);
+    if (vehicle) {
+        const driver = driversData.find((d) => d.id === vehicle.driver_id); 
+        const operator = operatorsData.find((o) => o.OperatorId === driver?.OperatorId);
+        const company = companiesData.find((c) => c.VRCompanyId === operator?.VRCompanyId);
+        
+        setSelectedCompany(company || {});
+        setSelectedOperator(operator || {});
+        setSelectedVehicle(vehicle || {});
+        setSelectedDriver(driver || {});
+        
+        updateFormData('general', {
+            ...formData.general,
+            plateNumber: value,  // Update plateNumber explicitly in formData
+            unitId: vehicle.id,
+            driverId: vehicle?.driver_id || '',
+        });
+
+        setNoDataFound(false);  // Data found, so reset noDataFound state
+    } else {
+        // No matching vehicle found
+        setNoDataFound(true);
+        setSelectedCompany({});
+        setSelectedOperator({});
+        setSelectedVehicle({});
+        setSelectedDriver({});
+    }
+};
+
     
 
-    const handleDateChange = (dateType: 'pickup' | 'dropoff', part: 'day' | 'month' | 'year', value: string) => {
+    const handleDateTimeChange = (dateType: 'pickup' | 'dropoff', value: string) => {
+        const [date, time] = value.split('T');
+        const [year, month, day] = date.split('-');
+        const [hours, minutes] = time.split(':');
+    
         updateFormData('general', {
             ...formData.general,
             [`${dateType}Date`]: {
-                ...formData.general[`${dateType}Date`],
-                [part]: value,
+                year,
+                month,
+                day,
+                hours,
+                minutes,
             },
         });
     };
+    
 
     const handleTripTypeSelect = (type: string) => {
         setSelectedTripType(type);
@@ -281,52 +294,41 @@ export function GeneralStep({
                             <p className="text-sm text-red-500">Drop-off address must be more than 10 characters.</p>
                         )}
                     </div>
-                    <div className="space-y-2">
-                        <Label>Pick-up Date</Label>
-                        <div className="grid grid-cols-3 gap-2">
-                            <Input
-                                placeholder="MM"
-                                value={formData.general.pickupDate.month}
-                                onChange={(e) => handleDateChange('pickup', 'month', e.target.value)}
-                            />
-                            <Input
-                                placeholder="DD"
-                                value={formData.general.pickupDate.day}
-                                onChange={(e) => handleDateChange('pickup', 'day', e.target.value)}
-                            />
-                            <Input
-                                placeholder="YYYY"
-                                value={formData.general.pickupDate.year}
-                                onChange={(e) => handleDateChange('pickup', 'year', e.target.value)}
-                            />
-                        </div>
-                        {(!formData.general.pickupDate.day || !formData.general.pickupDate.month || !formData.general.pickupDate.year) && (
-                            <p className="text-sm text-red-500">Pick-up date is required.</p>
-                        )}
-                    </div>
-                    <div className="space-y-2">
-                        <Label>Drop-off Date</Label>
-                        <div className="grid grid-cols-3 gap-2">
-                            <Input
-                                placeholder="MM"
-                                value={formData.general.dropoffDate.month}
-                                onChange={(e) => handleDateChange('dropoff', 'month', e.target.value)}
-                            />
-                            <Input
-                                placeholder="DD"
-                                value={formData.general.dropoffDate.day}
-                                onChange={(e) => handleDateChange('dropoff', 'day', e.target.value)}
-                            />
-                            <Input
-                                placeholder="YYYY"
-                                value={formData.general.dropoffDate.year}
-                                onChange={(e) => handleDateChange('dropoff', 'year', e.target.value)}
-                            />
-                        </div>
-                        {(!formData.general.dropoffDate.day || !formData.general.dropoffDate.month || !formData.general.dropoffDate.year) && (
-                            <p className="text-sm text-red-500">Drop-off date is required.</p>
-                        )}
-                    </div>
+                                  <div className="space-y-2">
+    <Label>Pick-up Date and Time</Label>
+    <div className="grid grid-cols-1 gap-2">
+        <Input
+            id="pickupDateTime"
+            type="datetime-local"
+            className="block w-full rounded-md border border-gray-300 p-2"
+            value={`${formData.general.pickupDate.year}-${formData.general.pickupDate.month?.padStart(2, '0')}-${formData.general.pickupDate.day?.padStart(2, '0')}T${formData.general.pickupDate.hours?.padStart(2, '0')}:${formData.general.pickupDate.minutes?.padStart(2, '0')}`}
+            onChange={(e) => handleDateTimeChange('pickup', e.target.value)}
+            min={currentDateString} // This will set the minimum date and time to now
+        />
+    </div>
+    {(!formData.general.pickupDate.day || !formData.general.pickupDate.month || !formData.general.pickupDate.year || !formData.general.pickupDate.hours || !formData.general.pickupDate.minutes) && (
+        <p className="text-sm text-red-500">Pick-up date and time are required.</p>
+    )}
+</div>
+
+<div className="space-y-2">
+    <Label>Drop-off Date and Time</Label>
+    <div className="grid grid-cols-1 gap-2">
+        <Input
+            id="dropoffDateTime"
+            type="datetime-local"
+            className="block w-full rounded-md border border-gray-300 p-2"
+            value={`${formData.general.dropoffDate.year}-${formData.general.dropoffDate.month?.padStart(2, '0')}-${formData.general.dropoffDate.day?.padStart(2, '0')}T${formData.general.dropoffDate.hours?.padStart(2, '0')}:${formData.general.dropoffDate.minutes?.padStart(2, '0')}`}
+            onChange={(e) => handleDateTimeChange('dropoff', e.target.value)}
+            min={currentDateString} // This will set the minimum date and time to now
+        />
+    </div>
+    {(!formData.general.dropoffDate.day || !formData.general.dropoffDate.month || !formData.general.dropoffDate.year || !formData.general.dropoffDate.hours || !formData.general.dropoffDate.minutes) && (
+        <p className="text-sm text-red-500">Drop-off date and time are required.</p>
+    )}
+</div>
+
+
             </div>
             
             <div className='grid grid-cols-1'>
