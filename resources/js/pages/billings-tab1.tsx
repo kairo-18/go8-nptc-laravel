@@ -98,7 +98,6 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
                 paymentId: selectedReceipt.id,
             });
             setSelectedReceipt(null);
-            window.location.reload();
         } catch (error) {
             console.error('Approval failed:', error);
         }
