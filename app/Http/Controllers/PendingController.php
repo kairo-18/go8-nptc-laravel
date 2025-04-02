@@ -356,7 +356,7 @@ class PendingController extends Controller
                 break;
 
             case 'vr_company':
-                $entity = VRCompany::with(['owner.user'])->find($entityId);
+                $entity = VRCompany::with(['owner.user', 'owner'])->find($entityId);
                 if ($entity) {
                     $payload = [
                         'CompanyName' => $entity->CompanyName,
@@ -364,6 +364,9 @@ class PendingController extends Controller
                         'date' => now()->format('F d, Y'),
                     ];
                     $recipientUser = $entity->owner->user;
+
+                    $entity->owner->Status = 'Approved';
+                    $entity->owner->save();
                 }
                 break;
 
@@ -469,7 +472,7 @@ class PendingController extends Controller
         $entity->Status = 'Approved';
         $entity->save();
 
-        if ($validated['paymentId']) {
+        if (isset($validated['paymentId'])) {
 
             $manualPayment = ManualPayment::find($validated['paymentId']);
 
