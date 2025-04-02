@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\NptcAdminController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -30,9 +31,7 @@ Route::middleware(['auth', 'verified', 'role:NPTC Admin|NPTC Super Admin'])->gro
 });
 
 Route::group(['middleware' => ['role:NPTC Admin|NPTC Super Admin|Operator|VR Admin|Driver']], function () {
-    Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
-    })->name('dashboard');
+    Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('pending', function () {
         return Inertia::render('pending');
