@@ -10,9 +10,12 @@ export default function ComposeMail() {
     const [newMail, setNewMail] = useState({ email: '', subject: '', content: '' });
     const [attachments, setAttachments] = useState([]); // State for file attachments
     const [isLoading, setIsLoading] = useState(false);
+    const [errors, setErrors] = useState({});
+
 
     const sendNewMail = async () => {
         setIsLoading(true);
+        setErrors({});
 
         const formData = new FormData();
         formData.append('email', newMail.email);
@@ -31,6 +34,9 @@ export default function ComposeMail() {
             setIsLoading(false);
         } catch (error) {
             console.error('Error sending mail:', error);
+            if (error.response && error.response.status === 422) {
+                setErrors(error.response.data.errors); // Set validation errors
+            }
             setIsLoading(false);
         }
     };
@@ -53,12 +59,15 @@ export default function ComposeMail() {
                     <DialogTitle>Send New Mail</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-3">
+                    <div>
                     <Input
                         type="email"
                         placeholder="Receiver Email"
                         value={newMail.email}
                         onChange={(e) => setNewMail({ ...newMail, email: e.target.value })}
                     />
+                    {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email[0]}</p>}
+                    </div>
                     <Input
                         type="text"
                         placeholder="Subject"
