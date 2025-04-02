@@ -135,6 +135,12 @@ Route::post('mails/new-mail', function (Request $request) {
             'receiver_id' => $receiver->id,
         ]);
         $isNewThread = true; // Mark that a new thread is created
+    } else {
+        // Swap sender and receiver for replies
+        $thread->update([
+            'sender_id' => $sender->id,
+            'receiver_id' => $receiver->id,
+        ]);
     }
 
     // Create the mail
