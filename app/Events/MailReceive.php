@@ -44,7 +44,7 @@ class MailReceive implements ShouldBroadcast
     {
         $lastMail = $this->mail->thread->mails()
             ->latest()
-            ->with(['media'])
+            ->with(['media', 'sender', 'thread.receiver'])
             ->first();
 
         // Add preview URLs to each media item
@@ -55,6 +55,18 @@ class MailReceive implements ShouldBroadcast
         return [
             'id' => $this->mail->thread->id,
             'last_mail' => $lastMail,
+            'sender' => [
+                'id' => $lastMail->sender->id,
+                'FirstName' => $lastMail->sender->FirstName,
+                'LastName' => $lastMail->sender->LastName,
+                'email' => $lastMail->sender->email,
+            ],
+            'receiver' => [
+                'id' => $this->mail->thread->receiver->id,
+                'FirstName' => $this->mail->thread->receiver->FirstName,
+                'LastName' => $this->mail->thread->receiver->LastName,
+                'email' => $this->mail->thread->receiver->email,
+            ],
             'created_at' => $this->mail->thread->created_at,
         ];
     }
