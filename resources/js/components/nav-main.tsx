@@ -36,7 +36,7 @@ export function NavMain({
   const isVRAdmin = userRole === "VR Admin";
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>Navigation</SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           const isAnyChildActive = item.children?.some((child) => child.url === currentPath);
