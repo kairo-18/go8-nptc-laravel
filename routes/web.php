@@ -49,7 +49,7 @@ Route::get(
     function () {
         return Inertia::render('mails');
     }
-)->middleware(['auth', 'verified'])->name('dashboard');
+)->middleware(['auth', 'verified'])->name('mails');
 
 Route::get('mails/threads', function () {
     $threads = Thread::where('sender_id', auth()->id())
