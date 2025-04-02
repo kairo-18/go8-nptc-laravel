@@ -5,6 +5,7 @@ import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { BadgePlus, BellRing, BookUser, Folder, LayoutGrid, Mail, Receipt, UserPlus, Wallet } from 'lucide-react';
 import AppLogo from './app-logo';
+import { getBackgroundColorForRole } from '@/components/UtilsColor';
 
 const mainNavItems: NavItem[] = [
     {
@@ -135,8 +136,10 @@ export function AppSidebar() {
         filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
     }
 
+    const sidebarBgColor = getBackgroundColorForRole(userRole);
+
     return (
-        <Sidebar collapsible="icon" variant="inset" className={userRole === 'VR Admin' ? 'bg-[#A41316]' : ''}>
+        <Sidebar collapsible="icon" variant="inset" className={sidebarBgColor}>
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem className="text-white">
@@ -153,7 +156,7 @@ export function AppSidebar() {
                 <NavMain items={filteredNavItems} currentPath={url} userRole={userRole} />
             </SidebarContent>
 
-            <SidebarFooter className="rounded-2xl border border-white text-white hover:border-red-700 hover:bg-white hover:text-blue-900">
+            <SidebarFooter className="rounded-2xl border border-white text-white hover:border-red-700 hover:bg-white hover:text-gray-900">
                 <NavUser />
             </SidebarFooter>
         </Sidebar>
