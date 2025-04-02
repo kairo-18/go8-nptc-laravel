@@ -114,12 +114,14 @@ class VRAdminController extends Controller
                 'role' => 'admin', // Assuming role is stored as a column
             ]);
 
+            $newAdmin->assignRole('VR Admin');
+
             // Assign the new admin to the VR company
             $vrCompany->owner()->updateOrCreate([], ['user_id' => $newAdmin->id]);
 
             \Log::info('New admin created:', ['admin' => $newAdmin]);
 
-            return response()->json(['message' => 'New VR Admin created successfully', 'admin' => $newAdmin]);
+            return;
         }
 
         // Validate and update the existing admin
