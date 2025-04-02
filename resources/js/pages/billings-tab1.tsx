@@ -55,6 +55,7 @@ interface DataReceipt {
     }[];
     Receipt?: string; // Keep this if you still need it
     driverIds: string[];
+    operatorId: string;
 }
 
 interface BillingsTab1Props {
@@ -116,8 +117,6 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
         let driverId = selectedReceipt.driverIds[0];
 
         if (!driverId) {
-            console.error('Driver ID is missing');
-            console.log(rejectNotes);
             driverId = selectedReceipt.operatorId;
         }
 

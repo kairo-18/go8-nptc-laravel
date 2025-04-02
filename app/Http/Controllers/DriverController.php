@@ -79,7 +79,7 @@ class DriverController extends Controller
             'username' => 'required|string|unique:users,username',
             'email' => 'required|email|unique:users,email',
             'FirstName' => 'required|string',
-            'MiddleName' => 'required|string',
+            'MiddleName' => 'nullable|string',
             'LastName' => 'required|string',
             'Address' => 'required|string',
             'BirthDate' => 'required|date',
@@ -91,11 +91,11 @@ class DriverController extends Controller
             'vehicle_id' => 'nullable|exists:vehicles,id',
             'LicenseNumber' => 'nullable|string|unique:drivers,LicenseNumber',
 
-            'License' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'Photo' => 'nullable|file|mimes:jpg,png|max:1024',
-            'NBI_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'Police_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'BIR_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'License' => 'nullable|file|mimes:pdf,jpg,png',
+            'Photo' => 'nullable|file|mimes:jpg,png',
+            'NBI_clearance' => 'nullable|file|mimes:pdf,jpg,png',
+            'Police_clearance' => 'nullable|file|mimes:pdf,jpg,png',
+            'BIR_clearance' => 'nullable|file|mimes:pdf,jpg,png',
         ]);
 
         // Create the user
@@ -173,11 +173,11 @@ class DriverController extends Controller
         // Validate request
         $request->validate([
 
-            'License' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'Photo' => 'nullable|file|mimes:jpg,png|max:2048',
-            'NBI_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'Police_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'BIR_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'License' => 'nullable|file|mimes:pdf,jpg,png',
+            'Photo' => 'nullable|file|mimes:jpg,png',
+            'NBI_clearance' => 'nullable|file|mimes:pdf,jpg,png',
+            'Police_clearance' => 'nullable|file|mimes:pdf,jpg,png',
+            'BIR_clearance' => 'nullable|file|mimes:pdf,jpg,png',
         ]);
 
         // File collections mapping
@@ -252,11 +252,11 @@ class DriverController extends Controller
             'Status' => 'sometimes|in:Pending,Approved,Rejected',
             'LicenseNumber' => 'sometimes|string|unique:drivers,LicenseNumber,'.$driver->id,
 
-            'License' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'Photo' => 'nullable|file|mimes:jpg,png|max:2048',
-            'NBI_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'Police_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'BIR_clearance' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'License' => 'nullable|file|mimes:pdf,jpg,png',
+            'Photo' => 'nullable|file|mimes:jpg,png',
+            'NBI_clearance' => 'nullable|file|mimes:pdf,jpg,png',
+            'Police_clearance' => 'nullable|file|mimes:pdf,jpg,png',
+            'BIR_clearance' => 'nullable|file|mimes:pdf,jpg,png',
         ]);
 
         // Update User Details

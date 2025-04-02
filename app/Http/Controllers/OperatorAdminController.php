@@ -38,9 +38,9 @@ class OperatorAdminController extends Controller
             'vr_company_id' => 'required|exists:vr_companies,id',
             'Status' => 'nullable|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected,For Payment',
 
-            'photo' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'valid_id_front' => 'nullable|file|mimes:jpg,png|max:1024',
-            'valid_id_back' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'photo' => 'nullable|file|mimes:pdf,jpg,png',
+            'valid_id_front' => 'nullable|file|mimes:jpg,png',
+            'valid_id_back' => 'nullable|file|mimes:pdf,jpg,png',
         ]);
 
         // Create the user
@@ -154,9 +154,9 @@ class OperatorAdminController extends Controller
         // Validate request
         $request->validate([
 
-            'photo' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'valid_id_front' => 'nullable|file|mimes:jpg,png|max:2048',
-            'valid_id_back' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'photo' => 'nullable|file|mimes:pdf,jpg,png',
+            'valid_id_front' => 'nullable|file|mimes:jpg,png',
+            'valid_id_back' => 'nullable|file|mimes:pdf,jpg,png',
         ]);
 
         // File collections mapping

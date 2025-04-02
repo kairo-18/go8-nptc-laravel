@@ -69,15 +69,15 @@ class VehicleController extends Controller
             'Brand' => 'required|string',
             'SeatNumber' => 'required|integer',
             'Status' => 'sometimes|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected,For VR Approval, For NPTC Approval',
-            'front_image' => 'nullable|file|mimes:jpg,png|max:2048',
-            'back_image' => 'nullable|file|mimes:jpg,png|max:2048',
-            'left_side_image' => 'nullable|file|mimes:jpg,png|max:2048',
-            'right_side_image' => 'nullable|file|mimes:jpg,png|max:2048',
-            'or_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-            'cr_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-            'id_card_image' => 'nullable|file|mimes:jpg,png|max:2048',
-            'gps_certificate_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-            'inspection_certificate_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
+            'front_image' => 'nullable|file|mimes:jpg,png',
+            'back_image' => 'nullable|file|mimes:jpg,png',
+            'left_side_image' => 'nullable|file|mimes:jpg,png',
+            'right_side_image' => 'nullable|file|mimes:jpg,png',
+            'or_image' => 'nullable|file|mimes:jpg,png,pdf',
+            'cr_image' => 'nullable|file|mimes:jpg,png,pdf',
+            'id_card_image' => 'nullable|file|mimes:jpg,png',
+            'gps_certificate_image' => 'nullable|file|mimes:jpg,png,pdf',
+            'inspection_certificate_image' => 'nullable|file|mimes:jpg,png,pdf',
         ]);
 
         if (! $request->has('Status') || $request->Status == '') {
@@ -113,15 +113,15 @@ class VehicleController extends Controller
 
         // Validate request
         $request->validate([
-            'front_image' => 'nullable|file|mimes:jpg,png|max:2048',
-            'back_image' => 'nullable|file|mimes:jpg,png|max:2048',
-            'left_side_image' => 'nullable|file|mimes:jpg,png|max:2048',
-            'right_side_image' => 'nullable|file|mimes:jpg,png|max:2048',
-            'or_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-            'cr_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-            'id_card_image' => 'nullable|file|mimes:jpg,png|max:2048',
-            'gps_certificate_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
-            'inspection_certificate_image' => 'nullable|file|mimes:jpg,png,pdf|max:2048',
+            'front_image' => 'nullable|file|mimes:jpg,png',
+            'back_image' => 'nullable|file|mimes:jpg,png',
+            'left_side_image' => 'nullable|file|mimes:jpg,png',
+            'right_side_image' => 'nullable|file|mimes:jpg,png',
+            'or_image' => 'nullable|file|mimes:jpg,png,pdf',
+            'cr_image' => 'nullable|file|mimes:jpg,png,pdf',
+            'id_card_image' => 'nullable|file|mimes:jpg,png',
+            'gps_certificate_image' => 'nullable|file|mimes:jpg,png,pdf',
+            'inspection_certificate_image' => 'nullable|file|mimes:jpg,png,pdf',
         ]);
 
         // File collections mapping

@@ -21,11 +21,11 @@ class VRCompanyController extends Controller
             [
                 'CompanyName' => 'required|string',
                 'BusinessPermitNumber' => 'required|integer',
-                'BusinessPermit' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-                'BIR_2303' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-                'DTI_Permit' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-                'BrandLogo' => 'nullable|file|mimes:jpg,png|max:1024',
-                'SalesInvoice' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+                'BusinessPermit' => 'nullable|file|mimes:pdf,jpg,png',
+                'BIR_2303' => 'nullable|file|mimes:pdf,jpg,png',
+                'DTI_Permit' => 'nullable|file|mimes:pdf,jpg,png',
+                'BrandLogo' => 'nullable|file|mimes:jpg,png',
+                'SalesInvoice' => 'nullable|file|mimes:pdf,jpg,png',
             ]
         );
 
@@ -121,11 +121,11 @@ class VRCompanyController extends Controller
             'oldCompanyName' => 'sometimes|string',
             'CompanyName' => 'sometimes|string',
             'BusinessPermitNumber' => 'sometimes|integer',
-            'BusinessPermit' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'BIR_2303' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'DTI_Permit' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'BrandLogo' => 'nullable|file|mimes:jpg,png|max:1024',
-            'SalesInvoice' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'BusinessPermit' => 'nullable|file|mimes:pdf,jpg,png',
+            'BIR_2303' => 'nullable|file|mimes:pdf,jpg,png',
+            'DTI_Permit' => 'nullable|file|mimes:pdf,jpg,png',
+            'BrandLogo' => 'nullable|file|mimes:jpg,png',
+            'SalesInvoice' => 'nullable|file|mimes:pdf,jpg,png',
         ]);
 
         // Search VRCompany by oldCompanyName
@@ -161,11 +161,11 @@ class VRCompanyController extends Controller
         $request->validate([
             'vr_company_id' => 'nullable|integer|exists:vr_companies,id',
             'oldCompanyName' => 'sometimes|string',
-            'BusinessPermit' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'BIR_2303' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'DTI_Permit' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
-            'BrandLogo' => 'nullable|file|mimes:jpg,png|max:1024',
-            'SalesInvoice' => 'nullable|file|mimes:pdf,jpg,png|max:2048',
+            'BusinessPermit' => 'nullable|file|mimes:pdf,jpg,png',
+            'BIR_2303' => 'nullable|file|mimes:pdf,jpg,png',
+            'DTI_Permit' => 'nullable|file|mimes:pdf,jpg,png',
+            'BrandLogo' => 'nullable|file|mimes:jpg,png',
+            'SalesInvoice' => 'nullable|file|mimes:pdf,jpg,png',
         ]);
 
         // Find company using vr_company_id or oldCompanyName

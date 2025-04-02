@@ -26,5 +26,7 @@ class AppServiceProvider extends ServiceProvider
         //
         Operator::observe(OperatorObserver::class);
         Driver::observe(DriverObserver::class);
+        ini_set('upload_max_filesize', '25M');
+        ini_set('post_max_size', '25M');
     }
 }
