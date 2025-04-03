@@ -55,33 +55,45 @@ class DashboardController extends Controller
 
     public function driverDashboard()
     {
-        // Get current date, week start, and month start
         $today = Carbon::today();
         $thisWeek = Carbon::now()->startOfWeek();
         $thisMonth = Carbon::now()->startOfMonth();
-
+        
         // Fetch scheduled trips for the driver dashboard
         $allTrips = Trip::whereIn('status', ['Scheduled', 'Ongoing', 'Done'])
-        ->get()
-        ->map(function ($trip) use ($today, $thisWeek, $thisMonth) {
-            // Access driver's name
-            $trip->driver_first_name = $trip->driver->user->FirstName;
-            $trip->driver_last_name = $trip->driver->user->LastName;
-    
-            $pickupDate = Carbon::parse($trip->pickupDate);
-
-            if ($pickupDate->isToday()) {
-                $trip->booking_type = 'Today';
-            } elseif ($pickupDate->isAfter($thisWeek) && $pickupDate->isBefore($thisMonth->copy()->addMonth())) {
-                $trip->booking_type = 'This Week';
-            } elseif ($pickupDate->isAfter($thisMonth->subDay()) && $pickupDate->isBefore($thisMonth->copy()->endOfMonth()->addDay())) { 
-                // Include "This Week" in "This Month"
-                $trip->booking_type = 'This Month';
-            } else {
-                $trip->booking_type = 'Earlier';
-            }
-            return $trip;
-        });
+            ->get()
+            ->map(function ($trip) use ($today, $thisWeek, $thisMonth) {
+                // Access driver's name
+                $trip->driver_first_name = $trip->driver->user->FirstName;
+                $trip->driver_last_name = $trip->driver->user->LastName;
+        
+                $pickupDate = Carbon::parse($trip->pickupDate);
+        
+                // Allow multiple classifications
+                $bookingTypes = [];
+        
+                if ($pickupDate->isToday()) {
+                    $bookingTypes[] = 'Today'; // Today trips should be counted in all categories
+                }
+        
+                if ($pickupDate->greaterThanOrEqualTo($thisWeek)) {
+                    $bookingTypes[] = 'This Week';
+                }
+        
+                if ($pickupDate->greaterThanOrEqualTo($thisMonth)) {
+                    $bookingTypes[] = 'This Month';
+                }
+        
+                // Convert array to string for filtering
+                $trip->setAttribute('booking_type', implode(', ', $bookingTypes));
+        
+                return $trip;
+            });
+        
+        // Group trips by booking type
+        $bookingsToday = $allTrips->filter(fn($trip) => str_contains($trip->booking_type, 'Today'))->count();
+        $bookingsThisWeek = $allTrips->filter(fn($trip) => str_contains($trip->booking_type, 'This Week'))->count();
+        $bookingsThisMonth = $allTrips->filter(fn($trip) => str_contains($trip->booking_type, 'This Month'))->count();
     
         $scheduledBookings = Trip::where('status', 'Scheduled')
         ->with(['driver.user', 'vehicle'])  // Include the vehicle relationship
@@ -101,16 +113,13 @@ class DashboardController extends Controller
             return $trip;
         });
     
-        // Group trips by booking type
-        $bookingsToday = $allTrips->where('booking_type', 'Today');
-        $bookingsThisWeek = $allTrips->where('booking_type', 'This Week');
-        $bookingsThisMonth = $allTrips->where('booking_type', 'This Month');
+   
 
         return Inertia::render('driver-dashboard', [
             'scheduledBookings'=> $scheduledBookings,
-            'bookingsToday' => $bookingsToday,
-            'bookingsThisWeek' => $bookingsThisWeek,
-            'bookingsThisMonth' => $bookingsThisMonth,
+            'bookingsToday' => (string) $bookingsToday,
+            'bookingsThisWeek' => (string) $bookingsThisWeek,
+            'bookingsThisMonth' => (string) $bookingsThisMonth,
         ]);
     }
 }
