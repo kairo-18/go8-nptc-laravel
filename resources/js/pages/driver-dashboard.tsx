@@ -26,7 +26,6 @@ export default function DriverDashboard({
     scheduledBookings:any;
   }) {
 
-    console.log(bookingsThisWeek)
   const [date, setDate] = React.useState<Date | undefined>(new Date());
   const [trip, setTrip] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -165,9 +164,9 @@ export default function DriverDashboard({
       <h2 className="text-2xl font-bold mt-6">Bookings</h2>
 <div className="grid grid-cols-3 gap-4">
   {[ 
-    { title: "Today's Bookings", value: bookingsToday.length },
-    { title: "This Week's Bookings", value: bookingsThisWeek.length },
-    { title: "This Month's Bookings", value: bookingsThisMonth.length },
+    { title: "Today's Bookings", value: bookingsToday },
+    { title: "This Week's Bookings", value: bookingsThisWeek },
+    { title: "This Month's Bookings", value: bookingsThisMonth },
   ].map((item, index) => (
     <Card key={index}>
       <CardHeader>
