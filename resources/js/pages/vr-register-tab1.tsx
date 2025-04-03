@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import axios from 'axios';
 import { Clipboard, ClipboardCheck } from 'lucide-react';
 import { useState } from 'react';
+import { Input } from '@/components/ui/input';
 
 const CopyButton = ({ text, isCopied, setIsCopied }: { text: string; isCopied: boolean; setIsCopied: (value: boolean) => void }) => (
     <Button
@@ -111,37 +112,20 @@ const TemporaryAccountTabContent = ({ type }) => {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-4">
-                    <div className="col-span-2">
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="col-span-1">
                         <label className="block text-sm font-medium text-gray-700">BirthDate</label>
-                        <div className="mt-1 grid grid-cols-3 gap-2">
-                            <input
+                        <div className="mt-1 grid grid-cols-1 gap-2">
+                        <Input
                                 id="BirthDate"
-                                type="text"
-                                placeholder="MM"
+                                type="date"
                                 className="block w-full rounded-md border border-gray-300 p-2"
                                 value={values.BirthDate}
                                 onChange={handleChange}
-                            />
-                            <input
-                                id="BirthDate"
-                                type="text"
-                                placeholder="DD"
-                                className="block w-full rounded-md border border-gray-300 p-2"
-                                value={values.BirthDate}
-                                onChange={handleChange}
-                            />
-                            <input
-                                id="BirthDate"
-                                type="text"
-                                placeholder="YYYY"
-                                className="block w-full rounded-md border border-gray-300 p-2"
-                                value={values.BirthDate}
-                                onChange={handleChange}
-                            />
+                        />
                         </div>
                     </div>
-                    <div className="col-span-2">
+                    <div className="col-span-1">
                         <label className="block text-sm font-medium text-gray-700">Email</label>
                         <input
                             id="email"

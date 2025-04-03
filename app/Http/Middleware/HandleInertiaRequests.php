@@ -47,6 +47,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
                 'roles' => optional($request->user())->roles,
                 'vr_company_id' => optional($user?->vrOwner?->vrCompany)->id,
+                'vrAdminStatus' => optional($user?->vrOwner)->Status,
             ],
         ];
     }

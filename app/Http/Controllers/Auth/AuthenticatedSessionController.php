@@ -49,7 +49,7 @@ class AuthenticatedSessionController extends Controller
     // Prevent login if any related model has 'Banned' Status
     if (in_array('Banned', $statuses)) {
         Auth::guard('web')->logout();
-        
+
         \DB::table('login_attempts')->insert([
             'user_id' => $user->id,
             'status' => 'Banned',
@@ -68,8 +68,8 @@ class AuthenticatedSessionController extends Controller
             ->latest('attempted_at')
             ->first();
 
-        $suspensionEndTime = $lastSuspendedAttempt 
-            ? \Carbon\Carbon::parse($lastSuspendedAttempt->attempted_at)->addMinutes(5) 
+        $suspensionEndTime = $lastSuspendedAttempt
+            ? \Carbon\Carbon::parse($lastSuspendedAttempt->attempted_at)->addMinutes(5)
             : now()->addMinutes(5);
 
         $remainingTime = now()->diffInSeconds($suspensionEndTime, false);
@@ -116,7 +116,7 @@ class AuthenticatedSessionController extends Controller
         'attempted_at' => now(),
     ]);
 
-    //comment out nalang before tom
+    // comment out nalang before tom
     // if (!in_array('Approved', $statuses)) {
     //     Auth::guard('web')->logout();
     //     return redirect()->route('login')->withErrors([
@@ -133,17 +133,28 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         return redirect()->route('create-operator.admin')->withInput(['Registration' => 'Please input your operator details']);
+    } elseif ($user->hasRole('Driver')) {
+        if ($user->driver->Status != 'Approved') {
+            Auth::guard('web')->logout();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Your driver account is not approved yet. Please talk to your operator.'
+            ]);
+        }
+        $request->session()->regenerate();
+
+        return redirect()->route('driver.dashboard');
+    } elseif ($user->hasRole('VR Admin')) {
+        if ($user->vrOwner->Status != 'Approved') {
+            $request->session()->regenerate();
+
+            return redirect()->route('mails');
+        } else{
+            $request->session()->regenerate();
+
+            return redirect()->intended(route('dashboard', absolute: false));
+        }
     }
-    // elseif ($user->hasRole('Driver')) {
-    //     if ($user->driver->Status != 'Approved') {
-    //         Auth::guard('web')->logout();
-    //
-    //         return redirect()->route('login');
-    //     }
-    //     $request->session()->regenerate();
-    //
-    //     return redirect()->route('driver.dashboard');
-    // }
 
     $request->session()->regenerate();
 
