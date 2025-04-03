@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\DriverController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -25,9 +26,8 @@ Route::delete('/driver/{driver}', [DriverController::class, 'destroy'])
 
 Route::middleware(['auth'])->get('/driver/trips', [DriverController::class, 'getDriverTrips'])->name('driver.trips');
 
-Route::get('/driver-dashboard', function () {
-    return Inertia::render('driver-dashboard');
-})->name('driver.dashboard');
+Route::get('/driver-dashboard', [DashboardController::class, 'driverDashboard'])->name('driver.dashboard');
+
 
 Route::patch('driver/updateStatus/{id}', [DriverController::class, 'updateStatus'])->name('driver.updateStatus');
 

@@ -13,7 +13,34 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function Dashboard() {
+export default function Dashboard({
+  vrCompaniesCount,
+  activeOperatorsCount,
+  activeDriversCount,
+  pendingPaymentsCount,
+  ongoingTripsCount,
+  ongoingBookings,
+  pendingRegistrationsCount,  // Added this prop
+}: {
+  vrCompaniesCount: number | null;
+  activeOperatorsCount: number | null;
+  activeDriversCount: number | null;
+  pendingPaymentsCount: number | null;
+  ongoingTripsCount: number | null;
+  ongoingBookings: Array<{ name: string; vehicle: string; route: string; eta: string }> | null;
+  pendingRegistrationsCount: number | null;  // Added this prop
+}) {
+  // Log the props to the console for debugging
+  console.log("Dashboard Props:", {
+    vrCompaniesCount,
+    activeOperatorsCount,
+    activeDriversCount,
+    pendingPaymentsCount,
+    ongoingTripsCount,
+    ongoingBookings,
+    pendingRegistrationsCount,  // Log the pending registrations count
+  });
+
   const [date, setDate] = React.useState<Date | undefined>(new Date());
 
   return (
@@ -24,10 +51,10 @@ export default function Dashboard() {
       {/* Overall Stats */}
       <h2 className="text-2xl font-bold mt-6">Overall</h2>
       <div className="grid grid-cols-3 gap-4">
-        {[
-          { title: "Registered VR Companies", value: 13 },
-          { title: "Active Operators", value: 30 },
-          { title: "Active Drivers", value: 200 },
+        {[ 
+          { title: "Registered VR Companies", value: vrCompaniesCount ?? 0 },
+          { title: "Active Operators", value: activeOperatorsCount ?? 0 },
+          { title: "Active Drivers", value: activeDriversCount ?? 0 },
         ].map((item, index) => (
           <Card key={index}>
             <CardHeader>
@@ -35,7 +62,6 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">{item.value}</p>
-              <p className="text-sm text-gray-500">+20.1% from last year</p>
             </CardContent>
           </Card>
         ))}
@@ -44,10 +70,10 @@ export default function Dashboard() {
       {/* Pending Stats */}
       <h2 className="text-2xl font-bold mt-6">Pending</h2>
       <div className="grid grid-cols-3 gap-4 mt-2">
-        {[
-          { title: "Pending Payments", value: 27 },
-          { title: "Pending Trip Tickets", value: 11 },
-          { title: "Pending Registrations", value: 30 },
+        {[ 
+          { title: "Pending Payments", value: pendingPaymentsCount ?? 0 },
+          { title: "Pending Trip Tickets", value: ongoingTripsCount ?? 0 },
+          { title: "Pending Registrations", value: pendingRegistrationsCount ?? 0 },  // Display pending registrations count
         ].map((item, index) => (
           <Card key={index}>
             <CardHeader>
@@ -55,7 +81,6 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold">{item.value}</p>
-              <p className="text-sm text-gray-500">+20.1% from last year</p>
             </CardContent>
           </Card>
         ))}
@@ -67,39 +92,19 @@ export default function Dashboard() {
         <Card>
           <CardHeader>
             <CardTitle>Ongoing Bookings</CardTitle>
-            <p className="text-sm text-gray-500">Last updated: 3:12 PM</p>
           </CardHeader>
           <CardContent>
-            {[
-              {
-                name: "Olivia Martin",
-                vehicle: "Honda Civic",
-                route: "Cubao to Laguna",
-                eta: "4:15 PM, February 15",
-              },
-              {
-                name: "Jackson Lee",
-                vehicle: "Toyota Hiace",
-                route: "Manila to Benguet",
-                eta: "4:28 PM, February 15",
-              },
-              {
-                name: "Isabella Nguyen",
-                vehicle: "Montero",
-                route: "Manila to Baguio",
-                eta: "4:33 PM, February 15",
-              },
-            ].map((booking, index) => (
+            {(ongoingBookings ?? []).map((booking, index) => (
               <div key={index} className="flex items-center gap-4 mb-4">
                 <Avatar>
-                  <AvatarFallback>{booking.name[0]}</AvatarFallback>
+                  <AvatarFallback>{booking.driver_first_name[0]}</AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="font-semibold">
-                    {booking.name} | {booking.vehicle}
+                    {booking.driver_first_name} {booking.driver_last_name} | {booking.NPTC_ID}
                   </p>
-                  <p className="text-sm text-gray-500">{booking.route}</p>
-                  <p className="text-sm text-gray-500">ETA: {booking.eta}</p>
+                  <p className="text-sm text-gray-500">{booking.pickupAddress} to {booking.dropOffAddress}</p>
+                  <p className="text-sm text-gray-500">Pickup: {booking.pickupDate} | Dropoff: {booking.dropOffDate}</p>
                 </div>
               </div>
             ))}
@@ -110,15 +115,15 @@ export default function Dashboard() {
         <Card className="flex justify-center items-center">
           <CardContent className="w-full h-full">
             <Calendar
-                className="h-full w-full flex"
-                classNames={{
+              className="h-full w-full flex"
+              classNames={{
                 months:
-                    "flex w-full flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 flex-1",
+                  "flex w-full flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0 flex-1",
                 month: "space-y-4 w-full flex flex-col",
                 table: "w-full h-full border-collapse space-y-1",
                 head_row: "",
                 row: "w-full mt-2",
-                }}
+              }}
             />
           </CardContent>
         </Card>
