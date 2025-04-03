@@ -30,56 +30,53 @@ export default function Summary({
     const [processing, setProcessing] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
 
-    const { props } = usePage<{ auth: { user?: { id: number; roles?: { name: string }[] }, vr_company_id?: number } }>();
-    const userRole = props.auth.user?.roles?.[0]?.name;
+    // Use state for current form data
+    const [currentCompanyData, setCurrentCompanyData] = useState(companyData);
+    const [currentAdminData, setCurrentAdminData] = useState(adminData);
+    const [currentContactsData, setCurrentContactsData] = useState(contactsData);
 
-    // Refs to store the initial data for comparison
+    // Refs to store the initial data and submit functions
     const initialCompanyData = useRef(companyData);
     const initialAdminData = useRef(adminData);
     const initialContactsData = useRef(contactsData);
-
-    // Refs to store the current form data from the modals
-    const companyFormData = useRef(companyData);
-    const adminFormData = useRef(adminData);
-    const contactsFormData = useRef(contactsData);
-
-    // Refs to store the handleSubmit functions from the modals
     const companySubmitRef = useRef<() => void>();
     const adminSubmitRef = useRef<() => void>();
     const contactsSubmitRef = useRef<() => void>();
 
-    // Track changes in the modals
+    const { props } = usePage<{ auth: { user?: { id: number; roles?: { name: string }[] }; vr_company_id?: number } }>();
+    const userRole = props.auth.user?.roles?.[0]?.name;
+
+    // Track changes in the form data
     useEffect(() => {
-        const companyChanged = JSON.stringify(companyFormData.current) !== JSON.stringify(initialCompanyData.current);
-        const adminChanged = JSON.stringify(adminFormData.current) !== JSON.stringify(initialAdminData.current);
-        const contactsChanged = JSON.stringify(contactsFormData.current) !== JSON.stringify(initialContactsData.current);
+        const companyChanged = JSON.stringify(currentCompanyData) !== JSON.stringify(initialCompanyData.current);
+        const adminChanged = JSON.stringify(currentAdminData) !== JSON.stringify(initialAdminData.current);
+        const contactsChanged = JSON.stringify(currentContactsData) !== JSON.stringify(initialContactsData.current);
 
         setHasChanges(companyChanged || adminChanged || contactsChanged);
-        console.log(companyChanged || adminChanged || contactsChanged);
-    }, [companyData, adminData, contactsData]);
+    }, [currentCompanyData, currentAdminData, currentContactsData]);
 
     const handleSaveChanges = async (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);
 
         try {
-            if (companyData &&
-                Object.keys(companyData).length > 0 &&
-                Object.values(companyData).some(value => value !== null && value !== '') &&
+            if (currentCompanyData &&
+                Object.keys(currentCompanyData).length > 0 &&
+                Object.values(currentCompanyData).some(value => value !== null && value !== '') &&
                 companySubmitRef.current) {
                 await companySubmitRef.current();
             }
 
-            if (adminData &&
-                Object.keys(adminData).length > 0 &&
-                Object.values(adminData).some(value => value !== null && value !== '') &&
+            if (currentAdminData &&
+                Object.keys(currentAdminData).length > 0 &&
+                Object.values(currentAdminData).some(value => value !== null && value !== '') &&
                 adminSubmitRef.current) {
                 await adminSubmitRef.current();
             }
 
-            if (contactsData &&
-                Object.keys(contactsData).length > 0 &&
-                contactsData?.contacts?.some(contact =>
+            if (currentContactsData &&
+                Object.keys(currentContactsData).length > 0 &&
+                currentContactsData?.contacts?.some(contact =>
                     Object.values(contact).some(value => value !== null && value !== '')
                 ) &&
                 contactsSubmitRef.current) {
@@ -87,16 +84,16 @@ export default function Summary({
             }
 
             // Reset initial data to reflect the updated state
-            initialCompanyData.current = companyFormData.current;
-            initialAdminData.current = adminFormData.current;
-            initialContactsData.current = contactsFormData.current;
+            initialCompanyData.current = currentCompanyData;
+            initialAdminData.current = currentAdminData;
+            initialContactsData.current = currentContactsData;
 
             setHasChanges(false);
             setProcessing(false);
 
             // Navigate to home/mails
             if (userRole === "Temp User") {
-                router.post(route('logout'));
+                await router.post(route('logout'));
             } else {
                 window.location.href = '/dashboard';
             }
@@ -106,64 +103,61 @@ export default function Summary({
         }
     };
 
+
     return (
         <>
             <div className="mx-auto mt-6 w-full max-w-6xl">
                 <h1 className="text-2xl font-semibold">Vehicle Rental Company Summary</h1>
                 <p className="text-gray-500">Contains all details of the Vehicle Rental Company.</p>
-                {companyData && Object.values(companyData).some(value => value !== null && value !== '') && (
+                {currentCompanyData && Object.values(currentCompanyData).some(value => value !== null && value !== '') && (
                     <CreateVrCompany
                         companies={companies}
-                        setCompanyData={(data) => {
-                            companyFormData.current = data; // Update the current company form data
-                        }}
+                        setCompanyData={setCurrentCompanyData}
                         onNextTab={() => {}}
                         isTitleDisabled={isTitleDisabled}
                         isButtonDisabled={true}
-                        companyData={companyData}
+                        companyData={currentCompanyData}
                         isEditing={true}
                         onSubmitRef={(submitFn) => {
-                            companySubmitRef.current = submitFn; // Store the handleSubmit function
+                            companySubmitRef.current = submitFn;
                         }}
                     />
                 )}
-                {adminData && Object.values(adminData).some(value => value !== null && value !== '') && (
+                {currentAdminData && Object.values(currentAdminData).some(value => value !== null && value !== '') && (
                     <CreateVrAdmin
                         companies={companies}
-                        setAdminData={(data) => {
-                            adminFormData.current = data; // Update the current admin form data
-                        }}
+                        setAdminData={setCurrentAdminData}
                         onNextTab={() => {}}
                         isTitleDisabled={isTitleDisabled}
                         isButtonDisabled={true}
-                        adminData={adminData}
-                        companyData={companyData}
+                        adminData={currentAdminData}
+                        companyData={currentCompanyData}
                         isEditing={true}
                         onSubmitRef={(submitFn) => {
-                            adminSubmitRef.current = submitFn; // Store the handleSubmit function
+                            adminSubmitRef.current = submitFn;
                         }}
                     />
                 )}
-                {contactsData && contactsData?.contacts?.some(contact =>
+                {currentContactsData && currentContactsData?.contacts?.some(contact =>
                     Object.values(contact).some(value => value !== null && value !== '')
                 ) && (
                     <CreateVrContacts
                         companies={companies}
-                        setContactsData={(data) => {
-                            contactsFormData.current = data; // Update the current contacts form data
-                        }}
+                        setContactsData={setCurrentContactsData}
                         onNextTab={() => {}}
                         isTitleDisabled={isTitleDisabled}
                         isButtonDisabled={true}
-                        contactsData={contactsData}
-                        companyData={companyData}
+                        contactsData={currentContactsData}
+                        companyData={currentCompanyData}
                         isEditing={true}
                         onSubmitRef={(submitFn) => {
-                            contactsSubmitRef.current = submitFn; // Store the handleSubmit function
+                            contactsSubmitRef.current = submitFn;
                         }}
                     />
                 )}
-                {!Object.values(companyData).some(value => value !== null && value !== '') && !Object.values(adminData).some(value => value !== null && value !== '') && !contactsData?.contacts?.some(contact =>
+                {!Object.values(currentCompanyData).some(value => value !== null && value !== '') &&
+                 !Object.values(currentAdminData).some(value => value !== null && value !== '') &&
+                 !currentContactsData?.contacts?.some(contact =>
                     Object.values(contact).some(value => value !== null && value !== '')
                 ) && (
                     <div className="text-center text-gray-500 text-lg font-semibold mt-6">
@@ -182,7 +176,7 @@ export default function Summary({
                     <Button
                         type="submit"
                         onClick={handleSaveChanges}
-                        disabled={processing} // Disable if no changes or processing
+                        disabled={processing || !hasChanges}
                         className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700"
                     >
                         {processing ? 'Submitting...' : 'Save Changes'}

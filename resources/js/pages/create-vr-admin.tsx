@@ -50,14 +50,14 @@ export default function CreateVrAdmin({
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
-    useEffect(() => {
-        if (isEditing && adminData) {
-            setData({
-                ...data,
-                ...adminData, // Populate the form with existing admin data
-            });
-        }
-    }, [isEditing, adminData]);
+    // useEffect(() => {
+    //     if (isEditing && adminData) {
+    //         setData({
+    //             ...data,
+    //             ...adminData, // Populate the form with existing admin data
+    //         });
+    //     }
+    // }, [isEditing, adminData]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

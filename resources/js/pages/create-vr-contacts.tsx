@@ -53,14 +53,13 @@ export default function CreateVrContacts({
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
-    console.log(contactsData);
-    useEffect(() => {
-        if (isEditing && contactsData) {
-            setData({
-                contacts: Array.isArray(contactsData.contacts) ? contactsData.contacts : [],
-            });
-        }
-    }, [isEditing, contactsData]);
+    // useEffect(() => {
+    //     if (isEditing && contactsData) {
+    //         setData({
+    //             contacts: Array.isArray(contactsData.contacts) ? contactsData.contacts : [],
+    //         });
+    //     }
+    // }, [isEditing, contactsData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -89,18 +88,18 @@ export default function CreateVrContacts({
     };
 
     // Notify parent when form data changes
-    useEffect(() => {
-        if (isEditing && contactsData) {
-          setData({
-            contacts: Array.isArray(contactsData.contacts)
-              ? contactsData.contacts.map(contact => ({
-                  ...contact,
-                  BusinessPermitNumber: companyData?.BusinessPermitNumber || contact.BusinessPermitNumber
-                }))
-              : []
-          });
-        }
-      }, [isEditing, contactsData, companyData]);
+    // useEffect(() => {
+    //     if (isEditing && contactsData) {
+    //       setData({
+    //         contacts: Array.isArray(contactsData.contacts)
+    //           ? contactsData.contacts.map(contact => ({
+    //               ...contact,
+    //               BusinessPermitNumber: companyData?.BusinessPermitNumber || contact.BusinessPermitNumber
+    //             }))
+    //           : []
+    //       });
+    //     }
+    //   }, [isEditing, contactsData, companyData]);
 
       // 2. Company data synchronization
       useEffect(() => {
