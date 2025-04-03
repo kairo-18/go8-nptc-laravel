@@ -383,7 +383,7 @@ export default function CreateDriver({ companies, latestVehicle, operator, compa
                                 value={data.Address}
                                 onChange={(e) => setData('Address', e.target.value)}
                                 className={`${validationErrors.Address ? 'border-red-500' : ''} placeholder:text-gray-500`}
-                                placeholder="Street Address, City, ZIP Code"
+                                placeholder="House No., Street, Subdivision/Village, Barangay, City, Province, ZIP Code"
                             />
                             {validationErrors.Address && <p className="text-sm text-red-500">{validationErrors.Address}</p>}
                         </div>
