@@ -64,14 +64,20 @@ export default function Summary({
                 Object.keys(currentCompanyData).length > 0 &&
                 Object.values(currentCompanyData).some(value => value !== null && value !== '') &&
                 companySubmitRef.current) {
-                await companySubmitRef.current();
+                    await new Promise(async (resolve) => {
+                        await companySubmitRef.current();
+                        resolve(null);
+                    });
             }
 
             if (currentAdminData &&
                 Object.keys(currentAdminData).length > 0 &&
                 Object.values(currentAdminData).some(value => value !== null && value !== '') &&
                 adminSubmitRef.current) {
-                await adminSubmitRef.current();
+                    await new Promise(async (resolve) => {
+                        await adminSubmitRef.current();
+                        resolve(null);
+                    });
             }
 
             if (currentContactsData &&
@@ -80,7 +86,10 @@ export default function Summary({
                     Object.values(contact).some(value => value !== null && value !== '')
                 ) &&
                 contactsSubmitRef.current) {
-                await contactsSubmitRef.current();
+                    await new Promise(async (resolve) => {
+                        await contactsSubmitRef.current();
+                        resolve(null);
+                    });
             }
 
             // Reset initial data to reflect the updated state
@@ -91,12 +100,14 @@ export default function Summary({
             setHasChanges(false);
             setProcessing(false);
 
-            // Navigate to home/mails
-            if (userRole === "Temp User") {
-                await router.post(route('logout'));
-            } else {
-                window.location.href = '/dashboard';
-            }
+            // Navigate to home/mails once setProcessing is done
+            setTimeout(async () => {
+                if (userRole === "Temp User") {
+                    await router.post(route('logout'));
+                } else {
+                    window.location.href = '/dashboard';
+                }
+            }, 0);
         } catch (error) {
             console.error('Error saving changes:', error);
             setProcessing(false);

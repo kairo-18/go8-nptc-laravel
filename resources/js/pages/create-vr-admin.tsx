@@ -148,12 +148,12 @@ export default function CreateVrAdmin({
 
     return (
         <div className="mx-auto mt-6 w-full max-w-6xl">
-            {!isTitleDisabled && (
+            {!isTitleDisabled ? (
                 <>
                     <h1 className="text-2xl font-semibold">Create Vehicle Rental Admin</h1>
                     <p className="text-gray-500">Assign an admin to a vehicle rental company.</p>
                 </>
-            )}
+            ): null}
             <Card className="mt-6 shadow-md">
                 <CardHeader>
                     <CardTitle className="text-lg">Owner Information</CardTitle>
