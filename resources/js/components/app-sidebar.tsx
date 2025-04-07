@@ -1,3 +1,4 @@
+// src/components/AppSidebar.tsx
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
@@ -6,6 +7,9 @@ import { Link, usePage } from '@inertiajs/react';
 import { BadgePlus, BellRing, BookUser, Folder, LayoutGrid, Mail, Receipt, UserPlus, Wallet } from 'lucide-react';
 import AppLogo from './app-logo';
 import { getBackgroundColorForRole } from '@/components/UtilsColor';
+
+// Import the useUnreadCount hook
+import { useUnreadCount } from '@/pages/UnreadCountContext'; 
 
 const mainNavItems: NavItem[] = [
     {
@@ -76,12 +80,16 @@ const mainNavItems: NavItem[] = [
         title: 'Mail',
         url: '/mails',
         icon: Mail,
+        
     },
 ];
 
 export function AppSidebar() {
     const { props, url } = usePage();
     const userRole = props.auth.user?.roles?.[0]?.name;
+
+    // Use the unread count from the context
+    const { totalUnreadCount } = useUnreadCount();  // Access the unread count from context
 
     let updatedNavItems = mainNavItems.map((item) =>
         item.title === 'Dashboard' && userRole === 'Driver' ? { ...item, title: 'Driver Dashboard', url: '/driver-dashboard' } : item,
@@ -106,23 +114,17 @@ export function AppSidebar() {
                 children: item.title === 'Registration' ? item.children?.filter((child) => child.title === 'Operator Registration') : item.children,
             }));
     } else if (userRole === 'VR Admin') {
-        const vrAdminStatus = props.auth.vrAdminStatus;
-
-        if (vrAdminStatus === 'Pending') {
-            filteredNavItems = updatedNavItems.filter((item) => item.title === 'Mail');
-        } else {
-            const allowedItems = [
-                'Dashboard',
-                'Pending',
-                'Operator Temp Account Registration',
-                'Records',
-                'Billings',
-                'Bookings',
-                'Mail',
-                'Notifications',
-            ];
-            filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
-        }
+        const allowedItems = [
+            'Dashboard',
+            'Pending',
+            'Operator Temp Account Registration',
+            'Records',
+            'Billings',
+            'Bookings',
+            'Mail',
+            'Notifications',
+        ];
+        filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
     } else if (userRole === 'Operator') {
         const allowedItems = ['Dashboard', 'Registration', 'Records', 'Billings', 'Bookings', 'Mail', 'Notifications'];
 
@@ -159,11 +161,14 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent className="text-white">
-                <NavMain items={filteredNavItems} currentPath={url} userRole={userRole} />
+                <NavMain items={filteredNavItems} currentPath={url} userRole={userRole} totalUnreadCount={totalUnreadCount}/>
             </SidebarContent>
 
             <SidebarFooter className="rounded-2xl border border-white text-white hover:border-red-700 hover:bg-white hover:text-gray-900">
                 <NavUser />
+                
+                {/* Display the unread count */}
+                
             </SidebarFooter>
         </Sidebar>
     );

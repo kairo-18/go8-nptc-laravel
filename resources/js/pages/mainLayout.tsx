@@ -5,6 +5,7 @@ import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { ReactNode, useEffect, useState } from 'react';
+import { UnreadCountProvider } from '../pages/UnreadCountContext';
 
 interface MainLayoutProps {
     children: ReactNode;
@@ -88,24 +89,27 @@ export default function MainLayout({ children, breadcrumbs }: MainLayoutProps) {
 
     return (
         <div className={`min-h-screen ${layoutBgColor}`}>
-            <AppLayout breadcrumbs={finalBreadcrumbs}>
-                <Head title="Dashboard" />
-                <div className="bg-card flex h-full flex-1 flex-col gap-4 rounded-b-xl p-4">
-                    {showAlert && (
-                        <Alert className="fixed top-4 right-4 w-[380px] text-white">
-                            <AlertTitle className="font-bold text-white">{alertMessage}</AlertTitle>
-                            <AlertDescription className="text-white">
-                                <div className="font-semibold">{senderName}</div>
-                                <div className="text-sm opacity-80">Subject: {subject}</div>
-                            </AlertDescription>
-                            <Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={() => setShowAlert(false)}>
-                                &times;
-                            </Button>
-                        </Alert>
-                    )}
-                    {children}
-                </div>
-            </AppLayout>
+            <UnreadCountProvider>
+                <AppLayout breadcrumbs={finalBreadcrumbs}>
+                    <Head title="Dashboard" />
+                    <div className="bg-card flex h-full flex-1 flex-col gap-4 rounded-b-xl p-4">
+                        {showAlert && (
+                            <Alert className="fixed top-4 right-4 w-[380px] text-white">
+                                <AlertTitle className="font-bold text-white">{alertMessage}</AlertTitle>
+                                <AlertDescription className="text-white">
+                                    <div className="font-semibold">{senderName}</div>
+                                    <div className="text-sm opacity-80">Subject: {subject}</div>
+                                </AlertDescription>
+                                <Button variant="ghost" size="sm" className="absolute top-2 right-2" onClick={() => setShowAlert(false)}>
+                                    &times;
+                                </Button>
+                            </Alert>
+                        )}
+                        {children}
+                    </div>
+                </AppLayout>
+            </UnreadCountProvider>
+            
         </div>
     );
 }
