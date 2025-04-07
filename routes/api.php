@@ -34,13 +34,6 @@ Route::patch('update-nptc-admin', [NptcAdminController::class, 'updateNPTCAdmin'
 Route::delete('delete-nptc-admin', [NptcAdminController::class, 'destroy'])
     ->name('delete-nptc-admin');
 
-// VR Company API Routes
-Route::get('download-media/{mediaId}', [VRCompanyController::class, 'downloadMedia'])
-    ->name('download-media');
-
-Route::get('preview-media/{mediaId}', [VRCompanyController::class, 'previewMedia'])
-    ->name('preview-media');
-
 Route::post('vr-company', [VRCompanyController::class, 'store'])
     ->name('vr-company.store');
 
