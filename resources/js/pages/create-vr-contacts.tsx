@@ -121,12 +121,11 @@ export default function CreateVrContacts({
       }, [companyData]);
 
       // 3. Parent data synchronization (you already have this)
-     if (isEditing2 === false){
+     if (!isEditing2){
         useEffect(() => {
             setContactsData(data);
         }, [data]);
-     }
-
+    }
 
     useEffect(() => {
         if (onSubmitRef) {

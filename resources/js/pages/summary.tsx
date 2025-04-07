@@ -187,7 +187,6 @@ export default function Summary({
                     <Button
                         type="submit"
                         onClick={handleSaveChanges}
-                        disabled={processing || !hasChanges}
                         className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700"
                     >
                         {processing ? 'Submitting...' : 'Save Changes'}
