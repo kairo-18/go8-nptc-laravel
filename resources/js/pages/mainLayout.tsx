@@ -4,7 +4,7 @@ import { getBackgroundColorForRole } from '@/components/UtilsColor';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useState, useMemo } from 'react';
 import { UnreadCountProvider } from '../pages/UnreadCountContext';
 
 interface MainLayoutProps {
@@ -15,8 +15,10 @@ interface MainLayoutProps {
 export default function MainLayout({ children, breadcrumbs }: MainLayoutProps) {
     const { props } = usePage();
     const userRole = props.auth.user?.roles?.[0]?.name;
-    const layoutBgColor = getBackgroundColorForRole(userRole);
     const auth = props.auth;
+
+    // Memoizing the background color to ensure it only recalculates when userRole changes
+    const layoutBgColor = useMemo(() => getBackgroundColorForRole(userRole), [userRole]);
 
     const defaultBreadcrumbs: BreadcrumbItem[] = [
         {
@@ -92,9 +94,9 @@ export default function MainLayout({ children, breadcrumbs }: MainLayoutProps) {
             <UnreadCountProvider>
                 <AppLayout breadcrumbs={finalBreadcrumbs}>
                     <Head title="Dashboard" />
-                    <div className="bg-card flex h-full flex-1 flex-col gap-4 rounded-b-xl p-4">
+                    <div className="bg-card flex h-full flex-1 flex-col gap-4 rounded-b-xl md:p-4">
                         {showAlert && (
-                            <Alert className="fixed top-4 right-4 w-[380px] text-white">
+                            <Alert className="fixed top-4 right-4 w-[370px] text-white">
                                 <AlertTitle className="font-bold text-white">{alertMessage}</AlertTitle>
                                 <AlertDescription className="text-white">
                                     <div className="font-semibold">{senderName}</div>
@@ -109,7 +111,6 @@ export default function MainLayout({ children, breadcrumbs }: MainLayoutProps) {
                     </div>
                 </AppLayout>
             </UnreadCountProvider>
-            
         </div>
     );
 }
