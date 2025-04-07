@@ -386,4 +386,76 @@ class DriverController extends Controller
 
         return response()->json(['message' => 'Status updated successfully'], 200);
     }
+
+    public function swapVehicleForDriver(Driver $driver, Request $request)
+    {
+        $request->validate([
+            'newId' => 'required|exists:vehicles,id'
+        ]);
+
+        try {
+            $newVehicleId = $request->newId;
+
+            // If selecting the same vehicle, do nothing
+            if ($driver->vehicle_id == $newVehicleId) {
+                return response()->json([
+                    'message' => 'This vehicle is already assigned to the driver.'
+                ], 422);
+            }
+
+            // Start transaction for data consistency
+            \DB::transaction(function () use ($driver, $newVehicleId) {
+                $newVehicle = Vehicle::findOrFail($newVehicleId);
+                $currentVehicle = $driver->vehicle_id ? Vehicle::find($driver->vehicle_id) : null;
+
+                // 1. Get the current driver of the new vehicle (if any)
+                $currentDriverOfNewVehicle = $newVehicle->driver_id
+                    ? Driver::find($newVehicle->driver_id)
+                    : null;
+
+                // 2. Get the current vehicle of our driver (if any)
+                $currentVehicleOfDriver = $driver->vehicle_id
+                    ? Vehicle::find($driver->vehicle_id)
+                    : null;
+
+                // 3. Perform the swap:
+                // - Assign new vehicle to our driver
+                $driver->vehicle_id = $newVehicle->id;
+                $driver->save();
+
+                // - Assign our driver to the new vehicle
+                $newVehicle->driver_id = $driver->id;
+                $newVehicle->save();
+
+                // 4. Handle the previous relationships:
+                // - If new vehicle had a driver before, assign them to our driver's old vehicle
+                if ($currentDriverOfNewVehicle && $currentVehicleOfDriver) {
+                    $currentDriverOfNewVehicle->vehicle_id = $currentVehicleOfDriver->id;
+                    $currentDriverOfNewVehicle->save();
+
+                    $currentVehicleOfDriver->driver_id = $currentDriverOfNewVehicle->id;
+                    $currentVehicleOfDriver->save();
+                }
+                // - If new vehicle had a driver but our driver had no vehicle
+                elseif ($currentDriverOfNewVehicle) {
+                    $currentDriverOfNewVehicle->vehicle_id = null;
+                    $currentDriverOfNewVehicle->save();
+                }
+                // - If our driver had a vehicle but new vehicle had no driver
+                elseif ($currentVehicleOfDriver) {
+                    $currentVehicleOfDriver->driver_id = null;
+                    $currentVehicleOfDriver->save();
+                }
+            });
+
+            return response()->json([
+                'message' => 'Vehicle swapped successfully.'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error swapping vehicle: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

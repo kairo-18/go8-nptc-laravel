@@ -65,8 +65,6 @@ class VRCompanyController extends Controller
             RegisteredVrCompany::dispatch($vrCompany);
 
             \Log::info('VR Company created successfully', ['id' => $vrCompany->id]);
-
-            return response()->json(['id' => $vrCompany->id], 201);
         } catch (\Exception $e) {
             \Log::error('Error creating VR Company:', ['error' => $e->getMessage()]);
 
