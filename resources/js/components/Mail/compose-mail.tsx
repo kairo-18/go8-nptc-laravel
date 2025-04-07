@@ -52,7 +52,7 @@ export default function ComposeMail() {
     return (
         <Dialog>
             <DialogTrigger asChild>
-                <Button variant="default" className='bg-blue-900'>Compose Mail</Button>
+                <Button variant="default" className='bg-blue-900 hover:bg-white hover:text-black'>Compose Mail</Button>
             </DialogTrigger>
             <DialogContent>
                 <DialogHeader>
