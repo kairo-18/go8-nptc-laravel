@@ -273,7 +273,7 @@ export default function CreateDriver({ companies, latestVehicle, operator, compa
     };
 
     return (
-        <div className="mx-auto mt-6 w-full max-w-6xl">
+        <div className=" w-full">
             <h1 className="text-2xl font-semibold">Register Driver</h1>
             <p className="text-gray-500">Enter the driver's details.</p>
 

@@ -270,7 +270,7 @@ export default function CreateOperator({ companies }) {
 
     return (
         <MainLayout breadcrumbs={[{ title: 'Operator Registration', href: '/create-operator' }]}>
-            <div className="mx-auto mt-6 w-full max-w-6xl">
+            <div className="p-10 w-full">
                 <h1 className="text-2xl font-semibold">Create Operator</h1>
                 <p className="text-gray-500">Create an operator that is under a VR Company.</p>
 
