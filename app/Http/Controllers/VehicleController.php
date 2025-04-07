@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 use Spatie\MediaLibrary\MediaCollections\Models\Media;
+use App\Models\Driver;
 
 class VehicleController extends Controller
 {
@@ -223,5 +224,48 @@ class VehicleController extends Controller
         \Log::info('Operator status updated', ['id' => $vehicle->id, 'status' => $vehicle->Status]);
 
         return response()->json(['message' => 'Status updated successfully'], 200);
+    }
+
+    public function swapDriverForVehicle(Vehicle $vehicle, Request $request)
+    {
+        $request->validate([
+            'newId' => 'required|exists:drivers,id'
+        ]);
+
+        try {
+            $newDriverId = $request->newId;
+
+            // If selecting the same driver, do nothing
+            if ($vehicle->driver_id == $newDriverId) {
+                return response()->json([
+                    'message' => 'This driver is already assigned to the vehicle.'
+                ], 422);
+            }
+
+            // Start transaction for data consistency
+            \DB::transaction(function () use ($vehicle, $newDriverId) {
+                // 1. Remove current driver assignment from vehicle (if any)
+                if ($vehicle->driver_id) {
+                    $currentDriver = Driver::find($vehicle->driver_id);
+                    if ($currentDriver) {
+                        $currentDriver->vehicle_id = null;
+                        $currentDriver->save();
+                    }
+                }
+
+                // 3. Assign the new driver to the vehicle
+                $vehicle->driver_id = $newDriverId;
+                $vehicle->save();
+            });
+
+            return response()->json([
+                'message' => 'Driver swapped successfully.'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Error swapping driver: ' . $e->getMessage()
+            ], 500);
+        }
     }
 }

@@ -4,6 +4,7 @@ import { DataTable } from './data-table';
 import { useState, useEffect } from 'react';
 import SetStatus from './set-status';
 import axios from 'axios';
+import SwapKey from './swapKey';
 
 
 interface DriverProps {
@@ -20,6 +21,7 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
     const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
     const [openStatusModal, setOpenStatusModal] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState('');
+    const [openSwapModal, setOpenSwapModal] = useState(false);
 
     useEffect(() => {
         setDriverData(drivers);
@@ -50,6 +52,16 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
         });
         setOpenStatusModal(false);
     };
+
+    const handleSwapDriver = (driverData: any) => {
+        setSelectedDriver(driverData); // Make sure this is setting the driver
+        setOpenSwapModal(true);
+    }
+
+    const handleSwapVehicle = (vehicleData: any) => {
+        setSelectedVehicle(vehicleData); // Make sure this is setting the vehicle
+        setOpenSwapModal(true);
+    }
 
     const handleSubmitToVehicle = async () => {
         if (!selectedVehicle) {
@@ -108,7 +120,8 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
                 {
                     entityType: 'drivers',
                     statusColumns: ['Status'],
-                    updateStatus: handleDriverSetStatus
+                    updateStatus: handleDriverSetStatus,
+                    swapVehicle: handleSwapDriver
                 }
             );
 
@@ -126,7 +139,8 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
                 {
                     entityType: 'vehicles',
                     statusColumns: ['Status'],
-                    updateStatus: handleVehicleSetStatus
+                    updateStatus: handleVehicleSetStatus,
+                    swapDriver: handleSwapVehicle
                 }
             );
 
@@ -148,11 +162,13 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
                 <TabsContent value="drivers">
                     <DataTable data={transformDriverData} ColumnFilterName="FirstName" columns={driverColumns} />
                     <SetStatus selectedData={selectedDriver} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={handleDriverSetStatus} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToDriver} />
+                    <SwapKey id={selectedDriver?.id} type="drivers" openSwapModal={openSwapModal} setOpenSwapModal={setOpenSwapModal} selectedData={selectedDriver} drivers={[]} vehicles={vehicleData} />
                 </TabsContent>
 
                 <TabsContent value="vehicles">
                     <DataTable data={transformVehicleData} ColumnFilterName="PlateNumber" columns={vehicleColumns} />
                     <SetStatus selectedData={selectedVehicle} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={handleVehicleSetStatus} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToVehicle} />
+                    <SwapKey id={selectedVehicle?.id} type="vehicles" openSwapModal={openSwapModal} setOpenSwapModal={setOpenSwapModal} selectedData={selectedVehicle} drivers={driverData} vehicles={[]} />
                 </TabsContent>
             </Tabs>
         </div>
