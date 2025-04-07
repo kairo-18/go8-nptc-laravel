@@ -48,7 +48,7 @@ class OperatorObserver
                 'sender_id' => $admin->id,
                 'thread_id' => $thread->id,
                 'subject' => 'Mail for Payment Step',
-                'content' => "Hello, {$recipientUser->name}. Your operator status has been updated to 'For Payment'. Please proceed to the payment step. <br><br>Please <a href='{$paymentLink}' style='color: #2563eb; text-decoration: underline;'>click this link to pay now</a>.",
+                'content' => "Hello, {$recipientUser->name}. Your operator status has been updated to 'For Payment'. Please proceed to the payment step. Contact Number: ".$operator->vrCompany->owner->user->ContactNumber.' Name: '.$operator->vrCompany->owner->user->FirstName.' '.$operator->vrCompany->owner->user->LastName.' '."<br><br>Please <a href='{$paymentLink}' style='color: #2563eb; text-decoration: underline;'>click this link to pay now</a>.",
                 'is_read' => false,
             ]);
 
