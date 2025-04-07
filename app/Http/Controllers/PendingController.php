@@ -372,7 +372,8 @@ class PendingController extends Controller
 
             case 'operator':
                 $entity = Operator::with(['user', 'vrCompany', 'drivers'])->find($entityId);
-                $admin = User::find(1);
+                $adminId = $entity->vrCompany->owner->user->id;
+                $admin = User::find($adminId);
                 if ($entity) {
                     if ($entity->Status === 'Approved') {
                         // If operator is already approved, process the drivers
