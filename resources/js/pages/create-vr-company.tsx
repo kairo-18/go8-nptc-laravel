@@ -43,26 +43,26 @@ export default function CreateVrCompany({
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
-    useEffect(() => {
-        if (isEditing && companyData) {
-            setData((prevData) => ({
-                ...prevData,
-                ...companyData,
-            }));
-        }
-    }, [isEditing, companyData]);
+    // useEffect(() => {
+    //     if (isEditing && companyData) {
+    //         setData((prevData) => ({
+    //             ...prevData,
+    //             ...companyData,
+    //         }));
+    //     }
+    // }, [isEditing, companyData]);
 
-    useEffect(() => {
-        if (isEditing && companyData) {
-            setData((prevData) => ({
-                ...data,
-                ...prevData,
-                oldCompanyName: companyData.CompanyName,
-                CompanyName: companyData.CompanyName,
-                BusinessPermitNumber: companyData.BusinessPermitNumber,
-            }));
-        }
-    }, [isEditing, companyData]);
+    // useEffect(() => {
+    //     if (isEditing && companyData) {
+    //         setData((prevData) => ({
+    //             ...data,
+    //             ...prevData,
+    //             oldCompanyName: companyData.CompanyName,
+    //             CompanyName: companyData.CompanyName,
+    //             BusinessPermitNumber: companyData.BusinessPermitNumber,
+    //         }));
+    //     }
+    // }, [isEditing, companyData]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -165,7 +165,7 @@ export default function CreateVrCompany({
 
     return (
         <div className="mx-auto mt-6 w-full max-w-6xl">
-            {isTitleDisabled == false ? (
+            {!isTitleDisabled == false ? (
                 <>
                     <h1 className="text-2xl font-semibold">Create Vehicle Rental Company</h1>
                     <p className="text-gray-500">Manage the account settings of the owner and company information.</p>

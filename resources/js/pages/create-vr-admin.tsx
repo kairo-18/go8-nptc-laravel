@@ -50,14 +50,14 @@ export default function CreateVrAdmin({
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
-    useEffect(() => {
-        if (isEditing && adminData) {
-            setData({
-                ...data,
-                ...adminData, // Populate the form with existing admin data
-            });
-        }
-    }, [isEditing, adminData]);
+    // useEffect(() => {
+    //     if (isEditing && adminData) {
+    //         setData({
+    //             ...data,
+    //             ...adminData, // Populate the form with existing admin data
+    //         });
+    //     }
+    // }, [isEditing, adminData]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -148,12 +148,12 @@ export default function CreateVrAdmin({
 
     return (
         <div className="mx-auto mt-6 w-full max-w-6xl">
-            {!isTitleDisabled && (
+            {!isTitleDisabled === false ? (
                 <>
                     <h1 className="text-2xl font-semibold">Create Vehicle Rental Admin</h1>
                     <p className="text-gray-500">Assign an admin to a vehicle rental company.</p>
                 </>
-            )}
+            ): null}
             <Card className="mt-6 shadow-md">
                 <CardHeader>
                     <CardTitle className="text-lg">Owner Information</CardTitle>

@@ -53,14 +53,13 @@ export default function CreateVrContacts({
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
-    console.log(contactsData);
-    useEffect(() => {
-        if (isEditing && contactsData) {
-            setData({
-                contacts: Array.isArray(contactsData.contacts) ? contactsData.contacts : [],
-            });
-        }
-    }, [isEditing, contactsData]);
+    // useEffect(() => {
+    //     if (isEditing && contactsData) {
+    //         setData({
+    //             contacts: Array.isArray(contactsData.contacts) ? contactsData.contacts : [],
+    //         });
+    //     }
+    // }, [isEditing, contactsData]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -89,18 +88,18 @@ export default function CreateVrContacts({
     };
 
     // Notify parent when form data changes
-    useEffect(() => {
-        if (isEditing && contactsData) {
-          setData({
-            contacts: Array.isArray(contactsData.contacts)
-              ? contactsData.contacts.map(contact => ({
-                  ...contact,
-                  BusinessPermitNumber: companyData?.BusinessPermitNumber || contact.BusinessPermitNumber
-                }))
-              : []
-          });
-        }
-      }, [isEditing, contactsData, companyData]);
+    // useEffect(() => {
+    //     if (isEditing && contactsData) {
+    //       setData({
+    //         contacts: Array.isArray(contactsData.contacts)
+    //           ? contactsData.contacts.map(contact => ({
+    //               ...contact,
+    //               BusinessPermitNumber: companyData?.BusinessPermitNumber || contact.BusinessPermitNumber
+    //             }))
+    //           : []
+    //       });
+    //     }
+    //   }, [isEditing, contactsData, companyData]);
 
       // 2. Company data synchronization
       useEffect(() => {
@@ -122,9 +121,12 @@ export default function CreateVrContacts({
       }, [companyData]);
 
       // 3. Parent data synchronization (you already have this)
-      useEffect(() => {
-        setContactsData(data);
-      }, [data]);
+     if (isEditing2 === false){
+        useEffect(() => {
+            setContactsData(data);
+        }, [data]);
+     }
+
 
     useEffect(() => {
         if (onSubmitRef) {
@@ -156,7 +158,7 @@ export default function CreateVrContacts({
 
     return (
         <div className="mx-auto mt-6 w-full max-w-6xl">
-            {isTitleDisabled === false ? (
+            {!isTitleDisabled === false ? (
                 <>
                     <h1 className="text-2xl font-semibold">Create Vehicle Rental Contacts</h1>
                     <p className="text-gray-500">Manage the contact information of the vehicle rental company.</p>
