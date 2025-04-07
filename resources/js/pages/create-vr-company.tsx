@@ -164,7 +164,7 @@ export default function CreateVrCompany({
     );
 
     return (
-        <div className="mx-auto mt-6 w-full max-w-6xl">
+        <div className=" w-full">
             {!isTitleDisabled == false ? (
                 <>
                     <h1 className="text-2xl font-semibold">Create Vehicle Rental Company</h1>

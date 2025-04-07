@@ -5,6 +5,7 @@ import CreateVrCompany from './create-vr-company';
 import CreateVrContacts from './create-vr-contacts';
 import { navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
 import { usePage, router } from '@inertiajs/react';
+import { Card } from '@/components/ui/card';
 
 interface CreateSummaryProps {
     companies: { id: number; BusinessPermitNumber: string }[];
@@ -116,9 +117,9 @@ export default function Summary({
 
 
     return (
-        <>
-            <div className="mx-auto mt-6 w-full max-w-6xl">
-                <h1 className="text-2xl font-semibold">Vehicle Rental Company Summary</h1>
+        <div className=" mt-5 w-full">
+            <Card className='p-5 gap-0'>
+                <h1 className="text-lg font-semibold">Vehicle Rental Company Summary</h1>
                 <p className="text-gray-500">Contains all details of the Vehicle Rental Company.</p>
                 {currentCompanyData && Object.values(currentCompanyData).some(value => value !== null && value !== '') && (
                     <CreateVrCompany
@@ -175,24 +176,25 @@ export default function Summary({
                         No Changes Found
                     </div>
                 )}
-            </div>
-            <div className="sticky bottom-5 w-full bg-white shadow-md rounded-xl">
-                <div className="mt-6 flex justify-end gap-2 p-4">
-                    <Button
-                        onClick={() => handleTabSwitch('previous')}
-                        className="px-4 py-2 rounded bg-black text-white hover:bg-gray-500"
-                    >
-                        Previous
-                    </Button>
-                    <Button
-                        type="submit"
-                        onClick={handleSaveChanges}
-                        className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700"
-                    >
-                        {processing ? 'Submitting...' : 'Save Changes'}
-                    </Button>
+                <div className="sticky bottom-5 w-full bg-white shadow-md rounded-xl">
+                    <div className="mt-6 flex justify-end gap-2 p-4">
+                        <Button
+                            onClick={() => handleTabSwitch('previous')}
+                            className="px-4 py-2 rounded bg-black text-white hover:bg-gray-500"
+                        >
+                            Previous
+                        </Button>
+                        <Button
+                            type="submit"
+                            onClick={handleSaveChanges}
+                            className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700"
+                        >
+                            {processing ? 'Submitting...' : 'Save Changes'}
+                        </Button>
+                    </div>
                 </div>
-            </div>
-        </>
+            </Card>
+            
+        </div>
     );
 }

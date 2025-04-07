@@ -188,8 +188,8 @@ export default function Vehicles({ vehicles }: VehiclesProps) {
   return (
     <MainLayout breadcrumbs={[{ title: 'Vehicles', href: '/vehicles' }]}>
       <Head title="Vehicles" />
-      <div className="p-5 flex justify-center">
-        <div className="mx-auto mt-6 w-full max-w-6xl">
+      <div className="p-10 flex justify-center">
+        <div className=" w-full ">
           {vehicles.length === 0 ? (
             <p className="text-center text-gray-500">No vehicles available.</p>
           ) : (

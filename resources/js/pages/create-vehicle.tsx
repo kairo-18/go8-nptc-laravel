@@ -234,7 +234,7 @@ export default function CreateVehicle({ operators, onNextTab }) {
     };
 
     return (
-        <div className="mx-auto mt-6 w-full max-w-6xl">
+        <div className="w-full">
             <h1 className="text-2xl font-semibold">Register Vehicle</h1>
             <p className="text-gray-500">Enter the vehicle's details.</p>
 

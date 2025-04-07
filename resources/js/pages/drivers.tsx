@@ -192,8 +192,8 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
     return (
         <MainLayout breadcrumbs={[{ title: 'Drivers', href: '/drivers' }]}>
             <Head title="Drivers" />
-            <div className="p-5 flex justify-center">
-                <div className="mx-auto mt-6 w-full max-w-6xl">
+            <div className="p-10 flex justify-center">
+                <div className=" w-full ">
                     {drivers.length === 0 ? (
                         <p className="text-center text-gray-500">No drivers available.</p>
                     ) : (

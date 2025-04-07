@@ -40,7 +40,7 @@ export default function Registration({ companies }: { companies: { id: number; B
 
     return (
         <MainLayout breadcrumbs={[{ title: 'Registration', href: '/registration' }]}>
-            <div className="mx-auto mt-6 w-full max-w-6xl">
+            <div className=" p-10 w-full">
                 {/* Tabs Navigation */}
                 <div className="flex space-x-2 text-gray-500">
                     {tabs.map((tab, index) => (

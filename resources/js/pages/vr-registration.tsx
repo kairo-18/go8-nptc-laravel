@@ -44,9 +44,10 @@ export default function VrRegistration({ companies }) {
         <MainLayout breadcrumbs={breadcrumbs}>
             <Head title="VR register" />
 
-            <div className="mx-auto flex w-full flex-col items-end">
+            <div className="flex w-full flex-col items-end p-10">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <div className="flex justify-end">
+                    <div className="flex justify-start
+                     mb-5">
                         <TabsList className="bg-[#2A2A92] text-white">
                             <TabsTrigger value="tempoAccountTab" className="px-10">
                                 Temporary Account

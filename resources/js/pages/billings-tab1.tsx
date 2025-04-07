@@ -184,7 +184,7 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
                                 variant="outline"
                                 role="combobox"
                                 aria-expanded={open}
-                                className="flex w-[225px] items-center justify-between bg-white"
+                                className="flex w-[225px] items-center justify-between bg-white text-white"
                             >
                                 <span>{sortValue ? sortOptions.find((option) => option.value === sortValue)?.label : 'Sort by'}</span>
                                 <ChevronsUpDown className="h-4 w-4 opacity-50" />
