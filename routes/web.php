@@ -185,3 +185,5 @@ require __DIR__.'/operator.php';
 require __DIR__.'/driver.php';
 require __DIR__.'/vehicle.php';
 require __DIR__.'/pending.php';
+
+Route::get('/trip-ticket/download/{trip}', [TripController::class, 'downloadTripTicket'])->name('trip-ticket.download');

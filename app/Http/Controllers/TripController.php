@@ -159,4 +159,30 @@ class TripController extends Controller
             return response()->json(['error' => 'Failed to end trip', 'details' => $e->getMessage()], 500);
         }
     }
+    public function downloadTripTicket(Trip $trip)
+    {
+        try {
+            $trip = Trip::with('passengers')->findOrFail($trip->id);
+
+            $html = view('trip-ticket-pdf', ['trip' => $trip])->render();
+
+            $pdf = \Spatie\Browsershot\Browsershot::html($html)
+                ->format('A4')
+                ->margins(10, 10, 10, 10)
+                ->pdf();
+
+            $filename = $trip->driver->operator->vrCompany->CompanyName . '/' .
+                        $trip->driver->operator->user->FirstName . ' ' . $trip->driver->operator->user->LastName . '/' .
+                        $trip->driver->user->FirstName . ' ' . $trip->driver->user->LastName . '/' .
+                        date('Y-m-d', strtotime($trip->created_at)) . '/' .
+                        $trip->id . '.pdf';
+
+            return response($pdf, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to generate PDF', 'details' => $e->getMessage()], 500);
+        }
+    }
 }
