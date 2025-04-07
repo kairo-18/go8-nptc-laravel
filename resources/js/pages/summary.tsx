@@ -74,10 +74,10 @@ export default function Summary({
                 Object.keys(currentAdminData).length > 0 &&
                 Object.values(currentAdminData).some(value => value !== null && value !== '') &&
                 adminSubmitRef.current) {
-                    await new Promise(async (resolve) => {
+                    await new Promise((resolve) => setTimeout(async () => {
                         await adminSubmitRef.current();
                         resolve(null);
-                    });
+                    }, 750));
             }
 
             if (currentContactsData &&
@@ -86,10 +86,10 @@ export default function Summary({
                     Object.values(contact).some(value => value !== null && value !== '')
                 ) &&
                 contactsSubmitRef.current) {
-                    await new Promise(async (resolve) => {
+                    await new Promise((resolve) => setTimeout(async () => {
                         await contactsSubmitRef.current();
                         resolve(null);
-                    });
+                    }, 750));
             }
 
             // Reset initial data to reflect the updated state
@@ -107,7 +107,7 @@ export default function Summary({
                 } else {
                     window.location.href = '/dashboard';
                 }
-            }, 0);
+            }, 1000);
         } catch (error) {
             console.error('Error saving changes:', error);
             setProcessing(false);
