@@ -178,7 +178,7 @@ export default function Mails() {
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            <div className="rounded-lg bg-white p-6 shadow">
+            <div className="rounded-xs p-10">
                 <div className="mb-4 flex items-center justify-between">
                     <Input
                         className="w-1/3"
@@ -204,7 +204,7 @@ export default function Mails() {
                         <ComposeMail />
                     </div>
                 </div>
-                <Table>
+                <Table className='border shadow-xl'>
                     <TableHeader>
                         <TableRow>
                             <TableHead>
@@ -232,8 +232,8 @@ export default function Mails() {
                                 key={thread.id}
                                 onClick={() => handleRowClick(thread)}
                                 className={`cursor-pointer ${
-                                    thread.mails.every((mail) => mail.is_read) ? 'bg-gray-100' : 'bg-white'
-                                } hover:bg-gray-200`}
+                                    thread.mails.every((mail) => mail.is_read) ? 'bg-gray-200' : 'bg-white'
+                                } hover:bg-gray-100`}
                             >
                                 <TableCell>
                                     <input
@@ -259,8 +259,8 @@ export default function Mails() {
                                 </TableCell>
                                 <TableCell>
                                     <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost">...</Button>
+                                        <DropdownMenuTrigger asChild >
+                                            <div variant="ghost" className='bg-transparent text-xl hover:bg-gray-500 w-8 h-8 flex justify-center items-center rounded-md'>...</div>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
                                             <DropdownMenuItem>Pin to top</DropdownMenuItem>
