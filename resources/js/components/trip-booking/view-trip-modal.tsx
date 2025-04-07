@@ -5,7 +5,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Download, FileText, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 
-export default function TripTicketModal({ open, setOpen, selectedTripData }) {
+export default function TripTicketModal({ open, setOpen, selectedTripData }: { open: boolean, setOpen: (open: boolean) => void, selectedTripData: any }) {
     const [tripData, setTripData] = useState({
         company: '',
         ticketId: '',
@@ -29,7 +29,7 @@ export default function TripTicketModal({ open, setOpen, selectedTripData }) {
             const passengerCount = selectedTripData.passengers?.length || 0;
 
             // Function to convert numbers to words (supports up to 10 for simplicity)
-            const numberToWords = (num) => {
+            const numberToWords = (num: number) => {
                 const words = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
                 return words[num] || num.toString(); // Fallback for larger numbers
             };
@@ -93,10 +93,8 @@ export default function TripTicketModal({ open, setOpen, selectedTripData }) {
             <Dialog open={open} onOpenChange={setOpen}>
                 <DialogContent className="overflow-hidden rounded-lg border-2 pt-3 sm:max-w-[700px]">
                     <div className="overflow-hidden rounded-lg bg-white">
-                        
-
-                        {/* Ticket Content */}
-                        <div className="p-6">
+                         {/* Ticket Content */}
+                         <div className="p-6">
                             <h2 className="text-xl font-bold text-indigo-800 mb-5">{tripData.company || ''}</h2>
 
                             <div className="mb-6 grid grid-cols-2 gap-6 text-sm text-gray-600">
@@ -212,21 +210,24 @@ export default function TripTicketModal({ open, setOpen, selectedTripData }) {
                             </div>
                         </div>
 
-                        {/* Action Buttons */}
-                        <div className="grid grid-cols-1 gap-3 p-4">
+                         {/* Action Buttons */}
+                         <div className="grid grid-cols-1 gap-3 p-4">
                             <Button
                                 className="flex items-center justify-center gap-2 rounded-md bg-indigo-800 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-                                onClick={() => setIsPassengerModalOpen(true)} // Open passenger manifest modal
+                                onClick={() => setIsPassengerModalOpen(true)}
                             >
                                 <FileText size={16} /> View passenger manifest
                             </Button>
-                            <Button className="flex items-center justify-center gap-2 rounded-md bg-indigo-800 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+                            <Button
+                                className="flex items-center justify-center gap-2 rounded-md bg-indigo-800 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                                onClick={() => window.open(`/trip-ticket/download/${selectedTripData?.id}`, '_blank')}
+                            >
                                 <Download size={16} /> Download Trip Ticket
                             </Button>
-                        </div>
-                    </div>
-                </DialogContent>
-            </Dialog>
+                         </div>
+                      </div>
+                 </DialogContent>
+             </Dialog>
 
             {/* Passenger Manifest Modal */}
             <Dialog open={isPassengerModalOpen} onOpenChange={setIsPassengerModalOpen}>
@@ -241,7 +242,7 @@ export default function TripTicketModal({ open, setOpen, selectedTripData }) {
                         <div className="p-6">
                             {selectedTripData?.passengers?.length > 0 ? (
                                 <div className="space-y-4">
-                                    {selectedTripData.passengers.map((passenger, index) => (
+                                    {selectedTripData.passengers.map((passenger: any, index: number) => (
                                         <div key={index} className="rounded-lg border p-4 grid grid-cols-2 md:grid-cols-4">
                                             <div className='flex flex-col gap-1'>
                                                 <div className='text-gray-600'>Contact</div>
