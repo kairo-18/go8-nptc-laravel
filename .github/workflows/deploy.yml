@@ -29,7 +29,7 @@ jobs:
             git pull origin main
 
             echo ">>> Stopping all PM2 services..."
-            pm2 stop all
+            /usr/local/bin/pm2 stop all
 
             echo ">>> Installing dependencies..."
             composer install --no-interaction --prefer-dist --optimize-autoloader
@@ -43,8 +43,8 @@ jobs:
             php artisan view:cache
 
             echo ">>> Restarting all PM2 services..."
-            pm2 restart all
-            pm2 start laravel-queue
-            pm2 start laravel-reverb
-            pm2 start soketi
+            /usr/local/bin/pm2 restart all
+            /usr/local/bin/pm2 start laravel-queue
+            /usr/local/bin/pm2 start laravel-reverb
+            /usr/local/bin/pm2 start soketi
           EOF
