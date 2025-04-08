@@ -12,8 +12,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(
     function () {
-        Route::get('register', [RegisteredUserController::class, 'create'])
-            ->name('register');
+        Route::get('/get-register', [RegisteredUserController::class, 'create'])
+            ->name('get-register');
 
         // remove later as users cannot register by themselves, only admins can
         Route::post('register', [RegisteredUserController::class, 'store'])
