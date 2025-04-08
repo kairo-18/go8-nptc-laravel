@@ -162,7 +162,6 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
                     entityType: 'vehicles',
                     statusColumns: ['Status'],
                     updateStatus: handleVehicleSetStatus,
-                    swapDriver: handleSwapVehicle
                 }
             );
 
@@ -190,7 +189,6 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
                 <TabsContent value="vehicles">
                     <DataTable data={transformVehicleData} ColumnFilterName="PlateNumber" columns={vehicleColumns} />
                     <SetStatus selectedData={selectedVehicle} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={handleVehicleSetStatus} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToVehicle} />
-                    <SwapKey id={selectedVehicle?.id} type="vehicles" openSwapModal={openSwapModal} setOpenSwapModal={setOpenSwapModal} selectedData={selectedVehicle} drivers={driverData} vehicles={[]} />
                 </TabsContent>
             </Tabs>
         </div>

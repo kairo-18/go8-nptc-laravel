@@ -183,7 +183,6 @@ export const generateColumns = (
                                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); updateStatus?.(data); }} className="cursor-pointer">Ban</DropdownMenuItem>
                                     <DropdownMenuItem onClick={() => router.delete(`/vehicles/${data.id}`)} className="cursor-pointer hover-bg-red-500 t">
                                     Remove Vehicle</DropdownMenuItem>
-                                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); swapDriver?.(row.original); }} className="cursor-pointer">Set Driver</DropdownMenuItem>
                                 </>
                             ) : null}
                         </DropdownMenuContent>
