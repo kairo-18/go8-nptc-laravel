@@ -18,7 +18,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 Route::get(
     '/',
     function () {
-        return Inertia::render('welcome');
+        return redirect()->route('login');
     }
 )->name('home');
 
