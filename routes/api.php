@@ -26,26 +26,26 @@ Route::get('/', function () {
 
 // NPTC Admin API Routes
 Route::post('create-nptc-admin', [NptcAdminController::class, 'createNPTCAdmin'])
-    ->name('create-nptc-admin');
+    ->name('api-create-nptc-admin');
 
 Route::patch('update-nptc-admin', [NptcAdminController::class, 'updateNPTCAdmin'])
-    ->name('update-nptc-admin');
+    ->name('api-update-nptc-admin');
 
 Route::delete('delete-nptc-admin', [NptcAdminController::class, 'destroy'])
-    ->name('delete-nptc-admin');
+    ->name('api-delete-nptc-admin');
 
 Route::post('vr-company', [VRCompanyController::class, 'store'])
     ->name('api-vr-company.store');
 
 // VR Contacts API Routes
 Route::get('vr-contacts', [VrContactsController::class, 'index'])
-    ->name('vr-contacts.index');
+    ->name('api-vr-contacts.index');
 
 Route::post('vr-contacts', [VrContactsController::class, 'store'])
-    ->name('vr-contacts.store');
+    ->name('api-vr-contacts.store');
 
 Route::post('vr-contacts/multiple', [VrContactsController::class, 'storeMultiple'])
-    ->name('vr-contacts.store-multiple');
+    ->name('api-vr-contacts.store-multiple');
 
 // VR Admin API Routes
 Route::post('vr-admins', [VRAdminController::class, 'store'])
