@@ -35,7 +35,7 @@ Route::delete('delete-nptc-admin', [NptcAdminController::class, 'destroy'])
     ->name('delete-nptc-admin');
 
 Route::post('vr-company', [VRCompanyController::class, 'store'])
-    ->name('vr-company.store');
+    ->name('api-vr-company.store');
 
 // VR Contacts API Routes
 Route::get('vr-contacts', [VrContactsController::class, 'index'])
