@@ -1,3 +1,4 @@
+import { FileInputWithPreview } from '@/components/file-input-with-preview';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -188,46 +189,6 @@ export default function CreateOperator({ companies }) {
         validateDocuments();
     }, [data.photo, data.valid_id_front, data.valid_id_back]);
 
-    const handleFileRemove = (field: string) => {
-        setData(field, null);
-        setValidationErrors((prev) => ({ ...prev, [field]: '' }));
-
-        // Force re-render by updating the key
-        setFileKeys((prevKeys) => ({
-            ...prevKeys,
-            [field]: Date.now(),
-        }));
-    };
-
-    // Helper function to render file input with remove button
-    const renderFileInput = (field: string, label: string) => (
-        <div>
-            <Label htmlFor={field}>{label}</Label>
-            <Input
-                key={fileKeys[field]} // Force re-render when key changes
-                id={field}
-                type="file"
-                accept="image/*"
-                onChange={(e) => setData(field, e.target.files[0])}
-                className={validationErrors[field] ? 'border-red-500' : ''}
-            />
-            {data[field] && (
-                <div className="mt-1 flex items-center justify-between gap-2">
-                    <p className="text-sm text-gray-500">{data[field].name}</p>
-                    <button
-                        type="button"
-                        onClick={() => handleFileRemove(field)}
-                        className="text-red-500 hover:text-red-700"
-                        aria-label={`Remove ${label}`}
-                    >
-                        ×
-                    </button>
-                </div>
-            )}
-            {validationErrors[field] && <p className="text-sm text-red-500">{validationErrors[field]}</p>}
-        </div>
-    );
-
     // Handle form submission
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -270,7 +231,7 @@ export default function CreateOperator({ companies }) {
 
     return (
         <MainLayout breadcrumbs={[{ title: 'Operator Registration', href: '/create-operator' }]}>
-            <div className="p-10 w-full">
+            <div className="w-full p-10">
                 <h1 className="text-2xl font-semibold">Create Operator</h1>
                 <p className="text-gray-500">Create an operator that is under a VR Company.</p>
 
@@ -431,9 +392,30 @@ export default function CreateOperator({ companies }) {
                             </div>
 
                             <div className="grid grid-cols-3 gap-4">
-                                {renderFileInput('photo', '1x1 Photo *')}
-                                {renderFileInput('valid_id_front', 'Valid ID (Front) *')}
-                                {renderFileInput('valid_id_back', 'Valid ID (Back) *')}
+                                <FileInputWithPreview
+                                    field="photo"
+                                    label="1x1 Photo *"
+                                    value={data.photo}
+                                    onChange={(file) => setData('photo', file)}
+                                    error={validationErrors.photo}
+                                    accept="image/*"
+                                />
+                                <FileInputWithPreview
+                                    field="valid_id_front"
+                                    label="Valid ID (Front) *"
+                                    value={data.valid_id_front}
+                                    onChange={(file) => setData('valid_id_front', file)}
+                                    error={validationErrors.valid_id_front}
+                                    accept="image/*"
+                                />
+                                <FileInputWithPreview
+                                    field="valid_id_back"
+                                    label="Valid ID (Back) *"
+                                    value={data.valid_id_back}
+                                    onChange={(file) => setData('valid_id_back', file)}
+                                    error={validationErrors.valid_id_back}
+                                    accept="image/*"
+                                />
                             </div>
 
                             {/* Submit Button */}

@@ -1,11 +1,10 @@
 import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { router, usePage } from '@inertiajs/react';
 import React, { useEffect, useRef, useState } from 'react';
 import CreateVrAdmin from './create-vr-admin';
 import CreateVrCompany from './create-vr-company';
 import CreateVrContacts from './create-vr-contacts';
-import { navigationMenuTriggerStyle } from '@/components/ui/navigation-menu';
-import { usePage, router } from '@inertiajs/react';
-import { Card } from '@/components/ui/card';
 
 interface CreateSummaryProps {
     companies: { id: number; BusinessPermitNumber: string }[];
@@ -61,36 +60,44 @@ export default function Summary({
         setProcessing(true);
 
         try {
-            if (currentCompanyData &&
+            if (
+                currentCompanyData &&
                 Object.keys(currentCompanyData).length > 0 &&
-                Object.values(currentCompanyData).some(value => value !== null && value !== '') &&
-                companySubmitRef.current) {
-                    await new Promise(async (resolve) => {
-                        await companySubmitRef.current();
-                        resolve(null);
-                    });
+                Object.values(currentCompanyData).some((value) => value !== null && value !== '') &&
+                companySubmitRef.current
+            ) {
+                await new Promise(async (resolve) => {
+                    await companySubmitRef.current();
+                    resolve(null);
+                });
             }
 
-            if (currentAdminData &&
+            if (
+                currentAdminData &&
                 Object.keys(currentAdminData).length > 0 &&
-                Object.values(currentAdminData).some(value => value !== null && value !== '') &&
-                adminSubmitRef.current) {
-                    await new Promise((resolve) => setTimeout(async () => {
+                Object.values(currentAdminData).some((value) => value !== null && value !== '') &&
+                adminSubmitRef.current
+            ) {
+                await new Promise((resolve) =>
+                    setTimeout(async () => {
                         await adminSubmitRef.current();
                         resolve(null);
-                    }, 750));
+                    }, 750),
+                );
             }
 
-            if (currentContactsData &&
+            if (
+                currentContactsData &&
                 Object.keys(currentContactsData).length > 0 &&
-                currentContactsData?.contacts?.some(contact =>
-                    Object.values(contact).some(value => value !== null && value !== '')
-                ) &&
-                contactsSubmitRef.current) {
-                    await new Promise((resolve) => setTimeout(async () => {
+                currentContactsData?.contacts?.some((contact) => Object.values(contact).some((value) => value !== null && value !== '')) &&
+                contactsSubmitRef.current
+            ) {
+                await new Promise((resolve) =>
+                    setTimeout(async () => {
                         await contactsSubmitRef.current();
                         resolve(null);
-                    }, 750));
+                    }, 750),
+                );
             }
 
             // Reset initial data to reflect the updated state
@@ -103,7 +110,7 @@ export default function Summary({
 
             // Navigate to home/mails once setProcessing is done
             setTimeout(async () => {
-                if (userRole === "Temp User") {
+                if (userRole === 'Temp User') {
                     await router.post(route('logout'));
                 } else {
                     window.location.href = '/dashboard';
@@ -115,13 +122,12 @@ export default function Summary({
         }
     };
 
-
     return (
-        <div className=" mt-5 w-full">
-            <Card className='p-5 gap-0'>
+        <div className="mt-5 w-full">
+            <Card className="gap-0 p-5">
                 <h1 className="text-lg font-semibold">Vehicle Rental Company Summary</h1>
                 <p className="text-gray-500">Contains all details of the Vehicle Rental Company.</p>
-                {currentCompanyData && Object.values(currentCompanyData).some(value => value !== null && value !== '') && (
+                {currentCompanyData && Object.values(currentCompanyData).some((value) => value !== null && value !== '') && (
                     <CreateVrCompany
                         companies={companies}
                         setCompanyData={setCurrentCompanyData}
@@ -135,7 +141,7 @@ export default function Summary({
                         }}
                     />
                 )}
-                {currentAdminData && Object.values(currentAdminData).some(value => value !== null && value !== '') && (
+                {currentAdminData && Object.values(currentAdminData).some((value) => value !== null && value !== '') && (
                     <CreateVrAdmin
                         companies={companies}
                         setAdminData={setCurrentAdminData}
@@ -150,51 +156,38 @@ export default function Summary({
                         }}
                     />
                 )}
-                {currentContactsData && currentContactsData?.contacts?.some(contact =>
-                    Object.values(contact).some(value => value !== null && value !== '')
-                ) && (
-                    <CreateVrContacts
-                        companies={companies}
-                        setContactsData={setCurrentContactsData}
-                        onNextTab={() => {}}
-                        isTitleDisabled={isTitleDisabled}
-                        isButtonDisabled={true}
-                        contactsData={currentContactsData}
-                        companyData={currentCompanyData}
-                        isEditing={true}
-                        onSubmitRef={(submitFn) => {
-                            contactsSubmitRef.current = submitFn;
-                        }}
-                    />
-                )}
-                {!Object.values(currentCompanyData).some(value => value !== null && value !== '') &&
-                 !Object.values(currentAdminData).some(value => value !== null && value !== '') &&
-                 !currentContactsData?.contacts?.some(contact =>
-                    Object.values(contact).some(value => value !== null && value !== '')
-                ) && (
-                    <div className="text-center text-gray-500 text-lg font-semibold mt-6">
-                        No Changes Found
-                    </div>
-                )}
-                <div className="sticky bottom-5 w-full bg-white shadow-md rounded-xl">
-                    <div className="mt-6 flex justify-end gap-2 p-4">
-                        <Button
-                            onClick={() => handleTabSwitch('previous')}
-                            className="px-4 py-2 rounded bg-black text-white hover:bg-gray-500"
-                        >
+                {currentContactsData &&
+                    currentContactsData?.contacts?.some((contact) => Object.values(contact).some((value) => value !== null && value !== '')) && (
+                        <CreateVrContacts
+                            companies={companies}
+                            setContactsData={setCurrentContactsData}
+                            onNextTab={() => {}}
+                            isTitleDisabled={isTitleDisabled}
+                            isButtonDisabled={true}
+                            contactsData={currentContactsData}
+                            companyData={currentCompanyData}
+                            isEditing={true}
+                            onSubmitRef={(submitFn) => {
+                                contactsSubmitRef.current = submitFn;
+                            }}
+                        />
+                    )}
+                {!Object.values(currentCompanyData).some((value) => value !== null && value !== '') &&
+                    !Object.values(currentAdminData).some((value) => value !== null && value !== '') &&
+                    !currentContactsData?.contacts?.some((contact) => Object.values(contact).some((value) => value !== null && value !== '')) && (
+                        <div className="mt-6 text-center text-lg font-semibold text-gray-500">No Changes Found</div>
+                    )}
+                <div className="sticky bottom-5 ml-auto w-fit rounded-xl border border-gray-200 bg-white shadow-xl">
+                    <div className="flex justify-end gap-2 p-4">
+                        <Button onClick={() => handleTabSwitch('previous')} className="rounded bg-black px-4 py-2 text-white hover:bg-gray-500">
                             Previous
                         </Button>
-                        <Button
-                            type="submit"
-                            onClick={handleSaveChanges}
-                            className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700"
-                        >
+                        <Button type="submit" onClick={handleSaveChanges} className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700">
                             {processing ? 'Submitting...' : 'Save Changes'}
                         </Button>
                     </div>
                 </div>
             </Card>
-            
         </div>
     );
 }
