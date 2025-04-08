@@ -49,7 +49,7 @@ Route::post('vr-contacts/multiple', [VrContactsController::class, 'storeMultiple
 
 // VR Admin API Routes
 Route::post('vr-admins', [VRAdminController::class, 'store'])
-    ->name('vr-admins.store');
+    ->name('api-vr-admins.store');
 
 Route::apiResource('operators', OperatorAdminController::class);
 
