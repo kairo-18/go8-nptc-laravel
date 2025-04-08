@@ -5,15 +5,18 @@ import Container from './container'; // Import Container component
 import { DataTable } from './data-table';
 import SetStatus from './set-status'; // Import SetStatus component
 import CompanyFiles from './vr-company-files'; // Import CompanyFiles component
+type CompanyType = { id: number; Status?: string; BusinessPermitNumber: string; CompanyName: string; media?: any[] };
+
 
 interface CompanyProps {
     companies: { id: number; Status?: string; BusinessPermitNumber: string; CompanyName: string; media?: any[] }[];
     companiesWithMedia: { id: number; media: any[] }[];
     onSelectCompany: (companyId: number) => void;
+    onStatusUpdate?: (updatedCompany: any) => void;
 }
 
-export default function Company({ companies, companiesWithMedia, onSelectCompany }: CompanyProps) {
-    const [selectedCompany, setSelectedCompany] = useState(null);
+export default function Company({ companies, companiesWithMedia, onSelectCompany, onStatusUpdate }: CompanyProps) {
+    const [selectedCompany, setSelectedCompany] = useState<CompanyType | null>(null);
     const [open, setOpen] = useState(false);
     const [containerType, setContainerType] = useState(String);
     const [openStatusModal, setOpenStatusModal] = useState(false);
@@ -26,12 +29,12 @@ export default function Company({ companies, companiesWithMedia, onSelectCompany
         setOpenContainerModal(true);
     };
 
-    const handleViewFiles = (company) => {
+    const handleViewFiles = (company: CompanyType) => {
         setSelectedCompany(company);
         setOpen(true);
     };
 
-    const setStatusData = (statusData) => {
+    const setStatusData = (statusData: CompanyType) => {
         setSelectedCompany(statusData);
         setOpenStatusModal(true);
     };
@@ -78,6 +81,15 @@ export default function Company({ companies, companiesWithMedia, onSelectCompany
             url,
             data: { status: selectedStatus },
         });
+
+        const updatedCompany = {
+            ...selectedCompany,
+            Status: selectedStatus,
+        };
+
+        if (onStatusUpdate) {
+            onStatusUpdate(updatedCompany);
+        }
 
         setOpenStatusModal(false);
     };

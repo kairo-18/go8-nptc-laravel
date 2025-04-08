@@ -13,12 +13,16 @@ export default function Records({
     vehicles,
     companiesWithMedia,
 }: {
-    companies: { id: number; BusinessPermitNumber: string }[];
-    operators: { id: number; name: string; status: string; vr_company_id: number; user_id?: number, FirstName: string, LastName: string }[];
-    drivers: { id: number; user_id:number; name: string; status: string;  operator_id: number }[];
-    vehicles: { id: number; name: string; driver_id:number; status: string; operator_id: number }[];
+    companies: { id: number; Status?: string; BusinessPermitNumber: string; CompanyName: string; media?: any[] }[];
+    operators: { id: number; name: string; status: string; vr_company_id: number; user_id?: number; FirstName: string; LastName: string }[];
+    drivers: { id: number; user_id: number; name: string; status: string; operator_id: number }[];
+    vehicles: { id: number; name: string; driver_id: number; status: string; operator_id: number }[];
     companiesWithMedia: { id: number; media: any[] }[];
 }) {
+    const [localCompanies, setLocalCompanies] = useState(companies);
+    const [localOperators, setLocalOperators] = useState(operators);
+    const [localDrivers, setLocalDrivers] = useState(drivers);
+    const [localVehicles, setLocalVehicles] = useState(vehicles);
     const { props } = usePage<{ auth: { user?: { id: number; roles?: { name: string }[] }, vr_company_id?: number } }>();
     const userRole = props.auth.user?.roles?.[0]?.name;
     const vrCompanyId = props.auth.vr_company_id;
@@ -29,26 +33,26 @@ export default function Records({
 
     // Filter operators based on selectedCompanyId
     const filteredOperators = selectedCompanyId
-        ? operators.filter((op) => op.vr_company_id === selectedCompanyId)
+        ? localOperators.filter((op) => op.vr_company_id === selectedCompanyId)
         : userRole === 'Operator'
-        ? operators.filter((op) => op.user_id === props.auth.user?.id)
-        : operators;
+        ? localOperators.filter((op) => op.user_id === props.auth.user?.id)
+        : localOperators;
 
     const filteredDrivers = selectedOperatorId
-        ? drivers.filter((driver) => driver.operator_id === selectedOperatorId)
+        ? localDrivers.filter((driver) => driver.operator_id === selectedOperatorId)
         : userRole === 'Operator'
-        ? drivers.filter((driver) => filteredOperators.some((op) => op.id === driver.operator_id))
+        ? localDrivers.filter((driver) => filteredOperators.some((op) => op.id === driver.operator_id))
         : userRole === 'Driver'
-        ? drivers.filter((driver) => driver.user_id === props.auth.user?.id)
-        : drivers;
+        ? localDrivers.filter((driver) => driver.user_id === props.auth.user?.id)
+        : localDrivers;
 
     const filteredVehicles = selectedOperatorId
-        ? vehicles.filter((vehicle) => vehicle.operator_id === selectedOperatorId)
+        ? localVehicles.filter((vehicle) => vehicle.operator_id === selectedOperatorId)
         : userRole === 'Operator'
-        ? vehicles.filter((vehicle) => filteredOperators.some((op) => op.id === vehicle.operator_id))
+        ? localVehicles.filter((vehicle) => filteredOperators.some((op) => op.id === vehicle.operator_id))
         : userRole === 'Driver'
-        ? vehicles.filter((vehicle) => filteredDrivers.some((driver) => driver.id === vehicle.driver_id))
-        : vehicles;
+        ? localVehicles.filter((vehicle) => filteredDrivers.some((driver) => driver.id === vehicle.driver_id))
+        : localVehicles;
 
     console.log(filteredOperators);
     console.log(drivers)
@@ -59,18 +63,12 @@ export default function Records({
         { label: activeTab.replace('-', ' ').toUpperCase(), title: activeTab.replace('-', ' ').toUpperCase(), href: '#', onClick: () => { } },
     ];
 
-    const handleTabChange = (tabKey) => {
+    const handleTabChange = (tabKey: string) => {
         setActiveTab(tabKey);
         setSelectedCompanyId(null);
         setSelectedOperatorId(null);
     };
 
-    useEffect(() => {
-        router.reload({
-            only: ['companies', 'operators', 'drivers', 'vehicles', 'companiesWithMedia'],
-            preserveUrl: true,
-        });
-    }, [companies, operators, drivers, vehicles, companiesWithMedia]);
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
@@ -99,11 +97,26 @@ export default function Records({
                 {/* Tab Content */}
                 {activeTab === 'vr-company' && (
                     <Company
-                        companies={companies}
+                        companies={localCompanies}
                         companiesWithMedia={companiesWithMedia}
                         onSelectCompany={(companyId) => {
                             setSelectedCompanyId(companyId);
                             setActiveTab('operator');
+                        }}
+                        onStatusUpdate={(updatedCompany) => {
+                            const cleanName = (name: string) =>
+                                name.replace(/^(Active|Inactive|Suspended|Banned|Approved|Rejected|Pending)\s*/i, '').trim();
+
+                            setLocalCompanies(prev =>
+                                prev.map(c =>
+                                    c.id === updatedCompany.id
+                                        ? {
+                                              ...updatedCompany,
+                                              CompanyName: cleanName(updatedCompany.CompanyName),
+                                          }
+                                        : c
+                                )
+                            );
                         }}
                     />
                 )}
@@ -111,14 +124,34 @@ export default function Records({
                     <Operator
                         operators={filteredOperators}
                         onSelectOperator={(operatorId) => {
-                            setSelectedOperatorId(operatorId);
+                            setSelectedOperatorId(Number(operatorId));
                             setActiveTab('driver');
                         }}
                         onNextTab={() => setActiveTab('driver')}
+                        onStatusUpdate={(updatedOperator) => {
+                            setLocalOperators(prev =>
+                                prev.map(op => op.id === updatedOperator.id ? updatedOperator : op)
+                            );
+                        }}
                     />
                 )}
                 {activeTab === 'driver' && (
-                    <DriverVehicle drivers={filteredDrivers} onNextTab={() => setActiveTab('vehicle')} vehicles={filteredVehicles} activeTab={''} />
+                    <DriverVehicle
+                        drivers={filteredDrivers}
+                        vehicles={filteredVehicles}
+                        onNextTab={() => setActiveTab('vehicle')}
+                        activeTab={''}
+                        onDriverUpdate={(updatedDriver) => {
+                            setLocalDrivers(prev =>
+                                prev.map(d => d.id === updatedDriver.id ? updatedDriver : d)
+                            );
+                        }}
+                        onVehicleUpdate={(updatedVehicle) => {
+                            setLocalVehicles(prev =>
+                                prev.map(v => v.id === updatedVehicle.id ? updatedVehicle : v)
+                            );
+                        }}
+                    />
                 )}
             </div>
         </MainLayout>

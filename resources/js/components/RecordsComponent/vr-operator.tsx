@@ -9,9 +9,10 @@ interface OperatorProps {
     operators: { [key: string]: any }[];
     onNextTab: () => void;
     onSelectOperator: (id: string) => void;
+    onStatusUpdate?: (updatedOperator: any) => void;
 }
 
-export default function Operator({ operators, onNextTab, onSelectOperator }: OperatorProps) {
+export default function Operator({ operators, onNextTab, onSelectOperator, onStatusUpdate }: OperatorProps) {
     const [selectedOperator, setSelectedOperator] = useState<any>(null);
     const [operatorData, setOperatorData] = useState(operators);
     const [operatorHeaders, setOperatorHeaders] = useState<{ key: string; label: string }[]>([]);
@@ -59,6 +60,16 @@ export default function Operator({ operators, onNextTab, onSelectOperator }: Ope
         await axios.patch(`operator/updateStatus/${selectedOperator.id}`, {
             status: selectedStatus,
         });
+
+        const updatedOperator = {
+            ...selectedOperator,
+            Status: selectedStatus,
+        };
+
+        if (onStatusUpdate) {
+            onStatusUpdate(updatedOperator);
+        }
+
         setOpenStatusModal(false);
     };
 
@@ -68,6 +79,7 @@ export default function Operator({ operators, onNextTab, onSelectOperator }: Ope
     };
 
     const transformedOperators = operators.map((operator) => ({
+        id: operator.id,
         ...operator,
         Operator: `${operator.Status ? `${operator.Status} ` : ''}${operator.user.FirstName} ${operator.user.LastName}`,
     }));

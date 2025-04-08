@@ -12,9 +12,11 @@ interface DriverProps {
     vehicles: { [key: string]: any }[];
     activeTab: string;
     onNextTab: () => void;
+    onDriverUpdate?: (updatedDriver: any) => void;
+    onVehicleUpdate?: (updatedVehicle: any) => void;
 }
 
-export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverProps) {
+export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUpdate, onVehicleUpdate }: DriverProps) {
     const [driverData, setDriverData] = useState(drivers);
     const [selectedDriver, setSelectedDriver] = useState<any>(null);
     const [vehicleData, setVehicleData] = useState(vehicles);
@@ -50,6 +52,16 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
         await axios.patch(`driver/updateStatus/${selectedDriver.id}`, {
             status: selectedStatus,
         });
+
+        const updatedDriver = {
+            ...selectedDriver,
+            Status: selectedStatus,
+        };
+
+        if (onDriverUpdate) {
+            onDriverUpdate(updatedDriver);
+        }
+
         setOpenStatusModal(false);
     };
 
@@ -72,6 +84,16 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
         await axios.patch(`vehicle/updateStatus/${selectedVehicle.id}`, {
             status: selectedStatus,
         });
+
+        const updatedVehicle = {
+            ...selectedVehicle,
+            Status: selectedStatus,
+        };
+
+        if (onVehicleUpdate) {
+            onVehicleUpdate(updatedVehicle);
+        }
+
         setOpenStatusModal(false);
     };
 
