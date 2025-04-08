@@ -1,4 +1,5 @@
 import { FileInputWithPreview } from '@/components/file-input-with-preview';
+import { showToast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -213,7 +214,10 @@ export default function CreateOperator({ companies }) {
 
         post(route('operators.store'), {
             onSuccess: () => {
-                alert('Operator created successfully!');
+                showToast('Operator created successfully!', {
+                    type: 'success',
+                    position: 'top-center',
+                });
                 reset();
 
                 const fileInputs = document.querySelectorAll<HTMLInputElement>('input[type="file"]');
@@ -224,6 +228,13 @@ export default function CreateOperator({ companies }) {
                     photo: Date.now(),
                     valid_id_front: Date.now(),
                     valid_id_back: Date.now(),
+                });
+            },
+            onError: (errors) => {
+                const errorMessages = Object.values(errors).flat();
+                showToast(errorMessages.join(', '), {
+                    type: 'error',
+                    position: 'top-center',
                 });
             },
         });

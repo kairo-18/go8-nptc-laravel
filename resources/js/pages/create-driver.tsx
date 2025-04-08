@@ -1,3 +1,4 @@
+import { showToast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -238,7 +239,10 @@ export default function CreateDriver({ companies, latestVehicle, operator, compa
         post(route('driver.store'), {
             data: formData,
             onSuccess: () => {
-                alert('Driver registered successfully!');
+                showToast('Driver registered successfully!', {
+                    type: 'success',
+                    position: 'top-center',
+                });
                 if (createAnother) {
                     setData({
                         ...data,
@@ -273,7 +277,7 @@ export default function CreateDriver({ companies, latestVehicle, operator, compa
     };
 
     return (
-        <div className=" w-full">
+        <div className="w-full">
             <h1 className="text-2xl font-semibold">Register Driver</h1>
             <p className="text-gray-500">Enter the driver's details.</p>
 

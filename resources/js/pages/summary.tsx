@@ -1,3 +1,4 @@
+import { showToast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { router, usePage } from '@inertiajs/react';
@@ -99,6 +100,11 @@ export default function Summary({
                     }, 750),
                 );
             }
+            showToast('Changes saved successfully!', {
+                type: 'success',
+                position: 'top-center',
+                autoClose: 3000,
+            });
 
             // Reset initial data to reflect the updated state
             initialCompanyData.current = currentCompanyData;
@@ -119,6 +125,11 @@ export default function Summary({
         } catch (error) {
             console.error('Error saving changes:', error);
             setProcessing(false);
+            showToast('Error saving changes. Please try again.', {
+                type: 'error',
+                position: 'top-center',
+                autoClose: 3000,
+            });
         }
     };
 
