@@ -44,7 +44,7 @@ export const generateColumns = (
         id: key,
         accessorKey: key,
         header: ({ column }) => {
-            if (sortableColumns.includes(key)) {
+            if (sortableColumns.includes(key) && !statusColumns.includes(key)) {
                 return (
                     <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
                         {label}
@@ -58,7 +58,7 @@ export const generateColumns = (
             const rawValue = row.getValue(key);
             const value = String(rawValue || '').trim(); // Ensure it's a string
 
-            if (statusColumns.includes(key)) {
+            if (key.toLowerCase() === 'status') {
                 const statusColors: Record<string, string> = {
                     Active: 'bg-green-500',
                     Inactive: 'bg-gray-500',
@@ -74,6 +74,7 @@ export const generateColumns = (
 
             return value || 'N/A'; // Default text if empty
         },
+        enableSorting: statusColumns.includes(key) ? false : sortableColumns.includes(key),
     }));
 
     // Add select checkbox column
