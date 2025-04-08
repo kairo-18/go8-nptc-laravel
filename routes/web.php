@@ -18,7 +18,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 Route::get(
     '/',
     function () {
-        return Inertia::render('welcome');
+        return redirect()->route('login');
     }
 )->name('home');
 
@@ -79,8 +79,12 @@ Route::get('mails/thread/{thread}', function (Thread $thread) {
     return response()->json(['thread' => $thread]);
 });
 
+// VR Company API Routes
+Route::get('download-media/{mediaId}', [VRCompanyController::class, 'downloadMedia'])
+    ->name('download-media');
+
 Route::get('preview-media/{mediaId}', [VRCompanyController::class, 'previewMedia'])
-    ->middleware('auth'); // Add authentication middleware if needed
+    ->name('preview-media');
 
 Route::put('mails/mark-read/{thread}', function (Thread $thread) {
     $thread->mails()->update(['is_read' => true]);
@@ -105,7 +109,7 @@ Route::post('mails/new-mail', function (Request $request) {
 
     // Find the receiver by email
     $sender = auth()->user();
-   $receiver = User::where('email', $request->email)->first();
+    $receiver = User::where('email', $request->email)->first();
     if (! $receiver) {
         return response()->json(['errors' => ['email' => ['This email is not registered.']]], 422);
     }

@@ -161,7 +161,7 @@ export function AppSidebar() {
             </SidebarHeader>
 
             <SidebarContent className="text-white">
-                <NavMain items={filteredNavItems} currentPath={url} userRole={userRole} totalUnreadCount={totalUnreadCount}/>
+                <NavMain items={filteredNavItems} currentPath={url} userRole={userRole} totalUnreadCount={totalUnreadCount} />
             </SidebarContent>
 
             <SidebarFooter className="rounded-2xl border border-white text-white hover:border-red-700 hover:bg-white hover:text-gray-900">

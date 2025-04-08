@@ -33,3 +33,6 @@ Route::patch('driver/updateStatus/{id}', [DriverController::class, 'updateStatus
 
 Route::delete('/drivers/{driver}/media', [DriverController::class, 'deleteMedia'])
     ->name('drivers.delete-media');
+
+Route::post('/drivers/{driver}/swap-vehicle', [DriverController::class, 'swapVehicleForDriver'])
+    ->name('driver.swap-vehicle');

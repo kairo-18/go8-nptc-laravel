@@ -1,0 +1,50 @@
+name: Deploy Laravel to DigitalOcean
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${{ secrets.DROPLET_HOST }} >> ~/.ssh/known_hosts
+
+      - name: SSH and Deploy
+        run: |
+          ssh ${{ secrets.DROPLET_USER }}@${{ secrets.DROPLET_HOST }} << 'EOF'
+            cd /var/www/go8-nptc-laravel
+
+            echo ">>> Pulling latest changes..."
+            git pull origin main
+
+            echo ">>> Stopping all PM2 services..."
+            /usr/local/bin/pm2 stop all
+
+            echo ">>> Installing dependencies..."
+            composer install --no-interaction --prefer-dist --optimize-autoloader
+            npm install --force
+            npm run build
+
+            echo ">>> Running Laravel optimizations..."
+            php artisan migrate --force
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            echo ">>> Restarting all PM2 services..."
+            /usr/local/bin/pm2 restart all
+            /usr/local/bin/pm2 start laravel-queue
+            /usr/local/bin/pm2 start laravel-reverb
+            /usr/local/bin/pm2 start soketi
+          EOF
