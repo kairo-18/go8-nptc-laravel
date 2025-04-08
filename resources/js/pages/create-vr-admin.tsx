@@ -140,20 +140,20 @@ export default function CreateVrAdmin({
         }
     }, [companyData]);
 
-    if(!isEditing2) {
+    if (!isEditing2) {
         useEffect(() => {
             setAdminData(data);
         }, [data]);
     }
 
     return (
-        <div className=" w-full">
+        <div className="w-full">
             {!isTitleDisabled === false ? (
                 <>
                     <h1 className="text-2xl font-semibold">Create Vehicle Rental Admin</h1>
                     <p className="text-gray-500">Assign an admin to a vehicle rental company.</p>
                 </>
-            ): null}
+            ) : null}
             <Card className="mt-6 shadow-md">
                 <CardHeader>
                     <CardTitle className="text-lg">Owner Information</CardTitle>
@@ -164,7 +164,7 @@ export default function CreateVrAdmin({
                         {/* VR Company & Username */}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                            {companyData && Object.values(companyData).some((value) => value !== null && value !== '') ? (
+                                {companyData && Object.values(companyData).some((value) => value !== null && value !== '') ? (
                                     <>
                                         <Label htmlFor="vr_company_id">Selected VR Company</Label>
                                         <Input
@@ -253,24 +253,22 @@ export default function CreateVrAdmin({
                                         {processing ? 'Submitting...' : 'Submit'}
                                     </Button>
                                 </>
-                            )
-                            : isButtonDisabled === false ? (
+                            ) : isButtonDisabled === false ? (
                                 <>
                                     <Button
                                         onClick={() => handleTabSwitch('previous')}
-                                        className={`px-4 py-2 rounded  'bg-blue-500 text-white hover:bg-blue-700'}`}
+                                        className={`'bg-blue-500 hover:bg-blue-700'} rounded px-4 py-2 text-white`}
                                     >
                                         Previous
                                     </Button>
                                     <Button
                                         onClick={() => handleTabSwitch('next')}
-                                        className={`px-4 py-2 rounded  'bg-blue-500 text-white hover:bg-blue-700'}`}
+                                        className={`'bg-blue-500 hover:bg-blue-700'} rounded px-4 py-2 text-white`}
                                     >
                                         Next
                                     </Button>
                                 </>
-                            )
-                            : null }
+                            ) : null}
                         </div>
                     </form>
                 </CardContent>
