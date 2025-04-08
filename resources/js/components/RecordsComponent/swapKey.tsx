@@ -25,6 +25,7 @@ interface Driver {
     id: number;
     FirstName: string;
     LastName: string;
+    operator_id: number;
 }
 
 interface Vehicle {
@@ -32,6 +33,8 @@ interface Vehicle {
     PlateNumber: string;
     Model: string;
     Brand: string;
+    driver_id: number;
+    operator_id: number;
 }
 
 export default function SwapKey({
@@ -44,9 +47,23 @@ export default function SwapKey({
     vehicles = []
 }: SwapKeyProps) {
     const [loading, setLoading] = useState(false);
+
+    const filteredDrivers = type === 'vehicles'
+        ? drivers.filter(driver => driver.operator_id === selectedData?.operator_id)
+        : drivers;
+
+    // Find the current vehicle assigned to the selected driver
+    const currentVehicle = type === 'drivers'
+        ? vehicles.find(vehicle => vehicle.driver_id === selectedData?.id)
+        : null;
     const { data, setData, post, processing, errors } = useForm({
         newId: '', // Rename to be more generic
     });
+
+    // Filtered lists based on relationships
+    const filteredVehicles = type === 'drivers'
+    ? vehicles.filter(vehicle => vehicle.operator_id === selectedData?.operator_id && vehicle.driver_id !== selectedData?.id)
+    : vehicles;
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -95,6 +112,14 @@ export default function SwapKey({
                     {selectedData ? (
                         <Card>
                             <CardContent className="space-y-6">
+                                {type === 'drivers' && currentVehicle && (
+                                    <div className="p-2 border rounded bg-gray-50">
+                                        <p className="text-sm font-semibold mb-1">Current Vehicle:</p>
+                                        <p className="text-sm">
+                                            {currentVehicle.PlateNumber} - {currentVehicle.Model}
+                                        </p>
+                                    </div>
+                                )}
                                 <h2 className="text-sm">
                                     {type === 'drivers'
                                         ? 'Select a new vehicle for this driver.'
@@ -121,16 +146,22 @@ export default function SwapKey({
                                         </SelectTrigger>
                                         <SelectContent>
                                             {type === 'drivers' &&
-                                                vehicles.map((vehicle) => (
-                                                    <SelectItem
-                                                        key={vehicle.id.toString()}
-                                                        value={vehicle.id.toString()}
-                                                    >
-                                                        {vehicle.PlateNumber} - {vehicle.Model} - {vehicle.Brand}
-                                                    </SelectItem>
-                                                ))}
+                                                filteredVehicles.length > 0
+                                                    ? filteredVehicles.map((vehicle) => (
+                                                        <SelectItem
+                                                            key={vehicle.id.toString()}
+                                                            value={vehicle.id.toString()}
+                                                        >
+                                                            {vehicle.PlateNumber} - {vehicle.Model} - {vehicle.Brand}
+                                                        </SelectItem>
+                                                    ))
+                                                    : (
+                                                        <SelectItem value={undefined} disabled>
+                                                            No vehicles available
+                                                        </SelectItem>
+                                                    )}
                                             {type === 'vehicles' &&
-                                                drivers.map((driver) => (
+                                                filteredDrivers.map((driver) => (
                                                     <SelectItem
                                                         key={driver.id.toString()}
                                                         value={driver.id.toString()}
