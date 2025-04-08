@@ -61,9 +61,6 @@ Route::post('/create-booking', [TripController::class, 'store'])
 Route::post('/add-passengers', [TripController::class, 'addPassengers'])
     ->name('add-passengers');
 
-Route::post('/generate-payment-link', [TripController::class, 'generatePaymentLink'])
-    ->name('generate-payment-link');
-
 Route::get('/check-payment-status/{id}', [TripController::class, 'checkStatus'])
     ->name('check-status');
 

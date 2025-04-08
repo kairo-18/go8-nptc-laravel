@@ -32,7 +32,7 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
     const handleProceedToPayment = async () => {
         setIsLoading(true); // Start loading
         try {
-            const response = await axios.post('/api/generate-payment-link', {
+            const response = await axios.post('/generate-payment-link', {
                 amount: 15000, // Amount in cents (150 PHP)
                 description: 'NPTC Trip Ticket Payment',
             });

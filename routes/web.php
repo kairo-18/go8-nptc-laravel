@@ -174,6 +174,9 @@ Route::post('mails/new-mail', function (Request $request) {
     return response()->json(['mail' => $mail]);
 });
 
+Route::post('/generate-payment-link', [TripController::class, 'generatePaymentLink'])
+    ->name('generate-payment-link');
+
 // pending
 Route::get('/pending-data', [PendingController::class, 'index']);
 
