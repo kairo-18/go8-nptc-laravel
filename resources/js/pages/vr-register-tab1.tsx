@@ -30,6 +30,7 @@ const TemporaryAccountTabContent = ({ type }) => {
         LastName: '',
         email: '',
         BirthDate: '',
+        ContactNumber: '',
     });
     const [serverErrors, setServerErrors] = useState<Record<string, string>>({});
 
@@ -40,6 +41,7 @@ const TemporaryAccountTabContent = ({ type }) => {
         MiddleName: '',
         email: '',
         BirthDate: '',
+        ContactNumber: '',
         Type: type,
     });
 
@@ -78,6 +80,10 @@ const TemporaryAccountTabContent = ({ type }) => {
                 minAgeDate.setFullYear(minAgeDate.getFullYear() - 18);
                 return birthDate > minAgeDate ? 'Must be at least 18 years old' : '';
             },
+        },
+        ContactNumber: {
+            pattern: /^(\+?63|0)?\d{10}$/,
+            error: 'Contact number must be 11 digits, e.g. 09123456789',
         },
     };
 
@@ -120,6 +126,7 @@ const TemporaryAccountTabContent = ({ type }) => {
             LastName: validateField('LastName', values.LastName),
             email: validateField('email', values.email),
             BirthDate: validateField('BirthDate', values.BirthDate),
+            ContactNumber: validateField('ContactNumber', values.ContactNumber),
         }));
     }, [values]);
 
@@ -127,7 +134,7 @@ const TemporaryAccountTabContent = ({ type }) => {
         e.preventDefault();
         setServerErrors({});
 
-        const requiredFields = ['username', 'FirstName', 'LastName', 'email', 'BirthDate'];
+        const requiredFields = ['username', 'FirstName', 'LastName', 'email', 'BirthDate', 'ContactNumber'];
         const hasEmptyFields = requiredFields.some((field) => !values[field]);
 
         if (hasEmptyFields) {
@@ -145,8 +152,13 @@ const TemporaryAccountTabContent = ({ type }) => {
             const formattedLastName = formatLastName(values.LastName);
             const password = `${formattedLastName}${new Date(values.BirthDate).getFullYear()}`;
 
+            const normalizedContact = values.ContactNumber.startsWith('0')
+                ? values.ContactNumber.replace(/^0/, '+63')
+                : values.ContactNumber;
+
             const response = await axios.post(route('temp-registration'), {
                 ...values,
+                ContactNumber: normalizedContact,
                 password: password,
             });
 
@@ -168,7 +180,6 @@ const TemporaryAccountTabContent = ({ type }) => {
                 alert('An error occurred. Please try again.');
             }
 
-            // TODO: REMOVE AFTER PRESENTATION!!!!! The route (temp-registration) still doesn't exist - TANGINA WTFUCK
             const formattedLastName = formatLastName(values.LastName);
             const password = `${formattedLastName}${new Date(values.BirthDate).getFullYear()}`;
             setGeneratedPassword(password);
@@ -250,6 +261,18 @@ const TemporaryAccountTabContent = ({ type }) => {
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
+                        <label className="block text-sm font-medium text-gray-700">Contact Number *</label>
+                        <input
+                            id="ContactNumber"
+                            type="tel"
+                            placeholder="09123456789"
+                            className={`mt-1 block w-full rounded-md border p-2 ${getError('ContactNumber') ? 'border-red-500' : 'border-gray-300'}`}
+                            value={values.ContactNumber}
+                            onChange={handleChange}
+                        />
+                        {getError('ContactNumber') && <p className="mt-1 text-sm text-red-500">{getError('ContactNumber')}</p>}
+                    </div>
+                    <div>
                         <label className="block text-sm font-medium text-gray-700">Username *</label>
                         <input
                             id="username"
@@ -261,19 +284,20 @@ const TemporaryAccountTabContent = ({ type }) => {
                         />
                         {getError('username') && <p className="mt-1 text-sm text-red-500">{getError('username')}</p>}
                     </div>
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700">Generated Password</label>
-                        <input
-                            type="text"
-                            className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 p-2"
-                            disabled
-                            value={
-                                values.LastName && values.BirthDate
-                                    ? `${formatLastName(values.LastName)}${new Date(values.BirthDate).getFullYear()}`
-                                    : 'Will be generated'
-                            }
-                        />
-                    </div>
+                </div>
+
+                <div>
+                    <label className="block text-sm font-medium text-gray-700">Generated Password</label>
+                    <input
+                        type="text"
+                        className="mt-1 block w-full rounded-md border border-gray-300 bg-gray-100 p-2"
+                        disabled
+                        value={
+                            values.LastName && values.BirthDate
+                                ? `${formatLastName(values.LastName)}${new Date(values.BirthDate).getFullYear()}`
+                                : 'Will be generated'
+                        }
+                    />
                 </div>
 
                 <Button type="submit" className="float-right mt-20 mb-5 bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white">
