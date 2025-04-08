@@ -85,10 +85,11 @@ export const generateColumns = (
                 checked={table.getIsAllPageRowsSelected()}
                 onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
                 aria-label="Select all"
+                className='hidden md:table-cell'
             />
         ),
         cell: ({ row }) => (
-            <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" />
+            <Checkbox checked={row.getIsSelected()} onCheckedChange={(value) => row.toggleSelected(!!value)} aria-label="Select row" className='hidden md:table-cell'/>
         ),
         enableSorting: false,
         enableHiding: false,
@@ -108,7 +109,7 @@ export const generateColumns = (
                 return (
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0 !bg-transparent">
+                            <Button variant="ghost" className="h-8 w-8 p-0 !bg-gray-200 ">
                                 <span className="sr-only">Open menu</span>
                                 <MoreHorizontal />
                             </Button>
