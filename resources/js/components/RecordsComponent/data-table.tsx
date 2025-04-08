@@ -26,7 +26,7 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
     const [selectedStatus, setSelectedStatus] = React.useState<string | null>(null);
-    const [pageSize, setPageSize] = React.useState(5); // Default page size
+    const [pageSize, setPageSize] = React.useState(3); // Default page size
     const [selectedColumnFilter, setSelectedColumnFilter] = React.useState<string | null>(null);
     const [pageIndex, setPageIndex] = React.useState(0);
 
@@ -89,12 +89,12 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
 
     return (
         <div className="w-full">
-            <div className="flex items-center justify-between py-4">
+            <div className="flex flex-row items-start justify-center md:justify-between md:py-4 gap-3 mb-3">
                 <Input
                     placeholder="Filter data..."
                     value={(selectedColumnFilter && table.getColumn(selectedColumnFilter)?.getFilterValue() as string) ?? ''}
                     onChange={(event) => selectedColumnFilter && table.getColumn(selectedColumnFilter)?.setFilterValue(event.target.value)}
-                    className="max-w-sm"
+                    className="w-48 md:max-w-sm"
                 />
 
                 <DropdownMenu>
@@ -117,9 +117,14 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                 </DropdownMenu>
             </div>
 
+
+            {/* Above here the row navigate pagination will appear when the is reached a md size */}
+
+            {/* Table*/}
             <div className="rounded-md border">
-                <Table className='w-full max-w-full overflow-auto '>
-                    <TableHeader>
+                <Table className="w-full max-w-full overflow-auto">
+                    {/* Actual Header (hidden on small screens) */}
+                    <TableHeader className="hidden md:table-header-group">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
@@ -132,15 +137,152 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                             </TableRow>
                         ))}
                     </TableHeader>
+
+                    {/* Table Body */}
                     <TableBody>
                         {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} className="cursor-pointer hover:bg-gray-100" onClick={() => onRowClick?.(row.original)}>
+                                <TableRow key={row.id} className="cursor-pointer hover:bg-gray-100 flex flex-col md:table-row border-b md:border-0 p-2 md:p-0" onClick={() => onRowClick?.(row.original)}>
+                                    {/* Mapped headers for small screens */}
+                                    <div className="md:hidden block space-y-1">
+                                        {/* Render the action button FIRST */}
+                                        {row.getVisibleCells()
+                                            .filter((cell) => cell.column.id === "actions")
+                                            .map((cell) => {
+                                            const cellValue = cell.getValue() as string;
+                                            const statusWords = ["Pending", "Approved", "Rejected", "For Payment", "Active", "Inactive", "Suspended", "Banned"];
+                                            const highlightableColumns = ["actions"];
+
+                                            const getStatusClass = (status: string) => {
+                                                switch (status) {
+                                                case "Pending": return "bg-orange-500";
+                                                case "Approved": return "bg-blue-500";
+                                                case "Rejected": return "bg-gray-800";
+                                                case "For Payment": return "bg-pink-500";
+                                                case "Active": return "bg-green-600";
+                                                case "Inactive": return "bg-red-500";
+                                                case "Suspended": return "bg-yellow-500";
+                                                case "Banned": return "bg-purple-500";
+                                                default: return "bg-gray-400";
+                                                }
+                                            };
+
+                                            const highlightedText = highlightableColumns.includes(cell.column.id) && typeof cellValue === "string"
+                                                ? cellValue.split(new RegExp(`(${statusWords.join("|")})`, "gi")).map((part, idx) =>
+                                                    statusWords.includes(part) ? (
+                                                    <span key={idx} className={`px-2 py-0.5 rounded text-white font-medium ${getStatusClass(part)}`}>
+                                                        {part}
+                                                    </span>
+                                                    ) : (
+                                                    part
+                                                    )
+                                                )
+                                                : cellValue;
+
+                                                return (
+                                                    <div key={cell.id} className="flex flex-row justify-between">
+                                                        <TableCell>
+                                                        Status:
+                                                        {/* Check if the value is a string and should be highlighted */}
+                                                        {highlightableColumns.includes(cell.column.id) && typeof cell.getValue() === "string" ? (
+                                                            <span className="text-black font-regular">
+                                                            {/* Get the status value from the cell */}
+                                                            {String(cell.getValue() || "") // Safeguard for undefined/null value
+                                                                .split(new RegExp(`(${statusWords.join("|")})`, "gi"))
+                                                                .map((part, idx) =>
+                                                                statusWords.includes(part) ? (
+                                                                    <span key={idx} className={`px-2 py-0.5 rounded text-white font-medium ${getStatusClass(part)}`}>
+                                                                    {part}
+                                                                    </span>
+                                                                ) : (
+                                                                    part
+                                                                )
+                                                                )}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-black font-regular">{String(cell.getValue() || "N/A")}</span> 
+                                                        )}
+                                                        </TableCell>
+
+                                                      <TableCell>
+                                                        {typeof cell.column.columnDef.cell === "function"
+                                                          ? cell.column.columnDef.cell(cell.getContext())
+                                                          : cell.getValue()}
+                                                      </TableCell>
+                                                  
+                                                      {/* Render the status separately */}
+                                                      {highlightableColumns.includes(cell.column.id) && typeof cell.getValue() === "string" ? (
+                                                        <div className="flex items-center">
+                                                          {(String(cell.getValue()).split(new RegExp(`(${statusWords.join("|")})`, "gi"))).map((part, idx) =>
+                                                            statusWords.includes(part) ? (
+                                                              <span key={idx} className={`px-2 py-0.5 rounded text-white font-medium ${getStatusClass(part)}`}>
+                                                                {part}
+                                                              </span>
+                                                            ) : (
+                                                              part
+                                                            )
+                                                          )}
+                                                        </div>
+                                                      ) : null}
+                                                    </div>
+                                                  );
+                                            })}
+
+                                        {/* Then render the rest of the cells */}
+                                        {row.getVisibleCells()
+                                            .filter((cell) => cell.column.id !== "actions")
+                                            .map((cell, index) => {
+                                            const header = table.getHeaderGroups()[0].headers[index];
+                                            const cellValue = cell.getValue() as string;
+                                            const statusWords = ["Pending", "Approved", "Rejected", "For Payment", "Active", "Inactive", "Suspended", "Banned"];
+                                            const highlightableColumns = ["CompanyName", "Operator", "Driver", "Vehicle"];
+
+                                            const getStatusClass = (status: string) => {
+                                                switch (status) {
+                                                case "Pending": return "bg-orange-500";
+                                                case "Approved": return "bg-blue-500";
+                                                case "Rejected": return "bg-gray-800";
+                                                case "For Payment": return "bg-pink-500";
+                                                case "Active": return "bg-green-600";
+                                                case "Inactive": return "bg-red-500";
+                                                case "Suspended": return "bg-yellow-500";
+                                                case "Banned": return "bg-purple-500";
+                                                default: return "bg-gray-400";
+                                                }
+                                            };
+
+                                            const highlightedText = highlightableColumns.includes(cell.column.id) && typeof cellValue === "string"
+                                                ? cellValue.split(new RegExp(`(${statusWords.join("|")})`, "gi")).map((part, idx) =>
+                                                    statusWords.includes(part) ? (
+                                                    <span key={idx} className={`px-2 py-0.5 rounded text-white font-medium ${getStatusClass(part)}`}>
+                                                        {part}
+                                                    </span>
+                                                    ) : (
+                                                    part
+                                                    )
+                                                )
+                                                : cellValue;
+
+                                            return (
+                                                <div key={cell.id} className="text-sm flex flex-row justify-between">
+                                                    <span className="text-black font-semibold">
+                                                        {typeof header.column.columnDef.header === 'function'
+                                                        ? header.column.columnDef.header(header.getContext())
+                                                        : header.column.columnDef.header}:
+                                                    </span>
+                                                    <span className="text-black font-regular">{highlightedText}</span>
+                                                </div>
+                                            );
+                                            })}
+                                        </div>
+
+
+                                    {/* Actual Table Cells */}
                                     {row.getVisibleCells().map((cell) => {
                                         const cellValue = cell.getValue() as string;
                                         const statusWords = ["Pending", "Approved", "Rejected", "For Payment", "Active", "Inactive", "Suspended", "Banned"];
                                         const highlightableColumns = ["CompanyName", "Operator", "Driver", "Vehicle"];
-    
+                
                                         const getStatusClass = (status: string) => {
                                             switch (status) {
                                                 case "Pending": return "bg-orange-500";
@@ -154,7 +296,7 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                                                 default: return "bg-gray-400";
                                             }
                                         };
-    
+                
                                         if (highlightableColumns.includes(cell.column.id) && typeof cellValue === "string") {
                                             const highlightedText = cellValue.split(new RegExp(`(${statusWords.join("|")})`, "gi"))
                                                 .map((part, index) =>
@@ -166,12 +308,14 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                                                         part
                                                     )
                                                 );
-    
-                                            return <TableCell key={cell.id}>{highlightedText}</TableCell>;
+                
+                                            return <TableCell key={cell.id} className="hidden md:block">
+                                                        {highlightedText}
+                                                    </TableCell>;
                                         }
-    
+
                                         return (
-                                            <TableCell key={cell.id}>
+                                            <TableCell key={cell.id} className='hidden md:table-cell'>
                                                 {typeof cell.column.columnDef.cell === "function"
                                                     ? cell.column.columnDef.cell(cell.getContext())
                                                     : (cellValue as React.ReactNode)}
@@ -191,7 +335,11 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                 </Table>
             </div>
 
-            <div className="flex items-center justify-end space-x-2 py-4 ">
+
+
+
+            {/* Row navigate pagination*/}
+            <div className="flex flex-col md:flex-row items-center md:items-start justify-end space-x-2 py-4 ">
                 <div className="text-muted-foreground flex-1 text-sm">
                     {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length} row(s) selected.
                 </div>
@@ -199,12 +347,12 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                     <label className="text-sm">Rows per page:</label>
                     <Select
                         value={`${pageSize}`}
-                            onValueChange={(value) => {
-                                const newSize = Number(value);
-                                setPageSize(newSize);
-                                table.setPageSize(newSize);
-                            }}
-                        >
+                        onValueChange={(value) => {
+                            const newSize = Number(value);
+                            setPageSize(newSize);
+                            table.setPageSize(newSize); // Ensure page size is correctly set
+                        }}
+                    >
                         <SelectTrigger className="h-8 w-[70px]">
                             <SelectValue placeholder={`${pageSize}`} />
                         </SelectTrigger>
@@ -224,7 +372,7 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setPageIndex(0)}
+                        onClick={() => table.setPageIndex(0)} // Set page index directly on the table
                         disabled={!table.getCanPreviousPage()}
                     >
                         <ChevronsLeft />
@@ -232,7 +380,7 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setPageIndex((prev) => Math.max(prev - 1, 0))}
+                        onClick={() => table.setPageIndex((prev) => Math.max(prev - 1, 0))} // Set page index properly
                         disabled={!table.getCanPreviousPage()}
                     >
                         <ChevronLeft />
@@ -240,7 +388,7 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setPageIndex((prev) => Math.min(prev + 1, table.getPageCount() - 1))}
+                        onClick={() => table.setPageIndex((prev) => Math.min(prev + 1, table.getPageCount() - 1))} // Set page index properly
                         disabled={!table.getCanNextPage()}
                     >
                         <ChevronRight />
@@ -248,13 +396,14 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                     <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => setPageIndex(table.getPageCount() - 1)}
+                        onClick={() => table.setPageIndex(table.getPageCount() - 1)} // Set page index directly on the table
                         disabled={!table.getCanNextPage()}
                     >
                         <ChevronsRight />
                     </Button>
                 </div>
             </div>
+
         </div>
     );
 }
