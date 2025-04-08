@@ -1,3 +1,4 @@
+import { showToast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -152,9 +153,7 @@ const TemporaryAccountTabContent = ({ type }) => {
             const formattedLastName = formatLastName(values.LastName);
             const password = `${formattedLastName}${new Date(values.BirthDate).getFullYear()}`;
 
-            const normalizedContact = values.ContactNumber.startsWith('0')
-                ? values.ContactNumber.replace(/^0/, '+63')
-                : values.ContactNumber;
+            const normalizedContact = values.ContactNumber.startsWith('0') ? values.ContactNumber.replace(/^0/, '+63') : values.ContactNumber;
 
             const response = await axios.post(route('temp-registration'), {
                 ...values,
@@ -165,6 +164,10 @@ const TemporaryAccountTabContent = ({ type }) => {
             setGeneratedPassword(password);
             setEmail(values.email);
             setIsDialogOpen(true);
+            showToast('VR Temporary Account Created!', {
+                type: 'success',
+                position: 'top-center',
+            });
         } catch (error) {
             if (axios.isAxiosError(error) && error.response?.status === 422) {
                 const errors = error.response.data.errors || {};
@@ -179,6 +182,11 @@ const TemporaryAccountTabContent = ({ type }) => {
                 console.error('Submission failed', error);
                 alert('An error occurred. Please try again.');
             }
+
+            showToast('An error occurred. Please try again.', {
+                type: 'error',
+                position: 'top-center',
+            });
 
             const formattedLastName = formatLastName(values.LastName);
             const password = `${formattedLastName}${new Date(values.BirthDate).getFullYear()}`;

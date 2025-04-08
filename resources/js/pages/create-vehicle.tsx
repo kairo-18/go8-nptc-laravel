@@ -1,4 +1,5 @@
 import { FileInputWithPreview } from '@/components/file-input-with-preview';
+import { showToast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -216,8 +217,19 @@ export default function CreateVehicle({ operators, onNextTab }) {
         post(route('vehicles.store'), {
             data: formData,
             onSuccess: () => {
-                alert('Vehicle registered successfully.');
-                onNextTab();
+                showToast('Vehicle registered successfully', {
+                    type: 'success',
+                    position: 'top-center',
+                });
+            },
+            onError: (errors) => {
+                const errorMessages = Object.values(errors).flat();
+                errorMessages.forEach((error) => {
+                    showToast(error, {
+                        type: 'error',
+                        position: 'top-center',
+                    });
+                });
             },
         });
     };
