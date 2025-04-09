@@ -141,7 +141,7 @@ export default function Billings({ billings }: { billings: Billing[] }) {
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
             <Head title="Billings" />
-            <div className="rounded border border-gray-300 bg-white p-4">
+            <div className="rounded border border-gray-300 bg-white m-10 p-5">
                 <Tabs defaultValue="approvalTab" className="w-full" onValueChange={(value) => setActiveTab(value)}>
                     <div className="flex items-center justify-between">
                         <div>

@@ -29,3 +29,5 @@ Route::delete('/vehicles/{vehicle}/media', [VehicleController::class, 'deleteMed
     ->name('vehicles.delete-media');
 
 Route::patch('vehicle/updateStatus/{id}', [VehicleController::class, 'updateStatus'])->name('vehicle.updateStatus');
+
+Route::post('/vehicles/{vehicle}/swap-driver', [VehicleController::class, 'swapDriverForVehicle'])->name('vehicle.swap-driver');

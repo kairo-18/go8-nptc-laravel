@@ -18,7 +18,7 @@ use Spatie\MediaLibrary\MediaCollections\Models\Media;
 Route::get(
     '/',
     function () {
-        return Inertia::render('welcome');
+        return redirect()->route('login');
     }
 )->name('home');
 
@@ -79,8 +79,12 @@ Route::get('mails/thread/{thread}', function (Thread $thread) {
     return response()->json(['thread' => $thread]);
 });
 
+// VR Company API Routes
+Route::get('download-media/{mediaId}', [VRCompanyController::class, 'downloadMedia'])
+    ->name('download-media');
+
 Route::get('preview-media/{mediaId}', [VRCompanyController::class, 'previewMedia'])
-    ->middleware('auth'); // Add authentication middleware if needed
+    ->name('preview-media');
 
 Route::put('mails/mark-read/{thread}', function (Thread $thread) {
     $thread->mails()->update(['is_read' => true]);
@@ -105,7 +109,7 @@ Route::post('mails/new-mail', function (Request $request) {
 
     // Find the receiver by email
     $sender = auth()->user();
-   $receiver = User::where('email', $request->email)->first();
+    $receiver = User::where('email', $request->email)->first();
     if (! $receiver) {
         return response()->json(['errors' => ['email' => ['This email is not registered.']]], 422);
     }
@@ -170,6 +174,9 @@ Route::post('mails/new-mail', function (Request $request) {
     return response()->json(['mail' => $mail]);
 });
 
+Route::post('/generate-payment-link', [TripController::class, 'generatePaymentLink'])
+    ->name('generate-payment-link');
+
 // pending
 Route::get('/pending-data', [PendingController::class, 'index']);
 
@@ -185,3 +192,5 @@ require __DIR__.'/operator.php';
 require __DIR__.'/driver.php';
 require __DIR__.'/vehicle.php';
 require __DIR__.'/pending.php';
+
+Route::get('/trip-ticket/download/{trip}', [TripController::class, 'downloadTripTicket'])->name('trip-ticket.download');

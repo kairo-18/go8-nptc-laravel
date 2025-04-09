@@ -9,15 +9,26 @@ import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import MainLayout from './mainLayout';
+import { useUnreadCount } from '@/pages/UnreadCountContext'; // Import the context
 
 export default function Mails() {
+    const { totalUnreadCount } = useUnreadCount(); // Use the context
     const [selectedThreads, setSelectedThreads] = useState(new Set());
-    const [threads, setThreads] = useState([]);
-    const [filteredThreads, setFilteredThreads] = useState([]);
+    const [threads, setThreads] = useState<{ id: number; mails: { is_read: boolean }[] }[]>([]);
+    const [filteredThreads, setFilteredThreads] = useState<{ id: number; mails: { is_read: boolean }[] }[]>([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [filter, setFilter] = useState('');
     const auth = usePage().props.auth;
     const [selectedThread, setSelectedThread] = useState(null); // Track the selected thread
+
+    useEffect(() => {
+        const unreadCount = threads.reduce(
+            (count, thread) => count + thread.mails.filter((mail) => !mail.is_read).length,
+            -1 // Adjusted this to 0, since -1 would skew the count
+        );
+        console.log(`Unread count updated: ${unreadCount}`); // Log the unread count
+        console.log(`Total Unread Messages: ${unreadCount}`);
+    }, [threads, totalUnreadCount]);
 
     const breadcrumbs = [
         {
@@ -120,19 +131,18 @@ export default function Mails() {
             setThreads((prevThreads) => [...prevThreads, event.thread]);
         });
 
-        // Listen for MailMarkedAsRead event
-        window.Echo.private(`user.${auth.user.id}`).listen('MailMarkedAsRead', (event) => {
-            console.log('Mail marked as read:', event);
+        window.Echo.private(`user.${auth.user.id}`).listen('MailReceive', (event) => {
+            console.log('New mail received:', event);
             setThreads((prevThreads) =>
-                prevThreads.map((thread) =>
-                    thread.id === event.threadId
-                        ? {
-                              ...thread,
-                              mails: thread.mails.map((mail) => (mail.id === event.mailId ? { ...mail, is_read: true } : mail)),
-                          }
-                        : thread,
-                ),
+                prevThreads.map((thread) => (thread.id === event.id ? { ...thread, mails: [...thread.mails, event.last_mail] } : thread)),
             );
+        
+            if (selectedThread?.id === event.id) {
+                setSelectedThread((prev) => ({
+                    ...prev,
+                    mails: [...prev.mails, event.last_mail],
+                }));
+            }
         });
 
         return () => {
@@ -168,7 +178,7 @@ export default function Mails() {
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            <div className="rounded-lg bg-white p-6 shadow">
+            <div className="rounded-xs p-10">
                 <div className="mb-4 flex items-center justify-between">
                     <Input
                         className="w-1/3"
@@ -194,7 +204,7 @@ export default function Mails() {
                         <ComposeMail />
                     </div>
                 </div>
-                <Table>
+                <Table className='border shadow-xl'>
                     <TableHeader>
                         <TableRow>
                             <TableHead>
@@ -222,8 +232,8 @@ export default function Mails() {
                                 key={thread.id}
                                 onClick={() => handleRowClick(thread)}
                                 className={`cursor-pointer ${
-                                    thread.mails.every((mail) => mail.is_read) ? 'bg-gray-100' : 'bg-white'
-                                } hover:bg-gray-200`}
+                                    thread.mails.every((mail) => mail.is_read) ? 'bg-gray-200' : 'bg-white'
+                                } hover:bg-gray-100`}
                             >
                                 <TableCell>
                                     <input
@@ -249,8 +259,8 @@ export default function Mails() {
                                 </TableCell>
                                 <TableCell>
                                     <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost">...</Button>
+                                        <DropdownMenuTrigger asChild >
+                                            <div variant="ghost" className='bg-transparent text-xl hover:bg-gray-500 w-8 h-8 flex justify-center items-center rounded-md'>...</div>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent>
                                             <DropdownMenuItem>Pin to top</DropdownMenuItem>

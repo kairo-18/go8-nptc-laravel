@@ -85,7 +85,14 @@ export default function CreateVrContacts({
         if (setContactsData) {
             setContactsData(data);
         }
-    }, [data, setContactsData]);
+      }, [companyData]);
+
+      // 3. Parent data synchronization (you already have this)
+     if (!isEditing2){
+        useEffect(() => {
+            setContactsData(data);
+        }, [data]);
+    }
 
     useEffect(() => {
         if (onSubmitRef) {
@@ -115,8 +122,8 @@ export default function CreateVrContacts({
     };
 
     return (
-        <div className="mx-auto mt-6 w-full max-w-6xl">
-            {isTitleDisabled === false ? (
+        <div className="w-full">
+            {!isTitleDisabled === false ? (
                 <>
                     <h1 className="text-2xl font-semibold">Create Vehicle Rental Contacts</h1>
                     <p className="text-gray-500">Manage the contact information of the vehicle rental company.</p>

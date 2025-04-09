@@ -71,7 +71,7 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
 
             // Add 'status' only if userRole matches the condition
             if (role === 'VR Admin') {
-                requestBody.status = 'For NPTC Approval';
+                requestBody.status = 'For Payment';
             } else if (role === 'NPTC Admin' || role === 'NPTC Super Admin') {
                 requestBody.status = 'For Payment';
             }
@@ -103,12 +103,12 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
                     <Button className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700" onClick={openRejectionModal}>
                         Reject and add notes
                     </Button>
-                    <Button className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700" onClick={() => handleApproval('operator')}>
-                        {role === 'VR Admin'
-                            ? 'Send to NPTC for Approval'
-                            : role === 'NPTC Admin' || role === 'NPTC Super Admin'
-                              ? 'Approve and prompt for payment'
-                              : 'Send to VR Admin'}
+                    <Button
+                        className="rounded-lg bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+                        disabled={role === 'VR Admin' ? false : true}
+                        onClick={() => handleApproval('operator')}
+                    >
+                        {role === 'VR Admin' ? 'Prompt for Payment' : 'Wait for VR Admin Approval'}
                     </Button>
                 </div>
 

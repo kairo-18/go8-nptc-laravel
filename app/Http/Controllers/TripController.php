@@ -18,12 +18,12 @@ class TripController extends Controller
             'general.pickupDate.day' => 'required|digits_between:1,2',
             'general.pickupDate.month' => 'required|digits_between:1,2',
             'general.pickupDate.year' => 'required|digits:4',
-            'general.pickupDate.hours' => 'required|digits_between:1,2|between:0,23',  
-            'general.pickupDate.minutes' => 'required|digits_between:1,2|between:0,59', 
+            'general.pickupDate.hours' => 'required|digits_between:1,2|between:0,23',
+            'general.pickupDate.minutes' => 'required|digits_between:1,2|between:0,59',
             'general.dropoffDate.day' => 'required|digits_between:1,2',
             'general.dropoffDate.month' => 'required|digits_between:1,2',
             'general.dropoffDate.year' => 'required|digits:4',
-            'general.dropoffDate.hours' => 'required|digits_between:1,2|between:0,23', 
+            'general.dropoffDate.hours' => 'required|digits_between:1,2|between:0,23',
             'general.dropoffDate.minutes' => 'required|digits_between:1,2|between:0,59',
             'general.tripType' => 'required|string|in:Drop-off,Airport Pick-up,Wedding,City Tour,Vacation,Team Building,Home Transfer,Corporate,Government,Others',
         ]);
@@ -47,7 +47,7 @@ class TripController extends Controller
 
         if (strtotime($pickupDate) >= strtotime($dropOffDate)) {
             return response()->json([
-                'error' => 'The pickup date must be before the drop-off date.'
+                'error' => 'The pickup date must be before the drop-off date.',
             ], 400);  // You can change the response code if needed
         }
         $trip = new Trip;
@@ -157,6 +157,34 @@ class TripController extends Controller
             return response()->json(['message' => 'Trip ended successfully', 'trip' => $trip], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to end trip', 'details' => $e->getMessage()], 500);
+        }
+    }
+
+    public function downloadTripTicket(Trip $trip)
+    {
+        try {
+            $trip = Trip::with('passengers')->findOrFail($trip->id);
+
+            $html = view('trip-ticket-pdf', ['trip' => $trip])->render();
+
+            $pdf = \Spatie\Browsershot\Browsershot::html($html)
+                ->format('A4')
+                ->margins(10, 10, 10, 10)
+                ->noSandbox()
+                ->pdf();
+
+            $filename = $trip->driver->operator->vrCompany->CompanyName.'/'.
+                        $trip->driver->operator->user->FirstName.' '.$trip->driver->operator->user->LastName.'/'.
+                        $trip->driver->user->FirstName.' '.$trip->driver->user->LastName.'/'.
+                        date('Y-m-d', strtotime($trip->created_at)).'/'.
+                        $trip->id.'.pdf';
+
+            return response($pdf, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to generate PDF', 'details' => $e->getMessage()], 500);
         }
     }
 }

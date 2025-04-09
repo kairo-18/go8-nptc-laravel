@@ -4,6 +4,7 @@ import { DataTable } from './data-table';
 import { useState, useEffect } from 'react';
 import SetStatus from './set-status';
 import axios from 'axios';
+import SwapKey from './swapKey';
 
 
 interface DriverProps {
@@ -11,15 +12,18 @@ interface DriverProps {
     vehicles: { [key: string]: any }[];
     activeTab: string;
     onNextTab: () => void;
+    onDriverUpdate?: (updatedDriver: any) => void;
+    onVehicleUpdate?: (updatedVehicle: any) => void;
 }
 
-export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverProps) {
+export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUpdate, onVehicleUpdate }: DriverProps) {
     const [driverData, setDriverData] = useState(drivers);
     const [selectedDriver, setSelectedDriver] = useState<any>(null);
     const [vehicleData, setVehicleData] = useState(vehicles);
     const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
     const [openStatusModal, setOpenStatusModal] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState('');
+    const [openSwapModal, setOpenSwapModal] = useState(false);
 
     useEffect(() => {
         setDriverData(drivers);
@@ -48,8 +52,28 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
         await axios.patch(`driver/updateStatus/${selectedDriver.id}`, {
             status: selectedStatus,
         });
+
+        const updatedDriver = {
+            ...selectedDriver,
+            Status: selectedStatus,
+        };
+
+        if (onDriverUpdate) {
+            onDriverUpdate(updatedDriver);
+        }
+
         setOpenStatusModal(false);
     };
+
+    const handleSwapDriver = (driverData: any) => {
+        setSelectedDriver(driverData); // Make sure this is setting the driver
+        setOpenSwapModal(true);
+    }
+
+    const handleSwapVehicle = (vehicleData: any) => {
+        setSelectedVehicle(vehicleData); // Make sure this is setting the vehicle
+        setOpenSwapModal(true);
+    }
 
     const handleSubmitToVehicle = async () => {
         if (!selectedVehicle) {
@@ -60,6 +84,16 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
         await axios.patch(`vehicle/updateStatus/${selectedVehicle.id}`, {
             status: selectedStatus,
         });
+
+        const updatedVehicle = {
+            ...selectedVehicle,
+            Status: selectedStatus,
+        };
+
+        if (onVehicleUpdate) {
+            onVehicleUpdate(updatedVehicle);
+        }
+
         setOpenStatusModal(false);
     };
 
@@ -108,7 +142,8 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
                 {
                     entityType: 'drivers',
                     statusColumns: ['Status'],
-                    updateStatus: handleDriverSetStatus
+                    updateStatus: handleDriverSetStatus,
+                    swapVehicle: handleSwapDriver
                 }
             );
 
@@ -126,28 +161,36 @@ export default function DriverVehicle({ drivers, vehicles, activeTab }: DriverPr
                 {
                     entityType: 'vehicles',
                     statusColumns: ['Status'],
-                    updateStatus: handleVehicleSetStatus
+                    updateStatus: handleVehicleSetStatus,
                 }
             );
 
 
     return (
-        <div>
-            <Tabs defaultValue="drivers" className="w-full">
-                <div className="flex justify-end">
-                    <TabsList className="bg-[#2A2A92] text-white">
-                        <TabsTrigger value="drivers" className="px-10">
-                            Drivers
-                        </TabsTrigger>
-                        <TabsTrigger value="vehicles" className="px-10">
-                            Vehicles
-                        </TabsTrigger>
-                    </TabsList>
+        <div className="w-full gap-4">
+            <Tabs defaultValue="drivers" className="w-full ">
+                <div className="flex md:justify-end justify-center mt-5 ">
+                <TabsList className="bg-[#006D54] text-white">
+                    <TabsTrigger 
+                        value="drivers" 
+                        className="px-10 !bg-[#006D54] data-[state=active]:!bg-white data-[state=active]:text-black"
+                    >
+                        Drivers
+                    </TabsTrigger>
+                    <TabsTrigger 
+                        value="vehicles" 
+                        className="px-10 !bg-[#006D54] data-[state=active]:!bg-white data-[state=active]:text-black"
+                    >
+                        Vehicles
+                    </TabsTrigger>
+                </TabsList>
+
                 </div>
 
                 <TabsContent value="drivers">
                     <DataTable data={transformDriverData} ColumnFilterName="FirstName" columns={driverColumns} />
                     <SetStatus selectedData={selectedDriver} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={handleDriverSetStatus} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToDriver} />
+                    <SwapKey id={selectedDriver?.id} type="drivers" openSwapModal={openSwapModal} setOpenSwapModal={setOpenSwapModal} selectedData={selectedDriver} drivers={[]} vehicles={vehicleData} />
                 </TabsContent>
 
                 <TabsContent value="vehicles">

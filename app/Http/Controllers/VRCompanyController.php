@@ -14,54 +14,62 @@ class VRCompanyController extends Controller
 {
     public function store(Request $request)
     {
-        \Log::info('Update Request Data:', $request->all());
+        try {
+            \Log::info('Store Request Data:', $request->all());
 
-        // Validate input fields and file uploads
-        $request->validate(
-            [
-                'CompanyName' => 'required|string',
-                'BusinessPermitNumber' => 'required|integer',
-                'BusinessPermit' => 'nullable|file|mimes:pdf,jpg,png',
-                'BIR_2303' => 'nullable|file|mimes:pdf,jpg,png',
-                'DTI_Permit' => 'nullable|file|mimes:pdf,jpg,png',
-                'BrandLogo' => 'nullable|file|mimes:jpg,png',
-                'SalesInvoice' => 'nullable|file|mimes:pdf,jpg,png',
-            ]
-        );
+            // Validate input fields and file uploads
+            $request->validate(
+                [
+                    'CompanyName' => 'required|string',
+                    'BusinessPermitNumber' => 'required|integer',
+                    'BusinessPermit' => 'nullable|file|mimes:pdf,jpg,png',
+                    'BIR_2303' => 'nullable|file|mimes:pdf,jpg,png',
+                    'DTI_Permit' => 'nullable|file|mimes:pdf,jpg,png',
+                    'BrandLogo' => 'nullable|file|mimes:jpg,png',
+                    'SalesInvoice' => 'nullable|file|mimes:pdf,jpg,png',
+                ]
+            );
 
-        $userRoles = Auth::user()->getRoleNames();
+            $userRoles = Auth::user()->getRoleNames();
 
-        $vrCompany = VRCompany::create(
-            [
-                'BusinessPermitNumber' => $request->BusinessPermitNumber,
-                'CompanyName' => $request->CompanyName,
-                'Status' => $userRoles->contains('NPTC Super Admin') || $userRoles->contains('NPTC Admin') ? 'Approved' : 'Pending',
-            ]
-        );
+            $vrCompany = VRCompany::create(
+                [
+                    'BusinessPermitNumber' => $request->BusinessPermitNumber,
+                    'CompanyName' => $request->CompanyName,
+                    'Status' => $userRoles->contains('NPTC Super Admin') || $userRoles->contains('NPTC Admin') ? 'Approved' : 'Pending',
+                ]
+            );
 
-        // Upload media files (only if provided)
-        if ($request->hasFile('BusinessPermit')) {
-            $vrCompany->addMediaFromRequest('BusinessPermit')->toMediaCollection('business_permit', 'private');
+            // Upload media files (only if provided)
+            if ($request->hasFile('BusinessPermit')) {
+                $vrCompany->addMediaFromRequest('BusinessPermit')->toMediaCollection('business_permit', 'private');
+            }
+
+            if ($request->hasFile('BIR_2303')) {
+                $vrCompany->addMedia($request->file('BIR_2303'))->toMediaCollection('bir_2303', 'private');
+            }
+
+            if ($request->hasFile('DTI_Permit')) {
+                $vrCompany->addMedia($request->file('DTI_Permit'))->toMediaCollection('dti_permit', 'private');
+            }
+
+            if ($request->hasFile('BrandLogo')) {
+                $vrCompany->addMedia($request->file('BrandLogo'))->toMediaCollection('brand_logo', 'private');
+            }
+
+            if ($request->hasFile('SalesInvoice')) {
+                $vrCompany->addMedia($request->file('SalesInvoice'))->toMediaCollection('sales_invoice', 'private');
+            }
+
+            // Dispatch RegisteredVrCompany Event
+            RegisteredVrCompany::dispatch($vrCompany);
+
+            \Log::info('VR Company created successfully', ['id' => $vrCompany->id]);
+        } catch (\Exception $e) {
+            \Log::error('Error creating VR Company:', ['error' => $e->getMessage()]);
+
+            return response()->json(['error' => 'Failed to create company', 'message' => $e->getMessage()], 500);
         }
-
-        if ($request->hasFile('BIR_2303')) {
-            $vrCompany->addMedia($request->file('BIR_2303'))->toMediaCollection('bir_2303', 'private');
-        }
-
-        if ($request->hasFile('DTI_Permit')) {
-            $vrCompany->addMedia($request->file('DTI_Permit'))->toMediaCollection('dti_permit', 'private');
-        }
-
-        if ($request->hasFile('BrandLogo')) {
-            $vrCompany->addMedia($request->file('BrandLogo'))->toMediaCollection('brand_logo', 'private');
-        }
-
-        if ($request->hasFile('SalesInvoice')) {
-            $vrCompany->addMedia($request->file('SalesInvoice'))->toMediaCollection('sales_invoice', 'private');
-        }
-
-        // Dispatch RegistedVrCompany Event
-        RegisteredVrCompany::dispatch($vrCompany);
     }
 
     public function downloadMedia($mediaId)

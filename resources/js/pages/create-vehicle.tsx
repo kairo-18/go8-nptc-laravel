@@ -1,3 +1,5 @@
+import { FileInputWithPreview } from '@/components/file-input-with-preview';
+import { showToast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -76,13 +78,13 @@ export default function CreateVehicle({ operators, onNextTab }) {
             onInput: (e) => e.target.value.slice(0, 15),
         },
         seatNumber: [
-            { value: "4", label: "4 seater (Car)" },
-            { value: "6", label: "6 seater (SUV)" },
-            { value: "8", label: "8 seater (UV)" },
-            { value: "10", label: "10 seater (Van)" },
-            { value: "12", label: "12 seater (Van)" },
-            { value: "51", label: "51 seater (2x2 Bus)" },
-            { value: "61", label: "61 seater (3x2 Bus)" }
+            { value: '4', label: '4 seater (Car)' },
+            { value: '6', label: '6 seater (SUV)' },
+            { value: '8', label: '8 seater (UV)' },
+            { value: '10', label: '10 seater (Van)' },
+            { value: '12', label: '12 seater (Van)' },
+            { value: '51', label: '51 seater (2x2 Bus)' },
+            { value: '61', label: '61 seater (3x2 Bus)' },
         ],
     };
 
@@ -215,15 +217,21 @@ export default function CreateVehicle({ operators, onNextTab }) {
         post(route('vehicles.store'), {
             data: formData,
             onSuccess: () => {
-                alert('Vehicle registered successfully.');
-                onNextTab();
+                showToast('Vehicle registered successfully', {
+                    type: 'success',
+                    position: 'top-center',
+                });
+            },
+            onError: (errors) => {
+                const errorMessages = Object.values(errors).flat();
+                errorMessages.forEach((error) => {
+                    showToast(error, {
+                        type: 'error',
+                        position: 'top-center',
+                    });
+                });
             },
         });
-    };
-
-    const handleFileRemove = (field) => {
-        setData(field, null);
-        setFileKeys((prev) => ({ ...prev, [field]: Date.now() }));
     };
 
     const handleInputChange = (field, value) => {
@@ -234,7 +242,7 @@ export default function CreateVehicle({ operators, onNextTab }) {
     };
 
     return (
-        <div className="mx-auto mt-6 w-full max-w-6xl">
+        <div className="w-full">
             <h1 className="text-2xl font-semibold">Register Vehicle</h1>
             <p className="text-gray-500">Enter the vehicle's details.</p>
 
@@ -359,36 +367,14 @@ export default function CreateVehicle({ operators, onNextTab }) {
                                 { field: 'gps_certificate_image', label: 'GPS Certificate' },
                                 { field: 'inspection_certificate_image', label: 'Inspection Certificate' },
                             ].map(({ field, label }) => (
-                                <div key={field}>
-                                    <Label htmlFor={field}>{label}</Label>
-                                    <Input
-                                        key={fileKeys[field]}
-                                        id={field}
-                                        type="file"
-                                        onChange={(e) => {
-                                            const file = e.target.files?.[0] || null;
-                                            setData(field, file);
-                                        }}
-                                        accept="image/*,.pdf"
-                                        className={
-                                            validationErrors[field] ? 'border-red-500 placeholder:text-gray-500/70' : 'placeholder:text-gray-500/70'
-                                        }
-                                    />
-                                    {data[field] && (
-                                        <div className="mt-1 flex items-center justify-between gap-2">
-                                            <p className="text-sm text-gray-500">{data[field].name}</p>
-                                            <button
-                                                type="button"
-                                                onClick={() => handleFileRemove(field)}
-                                                className="text-red-500 hover:text-red-700"
-                                                aria-label={`Remove ${field}`}
-                                            >
-                                                ×
-                                            </button>
-                                        </div>
-                                    )}
-                                    {validationErrors[field] && <p className="text-sm text-red-500">{validationErrors[field]}</p>}
-                                </div>
+                                <FileInputWithPreview
+                                    key={field}
+                                    field={field}
+                                    label={label}
+                                    value={data[field]}
+                                    onChange={(file) => setData(field, file)}
+                                    error={validationErrors[field]}
+                                />
                             ))}
                         </div>
 

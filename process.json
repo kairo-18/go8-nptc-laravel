@@ -1,0 +1,25 @@
+{
+  "apps": [
+    {
+      "name": "laravel-queue",
+      "script": "php",
+      "args": "artisan queue:work",
+      "cwd": "/var/www/go8-nptc-laravel", 
+      "autorestart": true,
+      "log_date_format": "YYYY-MM-DD HH:mm Z",
+      "error_file": "/var/www/go8-nptc-laravel/storage/logs/pm2-error.log",
+      "out_file": "/var/www/go8-nptc-laravel/storage/logs/pm2-out.log"
+    },
+    {
+      "name": "laravel-reverb",
+      "script": "php",
+      "args": "artisan reverb:start",
+      "cwd": "/var/www/go8-nptc-laravel",
+      "autorestart": true,
+      "log_date_format": "YYYY-MM-DD HH:mm Z",
+      "error_file": "/var/www/go8-nptc-laravel/storage/logs/pm2-error.log",
+      "out_file": "/var/www/go8-nptc-laravel/storage/logs/pm2-out.log"
+    }
+  ]
+}
+

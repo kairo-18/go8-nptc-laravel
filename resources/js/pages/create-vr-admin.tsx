@@ -103,9 +103,46 @@ export default function CreateVrAdmin({
         }
     }, [handleSubmit]);
 
+    useEffect(() => {
+        if (companyData && Object.values(companyData).some((value) => value !== null && value !== '')) {
+            setData((prevData) => ({
+                ...prevData,
+                vr_company_id: '',
+                BusinessPermitNumber: companyData.BusinessPermitNumber,
+            }));
+            if (!isEditing2) {
+                setAdminData((prevData) => ({
+                    ...prevData,
+                    vr_company_id: '',
+                    BusinessPermitNumber: companyData.BusinessPermitNumber,
+                }));
+            }
+        } else {
+            // If companyData is empty or removed, reset BusinessPermitNumber
+            setData((prevData) => ({
+                ...prevData,
+                vr_company_id: '',
+                BusinessPermitNumber: '',
+            }));
+            if (!isEditing2) {
+                setAdminData((prevData) => ({
+                    ...prevData,
+                    vr_company_id: '',
+                    BusinessPermitNumber: '',
+                }));
+            }
+        }
+    }, [companyData]);
+
+    if (!isEditing2) {
+        useEffect(() => {
+            setAdminData(data);
+        }, [data]);
+    }
+
     return (
-        <div className="mx-auto mt-6 w-full max-w-6xl">
-            {isTitleDisabled === false ? (
+        <div className="w-full">
+            {!isTitleDisabled === false ? (
                 <>
                     <h1 className="text-2xl font-semibold">Create Vehicle Rental Admin</h1>
                     <p className="text-gray-500">Assign an admin to a vehicle rental company.</p>
@@ -121,20 +158,37 @@ export default function CreateVrAdmin({
                         {/* VR Company & Username */}
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <Label htmlFor="vr_company_id">Select VR Company</Label>
-                                <Select value={String(data.vr_company_id)} onValueChange={(value) => setData('vr_company_id', value)}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a company" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {companies.map((company) => (
-                                            <SelectItem key={company.id} value={String(company.id)}>
-                                                {company.BusinessPermitNumber}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                                {errors.vr_company_id && <p className="text-sm text-red-500">{errors.vr_company_id}</p>}
+                                {companyData && Object.values(companyData).some((value) => value !== null && value !== '') ? (
+                                    <>
+                                        <Label htmlFor="vr_company_id">Selected VR Company</Label>
+                                        <Input
+                                            id="BusinessPermitNumber"
+                                            value={companyData.BusinessPermitNumber}
+                                            onChange={(e) => setData('BusinessPermitNumber', e.target.value)}
+                                            readOnly
+                                            disabled
+                                            className={!companyData.BusinessPermitNumber ? 'border-red-500' : ''}
+                                        />
+                                        {errors.vr_company_id && <p className="text-sm text-red-500">{errors.vr_company_id}</p>}
+                                    </>
+                                ) : (
+                                    <div>
+                                        <Label htmlFor="vr_company_id">Select VR Company</Label>
+                                        <Select value={String(data.vr_company_id)} onValueChange={(value) => setData('vr_company_id', value)}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a company" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {companies.map((company) => (
+                                                    <SelectItem key={company.id} value={String(company.id)}>
+                                                        {company.BusinessPermitNumber}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.vr_company_id && <p className="text-sm text-red-500">{errors.vr_company_id}</p>}
+                                    </div>
+                                )}
                             </div>
                             <div>
                                 <Label htmlFor="username">Username</Label>
@@ -185,13 +239,31 @@ export default function CreateVrAdmin({
                             </div>
                         </div>
 
-                        {isButtonDisabled === false ? (
-                            <div className="flex justify-end">
-                                <Button type="submit" disabled={processing} className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700">
-                                    {processing ? 'Submitting...' : 'Submit'}
-                                </Button>
-                            </div>
-                        ) : null}
+                        {/* Buttons */}
+                        <div className="flex justify-end gap-2">
+                            {isEditing2 === true ? (
+                                <>
+                                    <Button type="submit" disabled={processing} className="bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700">
+                                        {processing ? 'Submitting...' : 'Submit'}
+                                    </Button>
+                                </>
+                            ) : isButtonDisabled === false ? (
+                                <>
+                                    <Button
+                                        onClick={() => handleTabSwitch('previous')}
+                                        className={`'bg-blue-500 hover:bg-blue-700'} rounded px-4 py-2 text-white`}
+                                    >
+                                        Previous
+                                    </Button>
+                                    <Button
+                                        onClick={() => handleTabSwitch('next')}
+                                        className={`'bg-blue-500 hover:bg-blue-700'} rounded px-4 py-2 text-white`}
+                                    >
+                                        Next
+                                    </Button>
+                                </>
+                            ) : null}
+                        </div>
                     </form>
                 </CardContent>
             </Card>

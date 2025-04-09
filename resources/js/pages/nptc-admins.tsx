@@ -69,64 +69,66 @@ export default function NptcAdmins({ users }: NptcAdminsProps) {
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            {auth.roles[0].name === "NPTC Super Admin" &&
-                <Button className="mt-5 ml-5 w-[200px]" onClick={() => setIsModalOpen(true)}>
-                    Create NPTC Admin
-                </Button>
-            }
-            <NptcAdminRegister
-                isOpen={isModalOpen}
-                user={selectedUser}
-                isEditing={isEditing}
-                onClose={() => {
-                    setIsModalOpen(false);
-                    setSelectedUser(null); // Reset user selection
-                    setIsEditing(false); // Ensure editing state is reset
-                }}
-            />
-            <div className="p-5">
-                <Table>
-                    <TableCaption>A list of NPTC Admins.</TableCaption>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[100px]">ID</TableHead>
-                            <TableHead>First Name</TableHead>
-                            <TableHead>Last Name</TableHead>
-                            <TableHead>Username</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Contact Number</TableHead>
-                            <TableHead>Birth Date</TableHead>
-                            <TableHead>Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {users.map((user) => (
-                            <TableRow key={user.id}>
-                                <TableCell className="font-medium">{user.NPTC_ID}</TableCell>
-                                <TableCell>{user.FirstName}</TableCell>
-                                <TableCell>{user.LastName}</TableCell>
-                                <TableCell>{user.username}</TableCell>
-                                <TableCell>{user.email}</TableCell>
-                                <TableCell>{user.ContactNumber}</TableCell>
-                                <TableCell>{user.BirthDate}</TableCell>
-
-                                {auth.roles[0].name === "NPTC Super Admin" &&
-                                    (
-                                <>
-                                    <TableCell>
-                                        <Button size="sm" variant="destructive" onClick={() => confirmDelete(user)}>
-                                            Delete
-                                        </Button>
-                                        <Button size="sm" className="ml-2 bg-black" onClick={() => handleRowClick(user)}>
-                                            Edit
-                                        </Button>
-                                    </TableCell>
-                                </>
-                                    )}
+            <div className='p-10 space-y-5'>
+                {auth.roles[0].name === "NPTC Super Admin" &&
+                    <Button className=" w-[200px] hover:bg-white hover:text-black" onClick={() => setIsModalOpen(true)}>
+                        Create NPTC Admin
+                    </Button>
+                }
+                <NptcAdminRegister
+                    isOpen={isModalOpen}
+                    user={selectedUser}
+                    isEditing={isEditing}
+                    onClose={() => {
+                        setIsModalOpen(false);
+                        setSelectedUser(null); // Reset user selection
+                        setIsEditing(false); // Ensure editing state is reset
+                    }}
+                />
+                <div className="">
+                    <Table className='rounded-lg border'>
+                        <TableCaption>A list of NPTC Admins.</TableCaption>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead className="w-[100px]">ID</TableHead>
+                                <TableHead>First Name</TableHead>
+                                <TableHead>Last Name</TableHead>
+                                <TableHead>Username</TableHead>
+                                <TableHead>Email</TableHead>
+                                <TableHead>Contact Number</TableHead>
+                                <TableHead>Birth Date</TableHead>
+                                <TableHead>Actions</TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {users.map((user) => (
+                                <TableRow key={user.id}>
+                                    <TableCell className="font-medium">{user.NPTC_ID}</TableCell>
+                                    <TableCell>{user.FirstName}</TableCell>
+                                    <TableCell>{user.LastName}</TableCell>
+                                    <TableCell>{user.username}</TableCell>
+                                    <TableCell>{user.email}</TableCell>
+                                    <TableCell>{user.ContactNumber}</TableCell>
+                                    <TableCell>{user.BirthDate}</TableCell>
+
+                                    {auth.roles[0].name === "NPTC Super Admin" &&
+                                        (
+                                    <>
+                                        <TableCell>
+                                            <Button size="sm" className="hover:text-black" variant="destructive" onClick={() => confirmDelete(user)}>
+                                                Delete
+                                            </Button>
+                                            <Button size="sm" className="ml-2 hover:bg-white hover:text-black" onClick={() => handleRowClick(user)}>
+                                                Edit
+                                            </Button>
+                                        </TableCell>
+                                    </>
+                                        )}
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
             </div>
 
             <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
