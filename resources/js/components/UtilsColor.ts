@@ -2,12 +2,12 @@
 export function getBackgroundColorForRole(userRole: string | undefined): string {
     switch (userRole) {
         case 'VR Admin':
-            return 'bg-[#A41316]'; // Secondary color for VR Admin
+            return 'bg-[#252583]';
         case 'Operator':
-            return 'bg-[#AF921A]'; // Tertiary color for Operator
+            return 'bg-[#212174]';
         case 'Driver':
-            return 'bg-[#006D54]'; // New color for Driver
+            return 'bg-[#1d1d66]';
         default:
-            return 'bg-[#2A2A92]'; // Primary color for other roles (default)
+            return 'bg-[#2A2A92]';
     }
 }
