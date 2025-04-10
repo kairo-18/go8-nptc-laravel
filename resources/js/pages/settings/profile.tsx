@@ -46,117 +46,122 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
             <SettingsLayout>
                 <div className="space-y-6">
-                    <HeadingSmall title="Profile information" description="Update your name, email address, phone number, and address" />
+                    <HeadingSmall
+                        title="Profile information"
+                        description="Update your name, email address, phone number, and address"
+                    />
 
                     <form onSubmit={submit} className="space-y-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="FirstName">First Name</Label>
-                            <Input
-                                id="FirstName"
-                                className="mt-1 block w-full"
-                                value={data.FirstName}
-                                onChange={(e) => setData('FirstName', e.target.value)}
-                                required
-                                autoComplete="given-name"
-                                placeholder="First Name"
-                            />
-                            <InputError className="mt-2" message={errors.FirstName} />
-                        </div>
+                        <div className="grid md:grid-cols-2 gap-6">
+                            <div className="grid gap-2">
+                                <Label htmlFor="FirstName">First Name</Label>
+                                <Input
+                                    id="FirstName"
+                                    className="mt-1 block w-full"
+                                    value={data.FirstName}
+                                    onChange={(e) => setData('FirstName', e.target.value)}
+                                    required
+                                    autoComplete="given-name"
+                                    placeholder="First Name"
+                                />
+                                <InputError className="mt-2" message={errors.FirstName} />
+                            </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="LastName">Last Name</Label>
-                            <Input
-                                id="LastName"
-                                className="mt-1 block w-full"
-                                value={data.LastName}
-                                onChange={(e) => setData('LastName', e.target.value)}
-                                required
-                                autoComplete="family-name"
-                                placeholder="Last Name"
-                            />
-                            <InputError className="mt-2" message={errors.LastName} />
-                        </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="LastName">Last Name</Label>
+                                <Input
+                                    id="LastName"
+                                    className="mt-1 block w-full"
+                                    value={data.LastName}
+                                    onChange={(e) => setData('LastName', e.target.value)}
+                                    required
+                                    autoComplete="family-name"
+                                    placeholder="Last Name"
+                                />
+                                <InputError className="mt-2" message={errors.LastName} />
+                            </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="username">Username</Label>
-                            <Input
-                                id="username"
-                                className="mt-1 block w-full"
-                                value={data.username}
-                                onChange={(e) => setData('username', e.target.value)}
-                                required
-                                autoComplete="username"
-                                placeholder="Username"
-                            />
-                            <InputError className="mt-2" message={errors.username} />
-                        </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="username">Username</Label>
+                                <Input
+                                    id="username"
+                                    className="mt-1 block w-full"
+                                    value={data.username}
+                                    onChange={(e) => setData('username', e.target.value)}
+                                    required
+                                    autoComplete="username"
+                                    placeholder="Username"
+                                />
+                                <InputError className="mt-2" message={errors.username} />
+                            </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="Address">Address</Label>
-                            <Input
-                                id="Address"
-                                className="mt-1 block w-full"
-                                value={data.Address}
-                                onChange={(e) => setData('Address', e.target.value)}
-                                required
-                                autoComplete="street-address"
-                                placeholder="Address"
-                            />
-                            <InputError className="mt-2" message={errors.Address} />
-                        </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="email">Email address</Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    className="mt-1 block w-full"
+                                    value={data.email}
+                                    onChange={(e) => setData('email', e.target.value)}
+                                    required
+                                    autoComplete="email"
+                                    placeholder="Email address"
+                                />
+                                <InputError className="mt-2" message={errors.email} />
+                            </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="BirthDate">BirthDate</Label>
-                            <Input
-                                id="BirthDate"
-                                type="date"
-                                className="mt-1 block w-full"
-                                value={data.BirthDate}
-                                onChange={(e) => setData('BirthDate', e.target.value)}
-                                required
-                                autoComplete="bday"
-                            />
-                            <InputError className="mt-2" message={errors.BirthDate} />
-                        </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="ContactNumber">Contact Number</Label>
+                                <Input
+                                    id="ContactNumber"
+                                    className="mt-1 block w-full"
+                                    value={data.ContactNumber}
+                                    onChange={(e) => setData('ContactNumber', e.target.value)}
+                                    required
+                                    autoComplete="tel"
+                                    placeholder="Contact Number"
+                                />
+                                <InputError className="mt-2" message={errors.ContactNumber} />
+                            </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="ContactNumber">Contact Number</Label>
-                            <Input
-                                id="ContactNumber"
-                                className="mt-1 block w-full"
-                                value={data.ContactNumber}
-                                onChange={(e) => setData('ContactNumber', e.target.value)}
-                                required
-                                autoComplete="tel"
-                                placeholder="Contact Number"
-                            />
-                            <InputError className="mt-2" message={errors.ContactNumber} />
-                        </div>
+                            <div className="grid gap-2">
+                                <Label htmlFor="BirthDate">BirthDate</Label>
+                                <Input
+                                    id="BirthDate"
+                                    type="date"
+                                    className="mt-1 block w-full"
+                                    value={data.BirthDate}
+                                    onChange={(e) => setData('BirthDate', e.target.value)}
+                                    required
+                                    autoComplete="bday"
+                                />
+                                <InputError className="mt-2" message={errors.BirthDate} />
+                            </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Email address</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                className="mt-1 block w-full"
-                                value={data.email}
-                                onChange={(e) => setData('email', e.target.value)}
-                                required
-                                autoComplete="email"
-                                placeholder="Email address"
-                            />
-                            <InputError className="mt-2" message={errors.email} />
-                        </div>
+                            <div className="grid gap-2 md:col-span-2">
+                                <Label htmlFor="Address">Address</Label>
+                                <Input
+                                    id="Address"
+                                    className="mt-1 block w-full"
+                                    value={data.Address}
+                                    onChange={(e) => setData('Address', e.target.value)}
+                                    required
+                                    autoComplete="street-address"
+                                    placeholder="Address"
+                                />
+                                <InputError className="mt-2" message={errors.Address} />
+                            </div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="role">Role</Label>
-                            <Input id="role" className="mt-1 block w-full" value={auth.roles[0].name} disabled />
-                            <InputError className="mt-2" message={errors.role} />
+                            <div className="grid gap-2 md:col-span-2">
+                                <Label htmlFor="role">Role</Label>
+                                <Input id="role" className="mt-1 block w-full" value={auth.roles[0].name} disabled />
+                                <InputError className="mt-2" message={errors.role} />
+                            </div>
                         </div>
 
                         {mustVerifyEmail && auth.user.email_verified_at === null && (
-                            <div>
-                                <p className="text-muted-foreground -mt-4 text-sm">
+                            <div className="mt-2 space-y-2">
+                                <p className="text-muted-foreground text-sm">
                                     Your email address is unverified.{' '}
                                     <Link
                                         href={route('verification.send')}
@@ -169,7 +174,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 </p>
 
                                 {status === 'verification-link-sent' && (
-                                    <div className="mt-2 text-sm font-medium text-green-600">
+                                    <div className="text-sm font-medium text-green-600">
                                         A new verification link has been sent to your email address.
                                     </div>
                                 )}
@@ -177,7 +182,9 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         )}
 
                         <div className="flex items-center gap-4">
-                            <Button disabled={processing}>Save</Button>
+                            <Button className="!text-white" disabled={processing}>
+                                Save
+                            </Button>
 
                             <Transition
                                 show={recentlySuccessful}
@@ -192,7 +199,20 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                     </form>
                 </div>
 
-                <DeleteUser />
+                {/* Delete Account Section */}
+                <div className="mt-12 border-t pt-10">
+                    <div className="border rounded-xl p-6 bg-destructive/5">
+                        <div className="space-y-2">
+                            <h2 className="text-lg font-semibold text-destructive">Delete Account</h2>
+                            <p className="text-sm text-muted-foreground">
+                                Permanently delete your account and all associated data. This action cannot be undone.
+                            </p>
+                        </div>
+                        <div className="mt-6">
+                            <DeleteUser />
+                        </div>
+                    </div>
+                </div>
             </SettingsLayout>
         </MainLayout>
     );
