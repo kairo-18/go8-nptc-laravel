@@ -26,7 +26,7 @@ class OperatorObserver
      */
     public function updated(Operator $operator): void
     {
-        $operator->load('user.operator');
+        $operator->load('user.operator', 'user');
 
         if ($operator->isDirty('Status')) {
             $email = $operator->user->email;

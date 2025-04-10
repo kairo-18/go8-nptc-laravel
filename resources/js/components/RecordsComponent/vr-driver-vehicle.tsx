@@ -1,5 +1,6 @@
 import { showToast } from '@/components/toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { getBackgroundColorForRole } from '@/components/UtilsColor';
 import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
@@ -7,7 +8,6 @@ import { generateColumns } from './columns';
 import { DataTable } from './data-table';
 import SetStatus from './set-status';
 import SwapKey from './swapKey';
-import { getBackgroundColorForRole } from '@/components/UtilsColor';
 
 interface DriverProps {
     drivers: { [key: string]: any }[];
@@ -169,39 +169,54 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
         },
     );
 
-
     return (
-        <div className="grid grid-cols md:flex w-full gap-4">
-            <Tabs defaultValue="drivers" className="w-full ">
-                <div className="flex md:justify-end justify-center mt-5 ">
-                <TabsList className={`${getBackgroundColorForRole(userRole)} text-white`}>
-                    <TabsTrigger
-                        value="drivers"
-                        className={`px-10 !${getBackgroundColorForRole(userRole)} data-[state=active]:!bg-white data-[state=active]:text-black`}
-                    >
-                        Drivers
-                    </TabsTrigger>
-                    <TabsTrigger
-                        value="vehicles"
-                        className={`px-10 !${getBackgroundColorForRole(userRole)} data-[state=active]:!bg-white data-[state=active]:text-black`}
-                    >
-                        Vehicles
-                    </TabsTrigger>
-                </TabsList>
-
-
+        <div className="grid-cols grid w-full gap-4 md:flex">
+            <Tabs defaultValue="drivers" className="w-full">
+                <div className="mt-5 flex justify-center md:justify-end">
+                    <TabsList className={`${getBackgroundColorForRole(userRole)} text-white`}>
+                        <TabsTrigger
+                            value="drivers"
+                            className={`px-10 !${getBackgroundColorForRole(userRole)} data-[state=active]:!bg-white data-[state=active]:text-black`}
+                        >
+                            Drivers
+                        </TabsTrigger>
+                        <TabsTrigger
+                            value="vehicles"
+                            className={`px-10 !${getBackgroundColorForRole(userRole)} data-[state=active]:!bg-white data-[state=active]:text-black`}
+                        >
+                            Vehicles
+                        </TabsTrigger>
+                    </TabsList>
                 </div>
 
                 <TabsContent value="drivers">
                     <DataTable data={transformDriverData} ColumnFilterName="Status" columns={driverColumns} />
-                    <SetStatus selectedData={selectedDriver} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={handleDriverSetStatus} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToDriver} />
-                    <SwapKey id={selectedDriver?.id} type="drivers" openSwapModal={openSwapModal} setOpenSwapModal={setOpenSwapModal} selectedData={selectedDriver} drivers={[]} vehicles={vehicleData} />
+                    <SetStatus
+                        type="driver"
+                        selectedData={selectedDriver}
+                        openStatusModal={openStatusModal}
+                        setOpenStatusModal={setOpenStatusModal}
+                        selectedStatus={selectedStatus}
+                        setStatusData={handleDriverSetStatus}
+                        setSelectedStatus={setSelectedStatus}
+                        handleSubmit={handleSubmitToDriver}
+                    />
+                    <SwapKey
+                        id={selectedDriver?.id}
+                        type="drivers"
+                        openSwapModal={openSwapModal}
+                        setOpenSwapModal={setOpenSwapModal}
+                        selectedData={selectedDriver}
+                        drivers={[]}
+                        vehicles={vehicleData}
+                    />
                 </TabsContent>
 
                 <TabsContent value="vehicles">
                     <DataTable data={transformVehicleData} ColumnFilterName="Vehicles" columns={vehicleColumns} />
                     <SetStatus
-                        type="vehicle" selectedData={selectedVehicle}
+                        type="vehicle"
+                        selectedData={selectedVehicle}
                         openStatusModal={openStatusModal}
                         setOpenStatusModal={setOpenStatusModal}
                         selectedStatus={selectedStatus}
