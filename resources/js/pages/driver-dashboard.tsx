@@ -13,7 +13,15 @@ import {
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/components/ui/carousel"; // Ensure the file exists at this path or update the path to the correct one
+} from "@/components/ui/carousel";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -36,6 +44,8 @@ export default function DriverDashboard({
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [trip, setTrip] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [tripStartModalOpen, setTripStartModalOpen] = useState(false);
+  const [tripEndModalOpen, setTripEndModalOpen] = useState(false);
 
   useEffect(() => {
     axios
@@ -54,13 +64,12 @@ export default function DriverDashboard({
   const handleStartTrip = (tripId: number) => {
     axios
       .post(`/driver/trips/${tripId}/start`)
-      .then((response) => {
+      .then(() => {
         setTrip((prevTrip) => ({
           ...prevTrip,
           trip: { ...prevTrip.trip, status: "Ongoing" },
         }));
-        alert("Trip Started Successfully!");
-        location.reload();
+        setTripStartModalOpen(true);
       })
       .catch((error) => {
         console.error("Error starting trip:", error);
@@ -70,13 +79,12 @@ export default function DriverDashboard({
   const handleEndTrip = (tripId: number) => {
     axios
       .post(`/driver/trips/${tripId}/end`)
-      .then((response) => {
+      .then(() => {
         setTrip((prevTrip) => ({
           ...prevTrip,
           trip: { ...prevTrip.trip, status: "Done" },
         }));
-        alert("Trip Ended Successfully!");
-        location.reload();
+        setTripEndModalOpen(true);
       })
       .catch((error) => {
         console.error("Error ending trip:", error);
@@ -86,7 +94,7 @@ export default function DriverDashboard({
   return (
     <MainLayout breadcrumbs={breadcrumbs}>
       <Head title="Dashboard" />
-      <div className="flex flex-col gap-y-3 p-2 md:p-10">
+      <div className="grid grid-cols-1 lg:flex lg:flex-col gap-y-3 p-2 md:p-10">
         {/* Row 1: Welcome */}
         <div className="h-full w-full">
           <h4 className="text-2xl font-black">Welcome Back, Admin 1!</h4>
@@ -113,7 +121,7 @@ export default function DriverDashboard({
                 </h3>
               </CardHeader>
               <CardContent className="text-black">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid-cols-1 grid md:grid-cols-3 gap-4">
                   <p><strong>Trip Date:</strong> {trip.trip.pickupDate}</p>
                   <p><strong>Pick-up Address:</strong> {trip.trip.pickupAddress}</p>
                   <p><strong>Drop-off Address:</strong> {trip.trip.dropOffAddress}</p>
@@ -159,7 +167,7 @@ export default function DriverDashboard({
           <h2 className="text-lg font-bold">Bookings</h2>
 
           {/* Grid layout for md and up */}
-          <div className="hidden md:grid grid-cols-3 gap-4">
+          <div className="hidden grid-cols-1 md:grid md:grid-cols-3 gap-4">
             {[
               { title: "Today's Bookings", value: bookingsToday.length },
               { title: "This Week's Bookings", value: bookingsThisWeek.length },
@@ -205,9 +213,8 @@ export default function DriverDashboard({
           </div>
         </div>
 
-
         {/* Row 4: Scheduled Bookings + Calendar */}
-        <div className="grid grid-cols-1 md:grid-cols-[70%_30%] gap-4 min-w-0">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[70%_29%] gap-4 min-w-0">
           {/* Scheduled Bookings */}
           <Card>
             <CardHeader>
@@ -267,6 +274,36 @@ export default function DriverDashboard({
           </Card>
         </div>
       </div>
+
+      {/* Trip Started Modal */}
+      <Dialog open={tripStartModalOpen} onOpenChange={setTripStartModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Trip Started</DialogTitle>
+            <DialogDescription>
+              The trip has successfully started. Safe travels!
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => location.reload()}>OK</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Trip Ended Modal */}
+      <Dialog open={tripEndModalOpen} onOpenChange={setTripEndModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Trip Ended</DialogTitle>
+            <DialogDescription>
+              The trip has been successfully marked as completed.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => location.reload()}>OK</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </MainLayout>
   );
 }

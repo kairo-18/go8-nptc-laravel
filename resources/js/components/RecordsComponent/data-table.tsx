@@ -18,7 +18,8 @@ type DataTableProps<TData, TValue> = {
     onRowClick?: (row: TData) => void;
 };
 
-const statusHierarchy = ['Active', 'Inactive', 'Suspended', 'Banned'];
+const statusHierarchy = ["Pending", "Approved", "Rejected", "For Payment", "Active", "Inactive", "Suspended", "Banned", "For NPTC Approval", "For VR Approval"];
+
 
 export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilterName }: DataTableProps<TData, TValue>) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -85,7 +86,7 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
         table.setPageIndex(0); // Reset pagination
     };
 
-    const statusHierarchy = ['Active', 'Inactive', 'Suspended', 'Banned', 'Approved', 'Rejected', 'Pending'];
+    const statusHierarchy = ["Pending", "Approved", "Rejected", "For Payment", "Active", "Inactive", "Suspended", "Banned", "For NPTC Approval", "For VR Approval"];
 
     return (
         <div className="w-full">
@@ -94,7 +95,7 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                     placeholder="Filter data..."
                     value={(selectedColumnFilter && table.getColumn(selectedColumnFilter)?.getFilterValue() as string) ?? ''}
                     onChange={(event) => selectedColumnFilter && table.getColumn(selectedColumnFilter)?.setFilterValue(event.target.value)}
-                    className="w-48 md:max-w-sm"
+                    className="w-full md:max-w-80"
                 />
 
                 <DropdownMenu>
@@ -142,7 +143,7 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                     <TableBody>
                         {table.getRowModel().rows?.length ? (
                             table.getRowModel().rows.map((row) => (
-                                <TableRow key={row.id} className="cursor-pointer hover:bg-gray-100 flex flex-col md:table-row border-b md:border-0 p-2 md:p-0" onClick={() => onRowClick?.(row.original)}>
+                                <TableRow key={row.id} className="cursor-pointer hover:bg- flex flex-col md:table-row border-b md:border-0 p-2 md:p-0" onClick={() => onRowClick?.(row.original)}>
                                     {/* Mapped headers for small screens */}
                                     <div className="md:hidden block space-y-1">
                                         {/* Render the action button FIRST */}
@@ -150,8 +151,8 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                                             .filter((cell) => cell.column.id === "actions")
                                             .map((cell) => {
                                             const cellValue = cell.getValue() as string;
-                                            const statusWords = ["Pending", "Approved", "Rejected", "For Payment", "Active", "Inactive", "Suspended", "Banned"];
-                                            const highlightableColumns = ["actions"];
+                                            const statusWords = ["Pending", "Approved", "Rejected", "For Payment", "Active", "Inactive", "Suspended", "Banned", "For NPTC Approval", "For VR Approval"];
+                                            const highlightableColumns = ["CompanyName", "Operator", "Driver", "Vehicle"];
 
                                             const getStatusClass = (status: string) => {
                                                 switch (status) {
@@ -163,21 +164,24 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                                                 case "Inactive": return "bg-red-500";
                                                 case "Suspended": return "bg-yellow-500";
                                                 case "Banned": return "bg-purple-500";
-                                                default: return "bg-gray-400";
+                                                case "For NPTC Approval": return "bg-yellow-500";
+                                                case "For VR Approval": return "bg-emerald-500";
+                                                default: return "bg-amber-800";
                                                 }
                                             };
 
-                                            const highlightedText = highlightableColumns.includes(cell.column.id) && typeof cellValue === "string"
-                                                ? cellValue.split(new RegExp(`(${statusWords.join("|")})`, "gi")).map((part, idx) =>
-                                                    statusWords.includes(part) ? (
-                                                    <span key={idx} className={`px-2 py-0.5 rounded text-white font-medium ${getStatusClass(part)}`}>
-                                                        {part}
-                                                    </span>
-                                                    ) : (
-                                                    part
+                                            const highlightedText =
+                                                highlightableColumns.includes(cell.column.id) &&
+                                                typeof cellValue === "string" &&
+                                                statusWords.includes(cellValue)
+                                                    ? (
+                                                        <span className={`px-2 py-0.5 rounded text-white font-medium ${getStatusClass(cellValue)}`}>
+                                                        {cellValue}
+                                                        </span>
                                                     )
-                                                )
-                                                : cellValue;
+                                                    : (
+                                                        <span className="text-black font-regular">{cellValue || "N/A"}</span>
+                                                    );
 
                                                 return (
                                                     <div key={cell.id} className="flex flex-row justify-between">
@@ -234,7 +238,7 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                                             .map((cell, index) => {
                                             const header = table.getHeaderGroups()[0].headers[index];
                                             const cellValue = cell.getValue() as string;
-                                            const statusWords = ["Pending", "Approved", "Rejected", "For Payment", "Active", "Inactive", "Suspended", "Banned"];
+                                            const statusWords = ["Pending", "Approved", "Rejected", "For Payment", "Active", "Inactive", "Suspended", "Banned", "For NPTC Approval", "For VR Approval"];
                                             const highlightableColumns = ["CompanyName", "Operator", "Driver", "Vehicle"];
 
                                             const getStatusClass = (status: string) => {
@@ -274,13 +278,13 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                                                 </div>
                                             );
                                             })}
-                                        </div>
+                                    </div>
 
 
                                     {/* Actual Table Cells */}
                                     {row.getVisibleCells().map((cell) => {
                                         const cellValue = cell.getValue() as string;
-                                        const statusWords = ["Pending", "Approved", "Rejected", "For Payment", "Active", "Inactive", "Suspended", "Banned"];
+                                        const statusWords = ["Pending", "Approved", "Rejected", "For Payment", "Active", "Inactive", "Suspended", "Banned", "For NPTC Approval", "For VR Approval"];
                                         const highlightableColumns = ["CompanyName", "Operator", "Driver", "Vehicle"];
                 
                                         const getStatusClass = (status: string) => {
