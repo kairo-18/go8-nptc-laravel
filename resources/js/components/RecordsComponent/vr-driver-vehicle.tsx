@@ -1,13 +1,12 @@
 import { showToast } from '@/components/toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { generateColumns } from './columns';
 import { DataTable } from './data-table';
 import SetStatus from './set-status';
 import SwapKey from './swapKey';
-import { getBackgroundColorForRole } from '../UtilsColor';
-import { usePage } from "@inertiajs/react";
 
 interface DriverProps {
     drivers: { [key: string]: any }[];
@@ -27,7 +26,7 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
     const [selectedStatus, setSelectedStatus] = useState('');
     const [openSwapModal, setOpenSwapModal] = useState(false);
 
-    const { props } = usePage<{ auth: { user?: { id: number; roles?: { name: string }[] }, vr_company_id?: number } }>();
+    const { props } = usePage<{ auth: { user?: { id: number; roles?: { name: string }[] }; vr_company_id?: number } }>();
     const userRole = props.auth.user?.roles?.[0]?.name;
 
     useEffect(() => {
@@ -160,7 +159,6 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
 
     const orderedVehicleHeaders = [...primaryVehicleColumns, ...vehicleOtherColumns];
 
-<<<<<<< HEAD
     const vehicleColumns = generateColumns(
         orderedVehicleHeaders.map((key) => ({ key, label: formatHeader(key) })),
         {
@@ -185,7 +183,7 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
                 </div>
 
                 <TabsContent value="drivers">
-                    <DataTable data={transformDriverData} ColumnFilterName="FirstName" columns={driverColumns} />
+                    <DataTable data={transformDriverData} ColumnFilterName="Driver" columns={driverColumns} />
                     <SetStatus
                         selectedData={selectedDriver}
                         openStatusModal={openStatusModal}
@@ -204,38 +202,10 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
                         drivers={[]}
                         vehicles={vehicleData}
                     />
-=======
-    return (
-        <div className="grid grid-cols md:flex w-full gap-4">
-            <Tabs defaultValue="drivers" className="w-full ">
-                <div className="flex md:justify-end justify-center mt-5 ">
-                <TabsList className={`${getBackgroundColorForRole(userRole)} text-white`}>
-                    <TabsTrigger 
-                        value="drivers" 
-                        className={`px-10 !${getBackgroundColorForRole(userRole)} data-[state=active]:!bg-white data-[state=active]:text-black`}
-                    >
-                        Drivers
-                    </TabsTrigger>
-                    <TabsTrigger 
-                        value="vehicles" 
-                        className={`px-10 !${getBackgroundColorForRole(userRole)} data-[state=active]:!bg-white data-[state=active]:text-black`}
-                    >
-                        Vehicles
-                    </TabsTrigger>
-                </TabsList>
-
-
-                </div>
-
-                <TabsContent value="drivers">
-                    <DataTable data={transformDriverData} ColumnFilterName="Status" columns={driverColumns} />
-                    <SetStatus selectedData={selectedDriver} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={handleDriverSetStatus} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToDriver} />
-                    <SwapKey id={selectedDriver?.id} type="drivers" openSwapModal={openSwapModal} setOpenSwapModal={setOpenSwapModal} selectedData={selectedDriver} drivers={[]} vehicles={vehicleData} />
->>>>>>> 9c9c6ca56ab4baf46549bc1c503a2b80fa2e5063
                 </TabsContent>
 
                 <TabsContent value="vehicles">
-                    <DataTable data={transformVehicleData} ColumnFilterName="PlateNumber" columns={vehicleColumns} />
+                    <DataTable data={transformVehicleData} ColumnFilterName="Vehicles" columns={vehicleColumns} />
                     <SetStatus
                         selectedData={selectedVehicle}
                         openStatusModal={openStatusModal}
