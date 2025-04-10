@@ -2,6 +2,7 @@
 
 use App\Events\MailReceive;
 use App\Events\NewThreadCreated;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\ManualPaymentController;
 use App\Http\Controllers\PendingController;
 use App\Http\Controllers\TripController;
@@ -178,6 +179,44 @@ Route::post('/generate-payment-link', [TripController::class, 'generatePaymentLi
     ->name('generate-payment-link');
 
 Route::get('/generate-qr/{trip}', [TripController::class, 'generateQr']);
+
+Route::get('/generate-user-qr/{user}', [RegisteredUserController::class, 'generateUserQr']);
+
+Route::get('/user-verification-profile/{user}', function (User $user) {
+    if (! $user->hasRole('Driver')) {
+        return redirect()->route('home');
+    }
+
+    $driver = $user->driver()->with(['vehicle', 'media'])->first();
+
+    if (! $driver) {
+        abort(404, 'Driver profile not found.');
+    }
+
+    $mediaCollections = ['license', 'photo', 'nbi_clearance', 'police_clearance', 'bir_clearance'];
+
+    // Collect media files from all defined collections
+    $mediaFiles = collect($mediaCollections)->flatMap(function ($collection) use ($driver) {
+        return $driver->getMedia($collection)->map(fn ($media) => [
+            'id' => $media->id,
+            'name' => $media->file_name,
+            'collection_name' => $media->collection_name,
+            'mime_type' => $media->mime_type,
+            'url' => route('preview-driver-media', ['mediaId' => $media->id]),
+        ]);
+    })->values();
+
+    $companyName = $driver->operator->vrCompany->CompanyName ?? null;
+
+    $status = $driver->Status;
+
+    return Inertia::render('UserVerificationProfile', [
+        'user' => $user->load('driver.vehicle'),
+        'media_files' => $mediaFiles,
+        'company' => $companyName,
+        'status' => $status,
+    ]);
+})->name('user-verification-profile');
 
 // pending
 Route::get('/pending-data', [PendingController::class, 'index']);

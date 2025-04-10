@@ -4,6 +4,13 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\Label\Font\OpenSans;
+use Endroid\QrCode\Label\LabelAlignment;
+use Endroid\QrCode\RoundBlockSizeMode;
+use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -103,5 +110,34 @@ class RegisteredUserController extends Controller
         event(new Registered($user));
 
         return to_route('home');
+    }
+
+    public function generateUserQr(User $user)
+    {
+        // Generate Qr that contains the link for download
+        $builder = new Builder(
+            writer: new PngWriter,
+            writerOptions: [],
+            validateResult: false,
+            data: env('APP_URL').'/user-verification-profile/'.$user->id,
+            encoding: new Encoding('UTF-8'),
+            errorCorrectionLevel: ErrorCorrectionLevel::High,
+            size: 300,
+            margin: 10,
+            roundBlockSizeMode: RoundBlockSizeMode::Margin,
+            labelText: 'Scan this QR to download the trip ticket pdf',
+            labelFont: new OpenSans(20),
+            labelAlignment: LabelAlignment::Center
+        );
+
+        $result = $builder->build();
+
+        // Generate a data URI to include image data inline (i.e. inside an <img> tag)
+        $dataUri = $result->getDataUri();
+
+        return response()->json([
+            'message' => 'QR code generated successfully',
+            'qr_code' => $dataUri,
+        ]);
     }
 }
