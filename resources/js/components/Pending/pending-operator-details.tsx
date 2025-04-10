@@ -90,7 +90,7 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
             }
 
             const data = await response.json();
-            location.reload();
+            // location.reload();
         } catch (error) {
             console.error('Error submitting rejection:', error);
         }
