@@ -309,7 +309,7 @@ const TemporaryAccountTabContent = ({ type }) => {
                 </div>
 
                 <Button type="submit" className="float-right mt-20 mb-5 bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white">
-                    Generate Temporary Account
+                    Generate VR Temporary Account
                 </Button>
             </form>
 

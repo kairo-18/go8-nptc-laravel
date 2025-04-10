@@ -9,8 +9,8 @@ import ApplicationStatusTabContent from './vr-register-tab2';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
-        title: 'VR Registration',
-        href: '/vr-registration',
+        title: 'Operator Registration',
+        href: '/op-registration',
     },
 ];
 
@@ -42,14 +42,14 @@ export default function VrRegistration({ operators }) {
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            <Head title="VR register" />
+            <Head title="OP register" />
 
-            <div className="flex w-full flex-col items-end p-10 ">
+            <div className="flex w-full flex-col items-end p-10">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <div className="flex justify-start mb-5">
+                    <div className="mb-5 flex justify-start">
                         <TabsList className="bg-[#2A2A92] text-white">
                             <TabsTrigger value="tempoAccountTab" className="px-10">
-                                Temporary Account
+                                Operator Temporary Account
                             </TabsTrigger>
                             <TabsTrigger value="appStatsTab" className="px-10">
                                 Application Status
