@@ -1,3 +1,4 @@
+import { showToast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,14 +9,13 @@ import { useState } from 'react';
 export default function PendingCompanyDetails({ item }) {
     const [previewFile, setPreviewFile] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isRejectionModalOpen, setIsRejectionModalOpen] = useState(false); // Rejection modal state
-    const [rejectionNote, setRejectionNote] = useState(''); // Rejection note state
-    const [isLoading, setIsLoading] = useState(false); // Loading state for rejection
+    const [isRejectionModalOpen, setIsRejectionModalOpen] = useState(false);
+    const [rejectionNote, setRejectionNote] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    // Handle rejection button click
     const handleRejection = async () => {
         try {
-            setIsLoading(true); // Set loading to true when making the API call
+            setIsLoading(true);
 
             const response = await fetch('/api/rejection', {
                 method: 'POST',
@@ -23,30 +23,28 @@ export default function PendingCompanyDetails({ item }) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    id: item?.id, // Send item ID
-                    type: 'vr_company', // Send the entity type as 'company'
-                    note: rejectionNote, // Send the rejection note
+                    id: item?.id,
+                    type: 'vr_company',
+                    note: rejectionNote,
                     user_id: item?.id,
                 }),
             });
 
-            // Check if response is ok
             if (!response.ok) {
                 throw new Error('Error submitting rejection');
             }
 
-            // Handle successful rejection
             const data = await response.json();
             if (data.message === 'Entity rejected and note created successfully') {
-                setIsRejectionModalOpen(false); // Close the rejection modal after successful rejection
-                alert('Rejection successful!'); // Show success message
+                setIsRejectionModalOpen(false);
+                showToast('Rejection successful!', { type: 'success', position: 'top-center' });
                 location.reload();
             }
         } catch (error) {
             console.error('Error submitting rejection:', error);
-            alert('Error rejecting company. Please try again.'); // Show error message
+            showToast('Error rejecting company. Please try again.', { type: 'error', position: 'top-center' });
         } finally {
-            setIsLoading(false); // Set loading to false after API call completes
+            setIsLoading(false);
         }
     };
 
@@ -60,22 +58,26 @@ export default function PendingCompanyDetails({ item }) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    id: item?.id, // Send item ID
-                    type: 'vr_company', // Send the entity type as 'vehicle'
+                    id: item?.id,
+                    type: 'vr_company',
                     user_id: item?.id,
                 }),
             });
 
-            // Handle successful
             const data = await response.json();
             if (data.message === 'Entity approved and note created successfully') {
-                alert('Approval successful! Official documents will be sent to the mail of the driver.');
+                showToast('Approval successful! Official documents will be sent to the mail of the driver.', {
+                    type: 'success',
+                    autoClose: 5000,
+                    position: 'top-center',
+                });
                 location.reload();
             }
         } catch (error) {
             console.error('Error submitting rejection:', error);
+            showToast('Error approving company. Please try again.', { type: 'error', position: 'top-center' });
         } finally {
-            setIsLoading(false); // Set loading to false after API call completes
+            setIsLoading(false);
         }
     };
 
@@ -85,17 +87,14 @@ export default function PendingCompanyDetails({ item }) {
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                     <img
-                        src={item?.logoUrl || '/placeholder.png'}
+                        src={item?.logoUrl || '../../../../public/assets/NPTCLogo.png'}
                         alt="Company Logo"
                         className="h-16 w-16 rounded-full border border-gray-300 object-cover"
                     />
                     <h1 className="text-2xl font-bold text-gray-800">{item?.CompanyName || 'Company Name'}</h1>
                 </div>
                 <div className="space-x-3">
-                    <Button
-                        className="bg-red-500 text-white hover:bg-red-600"
-                        onClick={() => setIsRejectionModalOpen(true)} // Open rejection modal
-                    >
+                    <Button className="bg-red-500 text-white hover:bg-red-600" onClick={() => setIsRejectionModalOpen(true)}>
                         Reject and add notes
                     </Button>
                     <Button className="bg-green-500 text-white hover:bg-green-600" onClick={() => handleApproval()}>

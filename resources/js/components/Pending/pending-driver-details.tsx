@@ -5,12 +5,9 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
 
-export default function PendingDriverDetails({assignedDriver }) {
+export default function PendingDriverDetails({ assignedDriver }) {
     const [previewFile, setPreviewFile] = useState(null);
-    const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false); // Separate state for preview modal
-
-
-   
+    const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
     return (
         <div className="mx-auto max-w-6xl space-y-8 rounded-lg border border-gray-200 bg-white p-8 shadow">
@@ -22,7 +19,6 @@ export default function PendingDriverDetails({assignedDriver }) {
                     </h2>
                     <span className="rounded-md border border-gray-500 px-2 py-1 text-sm font-medium">Driver</span>
                 </div>
-
             </div>
             <Separator />
 
@@ -59,7 +55,7 @@ export default function PendingDriverDetails({assignedDriver }) {
                                     className="border-blue-500 text-blue-600"
                                     onClick={() => {
                                         setPreviewFile(file);
-                                        setIsPreviewModalOpen(true); // Open preview modal
+                                        setIsPreviewModalOpen(true);
                                     }}
                                 >
                                     Preview
@@ -71,7 +67,6 @@ export default function PendingDriverDetails({assignedDriver }) {
                     )}
                 </CardContent>
             </Card>
-
 
             {/* File Preview Modal */}
             {isPreviewModalOpen && previewFile && (
