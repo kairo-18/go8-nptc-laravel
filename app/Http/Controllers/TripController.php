@@ -208,7 +208,7 @@ class TripController extends Controller
             size: 300,
             margin: 10,
             roundBlockSizeMode: RoundBlockSizeMode::Margin,
-            labelText: 'This is the label',
+            labelText: 'Scan this QR to download the trip ticket pdf',
             labelFont: new OpenSans(20),
             labelAlignment: LabelAlignment::Center
         );
