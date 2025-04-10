@@ -8,6 +8,7 @@ import axios from 'axios';
 import { Loader2 } from 'lucide-react'; // Import a loading spinner icon
 import { useEffect, useState } from 'react';
 import PaymentSuccessModal from './payment-success-modal';
+import PaymentFailModal from './payment-fail-modal';
 
 interface PaymentStepProps {
     formData: BookingFormData;
@@ -25,6 +26,7 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
     const [paymentSuccess, setPaymentSuccess] = useState(false);
     const [isLoading, setIsLoading] = useState(false); // Loading state
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isFailModalOpen, setIsFailModalOpen] = useState(false);
 
     const formatCurrency = (amount: number) => {
         return `Php ${amount.toFixed(2)}`;
@@ -60,10 +62,17 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
         const interval = setInterval(async () => {
             try {
                 const response = await axios.get(`/api/check-payment-status/${linkId}`);
-                if (response.data?.data?.attributes?.status === 'paid') {
+                const status = response?.data?.data?.attributes?.status;
+
+                if (status === 'paid') {
                     clearInterval(interval);
                     setIsLoading(false);
                     handleSubmitBooking();
+                }
+                if (status === 'failed' || status === 'cancelled' || status === 'expired') {
+                    clearInterval(interval);
+                    setIsLoading(false);
+                    setIsFailModalOpen(true); 
                 }
             } catch (error) {
                 console.error('Error checking payment status:', error);
@@ -81,7 +90,7 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
             setIsModalOpen(true);
             showToast('Passengers added successfully!', { type: 'success', position: 'top-center' });
         } catch (e) {
-            console.log(e);
+            console.log(e); 
             showToast('Error adding passengers', { type: 'error', position: 'top-center' });
         }
     };
@@ -174,6 +183,17 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
                 amount={total}
                 title="Payment Successful!"
                 description="Thank you for your purchase. Your transaction has been completed successfully."
+            />
+
+        <PaymentFailModal
+                isOpen={isFailModalOpen}
+                onClose={() => {
+                    window.location.reload();
+                    setIsFailModalOpen(false);
+                }}
+                amount={total}
+                title="Payment Failed!"
+                description="The payment has failed, please try again."
             />
         </div>
     );
