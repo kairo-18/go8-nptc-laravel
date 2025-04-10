@@ -1,7 +1,7 @@
 import { type BreadcrumbItem, type SharedData } from '@/types';
 import { Transition } from '@headlessui/react';
 import { Head, Link, useForm, usePage } from '@inertiajs/react';
-import { FormEventHandler } from 'react';
+import { FormEventHandler, useState } from 'react';
 
 import DeleteUser from '@/components/delete-user';
 import HeadingSmall from '@/components/heading-small';
@@ -34,17 +34,28 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
-
         patch(route('profile.update'), {
             preserveScroll: true,
         });
     };
+
+    const [qrModalOpen, setQRModalOpen] = useState(false);
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
             <Head title="Profile settings" />
 
             <SettingsLayout>
+                <div className="flex items-center justify-between mb-4">
+                    <h1 className="text-xl font-semibold"></h1>
+                    <Button
+                        className="bg-primary text-white hover:bg-primary/90"
+                        onClick={() => setQRModalOpen(true)}
+                    >
+                        Show Profile QR Code
+                    </Button>
+                </div>
+
                 <div className="space-y-6">
                     <HeadingSmall
                         title="Profile information"
@@ -213,6 +224,31 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                         </div>
                     </div>
                 </div>
+
+                {/* QR Code Modal */}
+                {qrModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+                        <div className="bg-white dark:bg-neutral-900 p-6 rounded-xl shadow-xl w-[90%] max-w-md space-y-4">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-lg font-semibold">Profile QR Code</h2>
+                                <button
+                                    onClick={() => setQRModalOpen(false)}
+                                    className="text-sm text-neutral-500 hover:text-neutral-800 dark:hover:text-white"
+                                >
+                                    Close
+                                </button>
+                            </div>
+                            <div className="flex justify-center">
+                                <div className="w-40 h-40 bg-neutral-200 dark:bg-neutral-700 flex items-center justify-center text-neutral-500 text-sm">
+                                    QR Code Placeholder
+                                </div>
+                            </div>
+                            <div className="flex justify-end">
+                                <Button className="bg-primary text-white hover:bg-primary/90">Download QR Code</Button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </SettingsLayout>
         </MainLayout>
     );
