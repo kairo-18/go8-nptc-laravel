@@ -68,9 +68,9 @@ export default function Bookings({ bookings }) {
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
             <div className='p-10'>
-                <div className="ml-2 flex flex-row items-start py-2">
+                <div className="ml-2 flex flex-col md:flex-row justify-center md:justify-between items-center md:items-start py-2 gap-5">
                     <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">Table for Trips/Bookings</h3>
-                    <Button className="ml-auto w-1/4 bg-blue-900 hover:bg-white hover:text-black" onClick={() => (window.location.href = '/book-trip')}>
+                    <Button className=" w-full md:w-1/4 bg-blue-900 hover:bg-white hover:text-black" onClick={() => (window.location.href = '/book-trip')}>
                         Generate Trip Ticket
                     </Button>
                 </div>

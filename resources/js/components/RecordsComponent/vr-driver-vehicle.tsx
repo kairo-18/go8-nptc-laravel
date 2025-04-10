@@ -5,6 +5,8 @@ import { useState, useEffect } from 'react';
 import SetStatus from './set-status';
 import axios from 'axios';
 import SwapKey from './swapKey';
+import { getBackgroundColorForRole } from '../UtilsColor';
+import { usePage } from "@inertiajs/react";
 
 
 interface DriverProps {
@@ -24,6 +26,9 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
     const [openStatusModal, setOpenStatusModal] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState('');
     const [openSwapModal, setOpenSwapModal] = useState(false);
+
+    const { props } = usePage<{ auth: { user?: { id: number; roles?: { name: string }[] }, vr_company_id?: number } }>();
+    const userRole = props.auth.user?.roles?.[0]?.name;
 
     useEffect(() => {
         setDriverData(drivers);
@@ -165,30 +170,30 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
                 }
             );
 
-
     return (
-        <div className="w-full gap-4">
+        <div className="grid grid-cols md:flex w-full gap-4">
             <Tabs defaultValue="drivers" className="w-full ">
                 <div className="flex md:justify-end justify-center mt-5 ">
-                <TabsList className="bg-[#006D54] text-white">
+                <TabsList className={`${getBackgroundColorForRole(userRole)} text-white`}>
                     <TabsTrigger 
                         value="drivers" 
-                        className="px-10 !bg-[#006D54] data-[state=active]:!bg-white data-[state=active]:text-black"
+                        className={`px-10 !${getBackgroundColorForRole(userRole)} data-[state=active]:!bg-white data-[state=active]:text-black`}
                     >
                         Drivers
                     </TabsTrigger>
                     <TabsTrigger 
                         value="vehicles" 
-                        className="px-10 !bg-[#006D54] data-[state=active]:!bg-white data-[state=active]:text-black"
+                        className={`px-10 !${getBackgroundColorForRole(userRole)} data-[state=active]:!bg-white data-[state=active]:text-black`}
                     >
                         Vehicles
                     </TabsTrigger>
                 </TabsList>
 
+
                 </div>
 
                 <TabsContent value="drivers">
-                    <DataTable data={transformDriverData} ColumnFilterName="FirstName" columns={driverColumns} />
+                    <DataTable data={transformDriverData} ColumnFilterName="Status" columns={driverColumns} />
                     <SetStatus selectedData={selectedDriver} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={handleDriverSetStatus} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToDriver} />
                     <SwapKey id={selectedDriver?.id} type="drivers" openSwapModal={openSwapModal} setOpenSwapModal={setOpenSwapModal} selectedData={selectedDriver} drivers={[]} vehicles={vehicleData} />
                 </TabsContent>

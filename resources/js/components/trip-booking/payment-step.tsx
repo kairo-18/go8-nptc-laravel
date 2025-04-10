@@ -168,7 +168,7 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
             <PaymentSuccessModal
                 isOpen={isModalOpen}
                 onClose={() => {
-                    window.location.href = '/dashboard';
+                    window.location.href = '/driver-dashboard';
                 }}
                 amount={total}
                 title="Payment Successful!"
