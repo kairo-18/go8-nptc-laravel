@@ -4,10 +4,12 @@ namespace App\Observers;
 
 use App\Events\MailReceive;
 use App\Events\NewThreadCreated;
+use App\Mail\StatusEmail;
 use App\Models\Mail;
 use App\Models\Operator;
 use App\Models\Thread;
 use App\Models\User;
+use Illuminate\Support\Facades\Mail as IlluminateMail;
 
 class OperatorObserver
 {
@@ -25,6 +27,13 @@ class OperatorObserver
     public function updated(Operator $operator): void
     {
         $operator->load('user.operator');
+
+        if ($operator->isDirty('Status')) {
+            $email = $operator->user->email;
+            $userName = $operator->user->FirstName.' '.$operator->user->LastName.' ';
+
+            IlluminateMail::to($email)->send(new StatusEmail($userName, $operator->Status));
+        }
 
         if ($operator->Status == 'For Payment') {
 

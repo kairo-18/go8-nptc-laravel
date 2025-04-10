@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Events\MailReceive;
 use App\Events\NewThreadCreated;
+use App\Mail\RejectionEmail;
 use App\Models\Driver;
 use App\Models\Mail;
 use App\Models\ManualPayment;
@@ -18,6 +19,7 @@ use App\Models\VrContacts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail as IlluminateMail;
 use Spatie\Browsershot\Browsershot;
 
 class PendingController extends Controller
@@ -193,6 +195,18 @@ class PendingController extends Controller
         // Set the status to 'Rejected' and save the entity
         $entity->Status = 'Rejected';
         $entity->save();
+
+        // mail to user rejection and notes
+        $email = null;
+        if ($type === 'vr_company') {
+            $email = $entity->owner->user->email;
+            $userName = $entity->owner->user->FirstName.' '.$entity->owner->user->LastName.' ';
+        } else {
+            $email = $entity->user->email;
+            $userName = $entity->user->FirstName.' '.$entity->user->LastName.' ';
+        }
+
+        IlluminateMail::to($email)->send(new RejectionEmail($userName, $validated['note'], $type));
 
         // Create the rejection note
         Notes::create([

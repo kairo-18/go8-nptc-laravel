@@ -93,11 +93,15 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
             }
 
             const data = await response.json();
+<<<<<<< HEAD
             showToast('Operator approved successfully', {
                 type: 'success',
                 position: 'top-center',
             });
             location.reload();
+=======
+            // location.reload();
+>>>>>>> 9c9c6ca56ab4baf46549bc1c503a2b80fa2e5063
         } catch (error) {
             console.error('Error submitting rejection:', error);
             showToast('Error approving operator. Please try again.', {
