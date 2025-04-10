@@ -113,6 +113,7 @@ export default function Operator({ operators, onNextTab, onSelectOperator, onSta
         <>
             <DataTable data={transformedOperators} ColumnFilterName="Operator" columns={columns} onRowClick={(row) => onSelectOperator(row.id)} />
             <SetStatus
+                type="operator"
                 selectedData={selectedOperator}
                 openStatusModal={openStatusModal}
                 setOpenStatusModal={setOpenStatusModal}

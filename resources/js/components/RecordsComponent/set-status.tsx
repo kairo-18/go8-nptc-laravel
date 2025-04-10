@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 
 interface SetStatusProps {
+    type: 'company' | 'operator' | 'driver' | 'vehicle';
     selectedData: any | null;
     selectedStatus: string;
     setSelectedStatus: (status: string) => void;
@@ -15,9 +16,19 @@ interface SetStatusProps {
     handleSubmit: () => void;
 }
 
-const statuses = ['Active', 'Inactive', 'Suspended', 'Banned', 'Pending', 'Approved', 'Rejected', 'For Payment'];
+export default function SetStatus({ type, selectedStatus, setSelectedStatus, selectedData, openStatusModal, setOpenStatusModal, handleSubmit }: SetStatusProps) {
 
-export default function SetStatus({ selectedStatus, setSelectedStatus, selectedData, openStatusModal, setOpenStatusModal, handleSubmit }: SetStatusProps) {
+    const statuses = [];
+
+    if (type === 'company') {
+        statuses.push('Active', 'Inactive', 'Suspended', 'Banned', 'Pending', 'Approved', 'Rejected', 'For Payment');
+    } else if (type === 'operator') {
+        statuses.push('Active', 'Inactive', 'Suspended', 'Banned', 'Pending', 'Approved', 'Rejected', 'For Payment', 'For NPTC Approval', 'For VR Approval');
+    } else if (type === 'driver') {
+        statuses.push('Active', 'Inactive', 'Suspended', 'Banned', 'Pending', 'Approved', 'Rejected', 'For Payment', 'For NPTC Approval', 'For VR Approval');
+    } else if (type === 'vehicle') {
+        statuses.push('Active', 'Inactive', 'Suspended', 'Banned', 'Pending', 'Approved', 'Rejected', 'For Payment', 'For NPTC Approval', 'For VR Approval');
+    }
 
     useEffect(() => {
         if (selectedData) {
