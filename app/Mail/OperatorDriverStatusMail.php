@@ -49,7 +49,7 @@ class OperatorDriverStatusMail extends Mailable
         return new content(
             view: 'emails.operator-driver',
             with: [
-                'username' => $this->username,  // pass dynamic data to the view
+                'userName' => $this->username,  // pass dynamic data to the view
                 'status' => $this->status, // pass the status to the view
                 'subject' => 'Status Update Email', // pass the subject to the view
                 'operatorName' => $this->operatorname, // pass the operator name to the view
