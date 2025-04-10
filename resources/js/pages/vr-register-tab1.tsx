@@ -181,10 +181,6 @@ const TemporaryAccountTabContent = ({ type }) => {
                 setServerErrors(formattedErrors);
             } else {
                 console.error('Submission failed', error);
-                showToast('An error occurred. Please try again.', {
-                    type: 'error',
-                    position: 'top-center',
-                });
             }
 
             showToast('An error occurred. Please try again.', {

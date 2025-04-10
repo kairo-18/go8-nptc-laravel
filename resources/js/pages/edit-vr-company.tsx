@@ -144,10 +144,10 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
         await router.delete(`/vr-company/delete-media/${file.id}`, {
             preserveScroll: true,
             onSuccess: () => {
-                alert('File deleted successfully');
+                showToast('File deleted successfully', { type: 'success', position: 'top-center' });
             },
             onError: () => {
-                alert('Failed to delete file.');
+                showToast('Error deleting file', { type: 'error', position: 'top-center' });
             },
         });
     };
