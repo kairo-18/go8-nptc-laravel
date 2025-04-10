@@ -1,5 +1,6 @@
 'use client';
 
+import { showToast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { BookingFormData } from '@/lib/types';
@@ -40,17 +41,17 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
             if (response.data && response.data.data) {
                 const paymentUrl = response.data.data.attributes.checkout_url;
                 setLinkId(response.data.data.id);
-
                 window.open(paymentUrl, '_blank');
+                showToast('Payment link created successfully!', { type: 'success', position: 'top-center' });
             } else {
                 console.error('Payment link creation failed:', response.data);
-                alert('Failed to generate payment link. Please try again.');
-                setIsLoading(false); // Stop loading on error
+                showToast('Payment link creation failed', { type: 'error', position: 'top-center' });
+                setIsLoading(false);
             }
         } catch (error) {
             console.error('Error creating payment link:', error);
-            alert('An error occurred while processing the payment.');
-            setIsLoading(false); // Stop loading on error
+            showToast('Error creating payment link', { type: 'error', position: 'top-center' });
+            setIsLoading(false);
         }
     };
 
@@ -63,7 +64,7 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
 
                 if (response.data?.data?.attributes?.status === 'paid') {
                     clearInterval(interval);
-                    setIsLoading(false); // Stop loading when payment is successful
+                    setIsLoading(false);
                     handleSubmitBooking();
                 }
             } catch (error) {

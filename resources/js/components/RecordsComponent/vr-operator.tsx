@@ -1,9 +1,10 @@
+import { showToast } from '@/components/toast';
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 import { generateColumns } from './columns';
+import Container from './container';
 import { DataTable } from './data-table';
 import SetStatus from './set-status';
-import Container from './container';
-import axios from 'axios';
 
 interface OperatorProps {
     operators: { [key: string]: any }[];
@@ -53,7 +54,7 @@ export default function Operator({ operators, onNextTab, onSelectOperator, onSta
 
     const handleSubmitToOperator = async () => {
         if (!selectedOperator) {
-            alert('No operator selected');
+            showToast('No operator selected', { type: 'error', position: 'top-center' });
             return;
         }
 
@@ -74,8 +75,8 @@ export default function Operator({ operators, onNextTab, onSelectOperator, onSta
     };
 
     const handleContainerSubmit = async () => {
-        alert('This works');
         setOpenContainerModal(false);
+        showToast('Container submitted successfully', { type: 'success', position: 'top-center' });
     };
 
     const transformedOperators = operators.map((operator) => ({
@@ -85,27 +86,48 @@ export default function Operator({ operators, onNextTab, onSelectOperator, onSta
     }));
 
     const primaryColumns = ['NPTC_ID', 'Operator'];
-    const otherColumns = operatorHeaders.map((header) => header.key).filter((key) => !primaryColumns.includes(key) && key !== 'Status' && key !== 'id');
+    const otherColumns = operatorHeaders
+        .map((header) => header.key)
+        .filter((key) => !primaryColumns.includes(key) && key !== 'Status' && key !== 'id');
     const orderedHeaders = [...primaryColumns, ...otherColumns];
 
     const columns = generateColumns(
         orderedHeaders.map((key) => ({
             key,
-            label: key.replace(/_count$/, '').replace(/^vr_/, 'VR ').replace(/_/g, ' ').replace(/([A-Z])/g, ' $1').trim(),
+            label: key
+                .replace(/_count$/, '')
+                .replace(/^vr_/, 'VR ')
+                .replace(/_/g, ' ')
+                .replace(/([A-Z])/g, ' $1')
+                .trim(),
         })),
         {
             entityType: 'operators',
             statusColumns: ['Status'],
             updateStatus: handleSetStatus,
             handleContainer: handleContainer,
-        }
+        },
     );
 
     return (
         <>
             <DataTable data={transformedOperators} ColumnFilterName="Operator" columns={columns} onRowClick={(row) => onSelectOperator(row.id)} />
-            <SetStatus selectedData={selectedOperator} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={handleSetStatus} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToOperator} />
-            <Container openContainerModal={openContainerModal} setOpenContainerModal={setOpenContainerModal} handleSubmit={handleContainerSubmit} containerType={containerType} setInputValue={setInputValue} />
+            <SetStatus
+                selectedData={selectedOperator}
+                openStatusModal={openStatusModal}
+                setOpenStatusModal={setOpenStatusModal}
+                selectedStatus={selectedStatus}
+                setStatusData={handleSetStatus}
+                setSelectedStatus={setSelectedStatus}
+                handleSubmit={handleSubmitToOperator}
+            />
+            <Container
+                openContainerModal={openContainerModal}
+                setOpenContainerModal={setOpenContainerModal}
+                handleSubmit={handleContainerSubmit}
+                containerType={containerType}
+                setInputValue={setInputValue}
+            />
         </>
     );
 }
