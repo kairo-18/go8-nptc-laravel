@@ -107,6 +107,7 @@ export default function Company({ companies, companiesWithMedia, onSelectCompany
             <CompanyFiles selectedCompany={selectedCompany} companiesWithMedia={companiesWithMedia} open={open} setOpen={setOpen} />
 
             <SetStatus
+                type="company"
                 selectedData={selectedCompany}
                 openStatusModal={openStatusModal}
                 setOpenStatusModal={setOpenStatusModal}

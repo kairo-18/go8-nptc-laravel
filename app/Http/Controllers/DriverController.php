@@ -376,7 +376,7 @@ class DriverController extends Controller
         $driver = Driver::findOrFail($id);
 
         $request->validate([
-            'status' => 'required|string|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected,For Payment',
+            'status' => 'required|string|in:Active,Inactive,Suspended,Banned,Pending,Approved,Rejected,For Payment,For NPTC Approval, For VR Approval',
         ]);
 
         $driver->Status = $request->status;

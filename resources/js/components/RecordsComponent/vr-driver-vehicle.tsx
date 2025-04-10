@@ -169,52 +169,39 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
         },
     );
 
+
     return (
-        <div className="w-full gap-4">
-            <Tabs defaultValue="drivers" className="w-full">
-                <div className="mt-5 flex justify-center md:justify-end">
+        <div className="grid grid-cols md:flex w-full gap-4">
+            <Tabs defaultValue="drivers" className="w-full ">
+                <div className="flex md:justify-end justify-center mt-5 ">
                 <TabsList className={`${getBackgroundColorForRole(userRole)} text-white`}>
-                    <TabsTrigger 
-                        value="drivers" 
+                    <TabsTrigger
+                        value="drivers"
                         className={`px-10 !${getBackgroundColorForRole(userRole)} data-[state=active]:!bg-white data-[state=active]:text-black`}
                     >
                         Drivers
                     </TabsTrigger>
-                    <TabsTrigger 
-                        value="vehicles" 
+                    <TabsTrigger
+                        value="vehicles"
                         className={`px-10 !${getBackgroundColorForRole(userRole)} data-[state=active]:!bg-white data-[state=active]:text-black`}
                     >
                         Vehicles
                     </TabsTrigger>
                 </TabsList>
+
+
                 </div>
 
                 <TabsContent value="drivers">
-                    <DataTable data={transformDriverData} ColumnFilterName="Driver" columns={driverColumns} />
-                    <SetStatus
-                        selectedData={selectedDriver}
-                        openStatusModal={openStatusModal}
-                        setOpenStatusModal={setOpenStatusModal}
-                        selectedStatus={selectedStatus}
-                        setStatusData={handleDriverSetStatus}
-                        setSelectedStatus={setSelectedStatus}
-                        handleSubmit={handleSubmitToDriver}
-                    />
-                    <SwapKey
-                        id={selectedDriver?.id}
-                        type="drivers"
-                        openSwapModal={openSwapModal}
-                        setOpenSwapModal={setOpenSwapModal}
-                        selectedData={selectedDriver}
-                        drivers={[]}
-                        vehicles={vehicleData}
-                    />
+                    <DataTable data={transformDriverData} ColumnFilterName="Status" columns={driverColumns} />
+                    <SetStatus selectedData={selectedDriver} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={handleDriverSetStatus} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToDriver} />
+                    <SwapKey id={selectedDriver?.id} type="drivers" openSwapModal={openSwapModal} setOpenSwapModal={setOpenSwapModal} selectedData={selectedDriver} drivers={[]} vehicles={vehicleData} />
                 </TabsContent>
 
                 <TabsContent value="vehicles">
                     <DataTable data={transformVehicleData} ColumnFilterName="Vehicles" columns={vehicleColumns} />
                     <SetStatus
-                        selectedData={selectedVehicle}
+                        type="vehicle" selectedData={selectedVehicle}
                         openStatusModal={openStatusModal}
                         setOpenStatusModal={setOpenStatusModal}
                         selectedStatus={selectedStatus}
