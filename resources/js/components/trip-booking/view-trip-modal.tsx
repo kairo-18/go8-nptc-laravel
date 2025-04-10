@@ -31,17 +31,16 @@ export default function TripTicketModal({
         fees: { baseFee: 0, additionalFee: { amount: 0, description: '' }, passengerInsurance: 0, others: 0 },
     });
 
-    const [isPassengerModalOpen, setIsPassengerModalOpen] = useState(false); // State for passenger manifest modal
-    const [TripQr, setTripQr] = useState([]);
+    const [isPassengerModalOpen, setIsPassengerModalOpen] = useState(false);
+    const [TripQr, setTripQr] = useState('');
+    const [showQr, setShowQr] = useState(false);
 
     useEffect(() => {
         if (selectedTripData) {
             const passengerCount = selectedTripData.passengers?.length || 0;
-
-            // Function to convert numbers to words (supports up to 10 for simplicity)
             const numberToWords = (num: number) => {
                 const words = ['Zero', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven', 'Eight', 'Nine', 'Ten'];
-                return words[num] || num.toString(); // Fallback for larger numbers
+                return words[num] || num.toString();
             };
 
             setTripData({
@@ -89,11 +88,9 @@ export default function TripTicketModal({
                 },
             });
 
-            console.log('hotdog');
             const fetchQrCode = async () => {
                 try {
                     const response = await axios.get(`/generate-qr/${selectedTripData.id}`);
-                    console.log(response.data); // Handle your QR code here
                     setTripQr(response.data.qr_code);
                 } catch (error) {
                     console.error('Failed to fetch QR code:', error);
@@ -112,188 +109,100 @@ export default function TripTicketModal({
 
     return (
         <>
-            {/* Trip Ticket Modal */}
             <Dialog open={open} onOpenChange={setOpen}>
-                <DialogContent className="overflow-hidden rounded-lg border-2 pt-3 sm:max-w-[900px]">
-                    <div className="overflow-hidden rounded-lg bg-white">
-                        {/* Ticket Content */}
-                        <div className="p-6">
-                            <h2 className="mb-3 text-xl font-bold text-indigo-800">{tripData.company || ''}</h2>
+                <DialogContent className="overflow-y-auto max-h-[90vh] rounded-lg border-2 pt-3 sm:max-w-[900px]">
+                    {showQr ? (
+                        <div className="flex flex-col items-center justify-center gap-6 p-8">
+                            <h2 className="text-lg font-bold text-center text-indigo-800">Trip Ticket QR Code</h2>
+                            <img src={TripQr} alt="QR Code" className="w-full max-w-[250px]" />
+                            <Button className="mt-4" onClick={() => setShowQr(false)}>
+                                Back to Trip Info
+                            </Button>
+                        </div>
+                    ) : (
+                        <div className="overflow-hidden rounded-lg bg-white">
+                            <div className="p-4 sm:p-6">
+                                <h2 className="mb-3 text-xl font-bold text-indigo-800">{tripData.company || ''}</h2>
 
-                            {/* Adjust grid layout to horizontal view with two columns */}
-                            <div className="mb-6 grid grid-cols-1 gap-4 text-sm text-gray-600 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                                {tripData.operator && (
-                                    <p className="flex flex-col gap-1">
-                                        <span className="font-semibold text-gray-600">Operator:</span>
-                                        <span className="font-semibold text-black">{tripData.operator}</span>
-                                    </p>
-                                )}
-                                {tripData.ticketId && (
-                                    <p className="flex flex-col gap-1">
-                                        <span className="font-semibold text-gray-600">Ticket ID:</span>
-                                        <span className="font-semibold text-black">{tripData.ticketId}</span>
-                                    </p>
-                                )}
-                                {tripData.billingId && (
-                                    <p className="flex flex-col gap-1">
-                                        <span className="font-semibold text-gray-600">Billing ID:</span>
-                                        <span className="font-semibold text-black">{tripData.billingId}</span>
-                                    </p>
-                                )}
-                                {tripData.driver && (
-                                    <p className="flex flex-col gap-1">
-                                        <span className="font-semibold text-gray-600">Driver:</span>
-                                        <span className="font-semibold text-black">{tripData.driver}</span>
-                                    </p>
-                                )}
-                                {tripData.unit && (
-                                    <p className="flex flex-col gap-1">
-                                        <span className="font-semibold text-gray-600">Unit:</span>
-                                        <span className="font-semibold text-black">{tripData.unit}</span>
-                                    </p>
-                                )}
-                                {tripData.plate && (
-                                    <p className="flex flex-col gap-1">
-                                        <span className="font-semibold text-gray-600">Plate:</span>
-                                        <span className="font-semibold text-black">{tripData.plate}</span>
-                                    </p>
-                                )}
-                                {tripData.applicationDate && (
-                                    <p className="flex flex-col gap-1">
-                                        <span className="font-semibold text-gray-600">Application Date:</span>
-                                        <span className="font-semibold text-black">{tripData.applicationDate}</span>
-                                    </p>
-                                )}
-                                {tripData.totalPassengers?.number && (
-                                    <p className="flex flex-col gap-1">
-                                        <span className="font-semibold text-gray-600">Total Passengers:</span>
-                                        <span className="font-semibold text-black">
-                                            {tripData.totalPassengers.number} ({tripData.totalPassengers.text})
-                                        </span>
-                                    </p>
-                                )}
-                                {tripData.tripType && (
-                                    <p className="flex flex-col gap-1">
-                                        <span className="font-semibold text-gray-600">Trip Type:</span>
-                                        <span className="font-semibold text-black">{tripData.tripType}</span>
-                                    </p>
-                                )}
-                                {tripData.pickup?.dateTime && (
-                                    <p className="flex flex-col gap-1">
-                                        <span className="font-semibold text-gray-600">Pick-up Date and Time:</span>
-                                        <span className="font-semibold text-black">{tripData.pickup.dateTime}</span>
-                                    </p>
-                                )}
-                                {tripData.dropoff?.dateTime && (
-                                    <p className="flex flex-col gap-1">
-                                        <span className="font-semibold text-gray-600">Drop-off Date and Time:</span>
-                                        <span className="font-semibold text-black">{tripData.dropoff.dateTime}</span>
-                                    </p>
-                                )}
-                                {tripData.pickup?.address && (
-                                    <p className="flex flex-col gap-1">
-                                        <span className="font-semibold text-gray-600">Pick-up Address:</span>
-                                        <span className="font-semibold text-black">{tripData.pickup.address}</span>
-                                    </p>
-                                )}
-                                {tripData.dropoff?.address && (
-                                    <p className="flex flex-col gap-1">
-                                        <span className="font-semibold text-gray-600">Drop-off Address:</span>
-                                        <span className="font-semibold text-black">{tripData.dropoff.address}</span>
-                                    </p>
-                                )}
-                            </div>
+                                <div className="mb-6 grid grid-cols-1 gap-4 text-sm text-gray-600 sm:grid-cols-2 lg:grid-cols-3">
+                                    {tripData.operator && <Info label="Operator" value={tripData.operator} />}
+                                    {tripData.ticketId && <Info label="Ticket ID" value={tripData.ticketId} />}
+                                    {tripData.billingId && <Info label="Billing ID" value={tripData.billingId} />}
+                                    {tripData.driver && <Info label="Driver" value={tripData.driver} />}
+                                    {tripData.unit && <Info label="Unit" value={tripData.unit} />}
+                                    {tripData.plate && <Info label="Plate" value={tripData.plate} />}
+                                    {tripData.applicationDate && <Info label="Application Date" value={tripData.applicationDate} />}
+                                    {tripData.totalPassengers?.number !== 0 && (
+                                        <Info
+                                            label="Total Passengers"
+                                            value={`${tripData.totalPassengers.number} (${tripData.totalPassengers.text})`}
+                                        />
+                                    )}
+                                    {tripData.tripType && <Info label="Trip Type" value={tripData.tripType} />}
+                                    {tripData.pickup?.dateTime && <Info label="Pick-up Date and Time" value={tripData.pickup.dateTime} />}
+                                    {tripData.dropoff?.dateTime && <Info label="Drop-off Date and Time" value={tripData.dropoff.dateTime} />}
+                                    {tripData.pickup?.address && <Info label="Pick-up Address" value={tripData.pickup.address} />}
+                                    {tripData.dropoff?.address && <Info label="Drop-off Address" value={tripData.dropoff.address} />}
+                                </div>
 
-                            {/* Fee Breakdown */}
-                            <div className="border-t border-gray-200 pt-4">
-                                <div className="flex justify-between">
-                                    <div className="w-full text-sm text-gray-600">
-                                        {tripData.fees?.baseFee && (
-                                            <p className="flex justify-between">
-                                                <span className="font-semibold text-gray-600">Base Fee:</span>
-                                                <span className="font-bold text-black">Php {tripData.fees.baseFee.toFixed(2)}</span>
-                                            </p>
-                                        )}
-                                        {tripData.fees?.additionalFee?.amount && (
-                                            <p className="flex justify-between">
-                                                <span className="font-semibold text-gray-600">
-                                                    Additional Fee ({tripData.fees.additionalFee.description}):
-                                                </span>
-                                                <span className="font-bold text-black">Php {tripData.fees.additionalFee.amount.toFixed(2)}</span>
-                                            </p>
-                                        )}
-                                        {tripData.fees?.passengerInsurance && (
-                                            <p className="flex justify-between">
-                                                <span className="font-semibold text-gray-600">Passenger Insurance:</span>
-                                                <span className="font-bold text-black">Php {tripData.fees.passengerInsurance.toFixed(2)}</span>
-                                            </p>
-                                        )}
-                                        {tripData.fees?.others && (
-                                            <p className="flex justify-between">
-                                                <span className="font-semibold text-gray-600">Others:</span>
-                                                <span className="font-bold text-black">Php {tripData.fees.others.toFixed(2)}</span>
-                                            </p>
-                                        )}
-                                        <p className="mt-2 flex justify-between border-t border-gray-300 pt-2 text-base">
-                                            <span className="text-lg font-semibold text-gray-600">Total:</span>
-                                            <span className="text-lg font-bold text-black">Php {totalFee.toFixed(2)}</span>
-                                        </p>
-                                    </div>
+                                <div className="border-t border-gray-200 pt-4 text-sm text-gray-600">
+                                    {tripData.fees?.baseFee > 0 && <Fee label="Base Fee" value={tripData.fees.baseFee} />}
+                                    {tripData.fees?.additionalFee?.amount > 0 && (
+                                        <Fee
+                                            label={`Additional Fee (${tripData.fees.additionalFee.description})`}
+                                            value={tripData.fees.additionalFee.amount}
+                                        />
+                                    )}
+                                    {tripData.fees?.passengerInsurance > 0 && (
+                                        <Fee label="Passenger Insurance" value={tripData.fees.passengerInsurance} />
+                                    )}
+                                    {tripData.fees?.others > 0 && <Fee label="Others" value={tripData.fees.others} />}
+                                    <p className="mt-2 flex justify-between border-t border-gray-300 pt-2 text-base font-semibold">
+                                        <span>Total:</span>
+                                        <span className="font-bold text-black">Php {totalFee.toFixed(2)}</span>
+                                    </p>
                                 </div>
                             </div>
-                        </div>
 
-                        {/* Action Buttons */}
-                        <div className="grid grid-cols-1 gap-3 p-4">
-                            <Button
-                                className="flex items-center justify-center gap-2 rounded-md bg-indigo-800 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-                                onClick={() => setIsPassengerModalOpen(true)}
-                            >
-                                <FileText size={16} /> View passenger manifest
-                            </Button>
-                            <Button
-                                className="flex items-center justify-center gap-2 rounded-md bg-indigo-800 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
-                                onClick={() => window.open(`/trip-ticket/download/${selectedTripData?.id}`, '_blank')}
-                            >
-                                <Download size={16} /> Download Trip Ticket
-                            </Button>
-                            <img src={TripQr} alt="QR" className="mx-auto w-full max-w-[200px]" />
+                            {/* Action Buttons */}
+                            <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
+                                <Button className="w-full" onClick={() => setIsPassengerModalOpen(true)}>
+                                    <FileText size={16} className="mr-2" /> View passenger manifest
+                                </Button>
+                                <Button
+                                    className="w-full"
+                                    onClick={() => window.open(`/trip-ticket/download/${selectedTripData?.id}`, '_blank')}
+                                >
+                                    <Download size={16} className="mr-2" /> Download Trip Ticket
+                                </Button>
+                                <Button className="w-full" onClick={() => setShowQr(true)}>
+                                    Show QR Code
+                                </Button>
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </DialogContent>
             </Dialog>
 
-            {/* Passenger Manifest Modal */}
+            {/* Passenger Modal */}
             <Dialog open={isPassengerModalOpen} onOpenChange={setIsPassengerModalOpen}>
-                <DialogContent className="overflow-hidden rounded-lg border-2 border-indigo-100 p-0 sm:max-w-[900px]">
-                    <div className="overflow-hidden rounded-lg bg-white">
-                        {/* Modal Header */}
+                <DialogContent className="overflow-y-auto max-h-[90vh] rounded-lg border-2 p-0 sm:max-w-[900px]">
+                    <div className="bg-white">
                         <div className="border-b bg-gray-50 p-4">
                             <h2 className="text-lg font-bold text-indigo-800">Passenger Manifest</h2>
                         </div>
-
-                        {/* Passenger List */}
-                        <div className="p-6">
+                        <div className="p-4 sm:p-6">
                             {selectedTripData?.passengers?.length > 0 ? (
                                 <div className="space-y-4">
                                     {selectedTripData.passengers.map((passenger: any, index: number) => (
-                                        <div key={index} className="grid grid-cols-1 gap-4 rounded-lg border p-4 md:grid-cols-2 lg:grid-cols-3">
-                                            <div className="flex flex-col gap-1">
-                                                <div className="text-gray-600">Contact</div>
-                                                <div className="font-bold">{passenger.ContactNumber}</div>
-                                            </div>
-                                            <div className="flex flex-col gap-1">
-                                                <div className="text-gray-600">Last Name</div>
-                                                <div className="font-bold">{passenger.LastName}</div>
-                                            </div>
-                                            <div className="flex flex-col gap-1">
-                                                <div className="text-gray-600">First Name</div>
-                                                <div className="font-bold">{passenger.FirstName}</div>
-                                            </div>
-                                            <div className="flex flex-col gap-1">
-                                                <div className="text-gray-600">Address</div>
-                                                <div className="font-bold">{passenger.Address}</div>
-                                            </div>
+                                        <div
+                                            key={index}
+                                            className="grid grid-cols-1 gap-3 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-3"
+                                        >
+                                            <PassengerInfo label="Contact" value={passenger.ContactNumber} />
+                                            <PassengerInfo label="Last Name" value={passenger.LastName} />
+                                            <PassengerInfo label="First Name" value={passenger.FirstName} />
+                                            <PassengerInfo label="Address" value={passenger.Address} />
                                         </div>
                                     ))}
                                 </div>
@@ -307,3 +216,25 @@ export default function TripTicketModal({
         </>
     );
 }
+
+// Reusable UI Components
+const Info = ({ label, value }: { label: string; value: string }) => (
+    <div className="flex flex-col gap-1">
+        <span className="font-semibold text-gray-600">{label}:</span>
+        <span className="font-semibold text-black">{value}</span>
+    </div>
+);
+
+const Fee = ({ label, value }: { label: string; value: number }) => (
+    <p className="flex justify-between">
+        <span>{label}:</span>
+        <span className="font-bold text-black">Php {value.toFixed(2)}</span>
+    </p>
+);
+
+const PassengerInfo = ({ label, value }: { label: string; value: string }) => (
+    <div className="flex flex-col gap-1">
+        <span className="text-gray-600">{label}</span>
+        <span className="font-bold">{value}</span>
+    </div>
+);
