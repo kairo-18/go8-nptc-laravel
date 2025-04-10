@@ -70,6 +70,8 @@ Route::post('/approval', [PendingController::class, 'approval']);
 
 Route::post('/approve-with-docu', [PendingController::class, 'approveAndSendDocuments']);
 
+Route::get('/generate-qr/{trip}', [TripController::class, 'generateQr']);
+
 // Catch-all for unhandled API routes
 Route::fallback(function () {
     return response()->json(['error' => 'Route not found'], 404);
