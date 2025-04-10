@@ -1,16 +1,3 @@
-<<<<<<< HEAD
-import { showToast } from '@/components/toast';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { type BreadcrumbItem } from '@/types';
-import { Head } from '@inertiajs/react';
-import axios from 'axios';
-import { useEffect, useState } from 'react';
-import MainLayout from './mainLayout';
-=======
 import React, { useEffect, useState } from "react";
 import { Head } from "@inertiajs/react";
 import axios from "axios";
@@ -35,7 +22,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
->>>>>>> 9c9c6ca56ab4baf46549bc1c503a2b80fa2e5063
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -55,17 +41,11 @@ export default function DriverDashboard({
     bookingsThisMonth: any;
     scheduledBookings: any;
 }) {
-<<<<<<< HEAD
-    const [date, setDate] = useState<Date | undefined>(new Date());
-    const [trip, setTrip] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
-=======
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [trip, setTrip] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [tripStartModalOpen, setTripStartModalOpen] = useState(false);
   const [tripEndModalOpen, setTripEndModalOpen] = useState(false);
->>>>>>> 9c9c6ca56ab4baf46549bc1c503a2b80fa2e5063
 
     useEffect(() => {
         axios
@@ -81,49 +61,6 @@ export default function DriverDashboard({
             });
     }, []);
 
-<<<<<<< HEAD
-    const handleStartTrip = (tripId: number) => {
-        axios
-            .post(`/driver/trips/${tripId}/start`)
-            .then((response) => {
-                setTrip((prevTrip) => ({
-                    ...prevTrip,
-                    trip: { ...prevTrip.trip, status: 'Ongoing' },
-                }));
-                showToast('Trip Started Successfully!', { type: 'success', position: 'top-center' });
-                location.reload();
-            })
-            .catch((error) => {
-                console.error('Error starting trip:', error);
-                showToast('Error starting trip', { type: 'error', position: 'top-center' });
-            });
-    };
-
-    const handleEndTrip = (tripId: number) => {
-        axios
-            .post(`/driver/trips/${tripId}/end`)
-            .then((response) => {
-                setTrip((prevTrip) => ({
-                    ...prevTrip,
-                    trip: { ...prevTrip.trip, status: 'Done' },
-                }));
-                showToast('Trip Ended Successfully!', { type: 'success', position: 'top-center' });
-                location.reload();
-            })
-            .catch((error) => {
-                console.error('Error ending trip:', error);
-                showToast('Error ending trip', { type: 'error', position: 'top-center' });
-            });
-    };
-
-    return (
-        <MainLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
-            <div className="flex flex-col gap-y-3 p-2 md:p-10">
-                {/* Row 1: Welcome */}
-                <div className="h-full w-full">
-                    <h4 className="text-2xl font-black">Welcome Back, Admin 1!</h4>
-=======
   const handleStartTrip = (tripId: number) => {
     axios
       .post(`/driver/trips/${tripId}/start`)
@@ -193,7 +130,6 @@ export default function DriverDashboard({
                   <p><strong>Trip ID:</strong> {trip.trip.NPTC_ID}</p>
                   <p><strong>Unit:</strong> {trip.vehicle.Model}</p>
                   <p><strong>Plate:</strong> {trip.vehicle.PlateNumber}</p>
->>>>>>> 9c9c6ca56ab4baf46549bc1c503a2b80fa2e5063
                 </div>
 
                 {/* Row 2: Latest Trip */}
@@ -276,25 +212,6 @@ export default function DriverDashboard({
                 <div className="h-full w-full">
                     <h2 className="text-lg font-bold">Bookings</h2>
 
-<<<<<<< HEAD
-                    {/* Grid layout for md and up */}
-                    <div className="hidden grid-cols-3 gap-4 md:grid">
-                        {[
-                            { title: "Today's Bookings", value: bookingsToday.length },
-                            { title: "This Week's Bookings", value: bookingsThisWeek.length },
-                            { title: "This Month's Bookings", value: bookingsThisMonth.length },
-                        ].map((item, index) => (
-                            <Card key={index}>
-                                <CardHeader>
-                                    <CardTitle>{item.title}</CardTitle>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-md font-bold">{item.value}</p>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-=======
           {/* Grid layout for md and up */}
           <div className="hidden grid-cols-1 md:grid md:grid-cols-3 gap-4">
             {[
@@ -312,7 +229,6 @@ export default function DriverDashboard({
               </Card>
             ))}
           </div>
->>>>>>> 9c9c6ca56ab4baf46549bc1c503a2b80fa2e5063
 
                     {/* Carousel for screens below md */}
                     <div className="mt-4 md:hidden">
@@ -378,29 +294,6 @@ export default function DriverDashboard({
                         </CardContent>
                     </Card>
 
-<<<<<<< HEAD
-                    {/* Calendar */}
-                    <Card className="h-full w-full overflow-hidden">
-                        <CardContent className="h-full w-full p-2 sm:p-4">
-                            <div className="w-full overflow-x-auto">
-                                <Calendar
-                                    className="w-full"
-                                    classNames={{
-                                        months: 'flex w-full flex-col space-y-4',
-                                        month: 'space-y-4 w-full flex flex-col',
-                                        table: 'w-full border-collapse space-y-1',
-                                        head_row: '',
-                                        row: 'w-full',
-                                    }}
-                                />
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-            </div>
-        </MainLayout>
-    );
-=======
         {/* Row 4: Scheduled Bookings + Calendar */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-[70%_29%] gap-4 min-w-0">
           {/* Scheduled Bookings */}
@@ -494,5 +387,4 @@ export default function DriverDashboard({
       </Dialog>
     </MainLayout>
   );
->>>>>>> 9c9c6ca56ab4baf46549bc1c503a2b80fa2e5063
 }
