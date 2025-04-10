@@ -52,8 +52,8 @@ class OperatorDriverStatusMail extends Mailable
                 'username' => $this->username,  // pass dynamic data to the view
                 'status' => $this->status, // pass the status to the view
                 'subject' => 'Status Update Email', // pass the subject to the view
-                'operatorname' => $this->operatorname, // pass the operator name to the view
-                'platenumber' => $this->platenumber, // pass the plate number to the view
+                'operatorName' => $this->operatorname, // pass the operator name to the view
+                'PlateNumber' => $this->platenumber, // pass the plate number to the view
             ]
         );
     }
