@@ -7,6 +7,7 @@ import { generateColumns } from './columns';
 import { DataTable } from './data-table';
 import SetStatus from './set-status';
 import SwapKey from './swapKey';
+import { getBackgroundColorForRole } from '@/components/UtilsColor';
 
 interface DriverProps {
     drivers: { [key: string]: any }[];
@@ -172,14 +173,20 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
         <div className="w-full gap-4">
             <Tabs defaultValue="drivers" className="w-full">
                 <div className="mt-5 flex justify-center md:justify-end">
-                    <TabsList className="bg-[#006D54] text-white">
-                        <TabsTrigger value="drivers" className="!bg-[#006D54] px-10 data-[state=active]:!bg-white data-[state=active]:text-black">
-                            Drivers
-                        </TabsTrigger>
-                        <TabsTrigger value="vehicles" className="!bg-[#006D54] px-10 data-[state=active]:!bg-white data-[state=active]:text-black">
-                            Vehicles
-                        </TabsTrigger>
-                    </TabsList>
+                <TabsList className={`${getBackgroundColorForRole(userRole)} text-white`}>
+                    <TabsTrigger 
+                        value="drivers" 
+                        className={`px-10 !${getBackgroundColorForRole(userRole)} data-[state=active]:!bg-white data-[state=active]:text-black`}
+                    >
+                        Drivers
+                    </TabsTrigger>
+                    <TabsTrigger 
+                        value="vehicles" 
+                        className={`px-10 !${getBackgroundColorForRole(userRole)} data-[state=active]:!bg-white data-[state=active]:text-black`}
+                    >
+                        Vehicles
+                    </TabsTrigger>
+                </TabsList>
                 </div>
 
                 <TabsContent value="drivers">
