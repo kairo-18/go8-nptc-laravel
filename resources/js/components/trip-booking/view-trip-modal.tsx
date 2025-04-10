@@ -92,7 +92,7 @@ export default function TripTicketModal({
             console.log('hotdog');
             const fetchQrCode = async () => {
                 try {
-                    const response = await axios.get(`/api/generate-qr/${selectedTripData.id}`);
+                    const response = await axios.get(`/generate-qr/${selectedTripData.id}`);
                     console.log(response.data); // Handle your QR code here
                     setTripQr(response.data.qr_code);
                 } catch (error) {

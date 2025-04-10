@@ -177,6 +177,8 @@ Route::post('mails/new-mail', function (Request $request) {
 Route::post('/generate-payment-link', [TripController::class, 'generatePaymentLink'])
     ->name('generate-payment-link');
 
+Route::get('/generate-qr/{trip}', [TripController::class, 'generateQr']);
+
 // pending
 Route::get('/pending-data', [PendingController::class, 'index']);
 
