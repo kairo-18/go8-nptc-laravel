@@ -1,5 +1,6 @@
 'use client';
 
+import { showToast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { BookingFormData } from '@/lib/types';
@@ -40,39 +41,36 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
             if (response.data && response.data.data) {
                 const paymentUrl = response.data.data.attributes.checkout_url;
                 setLinkId(response.data.data.id);
-
                 window.open(paymentUrl, '_blank');
+                showToast('Payment link created successfully!', { type: 'success', position: 'top-center' });
             } else {
                 console.error('Payment link creation failed:', response.data);
-                alert('Failed to generate payment link. Please try again.');
-                setIsLoading(false); // Stop loading on error
+                showToast('Payment link creation failed', { type: 'error', position: 'top-center' });
+                setIsLoading(false);
             }
         } catch (error) {
             console.error('Error creating payment link:', error);
-            alert('An error occurred while processing the payment.');
-            setIsLoading(false); // Stop loading on error
+            showToast('Error creating payment link', { type: 'error', position: 'top-center' });
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
         if (!linkId) return;
-
         const interval = setInterval(async () => {
             try {
                 const response = await axios.get(`/api/check-payment-status/${linkId}`);
-
                 if (response.data?.data?.attributes?.status === 'paid') {
                     clearInterval(interval);
-                    setIsLoading(false); // Stop loading when payment is successful
+                    setIsLoading(false);
                     handleSubmitBooking();
                 }
             } catch (error) {
                 console.error('Error checking payment status:', error);
-                setIsLoading(false); // Stop loading on error
+                setIsLoading(false);
             }
-        }, 5000); // Poll every 5 seconds
-
-        return () => clearInterval(interval); // Cleanup on unmount
+        }, 5000);
+        return () => clearInterval(interval);
     }, [linkId]);
 
     const onSubmitPassengers = async () => {
@@ -81,8 +79,10 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
             console.log(response.data);
             setPaymentSuccess(true);
             setIsModalOpen(true);
+            showToast('Passengers added successfully!', { type: 'success', position: 'top-center' });
         } catch (e) {
             console.log(e);
+            showToast('Error adding passengers', { type: 'error', position: 'top-center' });
         }
     };
 
@@ -92,10 +92,11 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
 
             // Update the tripId in the formData
             updateFormData('tripId', response.data.trip.id);
-
+            showToast('Booking submitted successfully', { type: 'success', position: 'top-center' });
             console.log('Booking created:', response.data);
         } catch (error) {
             console.error('Booking submission failed:', error);
+            showToast('Error submitting booking', { type: 'error', position: 'top-center' });
         }
     };
 
@@ -168,7 +169,7 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
             <PaymentSuccessModal
                 isOpen={isModalOpen}
                 onClose={() => {
-                    window.location.href = '/dashboard';
+                    window.location.href = '/driver-dashboard';
                 }}
                 amount={total}
                 title="Payment Successful!"

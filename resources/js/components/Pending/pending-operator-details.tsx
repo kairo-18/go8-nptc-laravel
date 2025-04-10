@@ -1,3 +1,4 @@
+import { showToast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
@@ -21,43 +22,46 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
     const [operatorId, setOperatorId] = useState<string>('');
     const [note, setNote] = useState<string>('');
 
-    // Function to open the rejection modal
     const openRejectionModal = () => {
         setOperatorId(item?.user?.id || '');
         setIsModalOpen(true);
     };
 
-    // Function to close the rejection modal
     const closeRejectionModal = () => {
         setIsModalOpen(false);
     };
 
-    // Callback after rejection
     const handleRejection = async (note: string, entityId: string, entityType: string) => {
         try {
             const response = await fetch('/api/rejection', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Add any necessary authentication headers, e.g., Authorization: `Bearer ${token}`
                 },
                 body: JSON.stringify({
                     id: item.id,
                     type: entityType,
                     note,
-                    user_id: item.user.id, // Make sure to pass the appropriate user ID
+                    user_id: item.user.id,
                 }),
             });
 
-            // Check if the response is successful
             if (!response.ok) {
                 throw new Error(`Error: ${response.status} - ${response.statusText}`);
             }
 
             const data = await response.json();
+            showToast('Rejection note submitted successfully', {
+                type: 'success',
+                position: 'top-center',
+            });
             location.reload();
         } catch (error) {
             console.error('Error submitting rejection:', error);
+            showToast('Error rejecting operator. Please try again.', {
+                type: 'error',
+                position: 'top-center',
+            });
         }
     };
 
@@ -84,15 +88,26 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
                 body: JSON.stringify(requestBody),
             });
 
-            // Check if the response is successful
             if (!response.ok) {
                 throw new Error(`Error: ${response.status} - ${response.statusText}`);
             }
 
             const data = await response.json();
+<<<<<<< HEAD
+            showToast('Operator approved successfully', {
+                type: 'success',
+                position: 'top-center',
+            });
             location.reload();
+=======
+            // location.reload();
+>>>>>>> 9c9c6ca56ab4baf46549bc1c503a2b80fa2e5063
         } catch (error) {
             console.error('Error submitting rejection:', error);
+            showToast('Error approving operator. Please try again.', {
+                type: 'error',
+                position: 'top-center',
+            });
         }
     };
 

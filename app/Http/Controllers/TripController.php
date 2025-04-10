@@ -3,6 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Trip;
+use Endroid\QrCode\Builder\Builder;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\Label\Font\OpenSans;
+use Endroid\QrCode\Label\LabelAlignment;
+use Endroid\QrCode\RoundBlockSizeMode;
+use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -186,5 +193,34 @@ class TripController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to generate PDF', 'details' => $e->getMessage()], 500);
         }
+    }
+
+    public function generateQr(Trip $trip)
+    {
+        // Generate Qr that contains the link for download
+        $builder = new Builder(
+            writer: new PngWriter,
+            writerOptions: [],
+            validateResult: false,
+            data: env('APP_URL').'/trip-ticket/download/'.$trip->id,
+            encoding: new Encoding('UTF-8'),
+            errorCorrectionLevel: ErrorCorrectionLevel::High,
+            size: 300,
+            margin: 10,
+            roundBlockSizeMode: RoundBlockSizeMode::Margin,
+            labelText: 'Scan this QR to download the trip ticket pdf',
+            labelFont: new OpenSans(20),
+            labelAlignment: LabelAlignment::Center
+        );
+
+        $result = $builder->build();
+
+        // Generate a data URI to include image data inline (i.e. inside an <img> tag)
+        $dataUri = $result->getDataUri();
+
+        return response()->json([
+            'message' => 'QR code generated successfully',
+            'qr_code' => $dataUri,
+        ]);
     }
 }

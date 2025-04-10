@@ -1,11 +1,13 @@
+import { showToast } from '@/components/toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { generateColumns } from './columns';
 import { DataTable } from './data-table';
-import { useState, useEffect } from 'react';
 import SetStatus from './set-status';
-import axios from 'axios';
 import SwapKey from './swapKey';
-
+import { getBackgroundColorForRole } from '../UtilsColor';
+import { usePage } from "@inertiajs/react";
 
 interface DriverProps {
     drivers: { [key: string]: any }[];
@@ -24,6 +26,9 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
     const [openStatusModal, setOpenStatusModal] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState('');
     const [openSwapModal, setOpenSwapModal] = useState(false);
+
+    const { props } = usePage<{ auth: { user?: { id: number; roles?: { name: string }[] }, vr_company_id?: number } }>();
+    const userRole = props.auth.user?.roles?.[0]?.name;
 
     useEffect(() => {
         setDriverData(drivers);
@@ -45,7 +50,7 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
 
     const handleSubmitToDriver = async () => {
         if (!selectedDriver) {
-            alert('No driver selected');
+            showToast('No driver selected', { type: 'error', position: 'top-center' });
             return;
         }
 
@@ -68,16 +73,16 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
     const handleSwapDriver = (driverData: any) => {
         setSelectedDriver(driverData); // Make sure this is setting the driver
         setOpenSwapModal(true);
-    }
+    };
 
     const handleSwapVehicle = (vehicleData: any) => {
         setSelectedVehicle(vehicleData); // Make sure this is setting the vehicle
         setOpenSwapModal(true);
-    }
+    };
 
     const handleSubmitToVehicle = async () => {
         if (!selectedVehicle) {
-            alert('No vehicle selected');
+            showToast('No vehicle selected', { type: 'error', position: 'top-center' });
             return;
         }
 
@@ -97,7 +102,6 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
         setOpenStatusModal(false);
     };
 
-
     const transformDriverData = driverData.map((driver) => ({
         ...driver,
         Driver: `${driver.Status ? `${driver.Status} ` : ''}${driver.FirstName}  ${driver.LastName}`,
@@ -109,7 +113,8 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
     }));
 
     const formatHeader = (key: string) =>
-        key.replace(/_count$/, '')
+        key
+            .replace(/_count$/, '')
             .replace(/^vr_/, 'VR ')
             .replace(/_/g, ' ')
             .replace(/\b\w/g, (char) => char.toUpperCase());
@@ -129,73 +134,117 @@ export default function DriverVehicle({ drivers, vehicles, activeTab, onDriverUp
                   label: formatHeader(key),
               }))
             : [];
-            const primaryColumns = ['NPTC_ID', 'Driver'];
+    const primaryColumns = ['NPTC_ID', 'Driver'];
 
-            const driverOtherColumns = driverHeaders
-                .map(header => header.key)
-                .filter(key => !primaryColumns.includes(key) && key !== 'Status' && key !== 'id');
+    const driverOtherColumns = driverHeaders
+        .map((header) => header.key)
+        .filter((key) => !primaryColumns.includes(key) && key !== 'Status' && key !== 'id');
 
-            const orderedDriverHeaders = [...primaryColumns, ...driverOtherColumns];
+    const orderedDriverHeaders = [...primaryColumns, ...driverOtherColumns];
 
-            const driverColumns = generateColumns(
-                orderedDriverHeaders.map(key => ({ key, label: formatHeader(key) })),
-                {
-                    entityType: 'drivers',
-                    statusColumns: ['Status'],
-                    updateStatus: handleDriverSetStatus,
-                    swapVehicle: handleSwapDriver
-                }
-            );
+    const driverColumns = generateColumns(
+        orderedDriverHeaders.map((key) => ({ key, label: formatHeader(key) })),
+        {
+            entityType: 'drivers',
+            statusColumns: ['Status'],
+            updateStatus: handleDriverSetStatus,
+            swapVehicle: handleSwapDriver,
+        },
+    );
 
+    const primaryVehicleColumns = ['NPTC_ID', 'Vehicle'];
 
-            const primaryVehicleColumns = ['NPTC_ID', 'Vehicle'];
+    const vehicleOtherColumns = vehicleHeaders
+        .map((header) => header.key)
+        .filter((key) => !primaryVehicleColumns.includes(key) && key !== 'Status' && key !== 'Model' && key !== 'id');
 
-            const vehicleOtherColumns = vehicleHeaders
-                .map(header => header.key)
-                .filter(key => !primaryVehicleColumns.includes(key) && key !== 'Status' && key !== 'Model' && key !== 'id');
+    const orderedVehicleHeaders = [...primaryVehicleColumns, ...vehicleOtherColumns];
 
-            const orderedVehicleHeaders = [...primaryVehicleColumns, ...vehicleOtherColumns];
-
-            const vehicleColumns = generateColumns(
-                orderedVehicleHeaders.map(key => ({ key, label: formatHeader(key) })),
-                {
-                    entityType: 'vehicles',
-                    statusColumns: ['Status'],
-                    updateStatus: handleVehicleSetStatus,
-                }
-            );
-
+<<<<<<< HEAD
+    const vehicleColumns = generateColumns(
+        orderedVehicleHeaders.map((key) => ({ key, label: formatHeader(key) })),
+        {
+            entityType: 'vehicles',
+            statusColumns: ['Status'],
+            updateStatus: handleVehicleSetStatus,
+        },
+    );
 
     return (
         <div className="w-full gap-4">
+            <Tabs defaultValue="drivers" className="w-full">
+                <div className="mt-5 flex justify-center md:justify-end">
+                    <TabsList className="bg-[#006D54] text-white">
+                        <TabsTrigger value="drivers" className="!bg-[#006D54] px-10 data-[state=active]:!bg-white data-[state=active]:text-black">
+                            Drivers
+                        </TabsTrigger>
+                        <TabsTrigger value="vehicles" className="!bg-[#006D54] px-10 data-[state=active]:!bg-white data-[state=active]:text-black">
+                            Vehicles
+                        </TabsTrigger>
+                    </TabsList>
+                </div>
+
+                <TabsContent value="drivers">
+                    <DataTable data={transformDriverData} ColumnFilterName="FirstName" columns={driverColumns} />
+                    <SetStatus
+                        selectedData={selectedDriver}
+                        openStatusModal={openStatusModal}
+                        setOpenStatusModal={setOpenStatusModal}
+                        selectedStatus={selectedStatus}
+                        setStatusData={handleDriverSetStatus}
+                        setSelectedStatus={setSelectedStatus}
+                        handleSubmit={handleSubmitToDriver}
+                    />
+                    <SwapKey
+                        id={selectedDriver?.id}
+                        type="drivers"
+                        openSwapModal={openSwapModal}
+                        setOpenSwapModal={setOpenSwapModal}
+                        selectedData={selectedDriver}
+                        drivers={[]}
+                        vehicles={vehicleData}
+                    />
+=======
+    return (
+        <div className="grid grid-cols md:flex w-full gap-4">
             <Tabs defaultValue="drivers" className="w-full ">
                 <div className="flex md:justify-end justify-center mt-5 ">
-                <TabsList className="bg-[#006D54] text-white">
+                <TabsList className={`${getBackgroundColorForRole(userRole)} text-white`}>
                     <TabsTrigger 
                         value="drivers" 
-                        className="px-10 !bg-[#006D54] data-[state=active]:!bg-white data-[state=active]:text-black"
+                        className={`px-10 !${getBackgroundColorForRole(userRole)} data-[state=active]:!bg-white data-[state=active]:text-black`}
                     >
                         Drivers
                     </TabsTrigger>
                     <TabsTrigger 
                         value="vehicles" 
-                        className="px-10 !bg-[#006D54] data-[state=active]:!bg-white data-[state=active]:text-black"
+                        className={`px-10 !${getBackgroundColorForRole(userRole)} data-[state=active]:!bg-white data-[state=active]:text-black`}
                     >
                         Vehicles
                     </TabsTrigger>
                 </TabsList>
 
+
                 </div>
 
                 <TabsContent value="drivers">
-                    <DataTable data={transformDriverData} ColumnFilterName="FirstName" columns={driverColumns} />
+                    <DataTable data={transformDriverData} ColumnFilterName="Status" columns={driverColumns} />
                     <SetStatus selectedData={selectedDriver} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={handleDriverSetStatus} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToDriver} />
                     <SwapKey id={selectedDriver?.id} type="drivers" openSwapModal={openSwapModal} setOpenSwapModal={setOpenSwapModal} selectedData={selectedDriver} drivers={[]} vehicles={vehicleData} />
+>>>>>>> 9c9c6ca56ab4baf46549bc1c503a2b80fa2e5063
                 </TabsContent>
 
                 <TabsContent value="vehicles">
                     <DataTable data={transformVehicleData} ColumnFilterName="PlateNumber" columns={vehicleColumns} />
-                    <SetStatus selectedData={selectedVehicle} openStatusModal={openStatusModal} setOpenStatusModal={setOpenStatusModal} selectedStatus={selectedStatus} setStatusData={handleVehicleSetStatus} setSelectedStatus={setSelectedStatus} handleSubmit={handleSubmitToVehicle} />
+                    <SetStatus
+                        selectedData={selectedVehicle}
+                        openStatusModal={openStatusModal}
+                        setOpenStatusModal={setOpenStatusModal}
+                        selectedStatus={selectedStatus}
+                        setStatusData={handleVehicleSetStatus}
+                        setSelectedStatus={setSelectedStatus}
+                        handleSubmit={handleSubmitToVehicle}
+                    />
                 </TabsContent>
             </Tabs>
         </div>

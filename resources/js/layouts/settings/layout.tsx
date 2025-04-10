@@ -1,5 +1,4 @@
 import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { type NavItem } from '@/types';
@@ -27,27 +26,31 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
     const currentPath = window.location.pathname;
 
     return (
-        <div className="px-4 py-6">
+        <div className="px-4 py-6 bg-white text-gray-900">
             <Heading title="Settings" description="Manage your profile and account settings" />
 
             <div className="flex flex-col space-y-8 lg:flex-row lg:space-y-0 lg:space-x-12">
                 <aside className="w-full max-w-xl lg:w-48">
                     <nav className="flex flex-col space-y-1 space-x-0">
-                        {sidebarNavItems.map((item) => (
-                            <Button
-                                key={item.url}
-                                size="sm"
-                                variant="ghost"
-                                asChild
-                                className={cn('w-full justify-start', {
-                                    'bg-muted': currentPath === item.url,
-                                })}
-                            >
-                                <Link href={item.url} prefetch>
+                        {sidebarNavItems.map((item) => {
+                            const isActive = currentPath === item.url;
+
+                            return (
+                                <Link
+                                    key={item.url}
+                                    href={item.url}
+                                    prefetch
+                                    className={cn(
+                                        'w-full px-3 py-2 rounded-md text-sm font-medium transition-none',
+                                        'text-gray-800',
+                                        isActive && 'bg-gray-200 font-semibold',
+                                        '!hover:bg-transparent !hover:text-gray-800'
+                                    )}
+                                >
                                     {item.title}
                                 </Link>
-                            </Button>
-                        ))}
+                            );
+                        })}
                     </nav>
                 </aside>
 

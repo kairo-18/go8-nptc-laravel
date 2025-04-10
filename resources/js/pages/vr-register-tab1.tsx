@@ -13,6 +13,7 @@ const CopyButton = ({ text, isCopied, setIsCopied }: { text: string; isCopied: b
             navigator.clipboard.writeText(text);
             setIsCopied(true);
             setTimeout(() => setIsCopied(false), 2000);
+            showToast('Copied to clipboard', { type: 'success', position: 'top-center' });
         }}
     >
         {isCopied ? <ClipboardCheck /> : <Clipboard />}
@@ -180,7 +181,6 @@ const TemporaryAccountTabContent = ({ type }) => {
                 setServerErrors(formattedErrors);
             } else {
                 console.error('Submission failed', error);
-                alert('An error occurred. Please try again.');
             }
 
             showToast('An error occurred. Please try again.', {
@@ -309,7 +309,7 @@ const TemporaryAccountTabContent = ({ type }) => {
                 </div>
 
                 <Button type="submit" className="float-right mt-20 mb-5 bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white">
-                    Generate Temporary Account
+                    Generate VR Temporary Account
                 </Button>
             </form>
 

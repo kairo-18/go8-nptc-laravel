@@ -1,12 +1,13 @@
+import { showToast } from '@/components/toast';
 import axios from 'axios';
 import { useState } from 'react';
 import { generateColumns } from './columns';
-import Container from './container'; // Import Container component
+import Container from './container';
 import { DataTable } from './data-table';
-import SetStatus from './set-status'; // Import SetStatus component
-import CompanyFiles from './vr-company-files'; // Import CompanyFiles component
-type CompanyType = { id: number; Status?: string; BusinessPermitNumber: string; CompanyName: string; media?: any[] };
+import SetStatus from './set-status';
+import CompanyFiles from './vr-company-files';
 
+type CompanyType = { id: number; Status?: string; BusinessPermitNumber: string; CompanyName: string; media?: any[] };
 
 interface CompanyProps {
     companies: { id: number; Status?: string; BusinessPermitNumber: string; CompanyName: string; media?: any[] }[];
@@ -69,7 +70,7 @@ export default function Company({ companies, companiesWithMedia, onSelectCompany
 
     const handleSubmitToVRCompany = async () => {
         if (!selectedCompany) {
-            alert('No company selected');
+            showToast('Please select a company', { type: 'error', position: 'top-center' });
             return;
         }
 
@@ -95,12 +96,10 @@ export default function Company({ companies, companiesWithMedia, onSelectCompany
     };
 
     const handleContainerSubmit = async () => {
-        alert('This works');
         setOpenContainerModal(false);
+        showToast('Container submitted successfully', { type: 'success', position: 'top-center' });
     };
 
-    console.log('Columns');
-    console.log(columns);
     return (
         <>
             <DataTable data={transformedCompanies} columns={columns} ColumnFilterName="CompanyName" onRowClick={(row) => onSelectCompany(row.id)} />

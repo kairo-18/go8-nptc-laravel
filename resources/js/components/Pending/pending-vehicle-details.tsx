@@ -1,3 +1,4 @@
+import { showToast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,15 +9,14 @@ import PendingDriverDetails from './pending-driver-details';
 
 export default function PendingVehicleDetails({ item }) {
     const [previewFile, setPreviewFile] = useState(null);
-    const [isRejectionModalOpen, setIsRejectionModalOpen] = useState(false); // Rejection modal state
-    const [isFilePreviewModalOpen, setIsFilePreviewModalOpen] = useState(false); // File preview modal state
-    const [rejectionNote, setRejectionNote] = useState(''); // State for rejection note
-    const [isLoading, setIsLoading] = useState(false); // Loading state for rejection\
+    const [isRejectionModalOpen, setIsRejectionModalOpen] = useState(false);
+    const [isFilePreviewModalOpen, setIsFilePreviewModalOpen] = useState(false);
+    const [rejectionNote, setRejectionNote] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
 
-    // Handle rejection button click
     const handleRejection = async () => {
         try {
-            setIsLoading(true); // Set loading to true when making the API call
+            setIsLoading(true);
 
             const response = await fetch('/api/rejection', {
                 method: 'POST',
@@ -24,30 +24,34 @@ export default function PendingVehicleDetails({ item }) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    id: item?.id, // Send item ID
-                    type: 'vehicle', // Send the entity type as 'vehicle'
-                    note: rejectionNote, // Send the rejection note
-                    user_id: item?.id, // Replace with actual logged-in user ID
+                    id: item?.id,
+                    type: 'vehicle',
+                    note: rejectionNote,
+                    user_id: item?.id,
                 }),
             });
 
-            // Check if response is ok
             if (!response.ok) {
                 throw new Error('Error submitting rejection');
             }
 
-            // Handle successful rejection
             const data = await response.json();
             if (data.message === 'Entity rejected and note created successfully') {
-                setIsRejectionModalOpen(false); // Close the rejection modal after successful rejection
-                alert('Rejection successful!'); // Show success message
+                setIsRejectionModalOpen(false);
+                showToast('Rejection note submitted successfully', {
+                    type: 'success',
+                    position: 'top-center',
+                });
                 location.reload();
             }
         } catch (error) {
             console.error('Error submitting rejection:', error);
-            alert('Error rejecting vehicle. Please try again.'); // Show error message
+            showToast('Error rejecting vehicle. Please try again.', {
+                type: 'error',
+                position: 'top-center',
+            });
         } finally {
-            setIsLoading(false); // Set loading to false after API call completes
+            setIsLoading(false);
         }
     };
 
@@ -61,20 +65,26 @@ export default function PendingVehicleDetails({ item }) {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    id: item?.id, // Send item ID
-                    type: 'vehicle', // Send the entity type as 'vehicle'
+                    id: item?.id,
+                    type: 'vehicle',
                     user_id: item?.id,
                 }),
             });
 
-            // Handle successful
             const data = await response.json();
-            alert('Approval successful! Official documents will be sent to the mail of the operator.');
+            showToast('Approval successful! Official documents will be sent to the mail of the operator.', {
+                type: 'success',
+                position: 'top-center',
+            });
             location.reload();
         } catch (error) {
             console.error('Error submitting rejection:', error);
+            showToast('Error approving vehicle. Please try again.', {
+                type: 'error',
+                position: 'top-center',
+            });
         } finally {
-            setIsLoading(false); // Set loading to false after API call completes
+            setIsLoading(false);
         }
     };
 
@@ -86,10 +96,7 @@ export default function PendingVehicleDetails({ item }) {
                     {item?.Brand} {item?.Model}
                 </h1>
                 <div className="space-x-3">
-                    <Button
-                        className="bg-red-500 text-white hover:bg-red-600"
-                        onClick={() => setIsRejectionModalOpen(true)} // Open rejection modal
-                    >
+                    <Button className="bg-red-500 text-white hover:bg-red-600" onClick={() => setIsRejectionModalOpen(true)}>
                         Reject and add notes
                     </Button>
                     <Button className="bg-green-500 text-white hover:bg-green-600" onClick={() => handleApproval()}>
@@ -130,7 +137,7 @@ export default function PendingVehicleDetails({ item }) {
                                     className="border-blue-500 text-blue-600"
                                     onClick={() => {
                                         setPreviewFile(file);
-                                        setIsFilePreviewModalOpen(true); // Open file preview modal
+                                        setIsFilePreviewModalOpen(true);
                                     }}
                                 >
                                     Preview
@@ -143,16 +150,13 @@ export default function PendingVehicleDetails({ item }) {
                 </CardContent>
             </Card>
             <h3 className="mt-6 text-lg font-semibold">Assigned Drivers</h3>
-<div className="space-y-4">
-    {item?.drivers && item.drivers.length > 0 ? (
-        item.drivers.map((driver) => (
-            <PendingDriverDetails key={driver.id} assignedDriver={driver} />
-        ))
-    ) : (
-        <p className="text-gray-500">No drivers assigned to this vehicle.</p>
-    )}
-</div>
-
+            <div className="space-y-4">
+                {item?.drivers && item.drivers.length > 0 ? (
+                    item.drivers.map((driver) => <PendingDriverDetails key={driver.id} assignedDriver={driver} />)
+                ) : (
+                    <p className="text-gray-500">No drivers assigned to this vehicle.</p>
+                )}
+            </div>
 
             {/* Rejection Note Modal */}
             {isRejectionModalOpen && (

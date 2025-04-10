@@ -1,3 +1,4 @@
+import { showToast } from '@/components/toast';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { router } from '@inertiajs/react';
@@ -42,10 +43,10 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
                 CompanyName: companyData.CompanyName,
                 BusinessPermitNumber: companyData.BusinessPermitNumber,
             });
-            if (response.status === 200) alert('Company information updated successfully!');
+            if (response.status === 200) showToast('Company information updated successfully', { type: 'success', position: 'top-center' });
         } catch (error) {
             console.error('Error updating company:', error);
-            alert('Failed to update company information.');
+            showToast('Failed to update company information.', { type: 'error', position: 'top-center' });
         }
     };
 
@@ -61,10 +62,10 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
                 BirthDate: adminData.BirthDate,
                 ContactNumber: adminData.ContactNumber,
             });
-            if (response.status === 200) alert('Admin information updated successfully!');
+            if (response.status === 200) showToast('Admin information updated successfully', { type: 'success', position: 'top-center' });
         } catch (error) {
             console.error('Error updating admin:', error);
-            alert('Failed to update admin information.');
+            showToast('Failed to update admin information.', { type: 'error', position: 'top-center' });
         }
     };
 
@@ -82,10 +83,10 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
                     Position: contact.Position,
                 })),
             });
-            if (response.status === 200) alert('Contacts updated successfully!');
+            if (response.status === 200) showToast('Contacts updated successfully', { type: 'success', position: 'top-center' });
         } catch (error) {
             console.error('Error updating contacts:', error);
-            alert('Failed to update contacts.');
+            showToast('Failed to update contacts.', { type: 'error', position: 'top-center' });
         }
     };
 
@@ -120,7 +121,7 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
             if (response.status === 200) {
-                alert('File uploaded successfully!');
+                showToast('File uploaded successfully', { type: 'success', position: 'top-center' });
                 setTimeout(() => {
                     window.location.href = window.location.href; // This reloads the current page
                 }, 500);
@@ -128,7 +129,7 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
             setSelectedPreview(file);
         } catch (error) {
             console.error('Error uploading file:', error);
-            alert('Failed to upload file.');
+            showToast('Failed to upload file.', { type: 'error', position: 'top-center' });
         }
     };
 
@@ -136,17 +137,17 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
         const file = companyMediaState.find((media) => media.collection_name === mediaName);
 
         if (!file) {
-            alert('No file found');
+            showToast('File not found!', { type: 'error', position: 'top-center' });
             return;
         }
 
         await router.delete(`/vr-company/delete-media/${file.id}`, {
             preserveScroll: true,
             onSuccess: () => {
-                alert('File deleted successfully');
+                showToast('File deleted successfully', { type: 'success', position: 'top-center' });
             },
             onError: () => {
-                alert('Failed to delete file.');
+                showToast('Error deleting file', { type: 'error', position: 'top-center' });
             },
         });
     };
