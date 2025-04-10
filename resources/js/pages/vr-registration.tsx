@@ -46,11 +46,10 @@ export default function VrRegistration({ companies }) {
 
             <div className="flex w-full flex-col items-end p-10">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <div className="flex justify-start
-                     mb-5">
+                    <div className="mb-5 flex justify-start">
                         <TabsList className="bg-[#2A2A92] text-white">
                             <TabsTrigger value="tempoAccountTab" className="px-10">
-                                Temporary Account
+                                Vehicle Rental Temporary Account
                             </TabsTrigger>
                             <TabsTrigger value="appStatsTab" className="px-10">
                                 Application Status

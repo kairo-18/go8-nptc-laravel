@@ -221,7 +221,9 @@ export default function CreateVehicle({ operators, onNextTab }) {
                     type: 'success',
                     position: 'top-center',
                 });
+                onNextTab();
             },
+
             onError: (errors) => {
                 const errorMessages = Object.values(errors).flat();
                 errorMessages.forEach((error) => {

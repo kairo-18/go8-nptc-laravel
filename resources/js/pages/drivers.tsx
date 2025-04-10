@@ -1,24 +1,24 @@
+import { showToast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import MainLayout from '@/pages/mainLayout';
-import { Head } from '@inertiajs/react';
 import { Label } from '@/components/ui/label';
-import { useState, useEffect } from 'react';
-import { router } from '@inertiajs/react';
+import MainLayout from '@/pages/mainLayout';
+import { Head, router } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 
 // Modal Component (smaller version)
 function Modal({ isOpen, onClose, file }: { isOpen: boolean; onClose: () => void; file: MediaFile | null }) {
     if (!isOpen || !file) return null;
 
     return (
-        <div className="fixed inset-0 flex justify-center items-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 50 }}>
-            <div className="bg-white p-4 rounded-lg max-w-lg relative z-60">
+        <div className="fixed inset-0 flex items-center justify-center" style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)', zIndex: 50 }}>
+            <div className="relative z-60 max-w-lg rounded-lg bg-white p-4">
                 <Button onClick={onClose} className="absolute top-2 right-2 p-2" variant="outline">
                     ✕
                 </Button>
                 {file.mime_type.startsWith('image') ? (
-                    <img src={file.url} alt={file.name} className="w-64 h-auto object-contain" />
+                    <img src={file.url} alt={file.name} className="h-auto w-64 object-contain" />
                 ) : (
                     <div className="text-center">Preview for non-image file: {file.name}</div>
                 )}
@@ -85,57 +85,62 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
 
         try {
             // Update driver data
-            await router.patch(`/drivers/${formData.id}`, {
-                FirstName: formData.FirstName,
-                LastName: formData.LastName,
-                username: formData.username,
-                email: formData.email,
-                ContactNumber: formData.ContactNumber,
-                BirthDate: formData.BirthDate,
-                Address: formData.Address,
-                Status: formData.Status,
-                vrCompanyId: formData.vrCompany.id,
-                operatorId: formData.operator.id,
-            }, {
-                onSuccess: () => {
-                    console.log('Driver details updated successfully');
+            await router.patch(
+                `/drivers/${formData.id}`,
+                {
+                    FirstName: formData.FirstName,
+                    LastName: formData.LastName,
+                    username: formData.username,
+                    email: formData.email,
+                    ContactNumber: formData.ContactNumber,
+                    BirthDate: formData.BirthDate,
+                    Address: formData.Address,
+                    Status: formData.Status,
+                    vrCompanyId: formData.vrCompany.id,
+                    operatorId: formData.operator.id,
+                },
+                {
+                    onSuccess: () => {
+                        showToast('Driver updated successfully', { type: 'success', position: 'top-center' });
 
-                    // Handle file uploads only if there are files to upload
-                    const uploadData = new FormData();
-                    const fileFields = ['License', 'Photo', 'NBI_clearance', 'Police_clearance', 'BIR_clearance'];
-                    let hasFiles = false;
+                        // Handle file uploads only if there are files to upload
+                        const uploadData = new FormData();
+                        const fileFields = ['License', 'Photo', 'NBI_clearance', 'Police_clearance', 'BIR_clearance'];
+                        let hasFiles = false;
 
-                    fileFields.forEach((field) => {
-                        const file = selectedFile[field];
-                        if (file) {
-                            uploadData.append(field, file);
-                            hasFiles = true;
-                        }
-                    });
-
-                    if (hasFiles) {
-                        router.post(route('driver.upload-files', { driver: formData.id }), uploadData, {
-                            onSuccess: () => {
-                                console.log('Files uploaded successfully');
-                                // This will force a full page reload with fresh data
-                                router.reload({ only: ['drivers'] });
-                            },
-                            onError: (errors) => {
-                                console.error('File upload error:', errors);
+                        fileFields.forEach((field) => {
+                            const file = selectedFile[field];
+                            if (file) {
+                                uploadData.append(field, file);
+                                hasFiles = true;
                             }
                         });
-                    } else {
-                        // If no files to upload, just reload the drivers data
-                        router.reload({ only: ['drivers'] });
-                    }
 
-                    setIsEditing(false);
-                    setSelectedFile({});
+                        if (hasFiles) {
+                            router.post(route('driver.upload-files', { driver: formData.id }), uploadData, {
+                                onSuccess: () => {
+                                    console.log('Files uploaded successfully');
+                                    // This will force a full page reload with fresh data
+                                    router.reload({ only: ['drivers'] });
+                                },
+                                onError: (errors) => {
+                                    console.error('File upload error:', errors);
+                                },
+                            });
+                        } else {
+                            // If no files to upload, just reload the drivers data
+                            router.reload({ only: ['drivers'] });
+                        }
+
+                        setIsEditing(false);
+                        setSelectedFile({});
+                    },
+                    onError: (errors) => {
+                        console.error('Update error:', errors);
+                        showToast('Error updating driver', { type: 'error', position: 'top-center' });
+                    },
                 },
-                onError: (errors) => {
-                    console.error('Update error:', errors);
-                }
-            });
+            );
         } catch (error) {
             console.error('Error:', error);
         }
@@ -165,7 +170,7 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
     };
 
     const startEditing = (driver: Driver) => {
-        setFormData({...driver});
+        setFormData({ ...driver });
         setIsEditing(true);
     };
 
@@ -176,31 +181,34 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
 
     const handleDeleteFile = async (driverId: number, fileId: number) => {
         try {
-            await router.delete(route('drivers.delete-media', {
-                driver: driverId,
-            }), {
-                data: { media_id: fileId }
-            });
+            await router.delete(
+                route('drivers.delete-media', {
+                    driver: driverId,
+                }),
+                {
+                    data: { media_id: fileId },
+                },
+            );
 
-            alert('File deleted successfully');
+            showToast('File deleted successfully', { type: 'success', position: 'top-center' });
         } catch (error) {
             console.error('Error deleting file:', error);
-            alert('Failed to delete file');
+            showToast('Error deleting file', { type: 'error', position: 'top-center' });
         }
     };
 
     return (
         <MainLayout breadcrumbs={[{ title: 'Drivers', href: '/drivers' }]}>
             <Head title="Drivers" />
-            <div className="p-10 flex justify-center">
-                <div className=" w-full ">
+            <div className="flex justify-center p-10">
+                <div className="w-full">
                     {drivers.length === 0 ? (
                         <p className="text-center text-gray-500">No drivers available.</p>
                     ) : (
                         drivers.map((driver) => {
-                            const profilePhoto = driver.media_files.find(file => file.collection_name.toLowerCase() === 'photo');
+                            const profilePhoto = driver.media_files.find((file) => file.collection_name.toLowerCase() === 'photo');
                             return (
-                                <Card key={driver.id} className="shadow-md p-6 mb-6">
+                                <Card key={driver.id} className="mb-6 p-6 shadow-md">
                                     <CardHeader>
                                         <div className="flex items-center space-x-6">
                                             {/* Profile Image */}
@@ -208,10 +216,10 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                                 <img
                                                     src={profilePhoto.url}
                                                     alt="Profile"
-                                                    className="w-24 h-24 rounded-full object-cover border border-gray-300"
+                                                    className="h-24 w-24 rounded-full border border-gray-300 object-cover"
                                                 />
                                             ) : (
-                                                <div className="w-24 h-24 flex items-center justify-center bg-gray-300 text-white font-bold rounded-full text-3xl">
+                                                <div className="flex h-24 w-24 items-center justify-center rounded-full bg-gray-300 text-3xl font-bold text-white">
                                                     {driver.FirstName.charAt(0)}
                                                 </div>
                                             )}
@@ -232,7 +240,7 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                                 <Label>First Name</Label>
                                                 <Input
                                                     name="FirstName"
-                                                    value={isEditing ? formData?.FirstName ?? driver.FirstName : driver.FirstName}
+                                                    value={isEditing ? (formData?.FirstName ?? driver.FirstName) : driver.FirstName}
                                                     onChange={handleChange}
                                                     readOnly={!isEditing}
                                                 />
@@ -241,7 +249,7 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                                 <Label>Last Name</Label>
                                                 <Input
                                                     name="LastName"
-                                                    value={isEditing ? formData?.LastName ?? driver.LastName : driver.LastName}
+                                                    value={isEditing ? (formData?.LastName ?? driver.LastName) : driver.LastName}
                                                     onChange={handleChange}
                                                     readOnly={!isEditing}
                                                 />
@@ -251,7 +259,7 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                                 <Label>Username</Label>
                                                 <Input
                                                     name="username"
-                                                    value={isEditing ? formData?.username ?? driver.username : driver.username}
+                                                    value={isEditing ? (formData?.username ?? driver.username) : driver.username}
                                                     onChange={handleChange}
                                                     readOnly={!isEditing}
                                                 />
@@ -260,7 +268,7 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                                 <Label>Email</Label>
                                                 <Input
                                                     name="email"
-                                                    value={isEditing ? formData?.email ?? driver.email : driver.email}
+                                                    value={isEditing ? (formData?.email ?? driver.email) : driver.email}
                                                     onChange={handleChange}
                                                     readOnly={!isEditing}
                                                 />
@@ -270,7 +278,7 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                                 <Label>Contact Number</Label>
                                                 <Input
                                                     name="ContactNumber"
-                                                    value={isEditing ? formData?.ContactNumber ?? driver.ContactNumber : driver.ContactNumber}
+                                                    value={isEditing ? (formData?.ContactNumber ?? driver.ContactNumber) : driver.ContactNumber}
                                                     onChange={handleChange}
                                                     readOnly={!isEditing}
                                                 />
@@ -280,7 +288,7 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                                 <Input
                                                     name="BirthDate"
                                                     type="date"
-                                                    value={isEditing ? formData?.BirthDate ?? driver.BirthDate : driver.BirthDate}
+                                                    value={isEditing ? (formData?.BirthDate ?? driver.BirthDate) : driver.BirthDate}
                                                     onChange={handleChange}
                                                     readOnly={!isEditing}
                                                 />
@@ -290,7 +298,7 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                                 <Label>Address</Label>
                                                 <Input
                                                     name="Address"
-                                                    value={isEditing ? formData?.Address ?? driver.Address : driver.Address}
+                                                    value={isEditing ? (formData?.Address ?? driver.Address) : driver.Address}
                                                     onChange={handleChange}
                                                     readOnly={!isEditing}
                                                 />
@@ -302,10 +310,21 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                                         name="Status"
                                                         value={formData?.Status ?? driver.Status}
                                                         onChange={handleChange}
-                                                        className="border p-2 rounded"
+                                                        className="rounded border p-2"
                                                     >
-                                                        {['Active', 'Inactive', 'Suspended', 'Banned', 'Pending', 'Approved', 'Rejected', 'For Payment'].map((status) => (
-                                                            <option key={status} value={status}>{status}</option>
+                                                        {[
+                                                            'Active',
+                                                            'Inactive',
+                                                            'Suspended',
+                                                            'Banned',
+                                                            'Pending',
+                                                            'Approved',
+                                                            'Rejected',
+                                                            'For Payment',
+                                                        ].map((status) => (
+                                                            <option key={status} value={status}>
+                                                                {status}
+                                                            </option>
                                                         ))}
                                                     </select>
                                                 ) : (
@@ -318,15 +337,11 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                                 <Input
                                                     name="password"
                                                     type={passwordVisible ? 'text' : 'password'}
-                                                    value={isEditing ? formData?.password ?? driver.password : driver.password}
+                                                    value={isEditing ? (formData?.password ?? driver.password) : driver.password}
                                                     onChange={handleChange}
                                                     readOnly={!isEditing}
                                                 />
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    onClick={() => setPasswordVisible((prev) => !prev)}
-                                                >
+                                                <Button type="button" variant="outline" onClick={() => setPasswordVisible((prev) => !prev)}>
                                                     {passwordVisible ? 'Hide Password' : 'See Password'}
                                                 </Button>
                                             </div>
@@ -340,14 +355,19 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                                     <div key={file.id} className="flex items-center gap-2">
                                                         <Label>{file.collection_name}</Label>
                                                         <Input value={file.name} readOnly />
-                                                        <Button type="button" className='text-white' variant="outline" onClick={() => handlePreview(file)}>
+                                                        <Button
+                                                            type="button"
+                                                            className="text-white"
+                                                            variant="outline"
+                                                            onClick={() => handlePreview(file)}
+                                                        >
                                                             Preview
                                                         </Button>
                                                         {isEditing && (
                                                             <Button
                                                                 variant="destructive"
                                                                 size="sm"
-                                                                className='text-white bg-black'
+                                                                className="bg-black text-white"
                                                                 onClick={() => handleDeleteFile(driver.id, file.id)}
                                                             >
                                                                 Remove
@@ -363,16 +383,14 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                             {isEditing && (
                                                 <div className="grid grid-cols-2 gap-4">
                                                     {['License', 'Photo', 'NBI_clearance', 'Police_clearance', 'BIR_clearance'].map((field) => {
-                                                        const existingFile = driver.media_files.find(file => file.collection_name.toLowerCase() === field.toLowerCase());
+                                                        const existingFile = driver.media_files.find(
+                                                            (file) => file.collection_name.toLowerCase() === field.toLowerCase(),
+                                                        );
 
                                                         return (
                                                             <div key={field}>
                                                                 <Label htmlFor={field}>{field.replace('_', ' ')}</Label>
-                                                                <Input
-                                                                    id={field}
-                                                                    type="file"
-                                                                    onChange={(e) => handleFileChange(field, e)}
-                                                                />
+                                                                <Input id={field} type="file" onChange={(e) => handleFileChange(field, e)} />
                                                                 {selectedFile && selectedFile[field] && (
                                                                     <div className="mt-1 flex items-center justify-between gap-2">
                                                                         <p className="text-sm text-gray-500">{selectedFile[field]?.name}</p>
@@ -389,7 +407,11 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                                                 {existingFile && !isEditing && (
                                                                     <div className="mt-2 text-gray-500">
                                                                         <p>Current file: {existingFile.name}</p>
-                                                                        <Button type="button" variant="outline" onClick={() => handlePreview(existingFile)}>
+                                                                        <Button
+                                                                            type="button"
+                                                                            variant="outline"
+                                                                            onClick={() => handlePreview(existingFile)}
+                                                                        >
                                                                             Preview
                                                                         </Button>
                                                                     </div>
@@ -404,7 +426,7 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                                         {/* Update Button */}
                                         <div className="mt-6 flex justify-end space-x-4">
                                             <Button onClick={isEditing ? handleSubmit : () => startEditing(driver)}>
-                                                {isEditing ? "Save Changes" : "Update"}
+                                                {isEditing ? 'Save Changes' : 'Update'}
                                             </Button>
                                         </div>
                                     </CardContent>
