@@ -335,11 +335,6 @@ const TemporaryAccountTabContent = ({ type }) => {
                             <CopyButton text={generatedPassword} isCopied={isCopied} setIsCopied={setIsCopied} />
                         </div>
                     </div>
-                    <DialogFooter>
-                        <Button type="button" onClick={() => setIsDialogOpen(false)} className="!bg-gray-300 !text-gray-800 hover:!bg-gray-400">
-                            Close
-                        </Button>
-                    </DialogFooter>
                 </DialogContent>
             </Dialog>
         </div>

@@ -5,6 +5,7 @@ import MainLayout from "./mainLayout";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { usePage } from "@inertiajs/react";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -17,6 +18,7 @@ export default function Dashboard({
   vrCompaniesCount,
   activeOperatorsCount,
   activeDriversCount,
+  activeVehiclesCount,
   pendingPaymentsCount,
   ongoingTripsCount,
   ongoingBookings,
@@ -25,9 +27,22 @@ export default function Dashboard({
   vrCompaniesCount: number | null;
   activeOperatorsCount: number | null;
   activeDriversCount: number | null;
+  activeVehiclesCount: number | null;
   pendingPaymentsCount: number | null;
   ongoingTripsCount: number | null;
-  ongoingBookings: Array<{ name: string; vehicle: string; route: string; eta: string }> | null;
+  ongoingBookings: Array<{
+    name: string;
+    vehicle: string;
+    route: string;
+    eta: string;
+    driver_first_name: string;
+    driver_last_name: string;
+    NPTC_ID: string;
+    pickupAddress: string;
+    dropOffAddress: string;
+    pickupDate: string;
+    dropOffDate: string;
+  }> | null;
   pendingRegistrationsCount: number | null;  // Added this prop
 }) {
   // Log the props to the console for debugging
@@ -41,21 +56,32 @@ export default function Dashboard({
     pendingRegistrationsCount,  // Log the pending registrations count
   });
 
+    const { props } = usePage<{ auth: { user?: { id: number; roles?: { name: string }[] }, vr_company_id?: number } }>();
+    const userRole = props.auth.user?.roles?.[0]?.name;
+
   const [date, setDate] = React.useState<Date | undefined>(new Date());
+
+  const overallItems = [];
+  if (userRole !== "VR Admin" && userRole !== "Operator") {
+    overallItems.push({ title: "Registered VR Companies", value: vrCompaniesCount ?? 0 });
+  }
+  if (userRole !== "Operator") {
+    overallItems.push({ title: "Active Operators", value: activeOperatorsCount ?? 0 });
+  }
+  overallItems.push({ title: "Active Drivers", value: activeDriversCount ?? 0 });
+  if (userRole === "Operator") {
+    overallItems.push({ title: "Active Vehicles", value: activeVehiclesCount ?? 0 });
+  }
 
   return (
     <MainLayout breadcrumbs={breadcrumbs}>
       <Head title="Dashboard" />
-      <h1 className="text-4xl font-black">Welcome Back, Admin 1!</h1>
+      <h1 className="text-4xl font-black">Welcome Back, {props.auth.user?.FirstName}!</h1>
 
       {/* Overall Stats */}
       <h2 className="text-2xl font-bold mt-6">Overall</h2>
-      <div className="grid grid-cols-3 gap-4">
-        {[ 
-          { title: "Registered VR Companies", value: vrCompaniesCount ?? 0 },
-          { title: "Active Operators", value: activeOperatorsCount ?? 0 },
-          { title: "Active Drivers", value: activeDriversCount ?? 0 },
-        ].map((item, index) => (
+      <div className={`grid ${userRole === "VR Admin" || userRole === "Operator" ? "grid-cols-2" : "grid-cols-3"} gap-4`}>
+        {overallItems.map((item, index) => (
           <Card key={index}>
             <CardHeader>
               <CardTitle>{item.title}</CardTitle>
@@ -68,30 +94,34 @@ export default function Dashboard({
       </div>
 
       {/* Pending Stats */}
-      <h2 className="text-2xl font-bold mt-6">Pending</h2>
-      <div className="grid grid-cols-3 gap-4 mt-2">
-        {[ 
-          { title: "Pending Payments", value: pendingPaymentsCount ?? 0 },
-          { title: "Pending Trip Tickets", value: ongoingTripsCount ?? 0 },
-          { title: "Pending Registrations", value: pendingRegistrationsCount ?? 0 },  // Display pending registrations count
-        ].map((item, index) => (
-          <Card key={index}>
-            <CardHeader>
-              <CardTitle>{item.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">{item.value}</p>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {userRole !== "Operator" && (
+        <>
+          <h2 className="text-2xl font-bold mt-6">Pending</h2>
+          <div className="grid grid-cols-3 gap-4 mt-2">
+            {[
+              { title: "Pending Payments", value: pendingPaymentsCount ?? 0 },
+              { title: "Pending Trip Tickets", value: ongoingTripsCount ?? 0 },
+              { title: "Pending Registrations", value: pendingRegistrationsCount ?? 0 },  // Display pending registrations count
+            ].map((item, index) => (
+              <Card key={index}>
+                <CardHeader>
+                  <CardTitle>{item.title}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold">{item.value}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
 
       {/* Ongoing Bookings & Calendar (70:30 Ratio) */}
-      <div className="grid grid-cols-[70%_30%] gap-4 mt-6">
+      <div className="grid grid-cols-[70%_29%] gap-4 mt-6">
         {/* Ongoing Bookings */}
         <Card>
           <CardHeader>
-            <CardTitle>Ongoing Bookings</CardTitle>
+            <CardTitle>Scheduled Bookings</CardTitle>
           </CardHeader>
           <CardContent>
             {(ongoingBookings ?? []).map((booking, index) => (
