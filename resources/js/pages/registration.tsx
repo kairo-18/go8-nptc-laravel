@@ -1,3 +1,4 @@
+import { showToast } from '@/components/toast';
 import { useState } from 'react';
 import CreateVrAdmin from './create-vr-admin';
 import CreateVrCompany from './create-vr-company';
@@ -84,7 +85,7 @@ export default function Registration({ companies }: { companies: { id: number; B
         } else if (tabSwitch === 'previous') {
             goToPreviousTab();
         } else {
-            alert('Error switching tabs');
+            showToast('Invalid tab switch', { type: 'error', position: 'top-center' });
         }
     };
 

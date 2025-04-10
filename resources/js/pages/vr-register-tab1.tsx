@@ -13,6 +13,7 @@ const CopyButton = ({ text, isCopied, setIsCopied }: { text: string; isCopied: b
             navigator.clipboard.writeText(text);
             setIsCopied(true);
             setTimeout(() => setIsCopied(false), 2000);
+            showToast('Copied to clipboard', { type: 'success', position: 'top-center' });
         }}
     >
         {isCopied ? <ClipboardCheck /> : <Clipboard />}
@@ -180,7 +181,10 @@ const TemporaryAccountTabContent = ({ type }) => {
                 setServerErrors(formattedErrors);
             } else {
                 console.error('Submission failed', error);
-                alert('An error occurred. Please try again.');
+                showToast('An error occurred. Please try again.', {
+                    type: 'error',
+                    position: 'top-center',
+                });
             }
 
             showToast('An error occurred. Please try again.', {

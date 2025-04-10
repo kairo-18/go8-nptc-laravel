@@ -1,13 +1,14 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
-import MainLayout from './mainLayout';
-import OperatorInformation from './RecordsPage/OperatorInformation';
-import FilePreviewDialog from '../pages/RecordsPage/FilePreviewDialog';
+import { showToast } from '@/components/toast';
 import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Separator } from '@/components/ui/separator';
 import { router } from '@inertiajs/react';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import FilePreviewDialog from '../pages/RecordsPage/FilePreviewDialog';
+import MainLayout from './mainLayout';
+import OperatorInformation from './RecordsPage/OperatorInformation';
 
 export default function EditOperator({ mediaFiles, operator }) {
     const breadcrumbs = [{ title: 'Operator Edit', href: `/operator/edit/${operator?.id}` }];
@@ -36,9 +37,9 @@ export default function EditOperator({ mediaFiles, operator }) {
 
     // Add this file removal handler
     const handleFileRemove = (field: string) => {
-        setFiles(prev => ({ ...prev, [field]: null }));
+        setFiles((prev) => ({ ...prev, [field]: null }));
         // Force re-render by updating the key
-        setFileKeys(prevKeys => ({
+        setFileKeys((prevKeys) => ({
             ...prevKeys,
             [field]: Date.now(),
         }));
@@ -46,16 +47,19 @@ export default function EditOperator({ mediaFiles, operator }) {
 
     const handleDeleteFile = async (operatorId: number, fileId: number) => {
         try {
-            await router.delete(route('delete-operator-media', {
-                operator: operatorId,
-            }), {
-                data: { media_id: fileId }
-            });
+            await router.delete(
+                route('delete-operator-media', {
+                    operator: operatorId,
+                }),
+                {
+                    data: { media_id: fileId },
+                },
+            );
 
-            alert('File deleted successfully');
+            showToast('File deleted successfully', { type: 'success', position: 'top-center' });
         } catch (error) {
             console.error('Error deleting file:', error);
-            alert('Failed to delete file');
+            showToast('Error deleting file', { type: 'error', position: 'top-center' });
         }
     };
 
@@ -82,42 +86,43 @@ export default function EditOperator({ mediaFiles, operator }) {
         try {
             // 1️⃣ Update Operator Information
             const payload = {
-                username: operatorData?.user?.username || "",
-                email: operatorData?.user?.email || "",
-                FirstName: operatorData?.user?.FirstName || "",
-                LastName: operatorData?.user?.LastName || "",
-                Address: operatorData?.user?.Address || "",
-                BirthDate: operatorData?.user?.BirthDate || "",
-                Status: operatorData?.Status || "",
-                ContactNumber: operatorData?.user?.ContactNumber || "",
+                username: operatorData?.user?.username || '',
+                email: operatorData?.user?.email || '',
+                FirstName: operatorData?.user?.FirstName || '',
+                LastName: operatorData?.user?.LastName || '',
+                Address: operatorData?.user?.Address || '',
+                BirthDate: operatorData?.user?.BirthDate || '',
+                Status: operatorData?.Status || '',
+                ContactNumber: operatorData?.user?.ContactNumber || '',
                 vr_company_id: operatorData?.vr_company_id || null,
             };
 
             const response = await axios.patch(`/operator/update/${operatorData.id}`, payload, {
-                headers: { "Content-Type": "application/json" },
+                headers: { 'Content-Type': 'application/json' },
             });
 
             if (response.status !== 200) {
-                throw new Error("Failed to update operator details.");
+                throw new Error('Failed to update operator details.');
             }
 
             // 2️⃣ Upload Files if Selected (only non-null files)
             const formData = new FormData();
-            if (files.photo) formData.append("photo", files.photo);
-            if (files.valid_id_front) formData.append("valid_id_front", files.valid_id_front);
-            if (files.valid_id_back) formData.append("valid_id_back", files.valid_id_back);
+            if (files.photo) formData.append('photo', files.photo);
+            if (files.valid_id_front) formData.append('valid_id_front', files.valid_id_front);
+            if (files.valid_id_back) formData.append('valid_id_back', files.valid_id_back);
 
-            if (formData.entries().next().done === false) { // Check if formData has any entries
+            if (formData.entries().next().done === false) {
+                // Check if formData has any entries
                 await axios.post(`/operators/${operatorData.id}/upload-files`, formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
+                    headers: { 'Content-Type': 'multipart/form-data' },
                 });
             }
 
-            alert("Operator information and files updated successfully!");
+            showToast('Operator updated successfully', { type: 'success', position: 'top-center' });
             location.reload();
         } catch (error) {
-            console.error("Error updating operator:", error);
-            alert(`Failed to update operator: ${error.response?.data?.message || error.message}`);
+            console.error('Error updating operator:', error);
+            showToast(`Failed to update operator: ${error.response?.data?.message || error.message}`, { type: 'error', position: 'top-center' });
         }
     };
 
@@ -132,9 +137,7 @@ export default function EditOperator({ mediaFiles, operator }) {
                     <Separator />
                     <div className="flex items-center gap-4">
                         <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg bg-[#2a2a92]">
-                            <span className="text-2xl font-bold text-white">
-                                {operatorData?.user?.FirstName?.charAt(0) || 'O'}
-                            </span>
+                            <span className="text-2xl font-bold text-white">{operatorData?.user?.FirstName?.charAt(0) || 'O'}</span>
                         </div>
                         <div>
                             <h2 className="text-lg font-medium">
@@ -163,14 +166,23 @@ export default function EditOperator({ mediaFiles, operator }) {
                         <div className="mt-3 space-y-2">
                             {operatorMediaState.map((media) => (
                                 <>
-                                    <div className='flex items-center justify-between rounded-md border p-3 shadow-sm'>
+                                    <div className="flex items-center justify-between rounded-md border p-3 shadow-sm">
                                         <div key={media.id} className="">
                                             <Label>{media.collection_name}</Label>
                                             <span className="text-sm font-medium">{media.name}</span>
                                         </div>
                                         <div className="flex items-center justify-end gap-2">
-                                            <Button variant="outline" size="sm" className='text-white' onClick={() => handleOpenPreview(media)}>Preview</Button>
-                                            <Button variant="outline" size="sm" className='text-white' onClick={() => handleDeleteFile(operator.id, media.id)}>Delete</Button>
+                                            <Button variant="outline" size="sm" className="text-white" onClick={() => handleOpenPreview(media)}>
+                                                Preview
+                                            </Button>
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                className="text-white"
+                                                onClick={() => handleDeleteFile(operator.id, media.id)}
+                                            >
+                                                Delete
+                                            </Button>
                                         </div>
                                     </div>
                                 </>

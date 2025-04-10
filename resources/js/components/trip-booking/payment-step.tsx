@@ -57,11 +57,9 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
 
     useEffect(() => {
         if (!linkId) return;
-
         const interval = setInterval(async () => {
             try {
                 const response = await axios.get(`/api/check-payment-status/${linkId}`);
-
                 if (response.data?.data?.attributes?.status === 'paid') {
                     clearInterval(interval);
                     setIsLoading(false);
@@ -69,11 +67,10 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
                 }
             } catch (error) {
                 console.error('Error checking payment status:', error);
-                setIsLoading(false); // Stop loading on error
+                setIsLoading(false);
             }
-        }, 5000); // Poll every 5 seconds
-
-        return () => clearInterval(interval); // Cleanup on unmount
+        }, 5000);
+        return () => clearInterval(interval);
     }, [linkId]);
 
     const onSubmitPassengers = async () => {
@@ -82,8 +79,10 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
             console.log(response.data);
             setPaymentSuccess(true);
             setIsModalOpen(true);
+            showToast('Passengers added successfully!', { type: 'success', position: 'top-center' });
         } catch (e) {
             console.log(e);
+            showToast('Error adding passengers', { type: 'error', position: 'top-center' });
         }
     };
 
@@ -93,10 +92,11 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
 
             // Update the tripId in the formData
             updateFormData('tripId', response.data.trip.id);
-
+            showToast('Booking submitted successfully', { type: 'success', position: 'top-center' });
             console.log('Booking created:', response.data);
         } catch (error) {
             console.error('Booking submission failed:', error);
+            showToast('Error submitting booking', { type: 'error', position: 'top-center' });
         }
     };
 
