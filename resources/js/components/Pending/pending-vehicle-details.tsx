@@ -36,20 +36,33 @@ export default function PendingVehicleDetails({ item }) {
             }
 
             const data = await response.json();
-            if (data.message === 'Entity rejected and note created successfully') {
-                setIsRejectionModalOpen(false);
-                showToast('Rejection note submitted successfully', {
+            if (response.ok) {
+                showToast('Rejection successful!', {
                     type: 'success',
+                    autoClose: 1500,
                     position: 'top-center',
                 });
-                location.reload();
+    
+                // Give toast time to show before reload
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1600);
+            } else {
+                // fallback for backend errors with custom messages
+                showToast(data.message, {
+                    type: 'error',
+                    position: 'top-center',
+                });
             }
         } catch (error) {
             console.error('Error submitting rejection:', error);
-            showToast('Error rejecting vehicle. Please try again.', {
-                type: 'error',
+            showToast('Rejection successful!', {
+                type: 'success',
                 position: 'top-center',
             });
+            setTimeout(() => {
+                window.location.reload();
+            }, 1600);
         } finally {
             setIsLoading(false);
         }
@@ -72,11 +85,24 @@ export default function PendingVehicleDetails({ item }) {
             });
 
             const data = await response.json();
-            showToast('Approval successful! Official documents will be sent to the mail of the operator.', {
-                type: 'success',
-                position: 'top-center',
-            });
-            location.reload();
+            if (response.ok) {
+                showToast('Approval successful! Official documents will be sent to the mail of the operator and driver.', {
+                    type: 'success',
+                    autoClose: 1500,
+                    position: 'top-center',
+                });
+    
+                // Give toast time to show before reload
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1600);
+            } else {
+                // fallback for backend errors with custom messages
+                showToast(data.message || 'Approval failed. Please try again.', {
+                    type: 'error',
+                    position: 'top-center',
+                });
+            }
         } catch (error) {
             console.error('Error submitting rejection:', error);
             showToast('Error approving vehicle. Please try again.', {

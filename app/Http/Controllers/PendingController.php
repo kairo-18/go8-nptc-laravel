@@ -172,7 +172,7 @@ class PendingController extends Controller
                 break;
 
             case 'vehicle':
-                $entity = Vehicle::find($entityId);
+                $entity = Vehicle::with(['operator.user'])->find($entityId);
                 break;
 
             case 'vr_company':
@@ -195,6 +195,14 @@ class PendingController extends Controller
         // Set the status to 'Rejected' and save the entity
         $entity->Status = 'Rejected';
         $entity->save();
+
+        if ($type === 'vehicle') {
+            $drivers = Driver::where('vehicle_id', $entity->id)->get();
+            foreach ($drivers as $driver) {
+                $driver->Status = 'Rejected';
+                $driver->save();
+            }
+        }
 
         // mail to user rejection and notes
         $email = null;
@@ -548,7 +556,7 @@ class PendingController extends Controller
         $certificateName = null;
 
         // Convert images to base64
-        $logoPath = public_path('NPTC_Logo.png');
+        $logoPath = public_path('assets/NPTC_Logo.png');
         $bgPath = public_path('bg-cert.png');
 
         $logoImage = 'data:image/png;base64,'.base64_encode(file_get_contents($logoPath));

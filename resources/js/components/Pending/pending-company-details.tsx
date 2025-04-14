@@ -51,7 +51,7 @@ export default function PendingCompanyDetails({ item }) {
     const handleApproval = async () => {
         try {
             setIsLoading(true);
-
+    
             const response = await fetch('/api/approve-with-docu', {
                 method: 'POST',
                 headers: {
@@ -63,23 +63,35 @@ export default function PendingCompanyDetails({ item }) {
                     user_id: item?.id,
                 }),
             });
-
+    
             const data = await response.json();
-            if (data.message === 'Entity approved and note created successfully') {
+    
+            if (response.ok) {
                 showToast('Approval successful! Official documents will be sent to the mail of the driver.', {
                     type: 'success',
-                    autoClose: 5000,
+                    autoClose: 1500,
                     position: 'top-center',
                 });
-                location.reload();
+    
+                // Give toast time to show before reload
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1600);
+            } else {
+                // fallback for backend errors with custom messages
+                showToast(data.message || 'Approval failed. Please try again.', {
+                    type: 'error',
+                    position: 'top-center',
+                });
             }
         } catch (error) {
-            console.error('Error submitting rejection:', error);
+            console.error('Error submitting approval:', error);
             showToast('Error approving company. Please try again.', { type: 'error', position: 'top-center' });
         } finally {
             setIsLoading(false);
         }
     };
+    
 
     return (
         <div className="mx-auto max-w-6xl space-y-8 rounded-lg border border-gray-200 bg-white p-8 shadow">
@@ -87,7 +99,7 @@ export default function PendingCompanyDetails({ item }) {
             <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                     <img
-                        src={item?.logoUrl || '../../../../public/assets/NPTCLogo.png'}
+                        src={item?.media_files?.find(file => file.collection_name === 'brand_logo')?.url}
                         alt="Company Logo"
                         className="h-16 w-16 rounded-full border border-gray-300 object-cover"
                     />

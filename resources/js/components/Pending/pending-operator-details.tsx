@@ -21,6 +21,7 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [operatorId, setOperatorId] = useState<string>('');
     const [note, setNote] = useState<string>('');
+    const [loading, setLoading] = useState(false);
 
     const openRejectionModal = () => {
         setOperatorId(item?.user?.id || '');
@@ -33,6 +34,7 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
 
     const handleRejection = async (note: string, entityId: string, entityType: string) => {
         try {
+            setLoading(true);
             const response = await fetch('/api/rejection', {
                 method: 'POST',
                 headers: {
@@ -51,22 +53,38 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
             }
 
             const data = await response.json();
-            showToast('Rejection note submitted successfully', {
-                type: 'success',
-                position: 'top-center',
-            });
-            location.reload();
+            if (response.ok) {
+                showToast('Rejection successful!', {
+                    type: 'success',
+                    autoClose: 1500,
+                    position: 'top-center',
+                });
+    
+                // Give toast time to show before reload
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1600);
+            } else {
+                // fallback for backend errors with custom messages
+                showToast(data.message || 'Rejection failed. Please try again.', {
+                    type: 'error',
+                    position: 'top-center',
+                });
+            }
         } catch (error) {
             console.error('Error submitting rejection:', error);
             showToast('Error rejecting operator. Please try again.', {
                 type: 'error',
                 position: 'top-center',
             });
+        } finally{
+            setLoading(false);
         }
     };
 
     const handleApproval = async (entityType: string) => {
         try {
+            setLoading(true);
             const requestBody = {
                 id: item.id,
                 type: entityType,
@@ -93,13 +111,32 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
             }
 
             const data = await response.json();
-            // location.reload();
+            if (response.ok) {
+                showToast('Approval successful! Official documents will be sent to the mail of the operator.', {
+                    type: 'success',
+                    autoClose: 1500,
+                    position: 'top-center',
+                });
+    
+                // Give toast time to show before reload
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1600);
+            } else {
+                // fallback for backend errors with custom messages
+                showToast(data.message || 'Approval failed. Please try again.', {
+                    type: 'error',
+                    position: 'top-center',
+                });
+            }
         } catch (error) {
             console.error('Error submitting rejection:', error);
             showToast('Error approving operator. Please try again.', {
                 type: 'error',
                 position: 'top-center',
             });
+        } finally{
+            setLoading(false);
         }
     };
 
