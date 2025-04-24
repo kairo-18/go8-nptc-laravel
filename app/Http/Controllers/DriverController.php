@@ -160,11 +160,6 @@ class DriverController extends Controller
             $driver->update(['BIR_clearance' => $media->getPath()]);
         }
 
-        return response()->json([
-            'message' => 'Driver created successfully',
-            'user' => $user,
-            'driver' => $driver,
-        ], 201);
     }
 
     public function updateDriverMedia(Request $request, Driver $driver)
