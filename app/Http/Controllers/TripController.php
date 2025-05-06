@@ -97,38 +97,197 @@ class TripController extends Controller
             'trip' => $trip,
         ]);
     }
-
     public function generatePaymentLink(Request $request)
     {
-        $amount = $request->input('amount', 15000); // Default: 150 PHP
+        // Env vars
+        $merchantId = env('PAYNAMICS_MERCHANT_ID');
+        $merchantKey = env('PAYNAMICS_MERCHANT_KEY');
+        $gatewayUrl = env('PAYNAMICS_GATEWAY_URL');
+        $basicAuthUser = env('PAYNAMICS_BASIC_AUTH_USER');
+        $basicAuthPass = env('PAYNAMICS_BASIC_AUTH_PASS');
+        $returnUrl = env('PAYNAMICS_RETURN_URL');
+        $cancelUrl = env('PAYNAMICS_CANCEL_URL');
+    
+        // Data setup
+        $amount = number_format($request->input('amount', 15000), 2, '.', '');
+        $requestId = uniqid('PNX');
+        $clientIp = $request->ip() ?? '127.0.0.1';
+        $hostIp = gethostbyname(gethostname());
+    
+        $customer = [
+            "fname" => $request->input('first_name', 'Juan'),
+            "lname" => $request->input('last_name', 'Dela Cruz'),
+            "mname" => $request->input('middle_name', 'Amendo'),
+            "address1" => $request->input('address1', '123 Main St'),
+            "address2" => $request->input('address2', 'bahay kubo'),
+            "city" => $request->input('city', 'Manila'),
+            "state" => $request->input('state', 'NCR'),
+            "country" => $request->input('country', 'PH'),
+            "postal" => $request->input('postal', '1000'),
+            "email" => $request->input('email', 'test@example.com'),
+            "phone" => $request->input('phone', '09613470587'),
+            "mobile" => $request->input('mobile', '09171234567'),
+            "dob" => $request->input('dob', '2000-01-01'),
+        ];
+    
+        $transaction = [
+            "merchant_id" => $merchantId,
+            "request_id" => $requestId,
+            "ip_address" => $clientIp,
+            "client_ip" => $clientIp,
+            "host_ip" => $hostIp,
+            "notification_url" => $returnUrl,
+            "response_url" => $returnUrl,
+            "cancel_url" => $cancelUrl,
+            "pmethod" => "wallet",
+            "pchannel" => "gc",
+            "payment_action" => "url_link",
+            "processtype" => "1",
+            "accttype" => "personal",
+            "consumername" => $customer['fname'] . ' ' . $customer['lname'],
+            "accountname" => $customer['fname'] . ' ' . $customer['lname'],
+            "collection_method" => "single_pay",
+            "amount" => $amount,
+            "currency" => "PHP",
+            "parent_id" => "",
+            "mersubid" => "",
+            "schedule" => "",
+            "deferred_period" => "",
+            "deferred_time" => "",
+            "dp_balance_info" => "",
+            "descriptor_note" => "",
+            "payment_notification_status" => "",
+            "payment_notification_channel" => "",
+        ];
+    
+        // Generate signature
+        $transaction['signature'] = $this->generateTransactionSignature($transaction, $merchantKey);
+        $customer['signature'] = $this->generateCustomerSignature($customer, $merchantKey);
+    
+        // Create final payload
+        $finalPayload = [
+            "transaction" => $transaction,
+            "customer_info" => $customer,
+        ];
+    
+        try {
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
+            ])
+            ->withBasicAuth($basicAuthUser, $basicAuthPass)
+            ->post($gatewayUrl, $finalPayload);
+    
+            $responseData = $response->json();
+    
+            \Log::info('Paynamics API response', [
+                'response' => $responseData,
+            ]);
 
-        $description = $request->input('description', 'NPTC Trip Ticket Payment');
-
-        $response = Http::withHeaders([
-            'Authorization' => 'Basic '.base64_encode(env('PAY_MONGO_SECRET_KEY').':'),
-            'Accept' => 'application/json',
-            'Content-Type' => 'application/json',
-        ])->post('https://api.paymongo.com/v1/links', [
-            'data' => [
-                'attributes' => [
-                    'amount' => $amount,
-                    'description' => $description,
-                ],
-            ],
-        ]);
-
-        return response()->json($response->json());
+    
+            return $responseData;
+    
+        } catch (\Exception $e) {
+            \Log::error('Paynamics API Error', ['message' => $e->getMessage()]);
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
+    
+   
+    
+    private function generateTransactionSignature(array $transaction, string $key): string
+    {
+        $forSign =
+            ($transaction['merchant_id'] ?? '') .
+            ($transaction['request_id'] ?? '') .
+            ($transaction['notification_url'] ?? '') .
+            ($transaction['response_url'] ?? '') .
+            ($transaction['cancel_url'] ?? '') .
+            ($transaction['pmethod'] ?? '') .
+            ($transaction['payment_action'] ?? '') .
+            ($transaction['schedule'] ?? '') .
+            ($transaction['collection_method'] ?? '') .
+            ($transaction['deferred_period'] ?? '') .
+            ($transaction['deferred_time'] ?? '') .
+            ($transaction['dp_balance_info'] ?? '') .
+            ($transaction['amount'] ?? '') .
+            ($transaction['currency'] ?? '') .
+            ($transaction['descriptor_note'] ?? '') .
+            ($transaction['payment_notification_status'] ?? '') .
+            ($transaction['payment_notification_channel'] ?? '') .
+            $key;
+    
+        \Log::info('Transaction Signature Generation', [
+            'concat_string' => $forSign,
+            'signature' => hash_hmac('sha512', $forSign, $key),
+        ]);
+    
+        return strtolower(hash_hmac('sha512', $forSign, $key));
+    }
+    
+    private function generateCustomerSignature(array $customer, string $key): string
+    {
+        $forSign =
+            ($customer['fname'] ?? '') .
+            ($customer['lname'] ?? '') .
+            ($customer['mname'] ?? '') .
+            ($customer['email'] ?? '') .
+            ($customer['phone'] ?? '') .
+            ($customer['mobile'] ?? '') .
+            ($customer['dob'] ?? '') .
+            $key;
+    
+        \Log::info('Customer Signature Generation', [
+            'concat_string' => $forSign,
+            'signature' => hash_hmac('sha512', $forSign, $key),
+        ]);
+    
+        return strtolower(hash_hmac('sha512', $forSign, $key));
+    }
+     
+    
+    
+    public function handleResponse() {
+        return Inertia::render('response-page');
+    }
+    
+    public function handleCancel() {
+        return Inertia::render('cancel-page');
+    }
+    
+    public function handleReturn(Request $request) {
+        $transactionId = $request->input('request_id');
+        $paymentStatus = $request->input('status'); // Assuming Paynamics sends a 'status' parameter
+    
+        // Find the corresponding transaction in your database (based on the request ID)
+        $trip = Trip::where('payment_transaction_id', $transactionId)->first();
+    
+        if ($trip) {
+            // Update the status based on the response
+            $trip->payment_status = $paymentStatus;
+            $trip->save();
+            
+            return Inertia::render('return-page', [
+                'paymentStatus' => $paymentStatus,
+                'transactionId' => $transactionId,
+            ]);
+        } else {
+            // Handle case where the transaction is not found
+            return Inertia::render('error-page', ['message' => 'Transaction not found.']);
+        }
+    }
+    
+    
+    
 
     public function checkStatus($id)
     {
-        $apiKey = env('PAY_MONGO_SECRET_KEY');
+        // $apiKey = env('PAY_MONGO_SECRET_KEY');
 
-        $response = Http::withBasicAuth($apiKey, '')
-            ->acceptJson()
-            ->get("https://api.paymongo.com/v1/links/{$id}");
+        // $response = Http::withBasicAuth($apiKey, '')
+        //     ->acceptJson()
+        //     ->get("https://api.paymongo.com/v1/links/{$id}");
 
-        return response()->json($response->json());
+        // return response()->json($response->json());
     }
 
     public function startTrip($tripId)

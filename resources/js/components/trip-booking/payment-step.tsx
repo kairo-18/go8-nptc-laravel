@@ -33,21 +33,21 @@ export function PaymentStep({ formData, onPrevious, updateFormData }: PaymentSte
     const handleProceedToPayment = async () => {
         setIsLoading(true); // Start loading
         try {
-            const response = await axios.post('/generate-payment-link', {
-                amount: 15000, // Amount in cents (150 PHP)
+            const response = await axios.post('/api/generate-payment-link', {
+                amount: 1500,
                 description: 'NPTC Trip Ticket Payment',
+                email: "test@example.com",
             });
-
-            if (response.data && response.data.data) {
-                const paymentUrl = response.data.data.attributes.checkout_url;
-                setLinkId(response.data.data.id);
+            
+            if (response.data && response.data.redirect_url) {
+                const paymentUrl = response.data.redirect_url;
+                setLinkId(response.data.link_id || '');
                 window.open(paymentUrl, '_blank');
                 showToast('Payment link created successfully!', { type: 'success', position: 'top-center' });
             } else {
-                console.error('Payment link creation failed:', response.data);
                 showToast('Payment link creation failed', { type: 'error', position: 'top-center' });
-                setIsLoading(false);
             }
+            
         } catch (error) {
             console.error('Error creating payment link:', error);
             showToast('Error creating payment link', { type: 'error', position: 'top-center' });

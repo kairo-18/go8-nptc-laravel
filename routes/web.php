@@ -175,8 +175,7 @@ Route::post('mails/new-mail', function (Request $request) {
     return response()->json(['mail' => $mail]);
 });
 
-Route::post('/generate-payment-link', [TripController::class, 'generatePaymentLink'])
-    ->name('generate-payment-link');
+
 
 Route::get('/generate-qr/{trip}', [TripController::class, 'generateQr']);
 
@@ -233,5 +232,6 @@ require __DIR__.'/operator.php';
 require __DIR__.'/driver.php';
 require __DIR__.'/vehicle.php';
 require __DIR__.'/pending.php';
+require __DIR__.'/paynamicsurl.php';
 
 Route::get('/trip-ticket/download/{trip}', [TripController::class, 'downloadTripTicket'])->name('trip-ticket.download');

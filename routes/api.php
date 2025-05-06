@@ -69,7 +69,21 @@ Route::post('/rejection', [PendingController::class, 'rejection']);
 Route::post('/approval', [PendingController::class, 'approval']);
 
 Route::post('/approve-with-docu', [PendingController::class, 'approveAndSendDocuments']);
+Route::post('/generate-payment-link', [TripController::class, 'generatePaymentLink'])
+    ->name('generate-payment-link');
 
+
+    Route::post('/payment/success', function (Request $request) {
+        \Log::info('Paynamics Success Callback:', $request->all());
+        return response()->json(['status' => 'success']);
+    });
+    
+    // Paynamics Cancel Callback
+    Route::post('/payment/cancel', function (Request $request) {
+        \Log::info('Paynamics Cancel Callback:', $request->all());
+        return response()->json(['status' => 'cancelled']);
+    });
+    
 // Catch-all for unhandled API routes
 Route::fallback(function () {
     return response()->json(['error' => 'Route not found'], 404);
