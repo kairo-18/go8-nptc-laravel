@@ -97,132 +97,124 @@ class TripController extends Controller
             'trip' => $trip,
         ]);
     }
-    public function generatePaymentLink(Request $request)
-    {
-        // Env vars
-        $merchantId = env('PAYNAMICS_MERCHANT_ID');
-        $merchantKey = env('PAYNAMICS_MERCHANT_KEY');
-        $gatewayUrl = env('PAYNAMICS_GATEWAY_URL');
-        $basicAuthUser = env('PAYNAMICS_BASIC_AUTH_USER');
-        $basicAuthPass = env('PAYNAMICS_BASIC_AUTH_PASS');
-        $returnUrl = env('PAYNAMICS_RETURN_URL');
-        $cancelUrl = env('PAYNAMICS_CANCEL_URL');
-    
-        // Data setup
-        $amount = number_format($request->input('amount', 15000), 2, '.', '');
-        $requestId = uniqid('PNX');
-        $clientIp = $request->ip() ?? '127.0.0.1';
-        $hostIp = gethostbyname(gethostname());
-    
-        $customer = [
-            "fname" => $request->input('first_name', 'Juan'),
-            "lname" => $request->input('last_name', 'Dela Cruz'),
-            "mname" => $request->input('middle_name', 'Amendo'),
-            "address1" => $request->input('address1', '123 Main St'),
-            "address2" => $request->input('address2', 'bahay kubo'),
-            "city" => $request->input('city', 'Manila'),
-            "state" => $request->input('state', 'NCR'),
-            "country" => $request->input('country', 'PH'),
-            "postal" => $request->input('postal', '1000'),
-            "email" => $request->input('email', 'test@example.com'),
-            "phone" => $request->input('phone', '09613470587'),
-            "mobile" => $request->input('mobile', '09171234567'),
-            "dob" => $request->input('dob', '2000-01-01'),
-        ];
-    
-        $transaction = [
-            "merchant_id" => $merchantId,
-            "request_id" => $requestId,
-            "ip_address" => $clientIp,
-            "client_ip" => $clientIp,
-            "host_ip" => $hostIp,
-            "notification_url" => $returnUrl,
-            "response_url" => $returnUrl,
-            "cancel_url" => $cancelUrl,
-            "pmethod" => "wallet",
-            "pchannel" => "gc",
-            "payment_action" => "url_link",
-            "processtype" => "1",
-            "accttype" => "personal",
-            "consumername" => $customer['fname'] . ' ' . $customer['lname'],
-            "accountname" => $customer['fname'] . ' ' . $customer['lname'],
-            "collection_method" => "single_pay",
-            "amount" => $amount,
-            "currency" => "PHP",
-            "parent_id" => "",
-            "mersubid" => "",
-            "schedule" => "",
-            "deferred_period" => "",
-            "deferred_time" => "",
-            "dp_balance_info" => "",
-            "descriptor_note" => "",
-            "payment_notification_status" => "",
-            "payment_notification_channel" => "",
-        ];
-    
-        // Generate signature
-        $transaction['signature'] = $this->generateTransactionSignature($transaction, $merchantKey);
-        $customer['signature'] = $this->generateCustomerSignature($customer, $merchantKey);
-    
-        // Create final payload
-        $finalPayload = [
-            "transaction" => $transaction,
-            "customer_info" => $customer,
-        ];
-    
-        try {
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-            ])
-            ->withBasicAuth($basicAuthUser, $basicAuthPass)
-            ->post($gatewayUrl, $finalPayload);
-    
-            $responseData = $response->json();
-    
-            \Log::info('Paynamics API response', [
-                'response' => $responseData,
-            ]);
 
-    
-            return $responseData;
-    
-        } catch (\Exception $e) {
-            \Log::error('Paynamics API Error', ['message' => $e->getMessage()]);
-            return response()->json(['error' => $e->getMessage()], 500);
-        }
+    public function generatePaymentLink(Request $request)
+{
+    $merchantId = env('PAYNAMICS_MERCHANT_ID');
+    $merchantKey = env('PAYNAMICS_MERCHANT_KEY');
+    $gatewayUrl = env('PAYNAMICS_GATEWAY_URL');
+    $basicAuthUser = env('PAYNAMICS_BASIC_AUTH_USER');
+    $basicAuthPass = env('PAYNAMICS_BASIC_AUTH_PASS');
+
+    $amount = number_format($request->input('amount', 1.00), 2, '.', '');
+    $requestId = 'GC_AJD2434624_004'; // Or generate dynamically if needed
+
+    $transaction = [
+    "merchant_id" => $merchantId,
+    "request_id" => $requestId,
+    "notification_url" => "https://eokqz331hdn441n.m.pipedream.net",
+    "response_url" => "https://localhost:8001",
+    "cancel_url" => "https://payin.payserv.net/paygate",
+    "pmethod" => "wallet",
+    "pchannel" => "gc",
+    "payment_action" => "url_link",
+    "collection_method" => "single_pay",
+    "payment_notification_status" => "1",
+    "payment_notification_channel" => "1",
+    "amount" => $amount,
+    "currency" => "PHP",
+    "descriptor_note" => "test", 
+    ];
+
+    $transaction['signature'] = $this->generateTransactionSignature($transaction, $merchantKey);
+
+    $customer = [
+        "fname" => $request->input('first_name', 'Juan'),
+        "lname" => $request->input('last_name', 'Dela Cruz'),
+        "mname" => $request->input('middle_name', 'Apostolo'),
+        "email" => $request->input('email', 'juandelacruz@gmail.com'),
+        "phone" => $request->input('phone', '2702128'),
+        "mobile" => $request->input('mobile', '09613470587'),
+        "dob" => $request->input('dob', '2000-01-01'),
+    ];
+
+    $customer['signature'] = $this->generateCustomerSignature($customer, $merchantKey);
+
+    $orderDetails = [
+        "orders" => [
+            [
+                "itemname" => "TEST 01",
+                "quantity" => 1,
+                "unitprice" => "1.00",
+                "totalprice" => "1.00"
+            ]
+        ],
+        "subtotalprice" => "1.00",
+        "shippingprice" => "0.00",
+        "discountamount" => "0.00",
+        "totalorderamount" => "1.00"
+    ];
+
+    $finalPayload = [
+        "transaction" => $transaction,
+        "customer_info" => $customer,
+        "order_details" => $orderDetails
+    ];
+
+    \Log::info('Generated Payment Link Payload', ['payload' => $finalPayload]);
+
+    try {
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+        ])
+        ->withBasicAuth($basicAuthUser, $basicAuthPass)
+        ->post($gatewayUrl, $finalPayload);
+
+        $responseData = $response->json();
+
+        \Log::info('Payment Gateway Response', ['response' => $responseData]);
+
+        return $responseData;
+
+    } catch (\Exception $e) {
+        \Log::error('Payment Gateway Error', ['message' => $e->getMessage()]);
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
+
     
    
     
     private function generateTransactionSignature(array $transaction, string $key): string
-    {
-        $forSign =
-            ($transaction['merchant_id'] ?? '') .
-            ($transaction['request_id'] ?? '') .
-            ($transaction['notification_url'] ?? '') .
-            ($transaction['response_url'] ?? '') .
-            ($transaction['cancel_url'] ?? '') .
-            ($transaction['pmethod'] ?? '') .
-            ($transaction['payment_action'] ?? '') .
-            ($transaction['schedule'] ?? '') .
-            ($transaction['collection_method'] ?? '') .
-            ($transaction['deferred_period'] ?? '') .
-            ($transaction['deferred_time'] ?? '') .
-            ($transaction['dp_balance_info'] ?? '') .
-            ($transaction['amount'] ?? '') .
-            ($transaction['currency'] ?? '') .
-            ($transaction['descriptor_note'] ?? '') .
-            ($transaction['payment_notification_status'] ?? '') .
-            ($transaction['payment_notification_channel'] ?? '') .
-            $key;
-    
-        \Log::info('Transaction Signature Generation', [
-            'concat_string' => $forSign,
-            'signature' => hash_hmac('sha512', $forSign, $key),
-        ]);
-    
-        return strtolower(hash_hmac('sha512', $forSign, $key));
-    }
+{
+    $forSign =
+        ($transaction['merchant_id'] ?? '') .
+        ($transaction['request_id'] ?? '') .
+        ($transaction['notification_url'] ?? '') .
+        ($transaction['response_url'] ?? '') .
+        ($transaction['cancel_url'] ?? '') .
+        ($transaction['pmethod'] ?? '') .
+        ($transaction['payment_action'] ?? '') .
+        ($transaction['schedule'] ?? '') .
+        ($transaction['collection_method'] ?? '') .
+        ($transaction['deferred_period'] ?? '') .
+        ($transaction['deferred_time'] ?? '') .
+        ($transaction['dp_balance_info'] ?? '') .
+        ($transaction['amount'] ?? '') .
+        ($transaction['currency'] ?? '') .
+        ($transaction['descriptor_note'] ?? '') .
+        ($transaction['payment_notification_status'] ?? '') .
+        ($transaction['payment_notification_channel'] ?? '') .
+        $key;
+
+    \Log::info('Transaction Signature Generation', [
+        'concat_string' => $forSign,
+        'signature' => hash('sha512', $forSign),
+    ]);
+
+    return strtolower(hash('sha512', $forSign));
+}
+
     
     private function generateCustomerSignature(array $customer, string $key): string
     {
@@ -238,10 +230,10 @@ class TripController extends Controller
     
         \Log::info('Customer Signature Generation', [
             'concat_string' => $forSign,
-            'signature' => hash_hmac('sha512', $forSign, $key),
+            'signature' => hash('sha512', $forSign),
         ]);
     
-        return strtolower(hash_hmac('sha512', $forSign, $key));
+        return strtolower(hash('sha512', $forSign));
     }
      
     
