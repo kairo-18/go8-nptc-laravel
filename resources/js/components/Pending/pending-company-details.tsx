@@ -1,10 +1,12 @@
-import { showToast } from '@/components/toast';
+import { showToast, Id } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
+import {toast} from 'react-toastify';
+
 
 export default function PendingCompanyDetails({ item }) {
     const [previewFile, setPreviewFile] = useState(null);
@@ -13,9 +15,17 @@ export default function PendingCompanyDetails({ item }) {
     const [rejectionNote, setRejectionNote] = useState('');
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleRejection = async () => {
+     const handleRejection = async () => {
+        let loadingToastId: Id | null = null;
         try {
             setIsLoading(true);
+            // Show loading toast
+            loadingToastId = showToast('Processing rejection...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false
+            });
 
             const response = await fetch('/api/rejection', {
                 method: 'POST',
@@ -34,24 +44,45 @@ export default function PendingCompanyDetails({ item }) {
                 throw new Error('Error submitting rejection');
             }
 
-            const data = await response.json();
-            if (data.message === 'Entity rejected and note created successfully') {
-                setIsRejectionModalOpen(false);
-                showToast('Rejection successful!', { type: 'success', position: 'top-center' });
-                location.reload();
+            // Dismiss loading and show success
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+                showToast('Rejection successful!', {
+                    type: 'success',
+                    autoClose: 1500,
+                    position: 'top-center',
+                });
             }
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 1600);
         } catch (error) {
             console.error('Error submitting rejection:', error);
-            showToast('Error rejecting company. Please try again.', { type: 'error', position: 'top-center' });
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+                showToast(error.message || 'Error rejecting company. Please try again.', { 
+                    type: 'error', 
+                    position: 'top-center' 
+                });
+            }
         } finally {
             setIsLoading(false);
         }
     };
 
     const handleApproval = async () => {
+        let loadingToastId: Id | null = null;
         try {
             setIsLoading(true);
-    
+            // Show loading toast
+            loadingToastId = showToast('Processing approval...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false
+            });
+
             const response = await fetch('/api/approve-with-docu', {
                 method: 'POST',
                 headers: {
@@ -63,30 +94,35 @@ export default function PendingCompanyDetails({ item }) {
                     user_id: item?.id,
                 }),
             });
-    
+
             const data = await response.json();
-    
-            if (response.ok) {
+
+            if (!response.ok) {
+                throw new Error(data.message || 'Approval failed');
+            }
+
+            // Dismiss loading and show success
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
                 showToast('Approval successful! Official documents will be sent to the mail of the driver.', {
                     type: 'success',
                     autoClose: 1500,
                     position: 'top-center',
                 });
-    
-                // Give toast time to show before reload
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1600);
-            } else {
-                // fallback for backend errors with custom messages
-                showToast(data.message || 'Approval failed. Please try again.', {
-                    type: 'error',
-                    position: 'top-center',
-                });
             }
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 1600);
         } catch (error) {
             console.error('Error submitting approval:', error);
-            showToast('Error approving company. Please try again.', { type: 'error', position: 'top-center' });
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+                showToast(error.message || 'Error approving company. Please try again.', { 
+                    type: 'error', 
+                    position: 'top-center' 
+                });
+            }
         } finally {
             setIsLoading(false);
         }

@@ -1,4 +1,5 @@
-import { showToast } from '@/components/toast';
+import { showToast, Id } from '@/components/toast';
+import {toast} from 'react-toastify';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -45,8 +46,16 @@ export default function EditOperator({ mediaFiles, operator }) {
         }));
     };
 
-    const handleDeleteFile = async (operatorId: number, fileId: number) => {
+        const handleDeleteFile = async (operatorId: number, fileId: number) => {
+        let loadingToastId: Id | null = null;
         try {
+            loadingToastId = showToast('Deleting file...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false
+            });
+
             await router.delete(
                 route('delete-operator-media', {
                     operator: operatorId,
@@ -56,12 +65,25 @@ export default function EditOperator({ mediaFiles, operator }) {
                 },
             );
 
-            showToast('File deleted successfully', { type: 'success', position: 'top-center' });
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            showToast('File deleted successfully', { 
+                type: 'success', 
+                position: 'top-center' 
+            });
         } catch (error) {
             console.error('Error deleting file:', error);
-            showToast('Error deleting file', { type: 'error', position: 'top-center' });
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            showToast('Error deleting file', { 
+                type: 'error', 
+                position: 'top-center' 
+            });
         }
     };
+
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -82,8 +104,19 @@ export default function EditOperator({ mediaFiles, operator }) {
         }
     };
 
-    const handleOperatorUpdate = async () => {
+     const handleOperatorUpdate = async () => {
+        let loadingToastId: Id | null = null;
+        let fileUploadToastId: Id | null = null;
+        
         try {
+            // Show loading toast for operator update
+            loadingToastId = showToast('Updating operator...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false
+            });
+
             // 1️⃣ Update Operator Information
             const payload = {
                 username: operatorData?.user?.username || '',
@@ -105,6 +138,11 @@ export default function EditOperator({ mediaFiles, operator }) {
                 throw new Error('Failed to update operator details.');
             }
 
+            // Dismiss the operator update toast
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+
             // 2️⃣ Upload Files if Selected (only non-null files)
             const formData = new FormData();
             if (files.photo) formData.append('photo', files.photo);
@@ -112,19 +150,45 @@ export default function EditOperator({ mediaFiles, operator }) {
             if (files.valid_id_back) formData.append('valid_id_back', files.valid_id_back);
 
             if (formData.entries().next().done === false) {
-                // Check if formData has any entries
+                // Show loading toast for file upload
+                fileUploadToastId = showToast('Uploading files...', {
+                    type: 'loading',
+                    isLoading: true,
+                    position: 'top-center',
+                    autoClose: false
+                });
+
                 await axios.post(`/operators/${operatorData.id}/upload-files`, formData, {
                     headers: { 'Content-Type': 'multipart/form-data' },
                 });
+
+                // Dismiss the file upload toast
+                if (fileUploadToastId) {
+                    toast.dismiss(fileUploadToastId);
+                }
             }
 
-            showToast('Operator updated successfully', { type: 'success', position: 'top-center' });
+            showToast('Operator updated successfully', { 
+                type: 'success', 
+                position: 'top-center' 
+            });
             location.reload();
         } catch (error) {
             console.error('Error updating operator:', error);
-            showToast(`Failed to update operator: ${error.response?.data?.message || error.message}`, { type: 'error', position: 'top-center' });
+            // Dismiss any active loading toasts
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            if (fileUploadToastId) {
+                toast.dismiss(fileUploadToastId);
+            }
+            showToast(`Failed to update operator: ${error.response?.data?.message || error.message}`, { 
+                type: 'error', 
+                position: 'top-center' 
+            });
         }
     };
+
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>

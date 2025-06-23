@@ -1,4 +1,5 @@
-import { showToast } from '@/components/toast';
+import { showToast, Id } from '@/components/toast';
+import {toast} from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
 
@@ -32,9 +33,18 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
         setIsModalOpen(false);
     };
 
-    const handleRejection = async (note: string, entityId: string, entityType: string) => {
+     const handleRejection = async (note: string, entityId: string, entityType: string) => {
+        let loadingToastId: Id | null = null;
         try {
             setLoading(true);
+            // Show loading toast
+            loadingToastId = showToast('Processing rejection...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false
+            });
+
             const response = await fetch('/api/rejection', {
                 method: 'POST',
                 headers: {
@@ -52,46 +62,51 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
                 throw new Error(`Error: ${response.status} - ${response.statusText}`);
             }
 
-            const data = await response.json();
-            if (response.ok) {
+            // Dismiss loading and show success
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
                 showToast('Rejection successful!', {
                     type: 'success',
                     autoClose: 1500,
                     position: 'top-center',
                 });
-    
-                // Give toast time to show before reload
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1600);
-            } else {
-                // fallback for backend errors with custom messages
-                showToast(data.message || 'Rejection failed. Please try again.', {
+            }
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 1600);
+        } catch (error) {
+            console.error('Error submitting rejection:', error);
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+                showToast(error.message || 'Error rejecting operator. Please try again.', {
                     type: 'error',
                     position: 'top-center',
                 });
             }
-        } catch (error) {
-            console.error('Error submitting rejection:', error);
-            showToast('Error rejecting operator. Please try again.', {
-                type: 'error',
-                position: 'top-center',
-            });
-        } finally{
+        } finally {
             setLoading(false);
         }
     };
 
     const handleApproval = async (entityType: string) => {
+        let loadingToastId: Id | null = null;
         try {
             setLoading(true);
+            // Show loading toast
+            loadingToastId = showToast('Processing approval...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false
+            });
+
             const requestBody = {
                 id: item.id,
                 type: entityType,
                 user_id: item.user.id,
             };
 
-            // Add 'status' only if userRole matches the condition
             if (role === 'VR Admin') {
                 requestBody.status = 'For Payment';
             } else if (role === 'NPTC Admin' || role === 'NPTC Super Admin') {
@@ -110,32 +125,29 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
                 throw new Error(`Error: ${response.status} - ${response.statusText}`);
             }
 
-            const data = await response.json();
-            if (response.ok) {
+            // Dismiss loading and show success
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
                 showToast('Approval successful! Official documents will be sent to the mail of the operator.', {
                     type: 'success',
                     autoClose: 1500,
                     position: 'top-center',
                 });
-    
-                // Give toast time to show before reload
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1600);
-            } else {
-                // fallback for backend errors with custom messages
-                showToast(data.message || 'Approval failed. Please try again.', {
+            }
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 1600);
+        } catch (error) {
+            console.error('Error submitting approval:', error);
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+                showToast(error.message || 'Error approving operator. Please try again.', {
                     type: 'error',
                     position: 'top-center',
                 });
             }
-        } catch (error) {
-            console.error('Error submitting rejection:', error);
-            showToast('Error approving operator. Please try again.', {
-                type: 'error',
-                position: 'top-center',
-            });
-        } finally{
+        } finally {
             setLoading(false);
         }
     };
