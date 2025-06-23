@@ -83,7 +83,7 @@ interface VRCompany {
 }
 
 // Unified type for the data table
-type ApplicationData = (Operator  | Vehicle | VRCompany) & { type: string };
+type ApplicationData = (Operator | Vehicle | VRCompany) & { type: string };
 
 export default function Pending() {
     const [data, setData] = useState<ApplicationData[]>([]);
@@ -222,7 +222,7 @@ export default function Pending() {
         {
             id: 'actions',
             cell: ({ row }) => (
-                <Button variant="ghost" onClick={() => handleRowClick(row.original)}>
+                <Button variant="outline" className="!bg-gray-200 text-black" onClick={() => handleRowClick(row.original)}>
                     <Ellipsis className="h-4 w-4" />
                 </Button>
             ),
@@ -239,8 +239,8 @@ export default function Pending() {
 
                     {selectedItem && (
                         <div className="relative rounded-md border bg-white p-4 shadow-md">
-                            <Button className="absolute top-2 right-2" variant="ghost" onClick={() => setSelectedItem(null)}>
-                                <X className="h-5 w-5" />
+                            <Button className="absolute top-2 right-2 hover:!bg-blue-800" variant="ghost" onClick={() => setSelectedItem(null)}>
+                                <X className="h-5 w-5 text-white" />
                             </Button>
                             {selectedItem.type === 'Operator' ? (
                                 <PendingOperatorDetails item={selectedItem} role={userRole} />
