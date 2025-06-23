@@ -47,23 +47,56 @@ export default function OperatorDashboard({
 
       {/* Overall Stats */}
       <h2 className="text-2xl font-bold mt-6">Operator Overview</h2>
-      <div className="grid grid-cols-3 gap-4">
-        {[ 
-          { title: "Active Drivers", value: activeDriversCount },
-          { title: "Pending Registrations", value: pendingRegistrationsCount },
-          { title: "Today's Bookings", value: bookingsToday },
-          { title: "This Week's Bookings", value: bookingsThisWeek },
-          { title: "This Month's Bookings", value: bookingsThisMonth },
-        ].map((item, index) => (
-          <Card key={index}>
-            <CardHeader>
-              <CardTitle>{item.title}</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">{item.value}</p>
-            </CardContent>
-          </Card>
-        ))}
+      
+      {/* First row - Driver stats */}
+      <div className="grid grid-cols-2 gap-4 mb-4">
+        <Card>
+          <CardHeader>
+            <CardTitle>Active Drivers</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{activeDriversCount}</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Pending Registrations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{pendingRegistrationsCount}</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Second row - Booking stats */}
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Today's Bookings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{bookingsToday}</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>This Week's Bookings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{bookingsThisWeek}</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>This Month's Bookings</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-3xl font-bold">{bookingsThisMonth}</p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Scheduled Bookings & Calendar (70:30 Ratio) */}

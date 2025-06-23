@@ -217,7 +217,7 @@ public function operatorDashboard()
         'activeDriversCount' => $activeDrivers,
         'scheduledBookings' => $scheduledBookings,
         'pendingRegistrationsCount' => $pendingDrivers,
-        'operatorName' => $operator->name ?? 'Operator',
+        'operatorName' => $operator->user->FirstName ?? 'Operator',
         'bookingsToday' => $bookingsToday,
         'bookingsThisWeek' => $bookingsThisWeek,
         'bookingsThisMonth' => $bookingsThisMonth,
