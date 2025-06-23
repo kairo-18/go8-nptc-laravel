@@ -235,3 +235,4 @@ require __DIR__.'/vehicle.php';
 require __DIR__.'/pending.php';
 
 Route::get('/trip-ticket/download/{trip}', [TripController::class, 'downloadTripTicket'])->name('trip-ticket.download');
+Route::get('/trip-ticket/view/{trip}', [TripController::class, 'viewTripTicket'])->name('trip-ticket.view');

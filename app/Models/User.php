@@ -91,7 +91,7 @@ class User extends Authenticatable
 
     public function operator()
     {
-        return $this->hasMany(Operator::class);
+        return $this->hasOne(Operator::class);
     }
 
     public function vrOwner()

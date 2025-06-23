@@ -167,6 +167,17 @@ class TripController extends Controller
         }
     }
 
+    public function viewTripTicket(Trip $trip)
+    {
+        try {
+            $trip = Trip::with('passengers')->findOrFail($trip->id);
+
+            return view('trip-ticket-view', ['trip' => $trip]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to retrieve trip ticket', 'details' => $e->getMessage()], 500);
+        }
+    }
+
     public function downloadTripTicket(Trip $trip)
     {
         try {
@@ -202,7 +213,7 @@ class TripController extends Controller
             writer: new PngWriter,
             writerOptions: [],
             validateResult: false,
-            data: env('APP_URL').'/trip-ticket/download/'.$trip->id,
+            data: env('APP_URL').'/trip-ticket/view/'.$trip->id,
             encoding: new Encoding('UTF-8'),
             errorCorrectionLevel: ErrorCorrectionLevel::High,
             size: 300,
