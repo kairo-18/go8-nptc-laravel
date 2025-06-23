@@ -23,12 +23,12 @@ const mainNavItems: NavItem[] = [
         icon: Folder,
     },
     {
-        title: 'VR Temp Account Registration',
+        title: 'Register Temp VR',
         url: '/vr-registration',
         icon: BadgePlus,
     },
     {
-        title: 'Operator Temp Account Registration',
+        title: 'Register Temp Operator',
         url: '/op-registration',
         icon: BadgePlus,
     },
