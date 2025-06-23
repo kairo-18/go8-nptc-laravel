@@ -205,14 +205,28 @@ class PendingController extends Controller
         }
 
         // mail to user rejection and notes
-        $email = null;
-        if ($type === 'vr_company') {
+    $email = null;
+    $userName = '';
+    
+    switch ($type) {
+        case 'vr_company':
             $email = $entity->owner->user->email;
-            $userName = $entity->owner->user->FirstName.' '.$entity->owner->user->LastName.' ';
-        } else {
-            $email = $entity->user->email;
-            $userName = $entity->user->FirstName.' '.$entity->user->LastName.' ';
-        }
+            $userName = $entity->owner->user->FirstName.' '.$entity->owner->user->LastName;
+            break;
+        case 'vehicle':
+            // For vehicle, we access the operator's user
+            if ($entity->operator && $entity->operator->user) {
+                $email = $entity->operator->user->email;
+                $userName = $entity->operator->user->FirstName.' '.$entity->operator->user->LastName;
+            }
+            break;
+        default:
+            // For driver, operator, etc.
+            if ($entity->user) {
+                $email = $entity->user->email;
+                $userName = $entity->user->FirstName.' '.$entity->user->LastName;
+            }
+    }
 
         IlluminateMail::to($email)->send(new RejectionEmail($userName, $validated['note'], $type));
 
