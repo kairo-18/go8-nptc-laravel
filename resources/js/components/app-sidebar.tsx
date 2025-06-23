@@ -157,10 +157,8 @@ export function AppSidebar() {
                 <NavMain items={filteredNavItems} currentPath={url} userRole={userRole} totalUnreadCount={totalUnreadCount} />
             </SidebarContent>
 
-            <SidebarFooter className="rounded-2xl border border-white text-white hover:border-red-700 hover:bg-white hover:text-gray-900">
+            <SidebarFooter className="group transform rounded-2xl border border-white/50 text-white shadow-lg backdrop-blur-sm transition-all duration-300 ease-in-out hover:-translate-y-1 hover:border-white hover:bg-white/20 hover:text-white hover:shadow-xl">
                 <NavUser />
-
-                {/* Display the unread count */}
             </SidebarFooter>
         </Sidebar>
     );
