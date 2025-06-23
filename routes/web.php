@@ -7,6 +7,7 @@ use App\Http\Controllers\ManualPaymentController;
 use App\Http\Controllers\PendingController;
 use App\Http\Controllers\TripController;
 use App\Http\Controllers\VRCompanyController;
+use App\Http\Controllers\DashboardController;
 use App\Models\Mail;
 use App\Models\Thread;
 use App\Models\User;
@@ -220,6 +221,15 @@ Route::get('/user-verification-profile/{user}', function (User $user) {
 
 // pending
 Route::get('/pending-data', [PendingController::class, 'index']);
+
+//dashboard
+Route::middleware(['auth', 'verified', 'role:VR Admin'])->group(function () {
+    Route::get('/vr-admin-dashboard', [DashboardController::class, 'vrAdminDashboard'])->name('vr-admin.dashboard');
+});
+
+Route::middleware(['auth', 'verified', 'role:Operator'])->group(function () {
+    Route::get('/operator-dashboard', [DashboardController::class, 'operatorDashboard'])->name('operator.dashboard');
+});
 
 // Include additional route files
 require __DIR__.'/settings.php';

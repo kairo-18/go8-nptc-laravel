@@ -1,4 +1,5 @@
-import { showToast } from '@/components/toast';
+import { showToast, Id } from '@/components/toast';
+import {toast} from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -71,6 +72,7 @@ export default function Vehicles({ vehicles }: VehiclesProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState<Vehicle | null>(null);
     const [previewFile, setPreviewFile] = useState<MediaFile | null>(null);
+    const [processing, setProcessing] = useState(false);
 
     useEffect(() => {
         // Clear input field when a file is removed
@@ -133,63 +135,82 @@ export default function Vehicles({ vehicles }: VehiclesProps) {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-        if (!formData) {
-            console.error('No vehicle data available');
-            return;
-        }
+    if (!formData) {
+        console.error('No vehicle data available');
+        return;
+    }
 
-        try {
-            // Update vehicle data
-            await router.patch(`/vehicles/${formData.id}`, {
-                PlateNumber: formData.PlateNumber,
-                Model: formData.Model,
-                Brand: formData.Brand,
-                SeatNumber: formData.SeatNumber,
-                Status: formData.Status,
-            });
+    setProcessing(true);
+    let loadingToastId: Id | null = null;
 
-            console.log('Vehicle details updated successfully');
+    try {
+        // Show loading toast
+        loadingToastId = showToast('Updating vehicle...', {
+            type: 'loading',
+            isLoading: true,
+            position: 'top-center',
+            autoClose: false
+        });
 
-            // Handle file uploads
-            const uploadData = new FormData();
-            const fileFields = [
-                'front_image',
-                'back_image',
-                'left_side_image',
-                'right_side_image',
-                'or_image',
-                'cr_image',
-                'id_card_image',
-                'gps_certificate_image',
-                'inspection_certificate_image',
-            ];
-            let hasFiles = false;
+        // Update vehicle data
+        await router.patch(`/vehicles/${formData.id}`, {
+            PlateNumber: formData.PlateNumber,
+            Model: formData.Model,
+            Brand: formData.Brand,
+            SeatNumber: formData.SeatNumber,
+            Status: formData.Status,
+        });
 
-            fileFields.forEach((field) => {
-                const file = selectedFile?.[field];
-                if (file) {
-                    uploadData.append(field, file);
-                    hasFiles = true;
-                }
-            });
+        // Handle file uploads
+        const uploadData = new FormData();
+        const fileFields = [
+            'front_image',
+            'back_image',
+            'left_side_image',
+            'right_side_image',
+            'or_image',
+            'cr_image',
+            'id_card_image',
+            'gps_certificate_image',
+            'inspection_certificate_image',
+        ];
+        let hasFiles = false;
 
-            if (hasFiles) {
-                await router.post(route('vehicle.upload-files', { vehicle: formData.id }), uploadData);
-                console.log('Files uploaded successfully');
+        fileFields.forEach((field) => {
+            const file = selectedFile?.[field];
+            if (file) {
+                uploadData.append(field, file);
+                hasFiles = true;
             }
+        });
 
-            setIsEditing(false);
-            setSelectedFile({});
-            showToast('Vehicle updated successfully', { type: 'success', position: 'top-center' });
-            window.location.reload();
-        } catch (error) {
-            console.error('Error:', error);
-            showToast('Failed to update vehicle.', { type: 'error', position: 'top-center' });
+        if (hasFiles) {
+            await router.post(route('vehicle.upload-files', { vehicle: formData.id }), uploadData);
         }
-    };
+
+        // Dismiss loading toast
+        if (loadingToastId) {
+            toast.dismiss(loadingToastId);
+        }
+
+        showToast('Vehicle updated successfully', { type: 'success', position: 'top-center' });
+        setIsEditing(false);
+        setSelectedFile({});
+        window.location.reload();
+    } catch (error) {
+        console.error('Error:', error);
+        // Dismiss loading toast if it exists
+        if (loadingToastId) {
+            toast.dismiss(loadingToastId);
+        }
+        showToast('Failed to update vehicle.', { type: 'error', position: 'top-center' });
+    } finally {
+        setProcessing(false);
+    }
+};
 
     return (
         <MainLayout breadcrumbs={[{ title: 'Vehicles', href: '/vehicles' }]}>
@@ -348,9 +369,9 @@ export default function Vehicles({ vehicles }: VehiclesProps) {
 
                                     {/* Update / Save Button */}
                                     <div className="mt-6">
-                                        <Button onClick={isEditing ? handleSubmit : () => startEditing(vehicle)}>
-                                            {isEditing ? 'Save Changes' : 'Update'}
-                                        </Button>
+                                    <Button onClick={isEditing ? handleSubmit : () => startEditing(vehicle)}>
+                                        {processing ? 'Saving...' : isEditing ? 'Save Changes' : 'Update'}
+                                    </Button>
                                     </div>
                                 </CardContent>
                             </Card>
