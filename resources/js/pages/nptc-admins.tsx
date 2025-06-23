@@ -88,16 +88,16 @@ export default function NptcAdmins({ users }: NptcAdminsProps) {
                 <div className="">
                     <Table className='rounded-lg border'>
                         <TableCaption>A list of NPTC Admins.</TableCaption>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="w-[100px]">ID</TableHead>
-                                <TableHead>First Name</TableHead>
-                                <TableHead>Last Name</TableHead>
-                                <TableHead>Username</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Contact Number</TableHead>
-                                <TableHead>Birth Date</TableHead>
-                                <TableHead>Actions</TableHead>
+                        <TableHeader className='bg-[#252583] text-white'>
+                            <TableRow >
+                                <TableHead className="w-[100px] text-white">ID</TableHead>
+                                <TableHead className='text-white'>First Name</TableHead>
+                                <TableHead className='text-white'>Last Name</TableHead>
+                                <TableHead className='text-white'>Username</TableHead>
+                                <TableHead className='text-white'>Email</TableHead>
+                                <TableHead className='text-white'>Contact Number</TableHead>
+                                <TableHead className='text-white'>Birth Date</TableHead>
+                                <TableHead className='text-white'>Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>

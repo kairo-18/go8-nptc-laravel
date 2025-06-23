@@ -123,13 +123,13 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
 
             {/* Table*/}
             <div className="rounded-md border">
-                <Table className="w-full max-w-full overflow-auto">
+                <Table className="w-full max-w-full overflow-auto ">
                     {/* Actual Header (hidden on small screens) */}
-                    <TableHeader className="hidden md:table-header-group">
+                    <TableHeader className="hidden md:table-header-group bg-[#252583] text-white">
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id}>
+                                    <TableHead key={header.id} className="text-white">
                                         {typeof header.column.columnDef.header === 'function'
                                             ? header.column.columnDef.header(header.getContext())
                                             : header.column.columnDef.header}
