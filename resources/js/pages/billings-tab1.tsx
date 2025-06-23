@@ -1,6 +1,8 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { showToast, Id } from '@/components/toast';
+import { toast } from 'react-toastify';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import {
@@ -68,6 +70,8 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedReceipt, setSelectedReceipt] = useState<DataReceipt | null>(null);
     const [rejectNotes, setRejectNotes] = useState('');
+    const [isApproving, setIsApproving] = useState(false);
+    const [isRejecting, setIsRejecting] = useState(false);
     const { auth } = usePage<SharedData>().props;
 
     const formatDate = (dateString: string) => {
@@ -89,77 +93,117 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
             return 0;
         });
 
-    const handleApprove = async (selectedReceipt) => {
-        try {
-            await axios.post('/api/approve-with-docu', {
-                id: selectedReceipt.operatorId,
-                type: 'operator',
-                user_id: auth.user.id,
-                paymentId: selectedReceipt.id,
-            });
-            setSelectedReceipt(null);
-        } catch (error) {
-            console.error('Approval failed:', error);
+const handleApprove = async (selectedReceipt) => {
+    setIsApproving(true);
+    let loadingToastId: Id | null = null;
+
+    try {
+        loadingToastId = showToast('Approving receipt and generating documents...', {
+            type: 'loading',
+            isLoading: true,
+            position: 'top-center',
+            autoClose: false
+        });
+
+        await axios.post('/api/approve-with-docu', {
+            id: selectedReceipt.operatorId,
+            type: 'operator',
+            user_id: auth.user.id,
+            paymentId: selectedReceipt.id,
+        });
+
+        if (loadingToastId) {
+            toast.dismiss(loadingToastId);
         }
-    };
+
+        showToast('Receipt approved and documents generated successfully!', {
+            type: 'success',
+            position: 'top-center'
+        });
+
+        setSelectedReceipt(null);
+        window.location.reload();
+    } catch (error) {
+        console.error('Approval failed:', error);
+        if (loadingToastId) {
+            toast.dismiss(loadingToastId);
+        }
+        showToast('Failed to approve receipt', {
+            type: 'error',
+            position: 'top-center'
+        });
+    } finally {
+        setIsApproving(false);
+    }
+};
 
     const { post, data } = useForm({});
 
-    const handleReject = async () => {
-        console.log('Notes: ' + rejectNotes);
+   const handleReject = async () => {
+    if (!selectedReceipt?.driver) {
+        console.error('Driver information is missing');
+        showToast('Driver information is missing', {
+            type: 'error',
+            position: 'top-center'
+        });
+        return;
+    }
 
-        if (!selectedReceipt?.driver) {
-            console.error('Driver information is missing');
-            return;
-        }
+    setIsRejecting(true);
+    let loadingToastId: Id | null = null;
+
+    try {
+        loadingToastId = showToast('Processing rejection...', {
+            type: 'loading',
+            isLoading: true,
+            position: 'top-center',
+            autoClose: false
+        });
 
         let driverId = selectedReceipt.driverIds[0];
-
         if (!driverId) {
             driverId = selectedReceipt.operatorId;
         }
 
-        console.log('Sending data:', {
-            driverId: driverId,
-            note: rejectNotes,
+        const response = await axios.post(
+            route('reject.billing', { driver: driverId }),
+            {
+                note: rejectNotes,
+            },
+            {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            }
+        );
+
+        if (loadingToastId) {
+            toast.dismiss(loadingToastId);
+        }
+
+        showToast('Receipt rejected successfully', {
+            type: 'success',
+            position: 'top-center'
         });
 
-        try {
-            const response = await axios.post(
-                route('reject.billing', { driver: driverId }),
-                {
-                    note: rejectNotes, // Send the note at root level
-                },
-                {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content,
-                        'X-Requested-With': 'XMLHttpRequest',
-                    },
-                },
-            );
-
-            // Handle success
-            setRejectNotes('');
-            setSelectedReceipt(null);
-            window.location.reload();
-            console.log('Rejection successful', response.data);
-        } catch (error) {
-            console.error('Rejection failed:', error);
-            if (error.response) {
-                // The request was made and the server responded with a status code
-                console.error('Error data:', error.response.data);
-                console.error('Error status:', error.response.status);
-                console.error('Error headers:', error.response.headers);
-            } else if (error.request) {
-                // The request was made but no response was received
-                console.error('No response received:', error.request);
-            } else {
-                // Something happened in setting up the request
-                console.error('Error:', error.message);
-            }
+        setRejectNotes('');
+        setSelectedReceipt(null);
+        window.location.reload();
+    } catch (error) {
+        console.error('Rejection failed:', error);
+        if (loadingToastId) {
+            toast.dismiss(loadingToastId);
         }
-    };
+        showToast('Failed to reject receipt', {
+            type: 'error',
+            position: 'top-center'
+        });
+    } finally {
+        setIsRejecting(false);
+    }
+};
 
     return (
         <div className="mt-4 flex h-full flex-col">
@@ -304,9 +348,10 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
                                             <Button
                                                 variant="outline"
                                                 className="border-red-500 bg-transparent text-red-500 hover:bg-red-50 hover:text-red-700"
+                                                disabled={isRejecting}
                                                 onClick={handleReject}
                                             >
-                                                Confirm Rejection
+                                                {isRejecting ? 'Rejecting...' : 'Confirm Rejection'}
                                             </Button>
                                         </DialogFooter>
                                     </DialogContent>
@@ -318,9 +363,10 @@ export default function BillingsTab1({ dataReceipts }: BillingsTab1Props) {
                                         <Button
                                             variant="outline"
                                             className="border-green-500 bg-transparent text-green-500 hover:bg-green-50 hover:text-green-700"
+                                            disabled={isApproving}
                                             onClick={() => handleApprove(selectedReceipt)}
                                         >
-                                            Approve and generate documents
+                                            {isApproving ? 'Approving...' : 'Approve and generate documents'}
                                         </Button>
                                     </DialogTrigger>
                                     <DialogContent>
