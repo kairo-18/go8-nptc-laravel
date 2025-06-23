@@ -37,17 +37,33 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
-        $user = $request->user()?->load('vrOwner.vrCompany');
+
+        $user = $request->user()?->load([
+            'roles',
+            'vrOwner.vrCompany',
+            'driver',
+            'operator',
+        ]);
+
+        $status = null;
+
+        if ($user?->hasRole('VR Admin')) {
+            $status = optional($user?->vrOwner)->Status;
+        } elseif ($user?->hasRole('Operator')) {
+            $status = optional($user?->operator)->Status;
+        } elseif ($user?->hasRole('Driver')) {
+            $status = optional($user?->driver)->Status;
+        }
 
         return [
             ...parent::share($request),
             'name' => config('app.name'),
             'quote' => ['message' => trim($message), 'author' => trim($author)],
             'auth' => [
-                'user' => $request->user(),
-                'roles' => optional($request->user())->roles,
+                'user' => $user,
+                'roles' => $user?->roles,
                 'vr_company_id' => optional($user?->vrOwner?->vrCompany)->id,
-                'vrAdminStatus' => optional($user?->vrOwner)->Status,
+                'Status' => $status,
             ],
         ];
     }
