@@ -2,14 +2,14 @@
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
+import { getBackgroundColorForRole } from '@/components/UtilsColor';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
 import { BadgePlus, BellRing, BookUser, Folder, LayoutGrid, Mail, Receipt, UserPlus, Wallet } from 'lucide-react';
 import AppLogo from './app-logo';
-import { getBackgroundColorForRole } from '@/components/UtilsColor';
 
 // Import the useUnreadCount hook
-import { useUnreadCount } from '@/pages/UnreadCountContext'; 
+import { useUnreadCount } from '@/pages/UnreadCountContext';
 
 const mainNavItems: NavItem[] = [
     {
@@ -80,7 +80,6 @@ const mainNavItems: NavItem[] = [
         title: 'Mail',
         url: '/mails',
         icon: Mail,
-        
     },
 ];
 
@@ -89,7 +88,7 @@ export function AppSidebar() {
     const userRole = props.auth.user?.roles?.[0]?.name;
 
     // Use the unread count from the context
-    const { totalUnreadCount } = useUnreadCount();  // Access the unread count from context
+    const { totalUnreadCount } = useUnreadCount(); // Access the unread count from context
 
     let updatedNavItems = mainNavItems.map((item) =>
         item.title === 'Dashboard' && userRole === 'Driver' ? { ...item, title: 'Driver Dashboard', url: '/driver-dashboard' } : item,
@@ -166,9 +165,8 @@ export function AppSidebar() {
 
             <SidebarFooter className="rounded-2xl border border-white text-white hover:border-red-700 hover:bg-white hover:text-gray-900">
                 <NavUser />
-                
+
                 {/* Display the unread count */}
-                
             </SidebarFooter>
         </Sidebar>
     );

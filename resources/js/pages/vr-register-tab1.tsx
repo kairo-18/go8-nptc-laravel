@@ -76,7 +76,7 @@ const TemporaryAccountTabContent = ({ type }) => {
         },
         BirthDate: {
             validate: (value) => {
-                if (!value) return 'Birth date is required';
+                if (!value) return '';
                 const birthDate = new Date(value);
                 const minAgeDate = new Date();
                 minAgeDate.setFullYear(minAgeDate.getFullYear() - 18);

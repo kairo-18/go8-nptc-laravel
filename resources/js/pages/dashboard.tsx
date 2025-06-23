@@ -1,10 +1,12 @@
 import React from "react";
-import { type BreadcrumbItem } from "@/types";
-import { Head } from "@inertiajs/react";
+import { type BreadcrumbItem, type User  } from "@/types";
+import { Head, usePage } from "@inertiajs/react";
 import MainLayout from "./mainLayout";
 import { Calendar } from "@/components/ui/calendar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
+
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -30,6 +32,13 @@ export default function Dashboard({
   ongoingBookings: Array<{ name: string; vehicle: string; route: string; eta: string }> | null;
   pendingRegistrationsCount: number | null;  // Added this prop
 }) {
+
+  // Get user from Inertia page props and type it as User
+  const {
+    props: {
+      auth: { user },
+    },
+  } = usePage<{ auth: { user: User } }>();
   // Log the props to the console for debugging
   console.log("Dashboard Props:", {
     vrCompaniesCount,
@@ -46,7 +55,7 @@ export default function Dashboard({
   return (
     <MainLayout breadcrumbs={breadcrumbs}>
       <Head title="Dashboard" />
-      <h1 className="text-4xl font-black">Welcome Back, Admin 1!</h1>
+      <h1 className="text-4xl font-black">Welcome Back, {user?.FirstName} {user?.LastName}!</h1>
 
       {/* Overall Stats */}
       <h2 className="text-2xl font-bold mt-6">Overall</h2>
