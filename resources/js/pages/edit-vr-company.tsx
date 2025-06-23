@@ -1,4 +1,5 @@
-import { showToast } from '@/components/toast';
+import { showToast, Id } from '@/components/toast';
+import {toast} from 'react-toastify';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { router } from '@inertiajs/react';
@@ -35,23 +36,55 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
         }
     };
 
-    const handleSubmit = async (e) => {
+       const handleSubmit = async (e) => {
         e.preventDefault();
+        let loadingToastId: Id | null = null;
         try {
+            loadingToastId = showToast('Updating company information...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false
+            });
+
             const response = await axios.patch('/vr-company/edit', {
                 id: companyData.id,
                 CompanyName: companyData.CompanyName,
                 BusinessPermitNumber: companyData.BusinessPermitNumber,
             });
-            if (response.status === 200) showToast('Company information updated successfully', { type: 'success', position: 'top-center' });
+
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            if (response.status === 200) {
+                showToast('Company information updated successfully', { 
+                    type: 'success', 
+                    position: 'top-center' 
+                });
+            }
         } catch (error) {
             console.error('Error updating company:', error);
-            showToast('Failed to update company information.', { type: 'error', position: 'top-center' });
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            showToast('Failed to update company information.', { 
+                type: 'error', 
+                position: 'top-center' 
+            });
         }
     };
 
-    const handleAdminUpdate = async () => {
+
+const handleAdminUpdate = async () => {
+        let loadingToastId: Id | null = null;
         try {
+            loadingToastId = showToast('Updating admin information...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false
+            });
+
             const response = await axios.patch('/vr-admins.update', {
                 vr_company_id: companyData.id,
                 username: adminData.username,
@@ -62,15 +95,38 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
                 BirthDate: adminData.BirthDate,
                 ContactNumber: adminData.ContactNumber,
             });
-            if (response.status === 200) showToast('Admin information updated successfully', { type: 'success', position: 'top-center' });
+
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            if (response.status === 200) {
+                showToast('Admin information updated successfully', { 
+                    type: 'success', 
+                    position: 'top-center' 
+                });
+            }
         } catch (error) {
             console.error('Error updating admin:', error);
-            showToast('Failed to update admin information.', { type: 'error', position: 'top-center' });
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            showToast('Failed to update admin information.', { 
+                type: 'error', 
+                position: 'top-center' 
+            });
         }
     };
 
     const handleContactsUpdate = async () => {
+        let loadingToastId: Id | null = null;
         try {
+            loadingToastId = showToast('Updating contacts...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false
+            });
+
             const response = await axios.patch('/vr-contacts.update-multiple', {
                 contacts: contactsData.map((contact) => ({
                     id: contact.id,
@@ -83,12 +139,27 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
                     Position: contact.Position,
                 })),
             });
-            if (response.status === 200) showToast('Contacts updated successfully', { type: 'success', position: 'top-center' });
+
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            if (response.status === 200) {
+                showToast('Contacts updated successfully', { 
+                    type: 'success', 
+                    position: 'top-center' 
+                });
+            }
         } catch (error) {
             console.error('Error updating contacts:', error);
-            showToast('Failed to update contacts.', { type: 'error', position: 'top-center' });
-        }
-    };
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            showToast('Failed to update contacts.', { 
+                type: 'error', 
+                    position: 'top-center' 
+                });
+            }
+        };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -107,50 +178,105 @@ export default function RecordsPage({ companies, companyMedia, company, admin, c
         setContactsData(updatedContacts);
     };
 
-    const handleFileUpload = async (e, fileKey) => {
-        const file = e.target.files[0];
-        if (!file) return;
+     const handleFileUpload = async (e, fileKey) => {
+            const file = e.target.files[0];
+            if (!file) return;
 
-        const formData = new FormData();
-        formData.append('vr_company_id', companyData.id);
-        formData.append(fileKey, file);
-        formData.append('oldCompanyName', companyData.CompanyName);
+            let loadingToastId: Id | null = null;
+            try {
+                loadingToastId = showToast('Uploading file...', {
+                    type: 'loading',
+                    isLoading: true,
+                    position: 'top-center',
+                    autoClose: false
+                });
 
-        try {
-            const response = await axios.post('/vr-company.upload-files', formData, {
-                headers: { 'Content-Type': 'multipart/form-data' },
-            });
-            if (response.status === 200) {
-                showToast('File uploaded successfully', { type: 'success', position: 'top-center' });
-                setTimeout(() => {
-                    window.location.href = window.location.href; // This reloads the current page
-                }, 500);
+                const formData = new FormData();
+                formData.append('vr_company_id', companyData.id);
+                formData.append(fileKey, file);
+                formData.append('oldCompanyName', companyData.CompanyName);
+
+                const response = await axios.post('/vr-company.upload-files', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                });
+
+                if (loadingToastId) {
+                    toast.dismiss(loadingToastId);
+                }
+                if (response.status === 200) {
+                    showToast('File uploaded successfully', { 
+                        type: 'success', 
+                        position: 'top-center' 
+                    });
+                    setTimeout(() => {
+                        window.location.href = window.location.href;
+                    }, 500);
+                }
+                setSelectedPreview(file);
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                if (loadingToastId) {
+                    toast.dismiss(loadingToastId);
+                }
+                showToast('Failed to upload file.', { 
+                    type: 'error', 
+                    position: 'top-center' 
+                });
             }
-            setSelectedPreview(file);
-        } catch (error) {
-            console.error('Error uploading file:', error);
-            showToast('Failed to upload file.', { type: 'error', position: 'top-center' });
-        }
-    };
+        };
 
-    const handleDeleteFile = async (mediaName) => {
-        const file = companyMediaState.find((media) => media.collection_name === mediaName);
+     const handleDeleteFile = async (mediaName) => {
+            const file = companyMediaState.find((media) => media.collection_name === mediaName);
 
-        if (!file) {
-            showToast('File not found!', { type: 'error', position: 'top-center' });
-            return;
-        }
+            if (!file) {
+                showToast('File not found!', { 
+                    type: 'error', 
+                    position: 'top-center' 
+                });
+                return;
+            }
 
-        await router.delete(`/vr-company/delete-media/${file.id}`, {
-            preserveScroll: true,
-            onSuccess: () => {
-                showToast('File deleted successfully', { type: 'success', position: 'top-center' });
-            },
-            onError: () => {
-                showToast('Error deleting file', { type: 'error', position: 'top-center' });
-            },
-        });
-    };
+            let loadingToastId: Id | null = null;
+            try {
+                loadingToastId = showToast('Deleting file...', {
+                    type: 'loading',
+                    isLoading: true,
+                    position: 'top-center',
+                    autoClose: false
+                });
+
+                await router.delete(`/vr-company/delete-media/${file.id}`, {
+                    preserveScroll: true,
+                    onSuccess: () => {
+                        if (loadingToastId) {
+                            toast.dismiss(loadingToastId);
+                        }
+                        showToast('File deleted successfully', { 
+                            type: 'success', 
+                            position: 'top-center' 
+                        });
+                    },
+                    onError: () => {
+                        if (loadingToastId) {
+                            toast.dismiss(loadingToastId);
+                        }
+                        showToast('Error deleting file', { 
+                            type: 'error', 
+                            position: 'top-center' 
+                        });
+                    },
+                });
+            } catch (error) {
+                console.error('Error deleting file:', error);
+                if (loadingToastId) {
+                    toast.dismiss(loadingToastId);
+                }
+                showToast('Error deleting file', { 
+                    type: 'error', 
+                    position: 'top-center' 
+                });
+            }
+        };
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>

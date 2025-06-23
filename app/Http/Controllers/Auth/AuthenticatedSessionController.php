@@ -145,16 +145,14 @@ class AuthenticatedSessionController extends Controller
 
             return redirect()->route('driver.dashboard');
         } elseif ($user->hasRole('VR Admin')) {
-            if ($user->vrOwner->Status != 'Approved') {
-                $request->session()->regenerate();
-
-                return redirect()->route('mails');
-            } else {
-                $request->session()->regenerate();
-
-                return redirect()->intended(route('dashboard', absolute: false));
-            }
-        }
+    if ($user->vrOwner->Status != 'Approved') {
+        $request->session()->regenerate();
+        return redirect()->route('mails');
+    } else {
+        $request->session()->regenerate();
+        return redirect()->intended(route('vr-admin.dashboard', absolute: false));
+    }
+}
 
         $request->session()->regenerate();
 

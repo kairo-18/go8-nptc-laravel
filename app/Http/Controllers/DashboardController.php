@@ -9,6 +9,7 @@ use App\Models\ManualPayment;
 use App\Models\Trip;
 use App\Models\Vehicle;
 use App\Models\VehicleRentalOwner;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Inertia\Inertia;
 
@@ -52,6 +53,176 @@ class DashboardController extends Controller
             'pendingRegistrationsCount' => $pendingRegistrationsCount,  
         ]);
     }
+
+public function vrAdminDashboard()
+{
+    $user = Auth::user();
+    $today = Carbon::today();
+    $thisWeek = Carbon::now()->startOfWeek();
+    $thisMonth = Carbon::now()->startOfMonth();
+    
+    // Get the VR Admin's company
+    $vrCompany = VehicleRentalOwner::with('vrCompany')
+        ->where('user_id', $user->id)
+        ->firstOrFail();
+
+    // Active Operators for this VR Company
+    $activeOperators = Operator::where('vr_company_id', $vrCompany->vr_company_id)
+        ->whereIn('Status', ['Active', 'Approved'])
+        ->count();
+
+    // Active Drivers belonging to this VR Company
+    $activeDrivers = Driver::where('vr_company_id', $vrCompany->vr_company_id)
+        ->whereIn('Status', ['Active', 'Approved'])
+        ->count();
+
+    // Get all trips for date filtering
+    $allTrips = Trip::whereHas('driver', function($query) use ($vrCompany) {
+            $query->where('vr_company_id', $vrCompany->vr_company_id);
+        })
+        ->whereIn('status', ['Scheduled', 'Ongoing', 'Done'])
+        ->with(['driver.user', 'vehicle'])
+        ->get()
+        ->map(function ($trip) use ($today, $thisWeek, $thisMonth) {
+            $pickupDate = Carbon::parse($trip->pickup_date);
+            
+            // Classify bookings by time period
+            $bookingTypes = [];
+            
+            if ($pickupDate->isToday()) {
+                $bookingTypes[] = 'Today';
+            }
+            
+            if ($pickupDate->greaterThanOrEqualTo($thisWeek)) {
+                $bookingTypes[] = 'This Week';
+            }
+            
+            if ($pickupDate->greaterThanOrEqualTo($thisMonth)) {
+                $bookingTypes[] = 'This Month';
+            }
+            
+            $trip->setAttribute('booking_type', implode(', ', $bookingTypes));
+            
+            return $trip;
+        });
+
+    // Count bookings by period
+    $bookingsToday = $allTrips->filter(fn($trip) => str_contains($trip->booking_type, 'Today'))->count();
+    $bookingsThisWeek = $allTrips->filter(fn($trip) => str_contains($trip->booking_type, 'This Week'))->count();
+    $bookingsThisMonth = $allTrips->filter(fn($trip) => str_contains($trip->booking_type, 'This Month'))->count();
+
+    // Scheduled Bookings for display
+    $scheduledBookings = $allTrips
+        ->where('status', 'Scheduled')
+        ->map(function ($trip) {
+            return [
+                'id' => $trip->id,
+                'pickupDate' => $trip->pickup_date,
+                'pickupAddress' => $trip->pickup_address,
+                'dropOffAddress' => $trip->dropoff_address,
+                'driver_first_name' => $trip->driver->user->first_name,
+                'driver_last_name' => $trip->driver->user->last_name,
+                'vehicle_plate' => $trip->vehicle ? $trip->vehicle->plate_number : 'N/A',
+            ];
+        });
+
+    // Pending Drivers for this VR Company
+    $pendingDrivers = Driver::where('vr_company_id', $vrCompany->vr_company_id)
+        ->where('Status', 'Pending')
+        ->count();
+
+    return Inertia::render('vr-admin-dashboard', [
+        'activeOperatorsCount' => $activeOperators,
+        'activeDriversCount' => $activeDrivers,
+        'scheduledBookings' => $scheduledBookings,
+        'pendingRegistrationsCount' => $pendingDrivers,
+        'vrCompanyName' => $vrCompany->vrCompany->CompanyName ?? 'Your Company',
+        'bookingsToday' => $bookingsToday,
+        'bookingsThisWeek' => $bookingsThisWeek,
+        'bookingsThisMonth' => $bookingsThisMonth,
+    ]);
+}
+
+public function operatorDashboard()
+{
+    $user = Auth::user();
+    $today = Carbon::today();
+    $thisWeek = Carbon::now()->startOfWeek();
+    $thisMonth = Carbon::now()->startOfMonth();
+    
+    // Get the Operator record
+    $operator = Operator::where('user_id', $user->id)->firstOrFail();
+
+    // Active Drivers managed by this Operator
+    $activeDrivers = Driver::where('operator_id', $operator->id)
+        ->whereIn('Status', ['Active', 'Approved'])
+        ->count();
+
+    // Get all trips for date filtering
+    $allTrips = Trip::whereHas('driver', function($query) use ($operator) {
+            $query->where('operator_id', $operator->id);
+        })
+        ->whereIn('status', ['Scheduled', 'Ongoing', 'Done'])
+        ->with(['driver.user', 'vehicle'])
+        ->get()
+        ->map(function ($trip) use ($today, $thisWeek, $thisMonth) {
+            $pickupDate = Carbon::parse($trip->pickup_date);
+            
+            // Classify bookings by time period
+            $bookingTypes = [];
+            
+            if ($pickupDate->isToday()) {
+                $bookingTypes[] = 'Today';
+            }
+            
+            if ($pickupDate->greaterThanOrEqualTo($thisWeek)) {
+                $bookingTypes[] = 'This Week';
+            }
+            
+            if ($pickupDate->greaterThanOrEqualTo($thisMonth)) {
+                $bookingTypes[] = 'This Month';
+            }
+            
+            $trip->setAttribute('booking_type', implode(', ', $bookingTypes));
+            
+            return $trip;
+        });
+
+    // Count bookings by period
+    $bookingsToday = $allTrips->filter(fn($trip) => str_contains($trip->booking_type, 'Today'))->count();
+    $bookingsThisWeek = $allTrips->filter(fn($trip) => str_contains($trip->booking_type, 'This Week'))->count();
+    $bookingsThisMonth = $allTrips->filter(fn($trip) => str_contains($trip->booking_type, 'This Month'))->count();
+
+    // Scheduled Bookings for display
+    $scheduledBookings = $allTrips
+        ->where('status', 'Scheduled')
+        ->map(function ($trip) {
+            return [
+                'id' => $trip->id,
+                'pickupDate' => $trip->pickup_date,
+                'pickupAddress' => $trip->pickup_address,
+                'dropOffAddress' => $trip->dropoff_address,
+                'driver_first_name' => $trip->driver->user->first_name,
+                'driver_last_name' => $trip->driver->user->last_name,
+                'vehicle_plate' => $trip->vehicle ? $trip->vehicle->plate_number : 'N/A',
+            ];
+        });
+
+    // Pending Drivers managed by this Operator
+    $pendingDrivers = Driver::where('operator_id', $operator->id)
+        ->where('Status', 'Pending')
+        ->count();
+
+    return Inertia::render('operator-dashboard', [
+        'activeDriversCount' => $activeDrivers,
+        'scheduledBookings' => $scheduledBookings,
+        'pendingRegistrationsCount' => $pendingDrivers,
+        'operatorName' => $operator->user->FirstName ?? 'Operator',
+        'bookingsToday' => $bookingsToday,
+        'bookingsThisWeek' => $bookingsThisWeek,
+        'bookingsThisMonth' => $bookingsThisMonth,
+    ]);
+}
 
     public function driverDashboard()
     {

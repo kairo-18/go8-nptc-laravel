@@ -1,4 +1,5 @@
-import { showToast } from '@/components/toast';
+import { showToast, Id } from '@/components/toast';
+import {toast} from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { router, usePage } from '@inertiajs/react';
@@ -56,11 +57,21 @@ export default function Summary({
         setHasChanges(companyChanged || adminChanged || contactsChanged);
     }, [currentCompanyData, currentAdminData, currentContactsData]);
 
-    const handleSaveChanges = async (e: React.FormEvent) => {
+ const handleSaveChanges = async (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);
+        let loadingToastId: Id | null = null;
+        let successToastId: Id | null = null;
 
         try {
+            // Show loading toast
+            loadingToastId = showToast('Saving changes...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false
+            });
+
             if (
                 currentCompanyData &&
                 Object.keys(currentCompanyData).length > 0 &&
@@ -100,7 +111,12 @@ export default function Summary({
                     }, 750),
                 );
             }
-            showToast('Changes saved successfully!', {
+
+            // Dismiss loading toast and show success
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            successToastId = showToast('Changes saved successfully!', {
                 type: 'success',
                 position: 'top-center',
                 autoClose: 3000,
@@ -125,6 +141,14 @@ export default function Summary({
         } catch (error) {
             console.error('Error saving changes:', error);
             setProcessing(false);
+            // Dismiss loading toast if it exists
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            // Dismiss success toast if it exists (in case of partial success)
+            if (successToastId) {
+                toast.dismiss(successToastId);
+            }
             showToast('Error saving changes. Please try again.', {
                 type: 'error',
                 position: 'top-center',

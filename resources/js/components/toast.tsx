@@ -1,4 +1,4 @@
-import { Bounce, ToastContainer, toast } from 'react-toastify';
+import { Bounce, ToastContainer, toast, Id } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 export const Toast = () => {
@@ -22,11 +22,12 @@ export const Toast = () => {
 export const showToast = (
     message: string,
     options?: {
-        type?: 'info' | 'success' | 'warning' | 'error';
+        type?: 'info' | 'success' | 'warning' | 'error' | 'loading';
         position?: 'top-right' | 'top-center' | 'top-left' | 'bottom-right' | 'bottom-center' | 'bottom-left';
         autoClose?: number | false;
+        isLoading?: boolean;
     },
-) => {
+): Id => {  
     const defaultOptions = {
         position: 'top-center',
         autoClose: 3000,
@@ -40,17 +41,20 @@ export const showToast = (
         ...options,
     };
 
+    if (options?.isLoading || options?.type === 'loading') {
+        return toast.loading(message, defaultOptions);
+    }
+
     switch (options?.type) {
         case 'success':
-            toast.success(message, defaultOptions);
-            break;
+            return toast.success(message, defaultOptions);
         case 'warning':
-            toast.warning(message, defaultOptions);
-            break;
+            return toast.warning(message, defaultOptions);
         case 'error':
-            toast.error(message, defaultOptions);
-            break;
+            return toast.error(message, defaultOptions);
         default:
-            toast(message, defaultOptions);
+            return toast(message, defaultOptions);
     }
 };
+
+export type { Id };

@@ -1,4 +1,5 @@
-import { showToast } from '@/components/toast';
+import { showToast, Id } from '@/components/toast';
+import {toast} from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -196,7 +197,7 @@ export default function CreateDriver({ companies, latestVehicle, operator, compa
         validateDocuments();
     }, [data.License, data.Photo, data.NBI_clearance, data.Police_clearance, data.BIR_clearance]);
 
-    const handleSubmit = (e, createAnother = false) => {
+     const handleSubmit = (e, createAnother = false) => {
         e.preventDefault();
         validateDocuments();
 
@@ -236,38 +237,70 @@ export default function CreateDriver({ companies, latestVehicle, operator, compa
             }
         });
 
-        post(route('driver.store'), {
-            data: formData,
-            onSuccess: () => {
-                showToast('Driver registered successfully!', {
-                    type: 'success',
-                    position: 'top-center',
-                });
-                if (createAnother) {
-                    setData({
-                        ...data,
-                        username: '',
-                        email: '',
-                        FirstName: '',
-                        MiddleName: '',
-                        LastName: '',
-                        Address: '',
-                        BirthDate: '',
-                        ContactNumber: '',
-                        password: '',
-                        LicenseNumber: '',
-                        License: null,
-                        Photo: null,
-                        NBI_clearance: null,
-                        Police_clearance: null,
-                        BIR_clearance: null,
+        let loadingToastId: Id | null = null;
+        try {
+            // Show loading toast
+            loadingToastId = showToast('Creating driver...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false
+            });
+
+            post(route('driver.store'), {
+                data: formData,
+                onSuccess: () => {
+                    if (loadingToastId) {
+                        toast.dismiss(loadingToastId);
+                    }
+                    showToast('Driver registered successfully!', {
+                        type: 'success',
+                        position: 'top-center',
                     });
-                    setFileKeys({});
-                } else {
-                    onNextTab();
+                    if (createAnother) {
+                        setData({
+                            ...data,
+                            username: '',
+                            email: '',
+                            FirstName: '',
+                            MiddleName: '',
+                            LastName: '',
+                            Address: '',
+                            BirthDate: '',
+                            ContactNumber: '',
+                            password: '',
+                            LicenseNumber: '',
+                            License: null,
+                            Photo: null,
+                            NBI_clearance: null,
+                            Police_clearance: null,
+                            BIR_clearance: null,
+                        });
+                        setFileKeys({});
+                    } else {
+                        onNextTab();
+                    }
+                },
+                onError: (errors) => {
+                    if (loadingToastId) {
+                        toast.dismiss(loadingToastId);
+                    }
+                    showToast('Error creating driver. Please check the form.', {
+                        type: 'error',
+                        position: 'top-center',
+                    });
                 }
-            },
-        });
+            });
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            showToast('An unexpected error occurred. Please try again.', {
+                type: 'error',
+                position: 'top-center',
+            });
+        }
     };
 
     const handleFileRemove = (field) => {

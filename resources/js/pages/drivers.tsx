@@ -1,4 +1,5 @@
-import { showToast } from '@/components/toast';
+import { showToast, Id } from '@/components/toast';
+import {toast} from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -83,8 +84,16 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
             return;
         }
 
+        let loadingToastId: Id | null = null;
         try {
-            // Update driver data
+            // Show loading toast
+            loadingToastId = showToast('Updating driver...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false
+            });
+
             await router.patch(
                 `/drivers/${formData.id}`,
                 {
@@ -101,9 +110,11 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                 },
                 {
                     onSuccess: () => {
+                        if (loadingToastId) {
+                            toast.dismiss(loadingToastId);
+                        }
                         showToast('Driver updated successfully', { type: 'success', position: 'top-center' });
 
-                        // Handle file uploads only if there are files to upload
                         const uploadData = new FormData();
                         const fileFields = ['License', 'Photo', 'NBI_clearance', 'Police_clearance', 'BIR_clearance'];
                         let hasFiles = false;
@@ -117,18 +128,33 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                         });
 
                         if (hasFiles) {
+                            // Show new loading toast for file upload
+                            const fileUploadToastId = showToast('Uploading files...', {
+                                type: 'loading',
+                                isLoading: true,
+                                position: 'top-center',
+                                autoClose: false
+                            });
+
                             router.post(route('driver.upload-files', { driver: formData.id }), uploadData, {
                                 onSuccess: () => {
-                                    console.log('Files uploaded successfully');
-                                    // This will force a full page reload with fresh data
+                                    toast.dismiss(fileUploadToastId);
+                                    showToast('Files uploaded successfully', { 
+                                        type: 'success', 
+                                        position: 'top-center' 
+                                    });
                                     router.reload({ only: ['drivers'] });
                                 },
                                 onError: (errors) => {
+                                    toast.dismiss(fileUploadToastId);
                                     console.error('File upload error:', errors);
+                                    showToast('Error uploading files', { 
+                                        type: 'error', 
+                                        position: 'top-center' 
+                                    });
                                 },
                             });
                         } else {
-                            // If no files to upload, just reload the drivers data
                             router.reload({ only: ['drivers'] });
                         }
 
@@ -136,13 +162,26 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                         setSelectedFile({});
                     },
                     onError: (errors) => {
+                        if (loadingToastId) {
+                            toast.dismiss(loadingToastId);
+                        }
                         console.error('Update error:', errors);
-                        showToast('Error updating driver', { type: 'error', position: 'top-center' });
+                        showToast('Error updating driver', { 
+                            type: 'error', 
+                            position: 'top-center' 
+                        });
                     },
                 },
             );
         } catch (error) {
             console.error('Error:', error);
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            showToast('An unexpected error occurred', { 
+                type: 'error', 
+                position: 'top-center' 
+            });
         }
     };
 
@@ -179,8 +218,16 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
         setFormData((prev) => (prev ? { ...prev, [name]: value } : null));
     };
 
-    const handleDeleteFile = async (driverId: number, fileId: number) => {
+   const handleDeleteFile = async (driverId: number, fileId: number) => {
+        let loadingToastId: Id | null = null;
         try {
+            loadingToastId = showToast('Deleting file...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false
+            });
+
             await router.delete(
                 route('drivers.delete-media', {
                     driver: driverId,
@@ -190,10 +237,22 @@ export default function Drivers({ drivers, totalPages }: DriversProps) {
                 },
             );
 
-            showToast('File deleted successfully', { type: 'success', position: 'top-center' });
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            showToast('File deleted successfully', { 
+                type: 'success', 
+                position: 'top-center' 
+            });
         } catch (error) {
             console.error('Error deleting file:', error);
-            showToast('Error deleting file', { type: 'error', position: 'top-center' });
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            showToast('Error deleting file', { 
+                type: 'error', 
+                position: 'top-center' 
+            });
         }
     };
 

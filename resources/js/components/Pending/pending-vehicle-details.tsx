@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
 import PendingDriverDetails from './pending-driver-details';
+import { Id } from '@/components/toast';
+import { toast } from 'react-toastify';
 
 export default function PendingVehicleDetails({ item }) {
     const [previewFile, setPreviewFile] = useState(null);
@@ -15,8 +17,14 @@ export default function PendingVehicleDetails({ item }) {
     const [isLoading, setIsLoading] = useState(false);
 
     const handleRejection = async () => {
+        let loadingToastId: Id | null = null;
         try {
             setIsLoading(true);
+            loadingToastId = showToast('Processing rejection...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center'
+            });
 
             const response = await fetch('/api/rejection', {
                 method: 'POST',
@@ -35,42 +43,46 @@ export default function PendingVehicleDetails({ item }) {
                 throw new Error('Error submitting rejection');
             }
 
-            const data = await response.json();
-            if (response.ok) {
+            // Dismiss loading toast and show success
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
                 showToast('Rejection successful!', {
                     type: 'success',
                     autoClose: 1500,
                     position: 'top-center',
                 });
-    
-                // Give toast time to show before reload
-                setTimeout(() => {
-                    window.location.reload();
-                }, 1600);
-            } else {
-                // fallback for backend errors with custom messages
-                showToast(data.message, {
-                    type: 'error',
-                    position: 'top-center',
-                });
             }
-        } catch (error) {
-            console.error('Error submitting rejection:', error);
-            showToast('Rejection successful!', {
-                type: 'success',
-                position: 'top-center',
-            });
+            
+            // Reload after toast is shown
             setTimeout(() => {
                 window.location.reload();
             }, 1600);
+        } catch (error) {
+            console.error('Error submitting rejection:', error);
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+                showToast('Error submitting rejection', {
+                    type: 'error',
+                    position: 'top-center',
+                    autoClose: 3000
+                });
+            }
         } finally {
             setIsLoading(false);
+            setIsRejectionModalOpen(false);
         }
     };
 
     const handleApproval = async () => {
+        let loadingToastId: Id | null = null;
         try {
             setIsLoading(true);
+            loadingToastId = showToast('Processing approval...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false // Important for loading state
+            });
 
             const response = await fetch('/api/approval', {
                 method: 'POST',
@@ -85,30 +97,35 @@ export default function PendingVehicleDetails({ item }) {
             });
 
             const data = await response.json();
-            if (response.ok) {
+            
+            if (!response.ok) {
+                throw new Error(data.message || 'Approval failed');
+            }
+
+            // Success case - dismiss loading and show success
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
                 showToast('Approval successful! Official documents will be sent to the mail of the operator and driver.', {
                     type: 'success',
-                    autoClose: 1500,
+                    autoClose: 3000,
                     position: 'top-center',
                 });
-    
-                // Give toast time to show before reload
+                
+                // Wait for toast to show before reload
                 setTimeout(() => {
                     window.location.reload();
-                }, 1600);
-            } else {
-                // fallback for backend errors with custom messages
-                showToast(data.message || 'Approval failed. Please try again.', {
-                    type: 'error',
-                    position: 'top-center',
-                });
+                }, 3200);
             }
         } catch (error) {
-            console.error('Error submitting rejection:', error);
-            showToast('Error approving vehicle. Please try again.', {
-                type: 'error',
-                position: 'top-center',
-            });
+            console.error('Error submitting approval:', error);
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+                showToast(error.message || 'Error approving vehicle. Please try again.', {
+                    type: 'error',
+                    position: 'top-center',
+                    autoClose: 3000
+                });
+            }
         } finally {
             setIsLoading(false);
         }

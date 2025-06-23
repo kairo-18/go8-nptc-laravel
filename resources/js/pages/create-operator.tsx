@@ -1,5 +1,6 @@
 import { FileInputWithPreview } from '@/components/file-input-with-preview';
-import { showToast } from '@/components/toast';
+import { showToast, Id } from '@/components/toast';
+import {toast} from 'react-toastify';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -191,7 +192,7 @@ export default function CreateOperator({ companies }) {
     }, [data.photo, data.valid_id_front, data.valid_id_back]);
 
     // Handle form submission
-    const handleSubmit = (e: React.FormEvent) => {
+     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         validateDocuments();
 
@@ -212,32 +213,58 @@ export default function CreateOperator({ companies }) {
             return;
         }
 
-        post(route('operators.store'), {
-            onSuccess: () => {
-                showToast('Operator created successfully!', {
-                    type: 'success',
-                    position: 'top-center',
-                });
-                reset();
+        let loadingToastId: Id | null = null;
+        try {
+            // Show loading toast
+            loadingToastId = showToast('Creating operator...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false
+            });
 
-                const fileInputs = document.querySelectorAll<HTMLInputElement>('input[type="file"]');
-                fileInputs.forEach((input) => (input.value = ''));
+            post(route('operators.store'), {
+                onSuccess: () => {
+                    if (loadingToastId) {
+                        toast.dismiss(loadingToastId);
+                    }
+                    showToast('Operator created successfully!', {
+                        type: 'success',
+                        position: 'top-center',
+                    });
+                    reset();
 
-                // Reset file keys to force re-render of file inputs
-                setFileKeys({
-                    photo: Date.now(),
-                    valid_id_front: Date.now(),
-                    valid_id_back: Date.now(),
-                });
-            },
-            onError: (errors) => {
-                const errorMessages = Object.values(errors).flat();
-                showToast(errorMessages.join(', '), {
-                    type: 'error',
-                    position: 'top-center',
-                });
-            },
-        });
+                    const fileInputs = document.querySelectorAll<HTMLInputElement>('input[type="file"]');
+                    fileInputs.forEach((input) => (input.value = ''));
+
+                    // Reset file keys to force re-render of file inputs
+                    setFileKeys({
+                        photo: Date.now(),
+                        valid_id_front: Date.now(),
+                        valid_id_back: Date.now(),
+                    });
+                },
+                onError: (errors) => {
+                    if (loadingToastId) {
+                        toast.dismiss(loadingToastId);
+                    }
+                    const errorMessages = Object.values(errors).flat();
+                    showToast(errorMessages.join(', ') || 'Error creating operator', {
+                        type: 'error',
+                        position: 'top-center',
+                    });
+                },
+            });
+        } catch (error) {
+            console.error('Error submitting form:', error);
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+            showToast('An unexpected error occurred. Please try again.', {
+                type: 'error',
+                position: 'top-center',
+            });
+        }
     };
 
     return (
