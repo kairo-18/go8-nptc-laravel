@@ -37,7 +37,6 @@ export default function Operator({ operators, onNextTab, onSelectOperator, onSta
                         .replace(/([A-Z])/g, ' $1')
                         .trim(),
                 }));
-
             setOperatorHeaders(headers);
         }
     }, [operators]);
@@ -57,20 +56,16 @@ export default function Operator({ operators, onNextTab, onSelectOperator, onSta
             showToast('No operator selected', { type: 'error', position: 'top-center' });
             return;
         }
-
         await axios.patch(`operator/updateStatus/${selectedOperator.id}`, {
             status: selectedStatus,
         });
-
         const updatedOperator = {
             ...selectedOperator,
             Status: selectedStatus,
         };
-
         if (onStatusUpdate) {
             onStatusUpdate(updatedOperator);
         }
-
         setOpenStatusModal(false);
     };
 
@@ -79,18 +74,24 @@ export default function Operator({ operators, onNextTab, onSelectOperator, onSta
         showToast('Container submitted successfully', { type: 'success', position: 'top-center' });
     };
 
-    const transformedOperators = operators.map((operator) => ({
-        id: operator.id,
-        ...operator,
-        Operator: `${operator.Status ? `${operator.Status} ` : ''}${operator.user.FirstName} ${operator.user.LastName}`,
-    }));
+    const transformedOperators = operators.map((operator) => {
+        const vcNumber = operator.vr_company_id ? parseInt(operator.vr_company_id) : 0;
+        const uNumber = operator.user_id ? parseInt(operator.user_id) : 0;
+
+        return {
+            id: operator.id,
+            ...operator,
+            Operator: `${operator.Status ? `${operator.Status} ` : ''}${operator.user.FirstName} ${operator.user.LastName}`,
+            vr_company_id: `VC-${String(vcNumber).padStart(4, '0')}`,
+            user_id: `U-${String(uNumber).padStart(4, '0')}`,
+        };
+    });
 
     const primaryColumns = ['NPTC_ID', 'Operator'];
     const otherColumns = operatorHeaders
         .map((header) => header.key)
         .filter((key) => !primaryColumns.includes(key) && key !== 'Status' && key !== 'id');
     const orderedHeaders = [...primaryColumns, ...otherColumns];
-
     const columns = generateColumns(
         orderedHeaders.map((key) => ({
             key,
