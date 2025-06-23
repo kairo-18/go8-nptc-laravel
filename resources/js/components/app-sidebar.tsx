@@ -5,7 +5,7 @@ import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, Sid
 import { getBackgroundColorForRole } from '@/components/UtilsColor';
 import { type NavItem } from '@/types';
 import { Link, usePage } from '@inertiajs/react';
-import { BadgePlus, BellRing, BookUser, Folder, LayoutGrid, Mail, Receipt, UserPlus, Wallet } from 'lucide-react';
+import { BadgePlus, BookUser, Folder, LayoutGrid, Mail, Receipt, UserPlus, Wallet } from 'lucide-react';
 import AppLogo from './app-logo';
 
 // Import the useUnreadCount hook
@@ -72,11 +72,6 @@ const mainNavItems: NavItem[] = [
         icon: Wallet,
     },
     {
-        title: 'Notifications',
-        url: '',
-        icon: BellRing,
-    },
-    {
         title: 'Mail',
         url: '/mails',
         icon: Mail,
@@ -87,60 +82,59 @@ export function AppSidebar() {
     const { props, url } = usePage();
     const userRole = props.auth.user?.roles?.[0]?.name;
 
+    const status = props.auth.Status || '';
+
     // Use the unread count from the context
     const { totalUnreadCount } = useUnreadCount(); // Access the unread count from context
 
-    let updatedNavItems = mainNavItems.map((item) =>
+    const updatedNavItems = mainNavItems.map((item) =>
         item.title === 'Dashboard' && userRole === 'Driver' ? { ...item, title: 'Driver Dashboard', url: '/driver-dashboard' } : item,
     );
 
     let filteredNavItems = updatedNavItems;
 
-    if (userRole === 'Temp User') {
-        filteredNavItems = updatedNavItems
-            .filter((item) => item.title === 'Registration' || item.title === 'Mail')
-            .map((item) => ({
-                ...item,
-                url: item.title === 'Registration' ? '' : item.url,
-                children: item.title === 'Registration' ? item.children?.filter((child) => child.title === 'VR Registration') : item.children,
-            }));
-    } else if (userRole === 'Temp User Operator') {
-        filteredNavItems = updatedNavItems
-            .filter((item) => item.title === 'Registration' || item.title === 'Mail')
-            .map((item) => ({
-                ...item,
-                url: item.title === 'Registration' ? '' : item.url,
-                children: item.title === 'Registration' ? item.children?.filter((child) => child.title === 'Operator Registration') : item.children,
-            }));
-    } else if (userRole === 'VR Admin') {
-        const allowedItems = [
-            'Dashboard',
-            'Pending',
-            'Operator Temp Account Registration',
-            'Records',
-            'Billings',
-            'Bookings',
-            'Mail',
-            'Notifications',
-        ];
+    if (status !== 'Approved' && userRole !== 'NPTC Admin' && userRole !== 'NPTC Super Admin') {
+        const allowedItems = ['Mail'];
         filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
-    } else if (userRole === 'Operator') {
-        const allowedItems = ['Dashboard', 'Registration', 'Records', 'Billings', 'Bookings', 'Mail', 'Notifications'];
+    } else {
+        if (userRole === 'Temp User') {
+            filteredNavItems = updatedNavItems
+                .filter((item) => item.title === 'Registration' || item.title === 'Mail')
+                .map((item) => ({
+                    ...item,
+                    url: item.title === 'Registration' ? '' : item.url,
+                    children: item.title === 'Registration' ? item.children?.filter((child) => child.title === 'VR Registration') : item.children,
+                }));
+        } else if (userRole === 'Temp User Operator') {
+            filteredNavItems = updatedNavItems
+                .filter((item) => item.title === 'Registration' || item.title === 'Mail')
+                .map((item) => ({
+                    ...item,
+                    url: item.title === 'Registration' ? '' : item.url,
+                    children:
+                        item.title === 'Registration' ? item.children?.filter((child) => child.title === 'Operator Registration') : item.children,
+                }));
+        } else if (userRole === 'VR Admin') {
+            const allowedItems = ['Dashboard', 'Pending', 'Operator Temp Account Registration', 'Records', 'Billings', 'Bookings', 'Mail'];
+            filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
+        } else if (userRole === 'Operator') {
+            const allowedItems = ['Dashboard', 'Registration', 'Records', 'Billings', 'Bookings', 'Mail'];
 
-        filteredNavItems = updatedNavItems
-            .filter((item) => allowedItems.includes(item.title))
-            .map((item) => {
-                if (item.title === 'Registration' && item.children) {
-                    return {
-                        ...item,
-                        children: item.children.filter((child) => child.title === 'Unit Registration'),
-                    };
-                }
-                return item;
-            });
-    } else if (userRole === 'Driver') {
-        const allowedItems = ['Driver Dashboard', 'Records', 'Bookings', 'Mail'];
-        filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
+            filteredNavItems = updatedNavItems
+                .filter((item) => allowedItems.includes(item.title))
+                .map((item) => {
+                    if (item.title === 'Registration' && item.children) {
+                        return {
+                            ...item,
+                            children: item.children.filter((child) => child.title === 'Unit Registration'),
+                        };
+                    }
+                    return item;
+                });
+        } else if (userRole === 'Driver') {
+            const allowedItems = ['Driver Dashboard', 'Records', 'Bookings', 'Mail'];
+            filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
+        }
     }
 
     const sidebarBgColor = getBackgroundColorForRole(userRole);
