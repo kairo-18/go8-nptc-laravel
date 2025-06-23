@@ -125,7 +125,7 @@ class RegisteredUserController extends Controller
             size: 300,
             margin: 10,
             roundBlockSizeMode: RoundBlockSizeMode::Margin,
-            labelText: 'Scan this QR to download the trip ticket pdf',
+            labelText: 'Scan to View Profile',
             labelFont: new OpenSans(20),
             labelAlignment: LabelAlignment::Center
         );

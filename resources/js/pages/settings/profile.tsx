@@ -232,7 +232,7 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                 {/* QR Code Modal */}
                 {qrModalOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-                        <div className="w-[90%] max-w-md space-y-4 rounded-xl bg-white p-6 shadow-xl dark:bg-neutral-900">
+                        <div className="w-[90%] max-w-lg space-y-4 rounded-xl bg-white p-6 shadow-xl dark:bg-neutral-900">
                             <div className="flex items-center justify-between">
                                 <h2 className="text-lg font-semibold">Profile QR Code</h2>
                                 <button
@@ -243,8 +243,12 @@ export default function Profile({ mustVerifyEmail, status }: { mustVerifyEmail: 
                                 </button>
                             </div>
                             <div className="flex justify-center">
-                                <div className="flex h-40 w-40 items-center justify-center bg-neutral-200 text-sm text-neutral-500 dark:bg-neutral-700">
-                                    <img src={UserVerificationQr} alt="QR Code" className="h-full w-full object-cover" />
+                                <div className="flex h-64 w-64 items-center justify-center rounded-md bg-white p-4">
+                                    <img 
+                                        src={UserVerificationQr} 
+                                        alt="QR Code" 
+                                        className="h-full w-full object-contain" 
+                                    />
                                 </div>
                             </div>
                             <div className="flex justify-end">
