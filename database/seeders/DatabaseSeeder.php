@@ -28,13 +28,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Role::create(['name' => 'NPTC Super Admin']);
-        Role::create(['name' => 'NPTC Admin']);
-        Role::create(['name' => 'VR Admin']);
-        Role::create(['name' => 'Operator']);
-        Role::create(['name' => 'Driver']);
-        Role::create(['name' => 'Temp User']);
-        Role::create(['name' => 'Temp User Operator']);
+        // Create roles safely - only if they don't exist
+        $roles = [
+            'NPTC Super Admin',
+            'NPTC Admin',
+            'VR Admin',
+            'Operator',
+            'Driver',
+            'Temp User',
+            'Temp User Operator'
+        ];
+
+        foreach ($roles as $roleName) {
+            Role::firstOrCreate([
+                'name' => $roleName,
+                'guard_name' => 'web'
+            ]);
+        }
 
         $user = User::factory()->create([
             'username' => 'Test User',
