@@ -61,6 +61,26 @@ export function GeneralStep({
         'Others',
     ];
 
+    const toDate = (dateObj: any) => {
+        if (
+            !dateObj.year ||
+            !dateObj.month ||
+            !dateObj.day ||
+            !dateObj.hours ||
+            !dateObj.minutes
+        ) {
+            return null;
+        }
+        return new Date(
+            Number(dateObj.year),
+            Number(dateObj.month) - 1,
+            Number(dateObj.day),
+            Number(dateObj.hours),
+            Number(dateObj.minutes)
+        );
+    };
+
+
     useEffect(() => {
         setCompaniesData(companies);
         setOperatorsData(operators);
@@ -136,6 +156,13 @@ const handlePlateNumberChange = (value: string) => {
         setShowTripTypeDropdown(false);
     };
 
+    const isPickupBeforeDropoff = () => {
+        const pickup = toDate(formData.general.pickupDate);
+        const dropoff = toDate(formData.general.dropoffDate);
+        if (!pickup || !dropoff) return true; // Don't block if either is missing
+        return pickup < dropoff;
+    };
+
     // Validation function
     const isFormValid = () => {
         const { tripType, pickupAddress, dropoffAddress, pickupDate, dropoffDate, plateNumber, driverId, unitId } = formData.general;
@@ -158,7 +185,9 @@ const handlePlateNumberChange = (value: string) => {
         // Check if addresses are longer than 10 characters
         const areAddressesValid = pickupAddress.length > 10 && dropoffAddress.length > 10;
 
-        return areRequiredFieldsFilled && areAddressesValid;
+        const isDateOrderValid = isPickupBeforeDropoff();
+
+        return areRequiredFieldsFilled && areAddressesValid && isDateOrderValid;
     };
 
     return (
@@ -326,6 +355,11 @@ const handlePlateNumberChange = (value: string) => {
     {(!formData.general.dropoffDate.day || !formData.general.dropoffDate.month || !formData.general.dropoffDate.year || !formData.general.dropoffDate.hours || !formData.general.dropoffDate.minutes) && (
         <p className="text-sm text-red-500">Drop-off date and time are required.</p>
     )}
+    {!isPickupBeforeDropoff() && (
+    <p className="text-sm text-red-500">
+        Pick-up date and time must be earlier than drop-off date and time.
+    </p>
+)}
 </div>
 
 
