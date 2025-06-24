@@ -1,33 +1,12 @@
 import { showToast } from '@/components/toast';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { tabContainerVariants, tabContentVariants, tabItemVariants } from '@/lib/animations';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import CreateDriver from './create-driver';
 import CreateVehicle from './create-vehicle';
 import MainLayout from './mainLayout';
-
-const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.1,
-        },
-    },
-};
-
-const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    show: { opacity: 1, y: 0 },
-};
-
-const tabContentVariants = {
-    initial: { opacity: 0, y: 10 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -10 },
-    transition: { duration: 0.2 },
-};
 
 export default function UnitRegistration({ companies, latestVehicle, operator, company, operators }) {
     const [activeTab, setActiveTab] = useState('vehicle');
@@ -68,10 +47,9 @@ export default function UnitRegistration({ companies, latestVehicle, operator, c
         <MainLayout breadcrumbs={[{ title: 'Registration', href: '/registration' }]}>
             <div className="w-full p-2">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    {/* Tab list with its own animation */}
-                    <motion.div variants={containerVariants} initial="hidden" animate="show" className="absolute top-28 right-8">
+                    <motion.div variants={tabContainerVariants} initial="hidden" animate="show" className="absolute top-28 right-8">
                         <TabsList className="bg-[#2A2A92] text-white">
-                            <motion.div variants={itemVariants}>
+                            <motion.div variants={tabItemVariants}>
                                 <TabsTrigger value="vehicle" className="relative px-10 text-sm">
                                     {activeTab === 'vehicle' && (
                                         <motion.div
@@ -83,7 +61,7 @@ export default function UnitRegistration({ companies, latestVehicle, operator, c
                                     <span className="relative z-10">Vehicle</span>
                                 </TabsTrigger>
                             </motion.div>
-                            <motion.div variants={itemVariants}>
+                            <motion.div variants={tabContentVariants}>
                                 <TabsTrigger
                                     value="driver"
                                     className="relative px-10 text-sm disabled:cursor-not-allowed disabled:opacity-50"

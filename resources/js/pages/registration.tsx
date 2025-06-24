@@ -1,4 +1,5 @@
 import { showToast } from '@/components/toast';
+import { slideTransitionVariants } from '@/lib/animations';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import CreateVrAdmin from './create-vr-admin';
@@ -85,7 +86,7 @@ export default function Registration({ companies }: { companies: { id: number; B
     const [adminData, setAdminData] = useState({});
     const [contactsData, setContactsData] = useState(null);
     const [isEditing, setIsEditing] = useState(false);
-    const [direction, setDirection] = useState(1); // 1 for forward, -1 for backward
+    const [direction, setDirection] = useState(1);
 
     const goToNextTab = () => {
         setDirection(1);
@@ -113,35 +114,15 @@ export default function Registration({ companies }: { companies: { id: number; B
         }
     };
 
-    const variants = {
-        enter: (direction: number) => {
-            return {
-                x: direction > 0 ? 1000 : -1000,
-                opacity: 0,
-            };
-        },
-        center: {
-            x: 0,
-            opacity: 1,
-        },
-        exit: (direction: number) => {
-            return {
-                x: direction < 0 ? 1000 : -1000,
-                opacity: 0,
-            };
-        },
-    };
-
     return (
         <MainLayout breadcrumbs={[{ title: 'Registration', href: '/registration' }]}>
             <div className="w-full p-2">
                 <ProgressMarker steps={steps} currentStep={activeTab} setCurrentStep={setActiveTab} />
-
                 <AnimatePresence mode="wait" custom={direction}>
                     <motion.div
                         key={activeTab}
                         custom={direction}
-                        variants={variants}
+                        variants={slideTransitionVariants}
                         initial="enter"
                         animate="center"
                         exit="exit"

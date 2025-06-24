@@ -2,26 +2,13 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import NptcAdminRegister from '@/layouts/NptcAdminRegister';
+import { cardItemVariants, containerVariants, modalVariants, tableRowVariants } from '@/lib/animations';
+import { NptcAdminsProps, User } from '@/lib/types';
 import MainLayout from '@/pages/mainLayout';
 import { type SharedData } from '@/types';
 import { useForm, usePage } from '@inertiajs/react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
-
-interface User {
-    id: number;
-    FirstName: string;
-    LastName: string;
-    username: string;
-    email: string;
-    ContactNumber: string;
-    NPTC_ID?: string;
-    BirthDate?: string;
-}
-
-interface NptcAdminsProps {
-    users: User[];
-}
 
 export default function NptcAdmins({ users }: NptcAdminsProps) {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -67,46 +54,11 @@ export default function NptcAdmins({ users }: NptcAdminsProps) {
         }
     };
 
-    // Animation variants
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: {
-            opacity: 1,
-            transition: {
-                when: 'beforeChildren',
-                staggerChildren: 0.1,
-            },
-        },
-    };
-
-    const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
-        visible: {
-            y: 0,
-            opacity: 1,
-            transition: {
-                duration: 0.5,
-            },
-        },
-    };
-
-    const tableRowVariants = {
-        hidden: { opacity: 0, x: -10 },
-        visible: (i: number) => ({
-            opacity: 1,
-            x: 0,
-            transition: {
-                delay: i * 0.05,
-                duration: 0.3,
-            },
-        }),
-    };
-
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            <motion.div initial="hidden" animate="visible" variants={containerVariants} className="space-y-5 p-2">
+            <motion.div initial="initial" animate="animate" variants={containerVariants} className="space-y-5 p-2">
                 {auth.roles[0].name === 'NPTC Super Admin' && (
-                    <motion.div variants={itemVariants}>
+                    <motion.div variants={cardItemVariants}>
                         <Button
                             className="w-[200px] transition-colors duration-300 hover:bg-white hover:text-black"
                             onClick={handleCreateNewAdmin}
@@ -129,8 +81,7 @@ export default function NptcAdmins({ users }: NptcAdminsProps) {
                         setIsEditing(false);
                     }}
                 />
-
-                <motion.div className="overflow-hidden rounded-lg border shadow-md" variants={itemVariants}>
+                <motion.div className="overflow-hidden rounded-lg border shadow-md" variants={cardItemVariants}>
                     <Table className="w-full">
                         <TableHeader className="bg-[#252583] text-white">
                             <TableRow>
@@ -198,9 +149,10 @@ export default function NptcAdmins({ users }: NptcAdminsProps) {
                     {isDeleteModalOpen && (
                         <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.9 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 0.9 }}
+                                initial="initial"
+                                animate="animate"
+                                exit="exit"
+                                variants={modalVariants}
                                 transition={{ type: 'spring', damping: 20, stiffness: 300 }}
                             >
                                 <DialogContent>
