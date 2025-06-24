@@ -61,15 +61,25 @@ class OperatorObserver
             $companyLogo = $operator->vrCompany->getFirstMedia('brand_logo');
             $ownerContact = $operator->vrCompany->owner->user->ContactNumber ?? 'No contact number submitted';
             $BusinessPermitNumber = $operator->vrCompany->BusinessPermitNumber ?? 'No business permit number submitted';
+            $vrCompany = $operator->vrCompany ?? '';
 
             $vehicle = $operator->vehicles->first();
+            $logoBase64 = null;
+
+            if ($vrCompany && $vrCompany->hasMedia('brand_logo')) {
+                $media = $vrCompany->getFirstMedia('brand_logo');
+                $path = $media->getPath();
+                $type = pathinfo($path, PATHINFO_EXTENSION);
+                $data = file_get_contents($path);
+                $logoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
+            }
 
             $payload = [
                 'operator_name' => $operator->user->FirstName.' '.$operator->user->LastName,
                 'owner_name' => $operator->vrCompany->owner->user->FirstName.' '.$operator->vrCompany->owner->user->LastName,
                 'company' => $operator->vrCompany->CompanyName,
                 'owner_address' => $ownerAddress,
-                'company_logo' => $companyLogo?->getUrl(),
+                'company_logo' => $logoBase64 ?? '',
                 'owner_contact' => $ownerContact,
                 'business_permit_number' => $BusinessPermitNumber,
                 'vehicle_make' => $vehicle->Model ?? '',
