@@ -9,6 +9,7 @@ use App\Http\Controllers\TripController;
 use App\Http\Controllers\VRAdminController;
 use App\Http\Controllers\VRCompanyController;
 use App\Http\Controllers\VrContactsController;
+use App\Http\Controllers\BookingController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/user', function () {
@@ -74,3 +75,5 @@ Route::post('/approve-with-docu', [PendingController::class, 'approveAndSendDocu
 Route::fallback(function () {
     return response()->json(['error' => 'Route not found'], 404);
 });
+
+Route::get('/bookings', [BookingController::class, 'index']);

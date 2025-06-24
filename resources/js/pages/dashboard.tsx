@@ -6,6 +6,9 @@ import { Head, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
 import { AlertCircle, CheckCircle, ClipboardList, Clock, TrendingUp } from 'lucide-react';
 import MainLayout from './mainLayout';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { router } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -69,6 +72,42 @@ export default function Dashboard({
             auth: { user },
         },
     } = usePage<{ auth: { user: User } }>();
+    const [tripDates, setTripDates] = useState<Date[]>([]);
+    const [trips, setTrips] = useState<any[]>([]);
+    const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+    const [tripsForSelectedDate, setTripsForSelectedDate] = useState<any[]>([]);
+    useEffect(() => {
+        axios.get('/api/bookings')
+            .then(res => {
+                const trips = res.data;
+                setTrips(trips);
+                // Collect unique pickupDates as Date objects
+                const dates = trips
+                    .map((t: any) => t.pickupDate && new Date(t.pickupDate))
+                    .filter(Boolean);
+                setTripDates(dates);
+            })
+            .catch(() => {
+                setTrips([]);
+                setTripDates([]);
+            });
+    }, []);
+    useEffect(() => {
+        if (!selectedDate) {
+            setTripsForSelectedDate([]);
+            return;
+        }
+        // Filter trips for the selected date (ignoring time)
+        const filtered = trips.filter((t: any) => {
+            const tripDate = new Date(t.pickupDate);
+            return (
+                tripDate.getFullYear() === selectedDate.getFullYear() &&
+                tripDate.getMonth() === selectedDate.getMonth() &&
+                tripDate.getDate() === selectedDate.getDate()
+            );
+        });
+        setTripsForSelectedDate(filtered);
+    }, [selectedDate, trips]);
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
@@ -194,6 +233,18 @@ export default function Dashboard({
                         <CardContent className="p-0">
                             <Calendar
                                 mode="single"
+                                selected={selectedDate}
+                                onSelect={(date) => {
+                                    if (date) {
+                                        const formatted =
+                                            date.getFullYear() +
+                                            '-' +
+                                            String(date.getMonth() + 1).padStart(2, '0') +
+                                            '-' +
+                                            String(date.getDate()).padStart(2, '0');
+                                        router.visit(`/bookings?date=${formatted}`);
+                                    }
+                                }}
                                 className="rounded-md border-0"
                                 classNames={{
                                     day_selected: 'bg-primary text-primary-foreground hover:bg-primary/90',
@@ -207,9 +258,16 @@ export default function Dashboard({
                                 components={{
                                     caption: ({ children }) => <div className="flex items-center justify-between px-2 py-1">{children}</div>,
                                 }}
+                                modifiers={{
+                                    booked: tripDates,
+                                }}
+                                modifiersClassNames={{
+                                    booked: 'bg-blue-100 bg-blue-300 text-white-1',
+                                }}
                             />
                         </CardContent>
                     </Card>
+               
                 </div>
             </motion.section>
         </MainLayout>

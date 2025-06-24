@@ -1,24 +1,88 @@
 import TripTicketModal from '@/components/trip-booking/view-trip-modal';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { DataTable } from '../components/RecordsComponent/data-table';
 import MainLayout from './mainLayout';
 import { usePage } from '@inertiajs/react';
+import { DropdownMenuContent } from '@/components/ui/dropdown-menu';
+
 
 export default function Bookings({ bookings }) {
     const { props } = usePage();
 
     const userRole = props.auth.user?.roles?.[0]?.name;
     const userId = props.auth.user?.id;
-    
+
+    const [dateFilter, setDateFilter] = useState({ start: '', end: '' });
     let filteredBookings = bookings;
+    // Get date from query parameter
+    useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        const date = params.get('date');
+        if (date) {
+            setDateFilter({ start: date, end: date });
+        }
+    }, []);
+
+
+    // Role-based filtering
     if (userRole === 'Driver') {
-        filteredBookings = bookings.filter(trip => trip.driver.user_id === userId);
+        filteredBookings = bookings.filter((trip: any) => trip.driver?.user_id === userId);
+    } else if (userRole === 'VR Company') {
+        const userCompanyId = props.auth.user?.vr_company_id;
+        filteredBookings = bookings.filter(
+            (trip: any) => trip.driver?.operator?.vr_company?.id === userCompanyId
+        );
+    } // Admins see all
+
+    // Date filtering
+    if (dateFilter.start || dateFilter.end) {
+        filteredBookings = filteredBookings.filter((trip: any) => {
+            const tripDate = new Date(trip.pickupDate);
+
+            // Set start and end boundaries
+            const startDate = dateFilter.start ? new Date(dateFilter.start + 'T00:00:00') : null;
+            const endDate = dateFilter.end ? new Date(dateFilter.end + 'T23:59:59') : null;
+
+            const startOk = startDate ? tripDate >= startDate : true;
+            const endOk = endDate ? tripDate <= endDate : true;
+            return startOk && endOk;
+        });
     }
 
-    console.log('Filtered Bookings:', filteredBookings);
 
     let transformedData = transformData(filteredBookings);
+
+
+    const customDropdownMenuContent = (
+        <DropdownMenuContent align="end" className="p-4 space-y-2">
+            <div>
+                <label className="block text-sm mb-1">Start Date</label>
+                <input
+                    type="date"
+                    value={dateFilter.start}
+                    onChange={e => setDateFilter({ ...dateFilter, start: e.target.value })}
+                    className="border rounded px-2 py-1 w-full"
+                />
+            </div>
+            <div>
+                <label className="block text-sm mb-1">End Date</label>
+                <input
+                    type="date"
+                    value={dateFilter.end}
+                    onChange={e => setDateFilter({ ...dateFilter, end: e.target.value })}
+                    className="border rounded px-2 py-1 w-full"
+                />
+            </div>
+            <Button
+                className="w-full mt-2"
+                onClick={() => setDateFilter({ start: '', end: '' })}
+                variant="outline"
+            >
+                Clear Dates
+            </Button>
+        </DropdownMenuContent>
+    );
 
     const [open, setOpen] = useState(false);
     const [selectedTrip, setSelectedTrip] = useState(null);
@@ -74,7 +138,7 @@ export default function Bookings({ bookings }) {
                         Generate Trip Ticket
                     </Button>
                 </div>
-                <DataTable onRowClick={onSelectTrip} columns={columns} data={transformedData} ColumnFilterName="company_name" />
+                <DataTable onRowClick={onSelectTrip} columns={columns} data={transformedData} ColumnFilterName="company_name" dropdownMenuContent={customDropdownMenuContent}/>
                 {selectedTrip && <TripTicketModal open={open} setOpen={setOpen} selectedTripData={selectedTrip}/>}
             </div>
         </MainLayout>
