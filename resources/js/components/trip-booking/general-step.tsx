@@ -67,6 +67,10 @@ export function GeneralStep({
         setVehiclesData(vehicles);
         setDriversData(drivers);
     }, [companies, operators, vehicles, drivers]);
+    console.log('Companies Data:', companiesData);
+    console.log('Operators Data:', operatorsData);
+    console.log('Vehicles Data:', vehiclesData);
+    console.log('Drivers Data:', driversData);
 
     const handleInputChange = (field: string, value: string) => {
         updateFormData('general', {
@@ -84,8 +88,8 @@ const handlePlateNumberChange = (value: string) => {
     const vehicle = vehiclesData.find((v) => v.PlateNumber === value);
     if (vehicle) {
         const driver = driversData.find((d) => d.id === vehicle.driver_id); 
-        const operator = operatorsData.find((o) => o.OperatorId === driver?.OperatorId);
-        const company = companiesData.find((c) => c.VRCompanyId === operator?.VRCompanyId);
+        const operator = operatorsData.find((o) => o.id === vehicle.operator_id);
+        const company = companiesData.find((c) => c.id === operator?.vr_company_id);
         
         setSelectedCompany(company || {});
         setSelectedOperator(operator || {});
@@ -94,14 +98,13 @@ const handlePlateNumberChange = (value: string) => {
         
         updateFormData('general', {
             ...formData.general,
-            plateNumber: value,  // Update plateNumber explicitly in formData
+            plateNumber: value,
             unitId: vehicle.id,
             driverId: vehicle?.driver_id || '',
         });
 
-        setNoDataFound(false);  // Data found, so reset noDataFound state
+        setNoDataFound(false);
     } else {
-        // No matching vehicle found
         setNoDataFound(true);
         setSelectedCompany({});
         setSelectedOperator({});
