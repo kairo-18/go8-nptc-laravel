@@ -47,7 +47,6 @@ export default function CreateVehicle({ operators, onNextTab }) {
         cr_image: '',
     });
 
-    // Field validation with input restrictions
     const validationRules = {
         PlateNumber: {
             pattern: /^[A-Za-z]{2,3}\s?\d{3,4}$/,
@@ -88,34 +87,26 @@ export default function CreateVehicle({ operators, onNextTab }) {
         ],
     };
 
-    // Handle input with restrictions
     const handleRestrictedInput = (field, e) => {
         const rules = validationRules[field];
         if (!rules) {
             setData(field, e.target.value);
             return;
         }
-
         let value = e.target.value;
-
-        // Apply character restrictions
         if (rules.allowedChars && !rules.allowedChars.test(value)) {
             value = value
                 .split('')
                 .filter((char) => rules.allowedChars.test(char))
                 .join('');
         }
-
-        // Apply custom input handling
         if (rules.onInput) {
             e.target.value = rules.onInput(e);
             value = e.target.value;
         }
-
         setData(field, value);
     };
 
-    // Dynamic validation on input change
     useEffect(() => {
         const validateField = (field, value) => {
             if (!value) return '';
@@ -142,7 +133,6 @@ export default function CreateVehicle({ operators, onNextTab }) {
         }));
     }, [data.PlateNumber, data.Model, data.Brand, data.SeatNumber]);
 
-    // Validate required documents
     const validateDocuments = () => {
         const requiredDocs = [
             'front_image',
@@ -194,25 +184,18 @@ export default function CreateVehicle({ operators, onNextTab }) {
     const handleSubmit = (e) => {
         e.preventDefault();
         validateDocuments();
-
         const finalErrors = { ...validationErrors };
-
         if (!data.operator_id) finalErrors.operator_id = 'Please select an operator';
-
         if (isAdmin && data.Status === 'Select Status') {
             finalErrors.Status = 'Please select a valid status';
         }
-
         if (isAdmin && !data.Status) {
             finalErrors.Status = 'Please select a status';
         }
-
         setValidationErrors(finalErrors);
-
         if (Object.values(finalErrors).some((error) => error !== '')) {
             return;
         }
-
         const formData = isAdmin ? data : { ...data, Status: undefined };
         post(route('vehicles.store'), {
             data: formData,
@@ -223,7 +206,6 @@ export default function CreateVehicle({ operators, onNextTab }) {
                 });
                 onNextTab();
             },
-
             onError: (errors) => {
                 const errorMessages = Object.values(errors).flat();
                 errorMessages.forEach((error) => {
