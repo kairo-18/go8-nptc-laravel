@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type BreadcrumbItem, type User } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { AlertCircle, CheckCircle, ClipboardList, Clock, TrendingUp } from 'lucide-react';
+import { AlertCircle, CheckCircle, ClipboardList, Clock, TrendingUp, MapPinX} from 'lucide-react';
 import MainLayout from './mainLayout';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
@@ -153,7 +153,7 @@ export default function Dashboard({
                     </h2>
                     <div className="grid grid-cols-3 gap-4">
                         <StatCard title="Payments" value={pendingPaymentsCount ?? 0} icon={AlertCircle} trend="down" />
-                        <StatCard title="Trips" value={ongoingTripsCount ?? 0} icon={AlertCircle} trend="neutral" />
+                        <StatCard title="Trips" value={trips.length ?? 0} icon={AlertCircle} trend="neutral" />
                         <StatCard title="Registrations" value={pendingRegistrationsCount ?? 0} icon={AlertCircle} trend="down" />
                     </div>
                 </div>
@@ -164,10 +164,10 @@ export default function Dashboard({
                         <ClipboardList className="h-5 w-5 text-blue-500" />
                         Ongoing Bookings
                         <span className="ml-2 rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-                            {ongoingBookings?.length ?? 0} Active
+                            {trips.length ?? 0} Active
                         </span>
                     </h2>
-                    <Card className="flex-1 overflow-hidden bg-gradient-to-br from-white to-gray-100 shadow-lg">
+                    <Card className="h-[500px] overflow-hidden bg-gradient-to-br from-white to-gray-100 shadow-lg">
                         <div className="flex h-full flex-col">
                             <CardHeader className="px-6">
                                 <div className="flex items-center justify-between">
@@ -175,49 +175,70 @@ export default function Dashboard({
                                     <button className="text-sm font-medium text-blue-600 hover:text-blue-800">View All</button>
                                 </div>
                             </CardHeader>
-                            <CardContent className="grid flex-1 grid-cols-1 gap-4 overflow-y-auto px-6 pb-6 md:grid-cols-2 lg:grid-cols-3">
-                                {(ongoingBookings ?? []).map((booking, index) => (
-                                    <motion.div
-                                        key={index}
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: index * 0.1 }}
-                                        className="flex items-start gap-4 rounded-lg border p-4 transition-all hover:border-blue-200 hover:shadow-sm"
-                                    >
-                                        <Avatar className="mt-0.5 h-9 w-9">
-                                            <AvatarFallback className="bg-blue-100 font-medium text-blue-600">
-                                                {booking.driver_first_name?.[0]}
-                                                {booking.driver_last_name?.[0]}
-                                            </AvatarFallback>
-                                        </Avatar>
-                                        <div className="flex-1 space-y-1.5">
-                                            <div className="flex items-center justify-between">
-                                                <h3 className="text-sm font-medium">
-                                                    {booking.driver_first_name} {booking.driver_last_name}
-                                                </h3>
-                                                <span className="rounded bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700">
-                                                    {booking.NPTC_ID}
-                                                </span>
-                                            </div>
-                                            <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
-                                                <span className="text-foreground font-medium">Route:</span>
-                                                <span>
-                                                    {booking.pickupAddress} → {booking.dropOffAddress}
-                                                </span>
-                                            </div>
-                                            <div className="grid grid-cols-2 gap-1 text-xs">
-                                                <div className="space-y-0.5">
-                                                    <p className="text-muted-foreground">Pickup</p>
-                                                    <p className="font-medium">{booking.pickupDate}</p>
-                                                </div>
-                                                <div className="space-y-0.5">
-                                                    <p className="text-muted-foreground">Dropoff</p>
-                                                    <p className="font-medium">{booking.dropOffDate}</p>
-                                                </div>
-                                            </div>
+                            <CardContent 
+                                className="grid flex-1 grid-cols-1 gap-4 px-6 pb-6 md:grid-cols-2 lg:grid-cols-3 overflow-y-auto"
+                                style={{ maxHeight: '500px' }} 
+                            >
+                                {trips.length === 0 ? (
+                                    <div className="col-span-full flex h-full w-full flex-col items-center justify-center">
+                                        <motion.div
+                                            initial={{ y: 0 }}
+                                            animate={{ y: [0, -20, 0, 12, 0] }}
+                                            transition={{ duration: 2.5, repeat: Infinity, repeatType: "loop", ease: [0.45, .45, 0.45, 0.45],}}
+                                        >
+                                            <MapPinX className="mb-4 h-20 w-20 text-blue-300" />
+                                        </motion.div>
+                                        <div className="text-3xl font-bold text-muted-foreground mb-2">No Trips Yet</div>
+                                        <div className="text-lg text-muted-foreground text-center max-w-md">
+                                            We're waiting for new trips to appear.<br />
+                                            As soon as a trip is booked, you'll see it here!
                                         </div>
-                                    </motion.div>
-                                ))}
+                                    </div>
+                                    
+                                ) : (
+                                    trips.map((booking, index) => (
+                                        <motion.div
+                                            key={index}
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: index * 0.1 }}
+                                            className="flex items-start gap-4 rounded-lg border p-4 transition-all hover:border-blue-200 hover:shadow-sm"
+                                        >
+                                            <Avatar className="mt-0.5 h-9 w-9">
+                                                <AvatarFallback className="bg-blue-100 font-medium text-blue-600">
+                                                    {booking.driver_first_name?.[0]}
+                                                    {booking.driver_last_name?.[0]}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1 space-y-1.5">
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="text-sm font-medium">
+                                                        {booking.driver_first_name} {booking.driver_last_name}
+                                                    </h3>
+                                                    <span className="rounded bg-blue-50 px-1.5 py-0.5 text-xs font-medium text-blue-700">
+                                                        {booking.NPTC_ID}
+                                                    </span>
+                                                </div>
+                                                <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                                                    <span className="text-foreground font-medium">Route:</span>
+                                                    <span>
+                                                        {booking.pickupAddress} → {booking.dropOffAddress}
+                                                    </span>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-1 text-xs">
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-muted-foreground">Pickup</p>
+                                                        <p className="font-medium">{booking.pickupDate}</p>
+                                                    </div>
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-muted-foreground">Dropoff</p>
+                                                        <p className="font-medium">{booking.dropOffDate}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    ))
+                                )}
                             </CardContent>
                         </div>
                     </Card>
