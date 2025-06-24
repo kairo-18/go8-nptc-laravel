@@ -1,14 +1,11 @@
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import AppLayout from '@/layouts/app-layout';
 import NptcAdminRegister from '@/layouts/NptcAdminRegister';
-import { useForm } from '@inertiajs/react';
-import { useState } from 'react';
-import { type SharedData } from '@/types';
-import { Head, Link, usePage } from '@inertiajs/react';
 import MainLayout from '@/pages/mainLayout';
+import { type SharedData } from '@/types';
+import { useForm, usePage } from '@inertiajs/react';
+import { useState } from 'react';
 
 interface User {
     id: number;
@@ -69,12 +66,12 @@ export default function NptcAdmins({ users }: NptcAdminsProps) {
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            <div className='p-10 space-y-5'>
-                {auth.roles[0].name === "NPTC Super Admin" &&
-                    <Button className=" w-[200px] hover:bg-white hover:text-black" onClick={() => setIsModalOpen(true)}>
+            <div className="space-y-5 p-2">
+                {auth.roles[0].name === 'NPTC Super Admin' && (
+                    <Button className="w-[200px] hover:bg-white hover:text-black" onClick={() => setIsModalOpen(true)}>
                         Create NPTC Admin
                     </Button>
-                }
+                )}
                 <NptcAdminRegister
                     isOpen={isModalOpen}
                     user={selectedUser}
@@ -86,18 +83,18 @@ export default function NptcAdmins({ users }: NptcAdminsProps) {
                     }}
                 />
                 <div className="">
-                    <Table className='rounded-lg border'>
+                    <Table className="rounded-lg border">
                         <TableCaption>A list of NPTC Admins.</TableCaption>
-                        <TableHeader className='bg-[#252583] text-white'>
-                            <TableRow >
+                        <TableHeader className="bg-[#252583] text-white">
+                            <TableRow>
                                 <TableHead className="w-[100px] text-white">ID</TableHead>
-                                <TableHead className='text-white'>First Name</TableHead>
-                                <TableHead className='text-white'>Last Name</TableHead>
-                                <TableHead className='text-white'>Username</TableHead>
-                                <TableHead className='text-white'>Email</TableHead>
-                                <TableHead className='text-white'>Contact Number</TableHead>
-                                <TableHead className='text-white'>Birth Date</TableHead>
-                                <TableHead className='text-white'>Actions</TableHead>
+                                <TableHead className="text-white">First Name</TableHead>
+                                <TableHead className="text-white">Last Name</TableHead>
+                                <TableHead className="text-white">Username</TableHead>
+                                <TableHead className="text-white">Email</TableHead>
+                                <TableHead className="text-white">Contact Number</TableHead>
+                                <TableHead className="text-white">Birth Date</TableHead>
+                                <TableHead className="text-white">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -111,19 +108,27 @@ export default function NptcAdmins({ users }: NptcAdminsProps) {
                                     <TableCell>{user.ContactNumber}</TableCell>
                                     <TableCell>{user.BirthDate}</TableCell>
 
-                                    {auth.roles[0].name === "NPTC Super Admin" &&
-                                        (
-                                    <>
-                                        <TableCell>
-                                            <Button size="sm" className="hover:text-black" variant="destructive" onClick={() => confirmDelete(user)}>
-                                                Delete
-                                            </Button>
-                                            <Button size="sm" className="ml-2 hover:bg-white hover:text-black" onClick={() => handleRowClick(user)}>
-                                                Edit
-                                            </Button>
-                                        </TableCell>
-                                    </>
-                                        )}
+                                    {auth.roles[0].name === 'NPTC Super Admin' && (
+                                        <>
+                                            <TableCell>
+                                                <Button
+                                                    size="sm"
+                                                    className="hover:text-black"
+                                                    variant="destructive"
+                                                    onClick={() => confirmDelete(user)}
+                                                >
+                                                    Delete
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    className="ml-2 hover:bg-white hover:text-black"
+                                                    onClick={() => handleRowClick(user)}
+                                                >
+                                                    Edit
+                                                </Button>
+                                            </TableCell>
+                                        </>
+                                    )}
                                 </TableRow>
                             ))}
                         </TableBody>
