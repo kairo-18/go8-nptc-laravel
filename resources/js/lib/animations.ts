@@ -5,12 +5,15 @@ const fadeSlide = (y: number, duration = 0.5): Variants => ({
     animate: {
         opacity: 1,
         y: 0,
-        transition: { duration },
+        transition: {
+            duration,
+            ease: [0.16, 0.77, 0.47, 0.97],
+        },
     },
     exit: { opacity: 0, y: -10 },
 });
 
-const staggerContainer = (staggerChildren = 0.1, delay = 0, when: 'beforeChildren' | 'afterChildren' = 'beforeChildren'): Variants => ({
+const staggerContainer = (staggerChildren = 0.08, delay = 0, when: 'beforeChildren' | 'afterChildren' = 'beforeChildren'): Variants => ({
     hidden: { opacity: 0 },
     show: {
         opacity: 1,
@@ -36,7 +39,7 @@ export const pageVariants: Variants = {
         transition: {
             duration: 0.5,
             when: 'beforeChildren',
-            staggerChildren: 0.1,
+            staggerChildren: 0.08,
         },
     },
 };
@@ -48,7 +51,25 @@ export const modalVariants: Variants = {
     exit: { opacity: 0, y: 20 },
 };
 
-export const headerVariants: Variants = fadeSlide(-20, 0.5);
+export const headerVariants: Variants = {
+    initial: { opacity: 0, y: -10 },
+    animate: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.8,
+            ease: 'easeInOut',
+        },
+    },
+    exit: {
+        opacity: 0,
+        y: -10,
+        transition: {
+            duration: 0.4,
+            ease: 'easeInOut',
+        },
+    },
+};
 
 export const gridVariants = staggerContainer(0.1, 0.1);
 export const containerVariants = staggerContainer();
