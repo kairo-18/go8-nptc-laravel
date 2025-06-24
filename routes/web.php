@@ -8,6 +8,7 @@ use App\Http\Controllers\PendingController;
 use App\Http\Controllers\TripController;
 use App\Http\Controllers\VRCompanyController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\OperatorAdminController;
 use App\Models\Mail;
 use App\Models\Thread;
 use App\Models\User;
@@ -246,3 +247,10 @@ require __DIR__.'/pending.php';
 
 Route::get('/trip-ticket/download/{trip}', [TripController::class, 'downloadTripTicket'])->name('trip-ticket.download');
 Route::get('/trip-ticket/view/{trip}', [TripController::class, 'viewTripTicket'])->name('trip-ticket.view');
+
+
+Route::get('/management-form-upload/operator/{operator}', [OperatorAdminController::class, 'managementFormUpload'])
+    ->name('management-form-upload');
+
+Route::post('/management-form/operator/{operator}', [OperatorAdminController::class, 'storeManagementForm'])
+    ->name('operator.management-form.store');
