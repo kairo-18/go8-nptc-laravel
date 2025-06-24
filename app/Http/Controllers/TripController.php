@@ -167,44 +167,83 @@ class TripController extends Controller
         }
     }
 
-    public function viewTripTicket(Trip $trip)
-    {
-        try {
-            $trip = Trip::with('passengers')->findOrFail($trip->id);
+   public function viewTripTicket(Trip $trip)
+{
+    try {
+        $trip = Trip::with('passengers', 'driver.operator.vrCompany')->findOrFail($trip->id);
 
-            return view('trip-ticket-view', ['trip' => $trip]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to retrieve trip ticket', 'details' => $e->getMessage()], 500);
+        $brandLogoBase64 = null;
+        $vrCompany = $trip->driver->operator->vrCompany ?? null;
+
+        if ($vrCompany && $vrCompany->hasMedia('brand_logo')) {
+            $media = $vrCompany->getFirstMedia('brand_logo');
+            $path = $media->getPath(); // Gets the full path to the private file
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $data = file_get_contents($path);
+            $brandLogoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
         }
+
+        return view('trip-ticket-view', [
+            'trip' => $trip,
+            'brandLogoBase64' => $brandLogoBase64,
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Failed to retrieve trip ticket',
+            'details' => $e->getMessage()
+        ], 500);
     }
+}
 
-    public function downloadTripTicket(Trip $trip)
-    {
-        try {
-            $trip = Trip::with('passengers')->findOrFail($trip->id);
 
-            $html = view('trip-ticket-pdf', ['trip' => $trip])->render();
+public function downloadTripTicket(Trip $trip)
+{
+    try {
+        $trip = Trip::with('passengers', 'driver.operator.vrCompany')->findOrFail($trip->id);
 
-            $pdf = \Spatie\Browsershot\Browsershot::html($html)
-                ->format('A4')
-                ->margins(10, 10, 10, 10)
-                ->noSandbox()
-                ->pdf();
+        $brandLogoBase64 = null;
+        $vrCompany = $trip->driver->operator->vrCompany ?? null;
 
-            $filename = $trip->driver->operator->vrCompany->CompanyName.'/'.
-                        $trip->driver->operator->user->FirstName.' '.$trip->driver->operator->user->LastName.'/'.
-                        $trip->driver->user->FirstName.' '.$trip->driver->user->LastName.'/'.
-                        date('Y-m-d', strtotime($trip->created_at)).'/'.
-                        $trip->id.'.pdf';
-
-            return response($pdf, 200, [
-                'Content-Type' => 'application/pdf',
-                'Content-Disposition' => 'attachment; filename="'.$filename.'"',
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['error' => 'Failed to generate PDF', 'details' => $e->getMessage()], 500);
+        if ($vrCompany && $vrCompany->hasMedia('brand_logo')) {
+            $media = $vrCompany->getFirstMedia('brand_logo');
+            $path = $media->getPath();
+            $type = pathinfo($path, PATHINFO_EXTENSION);
+            $data = file_get_contents($path);
+            $brandLogoBase64 = 'data:image/' . $type . ';base64,' . base64_encode($data);
         }
+
+        $html = view('trip-ticket-pdf', [
+            'trip' => $trip,
+            'brandLogoBase64' => $brandLogoBase64,
+        ])->render();
+
+        $pdf = \Spatie\Browsershot\Browsershot::html($html)
+            ->format('A4')
+            ->margins(10, 10, 10, 10)
+            ->noSandbox()
+            ->pdf();
+
+
+        $filename =
+            $trip->driver->operator->vrCompany->CompanyName . '/' .
+            $trip->driver->operator->user->FirstName . ' ' . $trip->driver->operator->user->LastName . '/' .
+            $trip->driver->user->FirstName . ' ' . $trip->driver->user->LastName . '/' .
+            date('Y-m-d', strtotime($trip->created_at)) . '/' .
+            $trip->id . '.pdf';
+
+        return response($pdf, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '.pdf"',
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'error' => 'Failed to generate PDF',
+            'details' => $e->getMessage(),
+        ], 500);
     }
+}
+
+
 
     public function generateQr(Trip $trip)
     {
