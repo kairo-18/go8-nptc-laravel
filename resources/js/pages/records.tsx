@@ -85,7 +85,6 @@ export default function Records({
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
             <div className="w-full p-2">
-                {/* Enhanced Animated Tabs */}
                 <motion.div className="flex gap-1 rounded-lg bg-[#2A2A92] p-1" variants={tabContainerVariants} initial="hidden" animate="show">
                     {[
                         ...(userRole !== 'Operator' && userRole !== 'Driver' ? [{ key: 'vr-company', label: 'VR Company' }] : []),
@@ -102,7 +101,6 @@ export default function Records({
                             whileHover={activeTab !== tab.key ? { scale: 1.05 } : {}}
                             whileTap={activeTab !== tab.key ? { scale: 0.95 } : {}}
                         >
-                            {/* Text container with higher z-index */}
                             <span className="relative z-10 block w-full text-center">{tab.label}</span>
 
                             {activeTab === tab.key && (
@@ -116,7 +114,6 @@ export default function Records({
                                         duration: 0.3,
                                     }}
                                     style={{
-                                        // Constrain the animation within bounds
                                         originX: 0,
                                         originY: 0,
                                     }}

@@ -1,6 +1,9 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cardItemVariants, containerVariants, pageVariants } from '@/lib/animations';
+import { Billing, FormattedBillingReceipt } from '@/lib/types';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
+import { motion } from 'framer-motion';
 import { useState } from 'react';
 import BillingsTab1 from './billings-tab1';
 import BillingsTab2 from './billings-tab2';
@@ -12,67 +15,6 @@ const breadcrumbs: BreadcrumbItem[] = [
         href: '/billings',
     },
 ];
-
-interface Media {
-    id: number;
-    original_url: string;
-    file_name: string;
-    // Add other media properties as needed
-}
-
-interface Billing {
-    id: number;
-    operator_id: number;
-    AccountName: string;
-    ModePayment: string;
-    Receipt: string;
-    ReferenceNumber: string;
-    AccountNumber: string;
-    Notes: string;
-    Amount: string;
-    operator: {
-        id: number;
-        vr_company_id: number;
-        user_id: number;
-        Status: string;
-        NPTC_ID: string;
-        user: {
-            id: number;
-            FirstName: string;
-            MiddleName: string | null;
-            LastName: string;
-        };
-        vr_company: {
-            id: number;
-            CompanyName: string;
-        };
-    };
-    media: Media[];
-    created_at: string;
-}
-
-interface FormattedBillingReceipt {
-    id: number;
-    company: string;
-    driver: string;
-    vehicle: string;
-    date: string;
-    billingsID: string;
-    modeOfPayment: string;
-    accountName: string;
-    accountNumber: string;
-    purpose: string;
-    time: string;
-    referenceNumber: string;
-    amount: number;
-    requestingDocument: string[];
-    notes: string;
-    status: 'Pending' | 'Approved' | 'Rejected';
-    dueDate: string;
-    media: Media[]; // Include media in formatted receipt
-    receiptUrl?: string;
-    driverIds: string[];
-}
 
 export default function Billings({ billings }: { billings: Billing[] }) {
     const [activeTab, setActiveTab] = useState('approvalTab');
@@ -135,37 +77,66 @@ export default function Billings({ billings }: { billings: Billing[] }) {
             };
         });
     };
-
     const dataReceipts = formatBillingData(billings);
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
             <Head title="Billings" />
-            <div className="rounded border border-gray-300 bg-white m-10 p-5">
+            <motion.div
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                variants={pageVariants}
+                className="m-2 rounded border border-gray-300 bg-white p-5"
+            >
                 <Tabs defaultValue="approvalTab" className="w-full" onValueChange={(value) => setActiveTab(value)}>
-                    <div className="flex items-center justify-between">
+                    <motion.div variants={containerVariants} initial="initial" animate="animate" className="flex items-center justify-between">
                         <div>
                             <h1 className="text-xl font-bold">{activeTab === 'approvalTab' ? 'Approval' : 'Records'}</h1>
                             <p className="text-sm text-gray-600">{activeTab === 'approvalTab' ? 'Approval of Receipts' : 'Records of Receipts'}</p>
                         </div>
-                        <TabsList className="bg-[#2A2A92] text-white">
-                            <TabsTrigger value="approvalTab" className="px-5">
-                                Approval
-                            </TabsTrigger>
-                            <TabsTrigger value="recordsTab" className="px-5">
-                                Records
-                            </TabsTrigger>
-                        </TabsList>
-                    </div>
 
-                    <TabsContent value="approvalTab">
-                        <BillingsTab1 dataReceipts={dataReceipts} />
-                    </TabsContent>
-                    <TabsContent value="recordsTab">
-                        <BillingsTab2 dataReceipts={dataReceipts} />
-                    </TabsContent>
+                        <TabsList className="bg-[#2A2A92] text-white">
+                            <motion.div variants={cardItemVariants}>
+                                <TabsTrigger value="approvalTab" className="relative px-5">
+                                    {activeTab === 'approvalTab' && (
+                                        <motion.div
+                                            layoutId="activeTabIndicator"
+                                            className="absolute inset-0 rounded-md bg-white"
+                                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                    <span className="relative z-10">Approval</span>
+                                </TabsTrigger>
+                            </motion.div>
+
+                            <motion.div variants={cardItemVariants}>
+                                <TabsTrigger value="recordsTab" className="relative px-5">
+                                    {activeTab === 'recordsTab' && (
+                                        <motion.div
+                                            layoutId="activeTabIndicator"
+                                            className="absolute inset-0 rounded-md bg-white"
+                                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                    <span className="relative z-10">Records</span>
+                                </TabsTrigger>
+                            </motion.div>
+                        </TabsList>
+                    </motion.div>
+
+                    <motion.div variants={cardItemVariants}>
+                        <TabsContent value="approvalTab">
+                            <BillingsTab1 dataReceipts={dataReceipts} />
+                        </TabsContent>
+                    </motion.div>
+                    <motion.div variants={cardItemVariants}>
+                        <TabsContent value="recordsTab">
+                            <BillingsTab2 dataReceipts={dataReceipts} />
+                        </TabsContent>
+                    </motion.div>
                 </Tabs>
-            </div>
+            </motion.div>
         </MainLayout>
     );
 }
