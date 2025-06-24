@@ -47,32 +47,32 @@ class ManualPaymentController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $validatedData = $request->validate([
-            'operator_id' => 'required|exists:operators,id',
-            'AccountName' => 'required|string',
-            'ModePayment' => 'required|string',
-            'Receipt' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
-            'ReferenceNumber' => 'nullable|string',
-            'AccountNumber' => 'nullable|string',
-            'Notes' => 'nullable|string',
-            'Amount' => 'nullable|string',
-        ]);
+{
+    $validatedData = $request->validate([
+        'operator_id' => 'required|exists:operators,id',
+        'AccountName' => 'required|string',
+        'ModePayment' => 'required|string',
+        'Receipt' => 'nullable|file|mimes:jpg,jpeg,png,pdf',
+        'ReferenceNumber' => 'nullable|string',
+        'AccountNumber' => 'nullable|string',
+        'Notes' => 'nullable|string',
+        'Amount' => 'nullable|string',
+    ]);
 
-        $validatedData['Status'] = 'Pending';
+    $validatedData['Status'] = 'Pending';
 
-        $manualPayment = ManualPayment::create($validatedData);
+    $manualPayment = ManualPayment::create($validatedData);
 
-        if ($request->hasFile('Receipt')) {
-            $media = $manualPayment->addMediaFromRequest('Receipt')->toMediaCollection('receipt', 'private');
-            $manualPayment->update(['Receipt' => $media->getPath()]);
-        }
-
-        return response()->json([
-            'message' => 'Payment recorded successfully',
-            'manual_payment' => $manualPayment,
-        ]);
+    if ($request->hasFile('Receipt')) {
+        $media = $manualPayment->addMediaFromRequest('Receipt')->toMediaCollection('receipt', 'private');
+        $manualPayment->update(['Receipt' => $media->getPath()]);
     }
+
+    return back()->with([
+     'success' => true,
+     'message' => 'Payment recorded successfully'
+     ]);
+}
 
     public function rejectBilling(Request $request, $id): void
 {

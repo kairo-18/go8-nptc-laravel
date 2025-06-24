@@ -87,9 +87,18 @@ export function AppSidebar() {
     // Use the unread count from the context
     const { totalUnreadCount } = useUnreadCount(); // Access the unread count from context
 
-    const updatedNavItems = mainNavItems.map((item) =>
-        item.title === 'Dashboard' && userRole === 'Driver' ? { ...item, title: 'Driver Dashboard', url: '/driver-dashboard' } : item,
-    );
+    const updatedNavItems = mainNavItems.map((item) => {
+        if (item.title === 'Dashboard') {
+            if (userRole === 'Driver') {
+                return { ...item, title: 'Driver Dashboard', url: '/driver-dashboard' };
+            } else if (userRole === 'VR Admin') {
+                return { ...item, url: '/vr-admin-dashboard' };
+            } else if (userRole === 'Operator') {
+                return { ...item, url: '/operator-dashboard' };
+            }
+        }
+        return item;
+    });
 
     let filteredNavItems = updatedNavItems;
 
@@ -139,13 +148,27 @@ export function AppSidebar() {
 
     const sidebarBgColor = getBackgroundColorForRole(userRole);
 
+    // Determine the dashboard URL based on user role
+    const getDashboardUrl = () => {
+        switch (userRole) {
+            case 'Driver':
+                return '/driver-dashboard';
+            case 'VR Admin':
+                return '/vr-admin-dashboard';
+            case 'Operator':
+                return '/operator-dashboard';
+            default:
+                return '/dashboard';
+        }
+    };
+
     return (
         <Sidebar collapsible="icon" variant="inset" className={sidebarBgColor}>
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem className="text-white">
                         <SidebarMenuButton size="lg" asChild>
-                            <Link href={userRole === 'Driver' ? '/driver-dashboard' : '/dashboard'} prefetch>
+                            <Link href={getDashboardUrl()} prefetch>
                                 <AppLogo />
                             </Link>
                         </SidebarMenuButton>
