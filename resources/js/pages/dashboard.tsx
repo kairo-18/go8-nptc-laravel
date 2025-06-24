@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { type BreadcrumbItem, type User } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { AlertCircle, CheckCircle, ClipboardList, Clock, TrendingUp } from 'lucide-react';
+import { Building, Car, ClipboardList, Clock, HandCoins, MapPinned, TrendingUp, UserPlus, UserRoundCog } from 'lucide-react';
 import MainLayout from './mainLayout';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
@@ -139,9 +139,9 @@ export default function Dashboard({
                         System Overview
                     </h2>
                     <div className="grid grid-cols-3 gap-4">
-                        <StatCard title="VR Companies" value={vrCompaniesCount ?? 0} icon={CheckCircle} trend="up" />
-                        <StatCard title="Operators" value={activeOperatorsCount ?? 0} icon={CheckCircle} trend="neutral" />
-                        <StatCard title="Drivers" value={activeDriversCount ?? 0} icon={CheckCircle} trend="up" />
+                        <StatCard title="VR Companies" value={vrCompaniesCount ?? 0} icon={Building} trend="up" />
+                        <StatCard title="Operators" value={activeOperatorsCount ?? 0} icon={UserRoundCog} trend="neutral" />
+                        <StatCard title="Drivers" value={activeDriversCount ?? 0} icon={Car} trend="up" />
                     </div>
                 </div>
 
@@ -152,9 +152,9 @@ export default function Dashboard({
                         Pending Actions
                     </h2>
                     <div className="grid grid-cols-3 gap-4">
-                        <StatCard title="Payments" value={pendingPaymentsCount ?? 0} icon={AlertCircle} trend="down" />
-                        <StatCard title="Trips" value={ongoingTripsCount ?? 0} icon={AlertCircle} trend="neutral" />
-                        <StatCard title="Registrations" value={pendingRegistrationsCount ?? 0} icon={AlertCircle} trend="down" />
+                        <StatCard title="Payments" value={pendingPaymentsCount ?? 0} icon={HandCoins} trend="down" />
+                        <StatCard title="Trips" value={ongoingTripsCount ?? 0} icon={MapPinned} trend="neutral" />
+                        <StatCard title="Registrations" value={pendingRegistrationsCount ?? 0} icon={UserPlus} trend="down" />
                     </div>
                 </div>
 
