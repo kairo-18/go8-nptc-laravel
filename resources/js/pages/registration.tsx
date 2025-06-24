@@ -20,7 +20,7 @@ const ProgressMarker = ({
     const currentIndex = steps.findIndex((step) => step.id === currentStep);
 
     return (
-        <div className="mb-8 flex items-center space-x-6">
+        <div className="mb-5 flex items-center justify-center space-x-6">
             {steps.map((step, index) => {
                 const isActive = step.id === currentStep;
                 const isCompleted = index < currentIndex;
@@ -34,7 +34,6 @@ const ProgressMarker = ({
                         whileHover={isClickable ? { scale: 1.05 } : {}}
                         whileTap={isClickable ? { scale: 0.95 } : {}}
                     >
-                        {/* Number circle */}
                         <motion.span
                             className={`flex h-6 w-6 items-center justify-center rounded-full text-sm ${isActive ? 'bg-blue-800 font-bold text-white' : ''} ${isCompleted ? 'bg-blue-800 text-white' : ''} ${!isActive && !isCompleted ? 'border border-gray-300 text-gray-400' : ''} `}
                             initial={false}
@@ -45,7 +44,6 @@ const ProgressMarker = ({
                         >
                             {index + 1}
                         </motion.span>
-                        {/* Label */}
                         <motion.span
                             className={`text-3xl ${isActive ? 'font-semibold !text-blue-800' : ''} ${isCompleted ? 'text-blue-800' : 'text-gray-500'} `}
                             initial={false}
@@ -56,7 +54,6 @@ const ProgressMarker = ({
                         >
                             {step.label}
                         </motion.span>
-                        {/* Separator (except for last item) */}
                         {index < steps.length - 1 && (
                             <motion.div
                                 className="mx-2 h-0.5 w-10 self-center bg-gray-300"
