@@ -1,11 +1,11 @@
-import { showToast, Id } from '@/components/toast';
-import {toast} from 'react-toastify';
+import { Id, showToast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import axios from 'axios';
 import { Clipboard, ClipboardCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 const CopyButton = ({ text, isCopied, setIsCopied }: { text: string; isCopied: boolean; setIsCopied: (value: boolean) => void }) => (
     <Button
@@ -134,91 +134,91 @@ const TemporaryAccountTabContent = ({ type }) => {
         }));
     }, [values]);
 
-const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setProcessing(true);
-    setServerErrors({});
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setProcessing(true);
+        setServerErrors({});
 
-    const requiredFields = ['username', 'FirstName', 'LastName', 'email', 'BirthDate', 'ContactNumber'];
-    const hasEmptyFields = requiredFields.some((field) => !values[field]);
+        const requiredFields = ['username', 'FirstName', 'LastName', 'email', 'BirthDate', 'ContactNumber'];
+        const hasEmptyFields = requiredFields.some((field) => !values[field]);
 
-    if (hasEmptyFields) {
-        setValidationErrors((prev) => ({
-            ...prev,
-            ...Object.fromEntries(requiredFields.map((field) => [field, !values[field] ? 'This field is required' : prev[field]])),
-        }));
-        setProcessing(false);
-        return;
-    }
-    if (Object.values(validationErrors).some((error) => error !== '')) {
-        setProcessing(false);
-        return;
-    }
-
-    let loadingToastId: Id | null = null;
-    
-    try {
-        loadingToastId = showToast('Creating temporary account...', {
-            type: 'loading',
-            isLoading: true,
-            position: 'top-center',
-            autoClose: false
-        });
-
-        const formattedLastName = formatLastName(values.LastName);
-        const password = `${formattedLastName}${new Date(values.BirthDate).getFullYear()}`;
-
-        const normalizedContact = values.ContactNumber.startsWith('0') ? values.ContactNumber.replace(/^0/, '+63') : values.ContactNumber;
-
-        const response = await axios.post(route('temp-registration'), {
-            ...values,
-            ContactNumber: normalizedContact,
-            password: password,
-        });
-
-        if (loadingToastId) {
-            toast.dismiss(loadingToastId);
+        if (hasEmptyFields) {
+            setValidationErrors((prev) => ({
+                ...prev,
+                ...Object.fromEntries(requiredFields.map((field) => [field, !values[field] ? 'This field is required' : prev[field]])),
+            }));
+            setProcessing(false);
+            return;
+        }
+        if (Object.values(validationErrors).some((error) => error !== '')) {
+            setProcessing(false);
+            return;
         }
 
-        setGeneratedPassword(password);
-        setEmail(values.email);
-        setIsDialogOpen(true);
-        showToast('VR Temporary Account Created!', {
-            type: 'success',
-            position: 'top-center',
-        });
-    } catch (error) {
-        if (loadingToastId) {
-            toast.dismiss(loadingToastId);
-        }
+        let loadingToastId: Id | null = null;
 
-        if (axios.isAxiosError(error) && error.response?.status === 422) {
-            const errors = error.response.data.errors || {};
-            const formattedErrors: Record<string, string> = {};
-
-            Object.keys(errors).forEach((key) => {
-                formattedErrors[key] = errors[key][0];
+        try {
+            loadingToastId = showToast('Creating temporary account...', {
+                type: 'loading',
+                isLoading: true,
+                position: 'top-center',
+                autoClose: false,
             });
 
-            setServerErrors(formattedErrors);
-        } else {
-            console.error('Submission failed', error);
+            const formattedLastName = formatLastName(values.LastName);
+            const password = `${formattedLastName}${new Date(values.BirthDate).getFullYear()}`;
+
+            const normalizedContact = values.ContactNumber.startsWith('0') ? values.ContactNumber.replace(/^0/, '+63') : values.ContactNumber;
+
+            const response = await axios.post(route('temp-registration'), {
+                ...values,
+                ContactNumber: normalizedContact,
+                password: password,
+            });
+
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+
+            setGeneratedPassword(password);
+            setEmail(values.email);
+            setIsDialogOpen(true);
+            showToast('VR Temporary Account Created!', {
+                type: 'success',
+                position: 'top-center',
+            });
+        } catch (error) {
+            if (loadingToastId) {
+                toast.dismiss(loadingToastId);
+            }
+
+            if (axios.isAxiosError(error) && error.response?.status === 422) {
+                const errors = error.response.data.errors || {};
+                const formattedErrors: Record<string, string> = {};
+
+                Object.keys(errors).forEach((key) => {
+                    formattedErrors[key] = errors[key][0];
+                });
+
+                setServerErrors(formattedErrors);
+            } else {
+                console.error('Submission failed', error);
+            }
+
+            showToast('An error occurred. Please try again.', {
+                type: 'error',
+                position: 'top-center',
+            });
+
+            const formattedLastName = formatLastName(values.LastName);
+            const password = `${formattedLastName}${new Date(values.BirthDate).getFullYear()}`;
+            setGeneratedPassword(password);
+            setEmail(values.email);
+            setIsDialogOpen(true);
+        } finally {
+            setProcessing(false);
         }
-
-        showToast('An error occurred. Please try again.', {
-            type: 'error',
-            position: 'top-center',
-        });
-
-        const formattedLastName = formatLastName(values.LastName);
-        const password = `${formattedLastName}${new Date(values.BirthDate).getFullYear()}`;
-        setGeneratedPassword(password);
-        setEmail(values.email);
-        setIsDialogOpen(true);
-    } finally {
-        setProcessing(false);
-    }
-};
+    };
 
     const getError = (field: string) => {
         return serverErrors[field] || validationErrors[field] || '';
@@ -331,12 +331,12 @@ const handleSubmit = async (e: React.FormEvent) => {
                         }
                     />
                 </div>
-                <Button 
-                    type="submit" 
-                    className="float-right mt-20 mb-5 bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white"
+                <Button
+                    type="submit"
+                    className="float-right mt-12 mb-5 bg-[#2A2A92] text-white hover:bg-[#5454A7] hover:text-white"
                     disabled={processing}
                 >
-                    {processing ? 'Creating...' : 'Generate VR Temporary Account'}
+                    {processing ? 'Creating...' : 'Generate Temporary Account'}
                 </Button>
             </form>
 

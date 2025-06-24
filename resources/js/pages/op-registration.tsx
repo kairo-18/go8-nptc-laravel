@@ -2,6 +2,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import MainLayout from './mainLayout';
 import TemporaryAccountTabContent from './vr-register-tab1';
@@ -14,7 +15,45 @@ const breadcrumbs: BreadcrumbItem[] = [
     },
 ];
 
-export default function VrRegistration({ operators }) {
+const pageVariants = {
+    initial: {
+        opacity: 0,
+        y: 20,
+    },
+    animate: {
+        opacity: 1,
+        y: 0,
+        transition: {
+            duration: 0.5,
+            ease: 'easeOut',
+        },
+    },
+    exit: {
+        opacity: 0,
+        y: -20,
+        transition: {
+            duration: 0.3,
+            ease: 'easeIn',
+        },
+    },
+};
+
+const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1,
+        },
+    },
+};
+
+const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    show: { opacity: 1, y: 0 },
+};
+
+export default function OpRegistration({ operators }) {
     const [activeTab, setActiveTab] = useState('tempoAccountTab');
     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -25,18 +64,28 @@ export default function VrRegistration({ operators }) {
                 {description && <p className="text-sm text-gray-600">{description}</p>}
             </div>
             <Separator className="my-2" />
-            {value === 'tempoAccountTab' ? (
-                <TemporaryAccountTabContent type="operator" setIsDialogOpen={setIsDialogOpen} />
-            ) : (
-                <ApplicationStatusTabContent
-                    operators={[operators]}
-                    dataType="operators"
-                    onSelectCompany={function (companyId: number): void {
-                        throw new Error('Function not implemented.');
-                    }}
-                    companiesWithMedia={[]}
-                />
-            )}
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={value}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                >
+                    {value === 'tempoAccountTab' ? (
+                        <TemporaryAccountTabContent type="operator" setIsDialogOpen={setIsDialogOpen} />
+                    ) : (
+                        <ApplicationStatusTabContent
+                            operators={[operators]}
+                            dataType="operators"
+                            onSelectCompany={function (companyId: number): void {
+                                throw new Error('Function not implemented.');
+                            }}
+                            companiesWithMedia={[]}
+                        />
+                    )}
+                </motion.div>
+            </AnimatePresence>
         </TabsContent>
     );
 
@@ -44,23 +93,45 @@ export default function VrRegistration({ operators }) {
         <MainLayout breadcrumbs={breadcrumbs}>
             <Head title="OP register" />
 
-            <div className="flex w-full flex-col items-end p-10">
+            <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants} className="flex w-full flex-col items-end p-3">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <div className="mb-5 flex justify-start">
+                    <motion.div variants={containerVariants} initial="hidden" animate="show" className="mb-5 flex justify-start">
                         <TabsList className="bg-[#2A2A92] text-white">
-                            <TabsTrigger value="tempoAccountTab" className="px-10">
-                                Operator Temporary Account
-                            </TabsTrigger>
-                            <TabsTrigger value="appStatsTab" className="px-10">
-                                Application Status
-                            </TabsTrigger>
+                            <motion.div variants={itemVariants}>
+                                <TabsTrigger value="tempoAccountTab" className="relative px-10">
+                                    {activeTab === 'tempoAccountTab' && (
+                                        <motion.div
+                                            layoutId="activeTabIndicator"
+                                            className="absolute inset-0 rounded-md bg-white"
+                                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                    <span className="relative z-10">Operator Temporary Account</span>
+                                </TabsTrigger>
+                            </motion.div>
+                            <motion.div variants={itemVariants}>
+                                <TabsTrigger value="appStatsTab" className="relative px-10">
+                                    {activeTab === 'appStatsTab' && (
+                                        <motion.div
+                                            layoutId="activeTabIndicator"
+                                            className="absolute inset-0 rounded-md bg-white"
+                                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                    <span className="relative z-10">Application Status</span>
+                                </TabsTrigger>
+                            </motion.div>
                         </TabsList>
-                    </div>
+                    </motion.div>
 
-                    <TabContent value="tempoAccountTab" title="Temporary Account" description="Details of the Company Owner" />
-                    <TabContent value="appStatsTab" title="Application Status" description="Check the current status of your application" />
+                    <motion.div variants={itemVariants}>
+                        <TabContent value="tempoAccountTab" title="Temporary Account" description="Details of the Company Owner" />
+                    </motion.div>
+                    <motion.div variants={itemVariants}>
+                        <TabContent value="appStatsTab" title="Application Status" description="Check the current status of your application" />
+                    </motion.div>
                 </Tabs>
-            </div>
+            </motion.div>
         </MainLayout>
     );
 }
