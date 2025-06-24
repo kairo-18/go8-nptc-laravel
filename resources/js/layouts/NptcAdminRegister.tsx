@@ -1,4 +1,5 @@
 import { useForm } from '@inertiajs/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { LoaderCircle } from 'lucide-react';
 import { FormEventHandler, useEffect } from 'react';
 
@@ -9,25 +10,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
 interface RegisterForm {
+    id?: number | string;
     FirstName: string;
     LastName: string;
     username: string;
     Address: string;
-    Birthdate: string;
+    BirthDate: string;
     ContactNumber: string;
     email: string;
-    password: string;
-    password_confirmation: string;
-}
-
-interface UpdateForm {
-    id: number | string;
-    FirstName: string;
-    LastName: string;
-    username: string;
-    Address: string;
-    ContactNumber: string;
-    email: string;
+    password?: string;
+    password_confirmation?: string;
 }
 
 interface NptcAdminRegisterProps {
@@ -38,7 +30,7 @@ interface NptcAdminRegisterProps {
 }
 
 export default function NptcAdminRegister({ isOpen, onClose, isEditing, user }: NptcAdminRegisterProps) {
-    const { data, setData, post, patch, processing, errors, reset } = useForm({
+    const { data, setData, post, patch, processing, errors, reset } = useForm<RegisterForm>({
         id: '',
         FirstName: '',
         LastName: '',
@@ -62,8 +54,8 @@ export default function NptcAdminRegister({ isOpen, onClose, isEditing, user }: 
                 BirthDate: user.BirthDate || '',
                 ContactNumber: user.ContactNumber || '',
                 email: user.email || '',
-                password: undefined,
-                password_confirmation: undefined,
+                password: '',
+                password_confirmation: '',
             });
         } else {
             reset();
@@ -73,15 +65,13 @@ export default function NptcAdminRegister({ isOpen, onClose, isEditing, user }: 
     const submit: FormEventHandler = (e) => {
         e.preventDefault();
 
-        const updatedData = { ...data };
-
-        // Remove password fields if they are empty
-        if (!updatedData.password) delete updatedData.password;
-        if (!updatedData.password_confirmation) delete updatedData.password_confirmation;
+        const formData = { ...data };
+        if (!formData.password) delete formData.password;
+        if (!formData.password_confirmation) delete formData.password_confirmation;
 
         if (isEditing) {
             patch(route('update-nptc-admin'), {
-                data: updatedData, // Send filtered data
+                data: formData,
                 preserveScroll: true,
             });
         } else {
@@ -92,167 +82,221 @@ export default function NptcAdminRegister({ isOpen, onClose, isEditing, user }: 
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent>
-                <DialogHeader>
-                    <DialogTitle>{isEditing ? 'Update NPTC Admin' : 'Create NPTC Admin'}</DialogTitle>
-                    <DialogDescription>
-                        {isEditing ? 'Update the details below to edit the NPTC Admin.' : 'Enter the details below to create a new NPTC Admin.'}
-                    </DialogDescription>
-                </DialogHeader>
-                <form className="flex h-[70vh] flex-col gap-6 overflow-y-scroll" onSubmit={submit}>
-                    <div className="grid gap-6">
-                        <div className="grid gap-2">
-                            <Label htmlFor="FirstName">First Name</Label>
-                            <Input
-                                id="FirstName"
-                                type="text"
-                                required
-                                autoFocus
-                                tabIndex={1}
-                                autoComplete="given-name"
-                                value={data.FirstName}
-                                onChange={(e) => setData('FirstName', e.target.value)}
-                                disabled={processing}
-                                placeholder="First Name"
-                            />
-                            <InputError message={errors.FirstName} className="mt-2" />
-                        </div>
+        <AnimatePresence>
+            {isOpen && (
+                <Dialog open={isOpen} onOpenChange={onClose}>
+                    {/* Add preventAutoFocus prop to DialogContent */}
+                    <DialogContent className="max-w-2xl" onInteractOutside={(e) => e.preventDefault()}>
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: 20 }}
+                            transition={{ duration: 0.2 }}
+                        >
+                            <DialogHeader>
+                                <DialogTitle className="text-2xl font-bold text-[#252583]">
+                                    {isEditing ? 'Update NPTC Admin' : 'Create NPTC Admin'}
+                                </DialogTitle>
+                                <DialogDescription className="text-gray-600">
+                                    {isEditing ? 'Update the admin details below' : 'Fill in the details to create a new admin'}
+                                </DialogDescription>
+                            </DialogHeader>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="LastName">Last Name</Label>
-                            <Input
-                                id="LastName"
-                                type="text"
-                                required
-                                tabIndex={2}
-                                autoComplete="family-name"
-                                value={data.LastName}
-                                onChange={(e) => setData('LastName', e.target.value)}
-                                disabled={processing}
-                                placeholder="Last Name"
-                            />
-                            <InputError message={errors.LastName} />
-                        </div>
+                            <form onSubmit={submit}>
+                                <div className="grid max-h-[70vh] grid-cols-1 gap-4 overflow-y-auto p-1 md:grid-cols-2">
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.1 }}
+                                        className="space-y-2"
+                                    >
+                                        <Label htmlFor="FirstName">First Name</Label>
+                                        <Input
+                                            id="FirstName"
+                                            value={data.FirstName}
+                                            onChange={(e) => setData('FirstName', e.target.value)}
+                                            disabled={processing}
+                                            placeholder="First Name"
+                                            className="focus:ring-2 focus:ring-[#252583]"
+                                            autoFocus={false} // Explicitly disable auto-focus
+                                        />
+                                        <InputError message={errors.FirstName} />
+                                    </motion.div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="username">Username</Label>
-                            <Input
-                                id="username"
-                                type="text"
-                                required
-                                tabIndex={3}
-                                autoComplete="username"
-                                value={data.username}
-                                onChange={(e) => setData('username', e.target.value)}
-                                disabled={processing}
-                                placeholder="Username"
-                            />
-                            <InputError message={errors.username} />
-                        </div>
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.15 }}
+                                        className="space-y-2"
+                                    >
+                                        <Label htmlFor="LastName">Last Name</Label>
+                                        <Input
+                                            id="LastName"
+                                            value={data.LastName}
+                                            onChange={(e) => setData('LastName', e.target.value)}
+                                            disabled={processing}
+                                            placeholder="Last Name"
+                                            className="focus:ring-2 focus:ring-[#252583]"
+                                        />
+                                        <InputError message={errors.LastName} />
+                                    </motion.div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="Address">Address</Label>
-                            <Input
-                                id="Address"
-                                type="text"
-                                required
-                                tabIndex={4}
-                                autoComplete="street-address"
-                                value={data.Address}
-                                onChange={(e) => setData('Address', e.target.value)}
-                                disabled={processing}
-                                placeholder="Address"
-                            />
-                            <InputError message={errors.Address} />
-                        </div>
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.2 }}
+                                        className="space-y-2"
+                                    >
+                                        <Label htmlFor="username">Username</Label>
+                                        <Input
+                                            id="username"
+                                            value={data.username}
+                                            onChange={(e) => setData('username', e.target.value)}
+                                            disabled={processing}
+                                            placeholder="Username"
+                                            className="focus:ring-2 focus:ring-[#252583]"
+                                        />
+                                        <InputError message={errors.username} />
+                                    </motion.div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="ContactNumber">Contact Number</Label>
-                            <Input
-                                id="ContactNumber"
-                                type="tel"
-                                required
-                                tabIndex={5}
-                                autoComplete="tel"
-                                value={data.ContactNumber}
-                                onChange={(e) => setData('ContactNumber', e.target.value)}
-                                disabled={processing}
-                                placeholder="Contact Number"
-                            />
-                            <InputError message={errors.ContactNumber} />
-                        </div>
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.25 }}
+                                        className="space-y-2"
+                                    >
+                                        <Label htmlFor="email">Email</Label>
+                                        <Input
+                                            id="email"
+                                            type="email"
+                                            value={data.email}
+                                            onChange={(e) => setData('email', e.target.value)}
+                                            disabled={processing}
+                                            placeholder="email@example.com"
+                                            className="focus:ring-2 focus:ring-[#252583]"
+                                        />
+                                        <InputError message={errors.email} />
+                                    </motion.div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="email">Email address</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                required
-                                tabIndex={6}
-                                autoComplete="email"
-                                value={data.email}
-                                onChange={(e) => setData('email', e.target.value)}
-                                disabled={processing}
-                                placeholder="email@example.com"
-                            />
-                            <InputError message={errors.email} />
-                        </div>
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.3 }}
+                                        className="space-y-2"
+                                    >
+                                        <Label htmlFor="ContactNumber">Contact Number</Label>
+                                        <Input
+                                            id="ContactNumber"
+                                            type="tel"
+                                            value={data.ContactNumber}
+                                            onChange={(e) => setData('ContactNumber', e.target.value)}
+                                            disabled={processing}
+                                            placeholder="Contact Number"
+                                            className="focus:ring-2 focus:ring-[#252583]"
+                                        />
+                                        <InputError message={errors.ContactNumber} />
+                                    </motion.div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="Birthdate">Birthdate</Label>
-                            <Input
-                                id="Birthdate"
-                                type="date"
-                                required={!isEditing}
-                                tabIndex={7}
-                                autoComplete="bday"
-                                value={data.Birthdate}
-                                onChange={(e) => setData('BirthDate', e.target.value)}
-                                disabled={processing}
-                            />
-                            <InputError message={errors.Birthdate} />
-                        </div>
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.35 }}
+                                        className="space-y-2"
+                                    >
+                                        <Label htmlFor="BirthDate">Birthdate</Label>
+                                        <Input
+                                            id="BirthDate"
+                                            type="date"
+                                            value={data.BirthDate}
+                                            onChange={(e) => setData('BirthDate', e.target.value)}
+                                            disabled={processing}
+                                            className="focus:ring-2 focus:ring-[#252583]"
+                                        />
+                                        <InputError message={errors.BirthDate} />
+                                    </motion.div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                tabIndex={8}
-                                autoComplete={isEditing ? 'new-password' : 'current-password'}
-                                value={data.password}
-                                onChange={(e) => setData('password', e.target.value)}
-                                disabled={processing}
-                                placeholder={isEditing ? 'Leave blank to keep current password' : 'Password'}
-                            />
-                            <InputError message={errors.password} />
-                        </div>
+                                    <motion.div
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: 0.4 }}
+                                        className="space-y-2"
+                                    >
+                                        <Label htmlFor="Address">Address</Label>
+                                        <Input
+                                            id="Address"
+                                            value={data.Address}
+                                            onChange={(e) => setData('Address', e.target.value)}
+                                            disabled={processing}
+                                            placeholder="Address"
+                                            className="focus:ring-2 focus:ring-[#252583]"
+                                        />
+                                        <InputError message={errors.Address} />
+                                    </motion.div>
 
-                        <div className="grid gap-2">
-                            <Label htmlFor="password_confirmation">Confirm password</Label>
-                            <Input
-                                id="password_confirmation"
-                                type="password"
-                                tabIndex={9}
-                                autoComplete="new-password"
-                                value={data.password_confirmation}
-                                onChange={(e) => setData('password_confirmation', e.target.value)}
-                                disabled={processing}
-                                placeholder="Confirm password"
-                            />
-                            <InputError message={errors.password_confirmation} />
-                        </div>
+                                    {!isEditing && (
+                                        <>
+                                            <motion.div
+                                                initial={{ opacity: 0, x: -10 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: 0.45 }}
+                                                className="space-y-2"
+                                            >
+                                                <Label htmlFor="password">Password</Label>
+                                                <Input
+                                                    id="password"
+                                                    type="password"
+                                                    value={data.password}
+                                                    onChange={(e) => setData('password', e.target.value)}
+                                                    disabled={processing}
+                                                    placeholder="Password"
+                                                    className="focus:ring-2 focus:ring-[#252583]"
+                                                />
+                                                <InputError message={errors.password} />
+                                            </motion.div>
 
-                        <DialogFooter>
-                            <Button type="submit" className="mt-2 w-full" tabIndex={10} disabled={processing}>
-                                {processing && <LoaderCircle className="h-4 w-4 animate-spin" />}
-                                {isEditing ? 'Update account' : 'Create account'}
-                            </Button>
-                        </DialogFooter>
-                    </div>
-                </form>
-            </DialogContent>
-        </Dialog>
+                                            <motion.div
+                                                initial={{ opacity: 0, x: -10 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                transition={{ delay: 0.5 }}
+                                                className="space-y-2"
+                                            >
+                                                <Label htmlFor="password_confirmation">Confirm Password</Label>
+                                                <Input
+                                                    id="password_confirmation"
+                                                    type="password"
+                                                    value={data.password_confirmation}
+                                                    onChange={(e) => setData('password_confirmation', e.target.value)}
+                                                    disabled={processing}
+                                                    placeholder="Confirm Password"
+                                                    className="focus:ring-2 focus:ring-[#252583]"
+                                                />
+                                                <InputError message={errors.password_confirmation} />
+                                            </motion.div>
+                                        </>
+                                    )}
+                                </div>
+
+                                <DialogFooter className="mt-6">
+                                    <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full">
+                                        <Button type="submit" className="w-full bg-[#252583] text-white hover:bg-[#3a3a9e]" disabled={processing}>
+                                            {processing ? (
+                                                <span className="flex items-center gap-2">
+                                                    <LoaderCircle className="h-4 w-4 animate-spin" />
+                                                    Processing...
+                                                </span>
+                                            ) : isEditing ? (
+                                                'Update Admin'
+                                            ) : (
+                                                'Create Admin'
+                                            )}
+                                        </Button>
+                                    </motion.div>
+                                </DialogFooter>
+                            </form>
+                        </motion.div>
+                    </DialogContent>
+                </Dialog>
+            )}
+        </AnimatePresence>
     );
 }
