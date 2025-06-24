@@ -21,7 +21,7 @@ type DataTableProps<TData, TValue> = {
 const statusHierarchy = ["Pending", "Approved", "Rejected", "For Payment", "Active", "Inactive", "Suspended", "Banned", "For NPTC Approval", "For VR Approval"];
 
 
-export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilterName }: DataTableProps<TData, TValue>) {
+export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilterName, dropdownMenuContent, }: DataTableProps<TData, TValue> & { dropdownMenuContent?: React.ReactNode }) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -99,22 +99,26 @@ export function DataTable<TData, TValue>({ data, onRowClick, columns, ColumnFilt
                 />
 
                 <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                <DropdownMenuTrigger asChild>
                         <Button variant="outline" className='text-white'>
                             Filter Status <ChevronDown />
                         </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        {statusHierarchy.map((status) => (
-                            <DropdownMenuRadioItem key={status} value={status} onClick={() => handleStatusFilter(status)}>
-                            {status}
+                    {dropdownMenuContent ? (
+                        dropdownMenuContent
+                    ) : (
+                        <DropdownMenuContent align="end">
+                            {statusHierarchy.map((status) => (
+                                <DropdownMenuRadioItem key={status} value={status} onClick={() => handleStatusFilter(status)}>
+                                    {status}
+                                </DropdownMenuRadioItem>
+                            ))}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioItem value="All Status" onClick={() => handleStatusFilter("All Status")}>
+                                All Status
                             </DropdownMenuRadioItem>
-                        ))}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuRadioItem value="All Status" onClick={() => handleStatusFilter("All Status")}>
-                            All Status
-                        </DropdownMenuRadioItem>
-                    </DropdownMenuContent>
+                        </DropdownMenuContent>
+                    )}
                 </DropdownMenu>
             </div>
 
