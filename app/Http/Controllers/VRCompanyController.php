@@ -67,8 +67,6 @@ class VRCompanyController extends Controller
             \Log::info('VR Company created successfully', ['id' => $vrCompany->id]);
         } catch (\Exception $e) {
             \Log::error('Error creating VR Company:', ['error' => $e->getMessage()]);
-
-            return response()->json(['error' => 'Failed to create company', 'message' => $e->getMessage()], 500);
         }
     }
 

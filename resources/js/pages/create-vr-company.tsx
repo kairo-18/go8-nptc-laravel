@@ -43,27 +43,6 @@ export default function CreateVrCompany({
     const [errors, setErrors] = useState({});
     const [processing, setProcessing] = useState(false);
 
-    // useEffect(() => {
-    //     if (isEditing && companyData) {
-    //         setData((prevData) => ({
-    //             ...prevData,
-    //             ...companyData,
-    //         }));
-    //     }
-    // }, [isEditing, companyData]);
-
-    // useEffect(() => {
-    //     if (isEditing && companyData) {
-    //         setData((prevData) => ({
-    //             ...data,
-    //             ...prevData,
-    //             oldCompanyName: companyData.CompanyName,
-    //             CompanyName: companyData.CompanyName,
-    //             BusinessPermitNumber: companyData.BusinessPermitNumber,
-    //         }));
-    //     }
-    // }, [isEditing, companyData]);
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setProcessing(true);
