@@ -97,6 +97,7 @@ export default function Dashboard({
                 setTrips(trips);
                 // Collect unique pickupDates as Date objects
                 const dates = trips.map((t: any) => t.pickupDate && new Date(t.pickupDate)).filter(Boolean);
+
                 setTripDates(dates);
             })
             .catch(() => {
@@ -175,7 +176,7 @@ export default function Dashboard({
                         <ClipboardList className="h-5 w-5 text-blue-500" />
                         Ongoing Bookings
                         <span className="ml-2 rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">
-                            {ongoingBookings?.length ?? 0} Active
+                            {trips.length ?? 0} Active
                         </span>
                     </h2>
                     <Card className="h-[500px] overflow-hidden bg-gradient-to-br from-white to-gray-100 shadow-lg">
@@ -195,7 +196,7 @@ export default function Dashboard({
                                 className="grid flex-1 grid-cols-1 gap-4 overflow-y-auto px-6 pb-6 md:grid-cols-2 lg:grid-cols-3"
                                 style={{ maxHeight: '400px' }}
                             >
-                                {!ongoingBookings || ongoingBookings.length === 0 ? (
+                                {!trips || trips.length === 0 ? (
                                     <div className="col-span-full flex h-full w-full flex-col items-center justify-center">
                                         <motion.div
                                             initial={{ y: 0 }}
@@ -212,7 +213,7 @@ export default function Dashboard({
                                         </div>
                                     </div>
                                 ) : (
-                                    ongoingBookings.map((booking, index) => (
+                                    trips.map((booking, index) => (
                                         <motion.div
                                             key={index}
                                             initial={{ opacity: 0, y: 10 }}

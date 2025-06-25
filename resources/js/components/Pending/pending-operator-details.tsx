@@ -1,7 +1,7 @@
-import { showToast, Id } from '@/components/toast';
-import {toast} from 'react-toastify';
+import { Id, showToast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { useState } from 'react';
+import { toast } from 'react-toastify';
 
 interface PendingOperatorDetailsProps {
     item: {
@@ -14,6 +14,7 @@ interface PendingOperatorDetailsProps {
         Email: string;
         ValidID?: string;
         Photo1x1?: string;
+        ManagementFormSubmission?: string;
     };
     onClose: () => void;
 }
@@ -23,6 +24,18 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
     const [operatorId, setOperatorId] = useState<string>('');
     const [note, setNote] = useState<string>('');
     const [loading, setLoading] = useState(false);
+    const [previewFile, setPreviewFile] = useState<MediaFile | null>(null);
+    const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
+
+    const openPreview = (file: MediaFile) => {
+        setPreviewFile(file);
+        setIsPreviewModalOpen(true);
+    };
+
+    const closePreview = () => {
+        setIsPreviewModalOpen(false);
+        setPreviewFile(null);
+    };
 
     const openRejectionModal = () => {
         setOperatorId(item?.user?.id || '');
@@ -33,7 +46,7 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
         setIsModalOpen(false);
     };
 
-     const handleRejection = async (note: string, entityId: string, entityType: string) => {
+    const handleRejection = async (note: string, entityId: string, entityType: string) => {
         let loadingToastId: Id | null = null;
         try {
             setLoading(true);
@@ -42,7 +55,7 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
                 type: 'loading',
                 isLoading: true,
                 position: 'top-center',
-                autoClose: false
+                autoClose: false,
             });
 
             const response = await fetch('/api/rejection', {
@@ -98,7 +111,7 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
                 type: 'loading',
                 isLoading: true,
                 position: 'top-center',
-                autoClose: false
+                autoClose: false,
             });
 
             const requestBody = {
@@ -108,7 +121,11 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
             };
 
             if (role === 'VR Admin') {
-                requestBody.status = 'For Payment';
+                if (item.Status === 'For Final Submission') {
+                    requestBody.status = 'Approved';
+                } else {
+                    requestBody.status = 'For Payment';
+                }
             } else if (role === 'NPTC Admin' || role === 'NPTC Super Admin') {
                 requestBody.status = 'For Payment';
             }
@@ -219,12 +236,22 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
                             </div>
                         </div>
 
-                        <div>
-                            <label className="text-sm font-semibold">1x1 Photo</label>
-                            <div className="flex items-center gap-2">
-                                <input type="text" value={item.Photo1x1 || '-'} disabled className="w-full rounded-md border bg-gray-200 p-2" />
-                                <Button variant="outline">Preview</Button>
-                            </div>
+                        <div className="mt-4 space-y-3">
+                            {item.media_files && item.media_files.length > 0 ? (
+                                item.media_files.map((file, index) => (
+                                    <div key={index}>
+                                        <label className="text-sm font-semibold capitalize">{file.collection_name.replace(/_/g, ' ')}</label>
+                                        <div className="flex items-center gap-2">
+                                            <input type="text" value={file.name} disabled className="w-full rounded-md border bg-gray-200 p-2" />
+                                            <Button variant="outline" onClick={() => openPreview(file)}>
+                                                Preview
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-gray-500">No media files available</p>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -249,6 +276,26 @@ export default function PendingOperatorDetails({ item, role }: PendingOperatorDe
                                 Reject and send
                             </Button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {isPreviewModalOpen && previewFile && (
+                <div className="bg-opacity-50 fixed inset-0 z-50 flex items-center justify-center bg-black">
+                    <div className="relative max-w-lg rounded-md bg-white p-4 shadow-lg">
+                        <Button onClick={closePreview} className="absolute top-2 right-2" variant="outline">
+                            ✕
+                        </Button>
+                        {previewFile.mime_type.startsWith('image') ? (
+                            <img src={previewFile.url} alt={previewFile.name} className="h-auto w-64 object-contain" />
+                        ) : (
+                            <div className="text-center text-gray-700">
+                                <p className="mb-2 font-medium">Cannot preview this file directly.</p>
+                                <a href={previewFile.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                                    Download/View File
+                                </a>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

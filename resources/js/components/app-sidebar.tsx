@@ -104,7 +104,17 @@ export function AppSidebar() {
 
     if (status !== 'Approved' && userRole !== 'NPTC Admin' && userRole !== 'NPTC Super Admin') {
         const allowedItems = ['Mail'];
-        filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
+        if (status === 'For Vehicle Registration') {
+            filteredNavItems = updatedNavItems
+                .filter((item) => item.title === 'Registration' || item.title === 'Mail')
+                .map((item) => ({
+                    ...item,
+                    url: item.title === 'Registration' ? '' : item.url,
+                    children: item.title === 'Registration' ? item.children?.filter((child) => child.title === 'Unit Registration') : item.children,
+                }));
+        } else {
+            filteredNavItems = updatedNavItems.filter((item) => allowedItems.includes(item.title));
+        }
     } else {
         if (userRole === 'Temp User') {
             filteredNavItems = updatedNavItems

@@ -12,8 +12,10 @@ export default function Bookings({ bookings }) {
     const { props } = usePage();
     const userRole = props.auth.user?.roles?.[0]?.name;
     const userId = props.auth.user?.id;
+
     const [dateFilter, setDateFilter] = useState({ start: '', end: '' });
     let filteredBookings = bookings;
+
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const date = params.get('date');
@@ -21,10 +23,12 @@ export default function Bookings({ bookings }) {
             setDateFilter({ start: date, end: date });
         }
     }, []);
+
     if (userRole === 'Driver') {
         filteredBookings = bookings.filter((trip: any) => trip.driver?.user_id === userId);
     } else if (userRole === 'VR Company') {
         const userCompanyId = props.auth.user?.vr_company_id;
+
         filteredBookings = bookings.filter((trip: any) => trip.driver?.operator?.vr_company?.id === userCompanyId);
     }
 

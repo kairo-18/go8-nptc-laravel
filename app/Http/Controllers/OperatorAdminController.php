@@ -246,7 +246,7 @@ class OperatorAdminController extends Controller
         }
 
         // Media collections for operator
-        $mediaCollections = ['photo', 'valid_id_front', 'valid_id_back'];
+        $mediaCollections = ['photo', 'valid_id_front', 'valid_id_back', 'signed_management_agreement'];
 
         // Process media files
         $mediaFiles = collect($mediaCollections)->flatMap(function ($collection) use ($operator) {
@@ -280,5 +280,37 @@ class OperatorAdminController extends Controller
         }
 
         $media->delete();
+    }
+
+    public function managementFormUpload(Operator $operator)
+    {
+        return inertia('operator-management-form-upload', [
+            'operator' => $operator->load('user', 'vrCompany.owner.user'),
+        ]);
+    }
+    
+    public function storeManagementForm(Request $request, Operator $operator)
+    {
+        $request->validate([
+            'signed_management_agreement' => 'required|file|mimes:jpg,jpeg,png,pdf|max:10240', // 10MB max
+        ]);
+    
+        try {
+            if ($request->hasFile('signed_management_agreement')) {
+                // Delete existing file if it exists
+                if ($operator->signed_management_agreement) {
+                    $operator->getMedia('signed_management_agreement')->each->delete();
+                }
+    
+                $media = $operator->addMediaFromRequest('signed_management_agreement')
+                    ->toMediaCollection('signed_management_agreement', 'private');
+                
+                $operator->update(['signed_management_agreement' => $media->getPath()]);
+            }
+    
+            return redirect()->back()->with('success', 'Management agreement uploaded successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to upload management agreement. Please try again.');
+        }
     }
 }
