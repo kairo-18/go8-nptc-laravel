@@ -30,7 +30,7 @@ class PendingController extends Controller
         if (Auth::user()->hasRole(['NPTC Admin', 'NPTC Super Admin'])) {
             $statusValues = ['For NPTC Approval'];
         } elseif (Auth::user()->hasRole('VR Admin')) {
-            $statusValues = ['For VR Approval'];
+            $statusValues = ['For VR Approval', 'For Final Submission'];
         }
 
         // Fetch drivers with media
@@ -134,14 +134,38 @@ class PendingController extends Controller
                 ]);
             });
 
-        $operators = Operator::with(['user', 'vrCompany'])
-            ->whereIn('Status', $statusValues)
+        $mediaCollections = ['photo', 'valid_id_front', 'valid_id_back', 'signed_management_agreement']; // you can add more collections here later if needed
+
+        $finalSubmissionOperators = Operator::with(['user', 'vrCompany', 'media'])
+            ->where('Status', 'For Final Submission')
             ->get()
-            ->map(function ($operator) {
+            ->filter(function ($operator) {
+                return $operator->hasMedia('signed_management_agreement');
+            });
+
+        $vrApprovalOperators = Operator::with(['user', 'vrCompany', 'media'])
+            ->where('Status', 'For VR Approval')
+            ->get();
+
+        $operators = $finalSubmissionOperators
+            ->merge($vrApprovalOperators)
+            ->map(function ($operator) use ($mediaCollections) {
+                $mediaFiles = collect($mediaCollections)->flatMap(function ($collection) use ($operator) {
+                    return $operator->getMedia($collection)->map(fn ($media) => [
+                        'id' => $media->id,
+                        'name' => $media->file_name,
+                        'collection_name' => $media->collection_name,
+                        'mime_type' => $media->mime_type,
+                        'url' => route('preview-operator-media', ['mediaId' => $media->id]),
+                    ]);
+                })->values();
+
                 return array_merge($operator->toArray(), [
                     'company_name' => $operator->company->CompanyName ?? null,
+                    'media_files' => $mediaFiles,
                 ]);
             });
+
 
         return response()->json([
             'drivers' => $drivers,
@@ -411,12 +435,18 @@ class PendingController extends Controller
                 $adminId = $entity->vrCompany->owner->user->id;
                 $admin = User::find($adminId);
                 if ($entity) {
-                    if ($entity->Status === 'Approved') {
+                    if($entity === 'For Final Submission'){
+                        //Change the status to Approved
+                        $operator = Operator::find($entity->id);
+                        $operator->Status = "Approved";
+                        $operator->save();
+
+                    } else if ($entity->Status === 'For Vehicle Registration') {
                         // If operator is already approved, process the drivers
                         $processedDrivers = [];
-
                         if ($entity->drivers->isNotEmpty()) {
                             foreach ($entity->drivers as $driver) {
+
                                 if ($driver->Status === 'For Payment') {
                                     // Update driver status directly in DB
                                     DB::table('drivers')
@@ -433,6 +463,25 @@ class PendingController extends Controller
                                     // Reload the driver with relationships
                                     $updatedDriver = Driver::with(['user', 'vrCompany', 'vehicle', 'operator'])->find($driver->id);
                                     $vehicle = Vehicle::find($driver->vehicle_id);
+
+                                    $operator = Operator::find($entity->id);
+                                    $operator->Status = 'For Final Submission';
+                                    $operator->save();
+
+
+                                    if (isset($validated['paymentId'])) {
+
+                                        $manualPayment = ManualPayment::find($validated['paymentId']);
+
+                                        if (! $manualPayment) {
+                                            return response()->json(['error' => 'Manual payment not found'], 404);
+                                        }
+
+                                        $manualPayment->Status = 'Approved';
+                                        $manualPayment->save();
+
+                                    }
+
 
                                     $payload = [
                                         'name' => $updatedDriver->user->FirstName.' '.$updatedDriver->user->LastName,
@@ -461,30 +510,53 @@ class PendingController extends Controller
                                     );
 
                                     $processedDrivers[] = $updatedDriver->id;
+
+
                                 }
                             }
                         }
 
                     } else {
                         // Update operator status directly in DB
-                        DB::table('operators')
-                            ->where('id', $entity->id)
-                            ->update(['Status' => 'Approved']);
 
-                        $payload = [
-                            'name' => $entity->user->FirstName.' '.$entity->user->LastName,
-                            'company' => $entity->vrCompany->CompanyName,
-                            'date' => now()->format('F d, Y'),
-                        ];
+                            $operator = Operator::find($entity->id);
 
-                        // Call the mail sending function for operator
-                        $result = $this->sendCertificateMail(
-                            'operator',
-                            $payload,
-                            $admin,
-                            $entity->user,
-                            $entity->id
-                        );
+                        if($operator->Status === "For Payment"){
+                            $operator->Status = 'For Vehicle Registration';
+                            $operator->save();
+                        }else if($operator->Status === "For Vehicle Registration") {
+                            $operator->Status = 'For Final Submission';
+                            $operator->save();
+                        }
+
+
+                        if (isset($validated['paymentId'])) {
+
+                            $manualPayment = ManualPayment::find($validated['paymentId']);
+
+                            if (! $manualPayment) {
+                                return response()->json(['error' => 'Manual payment not found'], 404);
+                            }
+
+                            $manualPayment->Status = 'Approved';
+                            $manualPayment->save();
+
+                        }
+
+                        // $payload = [
+                        //     'name' => $entity->user->FirstName.' '.$entity->user->LastName,
+                        //     'company' => $entity->vrCompany->CompanyName,
+                        //     'date' => now()->format('F d, Y'),
+                        // ];
+                        //
+                        // // Call the mail sending function for operator
+                        // $result = $this->sendCertificateMail(
+                        //     'operator',
+                        //     $payload,
+                        //     $admin,
+                        //     $entity->user,
+                        //     $entity->id
+                        // );
 
                     }
 
@@ -506,50 +578,53 @@ class PendingController extends Controller
             return response()->json(['error' => 'Recipient user not found'], 404);
         }
 
-        $entity->Status = 'Approved';
-        $entity->save();
+        if($type !== 'operator'){
 
-        if (isset($validated['paymentId'])) {
+            $entity->Status = 'Approved';
+            $entity->save();
 
-            $manualPayment = ManualPayment::find($validated['paymentId']);
+            if (isset($validated['paymentId'])) {
 
-            if (! $manualPayment) {
-                return response()->json(['error' => 'Manual payment not found'], 404);
+                $manualPayment = ManualPayment::find($validated['paymentId']);
+
+                if (! $manualPayment) {
+                    return response()->json(['error' => 'Manual payment not found'], 404);
+                }
+
+                $manualPayment->Status = 'Approved';
+                $manualPayment->save();
+
             }
 
-            $manualPayment->Status = 'Approved';
-            $manualPayment->save();
+            // Send certificate mail
+            try {
+                $admin = User::find($validated['user_id']);
+                if (! $admin) {
+                    return response()->json(['error' => 'Admin user not found'], 404);
+                }
 
-        }
+                // Call the separated mail sending function
+                $result = $this->sendCertificateMail(
+                    type: $type,
+                    payload: $payload,
+                    admin: $admin,
+                    recipientUser: $recipientUser,
+                    entityId: $entity->id
+                );
 
-        // Send certificate mail
-        try {
-            $admin = User::find($validated['user_id']);
-            if (! $admin) {
-                return response()->json(['error' => 'Admin user not found'], 404);
+                return response()->json([
+                    'message' => 'Entity approved and certificate sent via mail system',
+                    'thread_id' => $result['thread_id'],
+                    'is_new_thread' => $result['is_new_thread'],
+                ], 200);
+
+            } catch (\Exception $e) {
+                return response()->json([
+                    'error' => 'Failed to process certificate',
+                    'message' => $e->getMessage(),
+                ], 500);
             }
-
-            // Call the separated mail sending function
-            $result = $this->sendCertificateMail(
-                type: $type,
-                payload: $payload,
-                admin: $admin,
-                recipientUser: $recipientUser,
-                entityId: $entity->id
-            );
-
-            return response()->json([
-                'message' => 'Entity approved and certificate sent via mail system',
-                'thread_id' => $result['thread_id'],
-                'is_new_thread' => $result['is_new_thread'],
-            ], 200);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Failed to process certificate',
-                'message' => $e->getMessage(),
-            ], 500);
-        }
+    }
     }
 
     /**

@@ -9,6 +9,9 @@ import { motion } from 'framer-motion';
 import { Building, Car, ClipboardList, Clock, HandCoins, MapPinned, MapPinX, TrendingUp, UserPlus, UserRoundCog } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import MainLayout from './mainLayout';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { router } from '@inertiajs/react';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -97,6 +100,7 @@ export default function Dashboard({
                 setTrips(trips);
                 // Collect unique pickupDates as Date objects
                 const dates = trips.map((t: any) => t.pickupDate && new Date(t.pickupDate)).filter(Boolean);
+
                 setTripDates(dates);
             })
             .catch(() => {
@@ -308,6 +312,7 @@ export default function Dashboard({
                             />
                         </CardContent>
                     </Card>
+               
                 </div>
             </motion.section>
         </MainLayout>
