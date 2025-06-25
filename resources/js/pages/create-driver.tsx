@@ -1,11 +1,11 @@
-import { showToast, Id } from '@/components/toast';
-import {toast} from 'react-toastify';
+import { Id, showToast } from '@/components/toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useForm } from '@inertiajs/react';
 import { useEffect, useState } from 'react';
+import { toast } from 'react-toastify';
 
 export default function CreateDriver({ companies, latestVehicle, operator, company, onNextTab }) {
     useEffect(() => {
@@ -197,7 +197,7 @@ export default function CreateDriver({ companies, latestVehicle, operator, compa
         validateDocuments();
     }, [data.License, data.Photo, data.NBI_clearance, data.Police_clearance, data.BIR_clearance]);
 
-     const handleSubmit = (e, createAnother = false) => {
+    const handleSubmit = (e, createAnother = false) => {
         e.preventDefault();
         validateDocuments();
 
@@ -207,8 +207,6 @@ export default function CreateDriver({ companies, latestVehicle, operator, compa
             email: 'Email is required',
             FirstName: 'First name is required',
             LastName: 'Last name is required',
-            Address: 'Address is required',
-            BirthDate: 'Birth date is required',
             ContactNumber: 'Contact number is required',
             password: 'Password is required',
             LicenseNumber: 'License number is required',
@@ -244,7 +242,7 @@ export default function CreateDriver({ companies, latestVehicle, operator, compa
                 type: 'loading',
                 isLoading: true,
                 position: 'top-center',
-                autoClose: false
+                autoClose: false,
             });
 
             post(route('driver.store'), {
@@ -289,7 +287,7 @@ export default function CreateDriver({ companies, latestVehicle, operator, compa
                         type: 'error',
                         position: 'top-center',
                     });
-                }
+                },
             });
         } catch (error) {
             console.error('Error submitting form:', error);
@@ -521,7 +519,12 @@ export default function CreateDriver({ companies, latestVehicle, operator, compa
 
                         {/* Submit Buttons */}
                         <div className="flex justify-end gap-4">
-                            <Button type="button" variant="outline" disabled={processing} onClick={(e) => handleSubmit(e, true)}>
+                            <Button
+                                variant="outline"
+                                disabled={processing}
+                                onClick={(e) => handleSubmit(e, true)}
+                                className="bg-gray-100 text-white hover:bg-gray-200"
+                            >
                                 Create and Add Another
                             </Button>
                             <Button type="submit" disabled={processing || Object.values(validationErrors).some((error) => error !== '')}>

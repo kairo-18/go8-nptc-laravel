@@ -5,11 +5,13 @@ import { Dialog } from '@/components/ui/dialog'; // Import Dialog and DialogCont
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { cardItemVariants, fadeOnly, pageVariants, tableRowVariants } from '@/lib/animations';
+import { useUnreadCount } from '@/pages/UnreadCountContext'; // Import the context
 import { usePage } from '@inertiajs/react';
 import axios from 'axios';
+import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
 import MainLayout from './mainLayout';
-import { useUnreadCount } from '@/pages/UnreadCountContext'; // Import the context
 
 export default function Mails() {
     const { totalUnreadCount } = useUnreadCount(); // Use the context
@@ -24,7 +26,7 @@ export default function Mails() {
     useEffect(() => {
         const unreadCount = threads.reduce(
             (count, thread) => count + thread.mails.filter((mail) => !mail.is_read).length,
-            -1 // Adjusted this to 0, since -1 would skew the count
+            -1, // Adjusted this to 0, since -1 would skew the count
         );
         console.log(`Unread count updated: ${unreadCount}`); // Log the unread count
         console.log(`Total Unread Messages: ${unreadCount}`);
@@ -136,7 +138,7 @@ export default function Mails() {
             setThreads((prevThreads) =>
                 prevThreads.map((thread) => (thread.id === event.id ? { ...thread, mails: [...thread.mails, event.last_mail] } : thread)),
             );
-        
+
             if (selectedThread?.id === event.id) {
                 setSelectedThread((prev) => ({
                     ...prev,
@@ -178,20 +180,24 @@ export default function Mails() {
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
-            <div className="rounded-xs p-10">
-                <div className="mb-4 flex items-center justify-between">
-                    <Input
-                        className="w-1/3"
-                        placeholder="Search mails by keyword"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+            <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants} className="rounded-xs p-4">
+                <motion.div variants={cardItemVariants} className="mb-4 flex items-center justify-between">
+                    <motion.div whileHover={{ scale: 1.01 }}>
+                        <Input
+                            className="w-full"
+                            placeholder="Search mails by keyword"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </motion.div>
                     <div className="flex gap-2">
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="text-white">
-                                    Filter
-                                </Button>
+                                <motion.div whileHover={{ scale: 1.05 }}>
+                                    <Button variant="outline" className="text-white">
+                                        Filter
+                                    </Button>
+                                </motion.div>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
                                 {['Read', 'Unread', 'Date (Latest)', 'Date (Oldest)'].map((option) => (
@@ -201,83 +207,100 @@ export default function Mails() {
                                 ))}
                             </DropdownMenuContent>
                         </DropdownMenu>
-                        <ComposeMail />
+                        <motion.div whileHover={{ scale: 1.05 }}>
+                            <ComposeMail />
+                        </motion.div>
                     </div>
-                </div>
-                <Table className='border shadow-xl'>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>
-                                <input
-                                    type="checkbox"
-                                    checked={isAllSelected}
-                                    ref={(el) => {
-                                        if (el) {
-                                            el.indeterminate = isIndeterminate;
-                                        }
-                                    }}
-                                    onChange={handleHeaderCheckboxClick}
-                                />
-                            </TableHead>
-                            <TableHead>To/From</TableHead>
-                            <TableHead>Subject</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead></TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {filteredThreads.map((thread) => (
-                            <TableRow
-                                key={thread.id}
-                                onClick={() => handleRowClick(thread)}
-                                className={`cursor-pointer ${
-                                    thread.mails.every((mail) => mail.is_read) ? 'bg-gray-200' : 'bg-white'
-                                } hover:bg-gray-100`}
-                            >
-                                <TableCell>
+                </motion.div>
+
+                <motion.div variants={fadeOnly}>
+                    <Table className="border shadow-xl">
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>
                                     <input
                                         type="checkbox"
-                                        checked={selectedThreads.has(thread.id)}
-                                        onChange={() => handleThreadCheckboxClick(thread.id)}
-                                        onClick={(e) => e.stopPropagation()} // Prevent row click event
+                                        checked={isAllSelected}
+                                        ref={(el) => {
+                                            if (el) {
+                                                el.indeterminate = isIndeterminate;
+                                            }
+                                        }}
+                                        onChange={handleHeaderCheckboxClick}
                                     />
-                                </TableCell>
-                                <TableCell>
-                                    {thread.receiver.FirstName} {thread.receiver.LastName}
-                                </TableCell>
-                                <TableCell className="font-medium">{thread.mails[thread.mails.length - 1]?.subject}</TableCell>
-                                <TableCell className={thread.mails.every((mail) => mail.is_read) ? 'text-green-600' : 'text-red-600'}>
-                                    {thread.mails.every((mail) => mail.is_read) ? 'Read' : 'Unread'}
-                                </TableCell>
-                                <TableCell>
-                                    {new Date(thread.mails[thread.mails.length - 1]?.created_at).toLocaleDateString('en-US', {
-                                        year: 'numeric',
-                                        month: 'short',
-                                        day: 'numeric',
-                                    })}
-                                </TableCell>
-                                <TableCell>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild >
-                                            <div variant="ghost" className='bg-transparent text-xl hover:bg-gray-500 w-8 h-8 flex justify-center items-center rounded-md'>...</div>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent>
-                                            <DropdownMenuItem>Pin to top</DropdownMenuItem>
-                                            <DropdownMenuItem className="text-red-500">Delete</DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </TableCell>
+                                </TableHead>
+                                <TableHead>To/From</TableHead>
+                                <TableHead>Subject</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Date</TableHead>
+                                <TableHead></TableHead>
                             </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                        </TableHeader>
+                        <TableBody>
+                            {filteredThreads.map((thread, index) => (
+                                <motion.tr
+                                    key={thread.id}
+                                    onClick={() => handleRowClick(thread)}
+                                    className={`cursor-pointer ${
+                                        thread.mails.every((mail) => mail.is_read) ? 'bg-gray-200' : 'bg-white'
+                                    } hover:bg-gray-100`}
+                                    variants={tableRowVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    custom={index}
+                                >
+                                    <TableCell>
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedThreads.has(thread.id)}
+                                            onChange={() => handleThreadCheckboxClick(thread.id)}
+                                            onClick={(e) => e.stopPropagation()}
+                                        />
+                                    </TableCell>
+                                    <TableCell>
+                                        {thread.receiver.FirstName} {thread.receiver.LastName}
+                                    </TableCell>
+                                    <TableCell className="font-medium">{thread.mails[thread.mails.length - 1]?.subject}</TableCell>
+                                    <TableCell className={thread.mails.every((mail) => mail.is_read) ? 'text-green-600' : 'text-red-600'}>
+                                        {thread.mails.every((mail) => mail.is_read) ? 'Read' : 'Unread'}
+                                    </TableCell>
+                                    <TableCell>
+                                        {new Date(thread.mails[thread.mails.length - 1]?.created_at).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'short',
+                                            day: 'numeric',
+                                        })}
+                                    </TableCell>
+                                    <TableCell>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <motion.div
+                                                    whileHover={{ scale: 1.2 }}
+                                                    variant="ghost"
+                                                    className="flex h-8 w-8 items-center justify-center rounded-md bg-transparent text-xl hover:bg-gray-500"
+                                                >
+                                                    ...
+                                                </motion.div>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent>
+                                                <DropdownMenuItem>Pin to top</DropdownMenuItem>
+                                                <DropdownMenuItem className="text-red-500">Delete</DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
+                                </motion.tr>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </motion.div>
 
                 {/* Render the Modal */}
-                <Dialog open={!!selectedThread} onOpenChange={(open) => !open && setSelectedThread(null)}>
-                    {selectedThread && <MainMailContent selectedThread={selectedThread} auth={auth} onClose={() => setSelectedThread(null)} />}
-                </Dialog>
-            </div>
+                <motion.div variants={fadeOnly}>
+                    <Dialog open={!!selectedThread} onOpenChange={(open) => !open && setSelectedThread(null)}>
+                        {selectedThread && <MainMailContent selectedThread={selectedThread} auth={auth} onClose={() => setSelectedThread(null)} />}
+                    </Dialog>
+                </motion.div>
+            </motion.div>
         </MainLayout>
     );
 }

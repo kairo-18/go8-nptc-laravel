@@ -1,7 +1,9 @@
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cardItemVariants, containerVariants, pageVariants } from '@/lib/animations';
 import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useState } from 'react';
 import MainLayout from './mainLayout';
 import TemporaryAccountTabContent from './vr-register-tab1';
@@ -25,42 +27,67 @@ export default function VrRegistration({ companies }) {
                 {description && <p className="text-sm text-gray-600">{description}</p>}
             </div>
             <Separator className="my-2" />
-            {value === 'tempoAccountTab' ? (
-                <TemporaryAccountTabContent setIsDialogOpen={setIsDialogOpen} />
-            ) : (
-                <ApplicationStatusTabContent
-                    companies={[companies]}
-                    dataType="companies"
-                    onSelectCompany={function (companyId: number): void {
-                        throw new Error('Function not implemented.');
-                    }}
-                    companiesWithMedia={[]}
-                />
-            )}
+            <AnimatePresence mode="wait">
+                <motion.div key={value} initial="initial" animate="animate" exit="exit" variants={cardItemVariants} transition={{ duration: 0.2 }}>
+                    {value === 'tempoAccountTab' ? (
+                        <TemporaryAccountTabContent setIsDialogOpen={setIsDialogOpen} />
+                    ) : (
+                        <ApplicationStatusTabContent
+                            companies={[companies]}
+                            dataType="companies"
+                            onSelectCompany={function (companyId: number): void {
+                                throw new Error('Function not implemented.');
+                            }}
+                            companiesWithMedia={[]}
+                        />
+                    )}
+                </motion.div>
+            </AnimatePresence>
         </TabsContent>
     );
 
     return (
         <MainLayout breadcrumbs={breadcrumbs}>
             <Head title="VR register" />
-
-            <div className="flex w-full flex-col items-end p-10">
+            <motion.div initial="initial" animate="animate" exit="exit" variants={pageVariants} className="flex w-full flex-col items-end p-3">
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <div className="mb-5 flex justify-start">
+                    <motion.div variants={containerVariants} initial="initial" animate="animate" className="mb-5 flex justify-start">
                         <TabsList className="bg-[#2A2A92] text-white">
-                            <TabsTrigger value="tempoAccountTab" className="px-10">
-                                Vehicle Rental Temporary Account
-                            </TabsTrigger>
-                            <TabsTrigger value="appStatsTab" className="px-10">
-                                Application Status
-                            </TabsTrigger>
+                            <motion.div variants={cardItemVariants}>
+                                <TabsTrigger value="tempoAccountTab" className="relative px-10">
+                                    {activeTab === 'tempoAccountTab' && (
+                                        <motion.div
+                                            layoutId="activeTabIndicator"
+                                            className="absolute inset-0 rounded-md bg-white"
+                                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                    <span className="relative z-10">Vehicle Rental Temporary Account</span>
+                                </TabsTrigger>
+                            </motion.div>
+                            <motion.div variants={cardItemVariants}>
+                                <TabsTrigger value="appStatsTab" className="relative px-10">
+                                    {activeTab === 'appStatsTab' && (
+                                        <motion.div
+                                            layoutId="activeTabIndicator"
+                                            className="absolute inset-0 rounded-md bg-white"
+                                            transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                    <span className="relative z-10">Application Status</span>
+                                </TabsTrigger>
+                            </motion.div>
                         </TabsList>
-                    </div>
+                    </motion.div>
 
-                    <TabContent value="tempoAccountTab" title="Temporary Account" description="Details of the Company Owner" />
-                    <TabContent value="appStatsTab" title="Application Status" description="Check the current status of your application" />
+                    <motion.div variants={cardItemVariants}>
+                        <TabContent value="tempoAccountTab" title="Temporary Account" description="Details of the Company Owner" />
+                    </motion.div>
+                    <motion.div variants={cardItemVariants}>
+                        <TabContent value="appStatsTab" title="Application Status" description="Check the current status of your application" />
+                    </motion.div>
                 </Tabs>
-            </div>
+            </motion.div>
         </MainLayout>
     );
 }
