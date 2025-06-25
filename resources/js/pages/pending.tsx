@@ -1,3 +1,7 @@
+import PendingCompanyDetails from '@/components/Pending/pending-company-details';
+import PendingDriverDetails from '@/components/Pending/pending-driver-details';
+import PendingOperatorDetails from '@/components/Pending/pending-operator-details';
+import PendingVehicleDetails from '@/components/Pending/pending-vehicle-details';
 import { DataTable } from '@/components/RecordsComponent/data-table';
 import { Button } from '@/components/ui/button';
 import { cardItemVariants, pageVariants } from '@/lib/animations';
@@ -7,7 +11,7 @@ import { Head, usePage } from '@inertiajs/react';
 import { ColumnDef } from '@tanstack/react-table';
 import axios from 'axios';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Ellipsis, TimerIcon } from 'lucide-react';
+import { Ellipsis, TimerIcon, X } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import MainLayout from './mainLayout';
 
