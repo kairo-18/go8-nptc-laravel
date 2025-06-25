@@ -8,7 +8,6 @@ import { useEffect, useState } from 'react';
 import { DataTable } from '../components/RecordsComponent/data-table';
 import MainLayout from './mainLayout';
 
-
 export default function Bookings({ bookings }) {
     const { props } = usePage();
     const userRole = props.auth.user?.roles?.[0]?.name;
@@ -16,7 +15,7 @@ export default function Bookings({ bookings }) {
 
     const [dateFilter, setDateFilter] = useState({ start: '', end: '' });
     let filteredBookings = bookings;
-        
+
     useEffect(() => {
         const params = new URLSearchParams(window.location.search);
         const date = params.get('date');
@@ -44,7 +43,6 @@ export default function Bookings({ bookings }) {
         });
     }
 
-
     const transformedData = transformData(filteredBookings);
 
     const customDropdownMenuContent = (
@@ -68,37 +66,6 @@ export default function Bookings({ bookings }) {
                 />
             </div>
             <Button className="mt-2 w-full" onClick={() => setDateFilter({ start: '', end: '' })} variant="outline">
-                Clear Dates
-            </Button>
-        </DropdownMenuContent>
-    );
-
-
-    const customDropdownMenuContent = (
-        <DropdownMenuContent align="end" className="p-4 space-y-2">
-            <div>
-                <label className="block text-sm mb-1">Start Date</label>
-                <input
-                    type="date"
-                    value={dateFilter.start}
-                    onChange={e => setDateFilter({ ...dateFilter, start: e.target.value })}
-                    className="border rounded px-2 py-1 w-full"
-                />
-            </div>
-            <div>
-                <label className="block text-sm mb-1">End Date</label>
-                <input
-                    type="date"
-                    value={dateFilter.end}
-                    onChange={e => setDateFilter({ ...dateFilter, end: e.target.value })}
-                    className="border rounded px-2 py-1 w-full"
-                />
-            </div>
-            <Button
-                className="w-full mt-2"
-                onClick={() => setDateFilter({ start: '', end: '' })}
-                variant="outline"
-            >
                 Clear Dates
             </Button>
         </DropdownMenuContent>
