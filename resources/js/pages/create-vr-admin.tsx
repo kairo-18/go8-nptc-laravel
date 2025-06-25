@@ -262,6 +262,7 @@ export default function CreateVrAdmin({
                                         Previous
                                     </Button>
                                     <Button
+                                        type="button"
                                         onClick={() => handleTabSwitch('next')}
                                         className={`'bg-blue-500 hover:bg-blue-700'} rounded px-4 py-2 text-white`}
                                     >

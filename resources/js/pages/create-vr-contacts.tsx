@@ -4,9 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useForm } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
 import axios from 'axios';
-import { router } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 
 interface CreateVrContactsProps {
     companies: { id: number; BusinessPermitNumber: string }[];
@@ -36,18 +35,20 @@ export default function CreateVrContacts({
     handleTabSwitch,
 }: CreateVrContactsProps) {
     const { data, setData } = useForm({
-        contacts: Array.isArray(contactsData?.contacts) ? contactsData.contacts : [
-            {
-                BusinessPermitNumber: '',
-                vr_company_id: '',
-                email: '',
-                ContactNumber: '',
-                LastName: '',
-                FirstName: '',
-                MiddleName: '',
-                Position: '',
-            },
-        ],
+        contacts: Array.isArray(contactsData?.contacts)
+            ? contactsData.contacts
+            : [
+                  {
+                      BusinessPermitNumber: '',
+                      vr_company_id: '',
+                      email: '',
+                      ContactNumber: '',
+                      LastName: '',
+                      FirstName: '',
+                      MiddleName: '',
+                      Position: '',
+                  },
+              ],
     });
 
     const [errors, setErrors] = useState({});
@@ -78,8 +79,6 @@ export default function CreateVrContacts({
             setData({ contacts: response.data.contacts ?? [] });
             console.log(response.data.contacts);
             onNextTab();
-
-
         } catch (error) {
             setErrors(error.response?.data?.errors || {});
         } finally {
@@ -101,27 +100,27 @@ export default function CreateVrContacts({
     //     }
     //   }, [isEditing, contactsData, companyData]);
 
-      // 2. Company data synchronization
-      useEffect(() => {
-        if (companyData && Object.values(companyData).some(v => v)) {
-          const updatedContacts = data.contacts.map(contact => ({
-            ...contact,
-            BusinessPermitNumber: companyData.BusinessPermitNumber,
-            vr_company_id: '' // Clear any manual selection
-          }));
-          setData('contacts', updatedContacts);
+    // 2. Company data synchronization
+    useEffect(() => {
+        if (companyData && Object.values(companyData).some((v) => v)) {
+            const updatedContacts = data.contacts.map((contact) => ({
+                ...contact,
+                BusinessPermitNumber: companyData.BusinessPermitNumber,
+                vr_company_id: '', // Clear any manual selection
+            }));
+            setData('contacts', updatedContacts);
         } else {
-          // Clear BusinessPermitNumber but preserve other data
-          const updatedContacts = data.contacts.map(contact => ({
-            ...contact,
-            BusinessPermitNumber: ''
-          }));
-          setData('contacts', updatedContacts);
+            // Clear BusinessPermitNumber but preserve other data
+            const updatedContacts = data.contacts.map((contact) => ({
+                ...contact,
+                BusinessPermitNumber: '',
+            }));
+            setData('contacts', updatedContacts);
         }
-      }, [companyData]);
+    }, [companyData]);
 
-      // 3. Parent data synchronization (you already have this)
-     if (!isEditing2){
+    // 3. Parent data synchronization (you already have this)
+    if (!isEditing2) {
         useEffect(() => {
             setContactsData(data);
         }, [data]);
@@ -129,7 +128,7 @@ export default function CreateVrContacts({
 
     useEffect(() => {
         if (onSubmitRef) {
-            onSubmitRef(() => handleSubmit({ preventDefault: () => { } } as React.FormEvent));
+            onSubmitRef(() => handleSubmit({ preventDefault: () => {} } as React.FormEvent));
         }
     }, [handleSubmit]);
 
@@ -150,9 +149,10 @@ export default function CreateVrContacts({
     };
 
     const updateContact = (index, field, value) => {
-        setData('contacts', data.contacts.map((contact, i) =>
-            i === index ? { ...contact, id: contact.id ?? null, [field]: value } : contact
-        ));
+        setData(
+            'contacts',
+            data.contacts.map((contact, i) => (i === index ? { ...contact, id: contact.id ?? null, [field]: value } : contact)),
+        );
     };
 
     return (
@@ -165,7 +165,7 @@ export default function CreateVrContacts({
             ) : null}
             <Card className="mt-6 shadow-md">
                 <CardHeader>
-                    <div className='flex justify-between'>
+                    <div className="flex justify-between">
                         <div>
                             <CardTitle className="text-lg">Contact Information</CardTitle>
                             <p className="text-sm text-gray-500">Details of the Vehicle Rental Contacts</p>
@@ -174,7 +174,6 @@ export default function CreateVrContacts({
                             Add Another Contact
                         </Button>
                     </div>
-
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-6">
@@ -184,47 +183,47 @@ export default function CreateVrContacts({
                                     <>
                                         <Label htmlFor="vr_company_id">Selected VR Company</Label>
                                         <Input
-                                        id="BusinessPermitNumber"
-                                        value={companyData.BusinessPermitNumber}
-                                        readOnly
-                                        disabled
-                                        className={!companyData.BusinessPermitNumber ? 'border-red-500' : ''}
+                                            id="BusinessPermitNumber"
+                                            value={companyData.BusinessPermitNumber}
+                                            readOnly
+                                            disabled
+                                            className={!companyData.BusinessPermitNumber ? 'border-red-500' : ''}
                                         />
                                     </>
-                                    ) : (
+                                ) : (
                                     <div>
                                         <Label htmlFor={`contacts.${index}.vr_company_id`}>Select VR Company</Label>
                                         <Select
-                                        value={String(contact.vr_company_id)}
-                                        onValueChange={(value) => {
-                                            // Find the selected company
-                                            const selectedCompany = companies.find(company => String(company.id) === value);
+                                            value={String(contact.vr_company_id)}
+                                            onValueChange={(value) => {
+                                                // Find the selected company
+                                                const selectedCompany = companies.find((company) => String(company.id) === value);
 
-                                            // Update all contacts with the selected company's data
-                                            const updatedContacts = data.contacts.map(contact => ({
-                                            ...contact,
-                                            vr_company_id: value,
-                                            }));
+                                                // Update all contacts with the selected company's data
+                                                const updatedContacts = data.contacts.map((contact) => ({
+                                                    ...contact,
+                                                    vr_company_id: value,
+                                                }));
 
-                                            setData('contacts', updatedContacts);
-                                        }}
+                                                setData('contacts', updatedContacts);
+                                            }}
                                         >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select a company" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {companies.map((company) => (
-                                            <SelectItem key={company.id} value={String(company.id)}>
-                                                {company.BusinessPermitNumber}
-                                            </SelectItem>
-                                            ))}
-                                        </SelectContent>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Select a company" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {companies.map((company) => (
+                                                    <SelectItem key={company.id} value={String(company.id)}>
+                                                        {company.BusinessPermitNumber}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
                                         </Select>
                                         {errors[`contacts.${index}.vr_company_id`] && (
-                                        <p className="text-sm text-red-500">{errors[`contacts.${index}.vr_company_id`]}</p>
+                                            <p className="text-sm text-red-500">{errors[`contacts.${index}.vr_company_id`]}</p>
                                         )}
                                     </div>
-                                    )}
+                                )}
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <Label htmlFor={`email_${index}`}>Email</Label>
@@ -310,24 +309,23 @@ export default function CreateVrContacts({
                                         {processing ? 'Submitting...' : 'Submit'}
                                     </Button>
                                 </>
-                            )
-                            : isButtonDisabled === false ? (
+                            ) : isButtonDisabled === false ? (
                                 <>
                                     <Button
                                         onClick={() => handleTabSwitch('previous')}
-                                        className={`px-4 py-2 rounded  'bg-blue-500 text-white hover:bg-blue-700'}`}
+                                        className={`'bg-blue-500 hover:bg-blue-700'} rounded px-4 py-2 text-white`}
                                     >
                                         Previous
                                     </Button>
                                     <Button
+                                        type="button"
                                         onClick={() => handleTabSwitch('next')}
-                                        className={`px-4 py-2 rounded  'bg-blue-500 text-white hover:bg-blue-700'}`}
+                                        className={`'bg-blue-500 hover:bg-blue-700'} rounded px-4 py-2 text-white`}
                                     >
                                         Next
                                     </Button>
                                 </>
-                            )
-                            : null }
+                            ) : null}
                         </div>
                     </form>
                 </CardContent>
