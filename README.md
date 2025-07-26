@@ -1,4 +1,4 @@
-# Project Initialization Guide 🚀
+# NPTC Initialization Guide 🚀
 
 ## 📥 Cloning the Repository
 
