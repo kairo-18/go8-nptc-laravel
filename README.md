@@ -14,7 +14,7 @@ cd <repo-folder>
 ## 🐳 Docker Setup
 
 > **Note:** Before running this project, you need to stop any other Docker projects using the same ports.  
-> I haven't added support for dynamic port selection yet (maybe in the future).
+> I haven't added support for dynamic port selection yet (maybe in the future)...
 
 ### 1️⃣ Initialize `.env`
 
